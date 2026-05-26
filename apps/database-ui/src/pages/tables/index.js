@@ -217,6 +217,80 @@ function getRowKey(columns) {
   return columns.length > 0 ? columns[0].name : "id";
 }
 
+function makeColumnResizeHandle(colIdx, colWidths_) {
+  // Resize only the column to the LEFT of the handle (mainstream behavior:
+  // Excel, Google Sheets, DataGrip, etc.). Right column stays fixed width.
+  var leftIdx = colIdx + 1;
+  var MIN = 50;
+
+  return View({
+    class: "absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10",
+    style: { "margin-right": "-3px" },
+    onMounted: function (event) {
+      var $el = event.target.get$elm();
+
+      // 1px visible line in the center, non-interactive
+      var $line = document.createElement("div");
+      Object.assign($line.style, {
+        position: "absolute",
+        left: "50%",
+        top: "0",
+        bottom: "0",
+        width: "1px",
+        marginLeft: "-0.5px",
+        pointerEvents: "none",
+        backgroundColor: "#d0d0d0",
+      });
+      $el.appendChild($line);
+
+      // Hover highlight: blue glow on hover
+      function onEnter() {
+        $line.style.backgroundColor = "#3376cd";
+        $line.style.width = "2px";
+        $line.style.marginLeft = "-1px";
+      }
+      function onLeave() {
+        $line.style.backgroundColor = "#d0d0d0";
+        $line.style.width = "1px";
+        $line.style.marginLeft = "-0.5px";
+      }
+      $el.addEventListener("pointerenter", onEnter);
+      $el.addEventListener("pointerleave", onLeave);
+
+      function onDown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $el.setPointerCapture(e.pointerId);
+        var startX = e.clientX;
+        var startLeft = colWidths_.value[leftIdx];
+
+        function onMove(me) {
+          var delta = me.clientX - startX;
+          var arr = colWidths_.value.slice();
+          arr[leftIdx] = Math.max(MIN, startLeft + delta);
+          colWidths_.as(arr);
+        }
+
+        function onUp() {
+          $el.removeEventListener("pointermove", onMove);
+          $el.removeEventListener("pointerup", onUp);
+          $el.removeEventListener("pointercancel", onUp);
+          document.body.style.cursor = "";
+          document.body.style.userSelect = "";
+        }
+
+        document.body.style.cursor = "col-resize";
+        document.body.style.userSelect = "none";
+        $el.addEventListener("pointermove", onMove);
+        $el.addEventListener("pointerup", onUp);
+        $el.addEventListener("pointercancel", onUp);
+      }
+
+      $el.addEventListener("pointerdown", onDown);
+    },
+  });
+}
+
 // ============================================================
 // Main component
 // ============================================================
@@ -432,8 +506,52 @@ export default function TablesPageView(props) {
                     if (!panel) return null;
 
                     var colCount = panel.columns.length;
-                    var gridTemplate = "48px " + panel.columns.map(function () { return "150px"; }).join(" ");
-                    var totalWidth = 48 + colCount * 150;
+                    // column 0 = row number (48px), columns 1..colCount = data columns (150px each)
+                    var widths = [48];
+                    for (var ci = 0; ci < colCount; ci++) { widths.push(150); }
+                    var colWidths_ = refarr(widths);
+
+                    // Fixed column detection
+                    var fixedLeftInfo_ = [{ gridIdx: 0, name: "#" }];
+                    for (var ci = 0; ci < colCount; ci++) {
+                      var cn = panel.columns[ci].name;
+                      if (cn === "id" || cn === "event_name") {
+                        fixedLeftInfo_.push({ gridIdx: ci + 1, name: cn });
+                      }
+                    }
+                    var lastLeftFixedIdx_ = fixedLeftInfo_[fixedLeftInfo_.length - 1].gridIdx;
+
+                    var rightFixedSet_ = {};
+                    for (var cri = 0; cri < colCount; cri++) {
+                      if (panel.columns[cri].name === "created_at") {
+                        rightFixedSet_[cri + 1] = true;
+                      }
+                    }
+
+                    // Sticky left offsets (reactive to column resize)
+                    var stickyLefts_ = {};
+                    for (var fi = 0; fi < fixedLeftInfo_.length; fi++) {
+                      (function (gi) {
+                        stickyLefts_[gi] = computed(colWidths_, function (arr) {
+                          var left = 0;
+                          for (var fj = 0; fj < fixedLeftInfo_.length; fj++) {
+                            var gj = fixedLeftInfo_[fj].gridIdx;
+                            if (gj === gi) return left;
+                            left += arr[gj];
+                          }
+                          return 0;
+                        });
+                      })(fixedLeftInfo_[fi].gridIdx);
+                    }
+
+                    var gridTemplate_ = computed(colWidths_, function (arr) {
+                      return arr.map(function (w) { return w + "px"; }).join(" ");
+                    });
+                    var totalWidth_ = computed(colWidths_, function (arr) {
+                      var sum = 0;
+                      for (var i = 0; i < arr.length; i++) { sum += arr[i]; }
+                      return sum;
+                    });
                     var scrollLeft_ = ref(0);
 
                     return [
@@ -462,8 +580,8 @@ export default function TablesPageView(props) {
                                   {
                                     style: {
                                       display: "grid",
-                                      "grid-template-columns": gridTemplate,
-                                      "min-width": totalWidth + "px",
+                                      "grid-template-columns": gridTemplate_,
+                                      "min-width": computed(totalWidth_, function (w) { return w + "px"; }),
                                       transform: computed(scrollLeft_, function (sx) {
                                         return "translateX(-" + sx + "px)";
                                       }),
@@ -471,20 +589,50 @@ export default function TablesPageView(props) {
                                   },
                                   [
                                     View(
-                                      { class: "px-3 py-2 text-xs font-medium text-muted-foreground text-right" },
+                                      {
+                                        class: "px-3 py-2 text-xs font-medium text-muted-foreground text-right",
+                                        style: {
+                                          position: "sticky",
+                                          left: "0px",
+                                          zIndex: 4,
+                                          backgroundColor: "#f5f5f4",
+                                        },
+                                      },
                                       ["#"],
                                     ),
                                     For({
                                       each: panel.columns,
-                                      render: function (col) {
+                                      render: function (col, idx) {
+                                        var colIdx = idx.value;
+                                        var gridIdx = colIdx + 1;
+                                        var isLeftSticky = stickyLefts_[gridIdx] !== undefined;
+                                        var isRightSticky = rightFixedSet_[gridIdx] === true;
+                                        var headerStickyStyle = {};
+                                        if (isLeftSticky) {
+                                          headerStickyStyle.position = "sticky";
+                                          headerStickyStyle.left = computed(stickyLefts_[gridIdx], function (v) { return v + "px"; });
+                                          headerStickyStyle.zIndex = 4;
+                                          headerStickyStyle.backgroundColor = "#f5f5f4";
+                                          if (gridIdx === lastLeftFixedIdx_) {
+                                            headerStickyStyle.boxShadow = "2px 0 4px rgba(0,0,0,0.06)";
+                                          }
+                                        } else if (isRightSticky) {
+                                          headerStickyStyle.position = "sticky";
+                                          headerStickyStyle.right = "0px";
+                                          headerStickyStyle.zIndex = 4;
+                                          headerStickyStyle.backgroundColor = "#f5f5f4";
+                                          headerStickyStyle.boxShadow = "-2px 0 4px rgba(0,0,0,0.06)";
+                                        }
+                                        var isLast = colIdx === colCount - 1;
                                         return View(
-                                          { class: "px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-1" },
+                                          { class: "px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-1 relative", style: headerStickyStyle },
                                           [
                                             View({ class: "truncate" }, [col.name]),
                                             View(
                                               { class: "text-[10px] text-muted-foreground/60 font-mono shrink-0" },
                                               [col.type],
                                             ),
+                                            !isLast ? makeColumnResizeHandle(colIdx, colWidths_) : null,
                                           ],
                                         );
                                       },
@@ -539,8 +687,8 @@ export default function TablesPageView(props) {
                                     {
                                       style: {
                                         display: "grid",
-                                        "grid-template-columns": gridTemplate,
-                                        "min-width": totalWidth + "px",
+                                        "grid-template-columns": gridTemplate_,
+                                        "min-width": computed(totalWidth_, function (w) { return w + "px"; }),
                                         "border-bottom": borderBottom_,
                                       },
                                       onUnmounted: function () {
@@ -551,12 +699,39 @@ export default function TablesPageView(props) {
                                     },
                                     [
                                       View(
-                                        { class: "px-3 py-2 text-xs text-muted-foreground text-right font-mono select-none" },
+                                        {
+                                          class: "px-3 py-2 text-xs text-muted-foreground text-right font-mono select-none",
+                                          style: {
+                                            position: "sticky",
+                                            left: "0px",
+                                            zIndex: 2,
+                                            backgroundColor: "#ffffff",
+                                          },
+                                        },
                                         [rowNum],
                                       ),
-                                      ...cellRefs.map(function (ref) {
+                                      ...cellRefs.map(function (ref, cidx) {
+                                        var cellGridIdx = cidx + 1;
+                                        var isLeftSticky = stickyLefts_[cellGridIdx] !== undefined;
+                                        var isRightSticky = rightFixedSet_[cellGridIdx] === true;
+                                        var cellStickyStyle = {};
+                                        if (isLeftSticky) {
+                                          cellStickyStyle.position = "sticky";
+                                          cellStickyStyle.left = computed(stickyLefts_[cellGridIdx], function (v) { return v + "px"; });
+                                          cellStickyStyle.zIndex = 2;
+                                          cellStickyStyle.backgroundColor = "#ffffff";
+                                          if (cellGridIdx === lastLeftFixedIdx_) {
+                                            cellStickyStyle.boxShadow = "2px 0 4px rgba(0,0,0,0.06)";
+                                          }
+                                        } else if (isRightSticky) {
+                                          cellStickyStyle.position = "sticky";
+                                          cellStickyStyle.right = "0px";
+                                          cellStickyStyle.zIndex = 2;
+                                          cellStickyStyle.backgroundColor = "#ffffff";
+                                          cellStickyStyle.boxShadow = "-2px 0 4px rgba(0,0,0,0.06)";
+                                        }
                                         return View(
-                                          { class: "px-3 py-2 text-sm truncate" },
+                                          { class: "px-3 py-2 text-sm truncate", style: cellStickyStyle },
                                           [ref],
                                         );
                                       }),
