@@ -13,12 +13,10 @@ function ColumnResizeHandler(colIdx, colWidths_, opts) {
   var onLeft = !!(opts && opts.onLeft);
 
   return View({
-    class: onLeft
-      ? "absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize"
-      : "absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize",
+    class: "absolute top-0 bottom-0 w-3 cursor-col-resize",
     style: onLeft
-      ? { "margin-left": "-3px", "z-index": "1" }
-      : { "margin-right": "-3px", "z-index": "1" },
+      ? { "left": "-6px", "z-index": "100" }
+      : { "right": "-6px", "z-index": "100" },
     onMounted(event) {
       var $el = event.target.get$elm();
 
@@ -170,7 +168,7 @@ export default function TablesPageView(props) {
     panels_.push(panel);
     curPanel_.as(name);
 
-    var rowCount = name === "tags" ? 10 : 5000;
+    var rowCount = (name === "tags" || name === "posts") ? 5000 : 10;
     var rows = generateMockRows(name, rowCount);
     panel.data.as(rows);
     panel.loading.as(false);
@@ -212,7 +210,7 @@ export default function TablesPageView(props) {
     {
       class: "h-full",
       onMounted() {
-        openTable(MOCK_TABLES[MOCK_TABLES.length - 1].name);
+        openTable(MOCK_TABLES[MOCK_TABLES.length - 4].name);
         // Inject hover highlight style — !important beats inline styles on sticky cells
         if (!document.getElementById("row-hover-style")) {
           var style = document.createElement("style");
@@ -551,7 +549,7 @@ export default function TablesPageView(props) {
                                 View(
                                   {
                                     class:
-                                      "shrink-0 border-b border-border bg-muted/50",
+                                      "shrink-0 border-b border-border bg-muted",
                                     style: {
                                       overflow: "auto",
                                       "scrollbar-width": "none",
@@ -661,19 +659,8 @@ export default function TablesPageView(props) {
                                               headerStickyStyle[
                                                 "background-color"
                                               ] = "var(--muted)";
-                                              if (
-                                                gridIdx === firstRightFixedIdx_
-                                              ) {
-                                                headerStickyStyle[
-                                                  "box-shadow"
-                                                ] =
-                                                  "inset 1px 0 0 0 var(--border)";
-                                              } else {
-                                                headerStickyStyle[
-                                                  "box-shadow"
-                                                ] =
-                                                  "inset 1px 0 0 0 var(--border)";
-                                              }
+                                              headerStickyStyle["border-right"] =
+                                                "1px solid var(--border)";
                                             }
                                             if (!isRightSticky) {
                                               headerStickyStyle["border-right"] =
@@ -964,16 +951,8 @@ export default function TablesPageView(props) {
                                                 CellStyles["z-index"] = 2;
                                                 CellStyles["background-color"] =
                                                   "var(--background)";
-                                                if (
-                                                  cell_idx ===
-                                                  firstRightFixedIdx_
-                                                ) {
-                                                  CellStyles["box-shadow"] =
-                                                    "inset 1px 0 0 0 var(--border)";
-                                                } else {
-                                                  CellStyles["box-shadow"] =
-                                                    "inset 1px 0 0 0 var(--border)";
-                                                }
+                                                CellStyles["border-right"] =
+                                                  "1px solid var(--border)";
                                               }
                                               if (!is_right_sticky) {
                                                 CellStyles["border-right"] =
