@@ -143,13 +143,11 @@ export default function TablesPageView(props) {
     panels_.push(panel);
     curPanel_.as(name);
 
-    setTimeout(function () {
-      var rowCount = name === "tags" ? 10 : 5000;
-      var rows = generateMockRows(name, rowCount);
-      panel.data.as(rows);
-      panel.loading.as(false);
-      panel.loaded.as(true);
-    }, 200);
+    var rowCount = name === "tags" ? 10 : 5000;
+    var rows = generateMockRows(name, rowCount);
+    panel.data.as(rows);
+    panel.loading.as(false);
+    panel.loaded.as(true);
   }
 
   function closeTable(name, e) {
@@ -372,6 +370,17 @@ export default function TablesPageView(props) {
                           columns_fixed_right[cri + 1] = true;
                         }
                       }
+                      var firstRightFixedIdx_ = null;
+                      for (var cri = 0; cri < colCount; cri++) {
+                        if (columns_fixed_right[cri + 1]) {
+                          firstRightFixedIdx_ = cri + 1;
+                          break;
+                        }
+                      }
+
+                      // Scroll-driven shadows on fixed column edges (antd-style)
+                      var showLeftShadow_ = ref(false);
+                      var showRightShadow_ = ref(false);
 
                       // Sticky left offsets (reactive to column resize)
                       var columns_sticky_left = {};
@@ -436,6 +445,35 @@ export default function TablesPageView(props) {
                         }
                         return template;
                       });
+                      // Direct DOM sync for shadow overlays — same pattern, bypasses
+                      // ListView reactive lifecycle for newly virtualized rows.
+                      var _leftShadowSync_ = computed(
+                        showLeftShadow_,
+                        function (show) {
+                          var $els =
+                            document.querySelectorAll("[data-shadow-left]");
+                          for (var i = 0; i < $els.length; i++) {
+                            $els[i].style.boxShadow = show
+                              ? "inset 10px 0 8px -8px var(--table-fixed-shadow)"
+                              : "none";
+                          }
+                          return show;
+                        },
+                      );
+                      var _rightShadowSync_ = computed(
+                        showRightShadow_,
+                        function (show) {
+                          var $els = document.querySelectorAll(
+                            "[data-shadow-right]",
+                          );
+                          for (var i = 0; i < $els.length; i++) {
+                            $els[i].style.boxShadow = show
+                              ? "inset -10px 0 8px -8px var(--table-fixed-shadow)"
+                              : "none";
+                          }
+                          return show;
+                        },
+                      );
                       return [
                         // Loading
                         Show({
@@ -464,7 +502,11 @@ export default function TablesPageView(props) {
                             return View(
                               {
                                 class: "flex flex-col h-full min-h-0",
-                                style: { "--grid-sync": _grid_sync_ },
+                                style: {
+                                  "--grid-sync": _grid_sync_,
+                                  "--shadow-l": _leftShadowSync_,
+                                  "--shadow-r": _rightShadowSync_,
+                                },
                               },
                               [
                                 // Column headers — native scroll synced with body
@@ -579,49 +621,102 @@ export default function TablesPageView(props) {
                                               headerStickyStyle[
                                                 "background-color"
                                               ] = "var(--muted)";
-                                              headerStickyStyle["box-shadow"] =
-                                                "inset 1px 0 0 0 var(--border)";
+                                              if (
+                                                gridIdx === firstRightFixedIdx_
+                                              ) {
+                                                headerStickyStyle[
+                                                  "box-shadow"
+                                                ] =
+                                                  "inset 1px 0 0 0 var(--border)";
+                                              } else {
+                                                headerStickyStyle[
+                                                  "box-shadow"
+                                                ] =
+                                                  "inset 1px 0 0 0 var(--border)";
+                                              }
                                             }
                                             headerStickyStyle["border-right"] =
                                               "1px solid var(--border)";
+                                            var headerChildren = [
+                                              Show({
+                                                when: isRightSticky,
+                                                ok() {
+                                                  return ColumnResizeHandler(
+                                                    colIdx,
+                                                    colWidths_,
+                                                    { onLeft: true },
+                                                  );
+                                                },
+                                              }),
+                                              View({ class: "truncate" }, [
+                                                col.name,
+                                              ]),
+                                              View(
+                                                {
+                                                  class:
+                                                    "text-[10px] text-muted-foreground/60 font-mono shrink-0",
+                                                },
+                                                [col.type],
+                                              ),
+                                              Show({
+                                                when: !isLast && !isRightSticky,
+                                                ok() {
+                                                  return ColumnResizeHandler(
+                                                    colIdx,
+                                                    colWidths_,
+                                                  );
+                                                },
+                                              }),
+                                            ];
+                                            if (gridIdx === lastLeftFixedIdx_) {
+                                              headerChildren.push(
+                                                View({
+                                                  dataset: {
+                                                    "shadow-left": "",
+                                                  },
+                                                  style: {
+                                                    position: "absolute",
+                                                    top: "0",
+                                                    bottom: "-1px",
+                                                    right: "0",
+                                                    width: "30px",
+                                                    transform:
+                                                      "translateX(100%)",
+                                                    pointerEvents: "none",
+                                                    boxShadow: "none",
+                                                  },
+                                                }),
+                                              );
+                                            }
+                                            if (
+                                              gridIdx === firstRightFixedIdx_
+                                            ) {
+                                              headerChildren.push(
+                                                View({
+                                                  dataset: {
+                                                    "shadow-right": "",
+                                                  },
+                                                  style: {
+                                                    position: "absolute",
+                                                    top: "0",
+                                                    bottom: "-1px",
+                                                    left: "0",
+                                                    width: "30px",
+                                                    transform:
+                                                      "translateX(-100%)",
+                                                    pointerEvents: "none",
+                                                    boxShadow: "none",
+                                                  },
+                                                }),
+                                              );
+                                            }
                                             return View(
                                               {
                                                 class:
                                                   "px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-1 relative",
                                                 style: headerStickyStyle,
                                               },
-                                              [
-                                                Show({
-                                                  when: isRightSticky,
-                                                  ok() {
-                                                    return ColumnResizeHandler(
-                                                      colIdx,
-                                                      colWidths_,
-                                                      { onLeft: true },
-                                                    );
-                                                  },
-                                                }),
-                                                View({ class: "truncate" }, [
-                                                  col.name,
-                                                ]),
-                                                View(
-                                                  {
-                                                    class:
-                                                      "text-[10px] text-muted-foreground/60 font-mono shrink-0",
-                                                  },
-                                                  [col.type],
-                                                ),
-                                                Show({
-                                                  when:
-                                                    !isLast && !isRightSticky,
-                                                  ok() {
-                                                    return ColumnResizeHandler(
-                                                      colIdx,
-                                                      colWidths_,
-                                                    );
-                                                  },
-                                                }),
-                                              ],
+                                              headerChildren,
                                             );
                                           },
                                         }),
@@ -647,6 +742,12 @@ export default function TablesPageView(props) {
                                         "data-table-body-scroll",
                                         "",
                                       );
+                                      // Initialize shadow state
+                                      showLeftShadow_.as($elm.scrollLeft > 0);
+                                      var atEnd =
+                                        $elm.scrollLeft + $elm.clientWidth >=
+                                        $elm.scrollWidth - 2;
+                                      showRightShadow_.as(!atEnd);
                                       function onScroll() {
                                         if (isScrollSyncing_) return;
                                         isScrollSyncing_ = true;
@@ -654,6 +755,11 @@ export default function TablesPageView(props) {
                                           headerScrollEl_.scrollLeft =
                                             $elm.scrollLeft;
                                         isScrollSyncing_ = false;
+                                        showLeftShadow_.as($elm.scrollLeft > 0);
+                                        var _atEnd =
+                                          $elm.scrollLeft + $elm.clientWidth >=
+                                          $elm.scrollWidth - 2;
+                                        showRightShadow_.as(!_atEnd);
                                       }
                                       $elm.addEventListener("scroll", onScroll);
                                       cleanupScroll_ = function () {
@@ -758,20 +864,93 @@ export default function TablesPageView(props) {
                                                 CellStyles["z-index"] = 2;
                                                 CellStyles["background-color"] =
                                                   "var(--background)";
-                                                CellStyles["box-shadow"] =
-                                                  "inset 1px 0 0 0 var(--border)";
+                                                if (
+                                                  cell_idx ===
+                                                  firstRightFixedIdx_
+                                                ) {
+                                                  CellStyles["box-shadow"] =
+                                                    "inset 1px 0 0 0 var(--border)";
+                                                } else {
+                                                  CellStyles["box-shadow"] =
+                                                    "inset 1px 0 0 0 var(--border)";
+                                                }
                                               }
                                               CellStyles["border-right"] =
                                                 "1px solid var(--border)";
                                               CellStyles["border-bottom"] =
                                                 "1px solid var(--border)";
+                                              var isEdge =
+                                                cell_idx ===
+                                                  lastLeftFixedIdx_ ||
+                                                cell_idx ===
+                                                  firstRightFixedIdx_;
+                                              var cellChildren;
+                                              var cellClass;
+                                              if (isEdge) {
+                                                CellStyles["overflow"] =
+                                                  "visible";
+                                                cellClass = "px-3 py-2 text-sm";
+                                                cellChildren = [
+                                                  View({ class: "truncate" }, [
+                                                    ref,
+                                                  ]),
+                                                ];
+                                                if (
+                                                  cell_idx === lastLeftFixedIdx_
+                                                ) {
+                                                  cellChildren.push(
+                                                    View({
+                                                      dataset: {
+                                                        "shadow-left": "",
+                                                      },
+                                                      style: {
+                                                        position: "absolute",
+                                                        top: "0",
+                                                        bottom: "-1px",
+                                                        right: "0",
+                                                        width: "30px",
+                                                        transform:
+                                                          "translateX(100%)",
+                                                        pointerEvents: "none",
+                                                        boxShadow: "none",
+                                                      },
+                                                    }),
+                                                  );
+                                                }
+                                                if (
+                                                  cell_idx ===
+                                                  firstRightFixedIdx_
+                                                ) {
+                                                  cellChildren.push(
+                                                    View({
+                                                      dataset: {
+                                                        "shadow-right": "",
+                                                      },
+                                                      style: {
+                                                        position: "absolute",
+                                                        top: "0",
+                                                        bottom: "-1px",
+                                                        left: "0",
+                                                        width: "30px",
+                                                        transform:
+                                                          "translateX(-100%)",
+                                                        pointerEvents: "none",
+                                                        boxShadow: "none",
+                                                      },
+                                                    }),
+                                                  );
+                                                }
+                                              } else {
+                                                cellClass =
+                                                  "px-3 py-2 text-sm truncate";
+                                                cellChildren = [ref];
+                                              }
                                               return View(
                                                 {
-                                                  class:
-                                                    "px-3 py-2 text-sm truncate",
+                                                  class: cellClass,
                                                   style: CellStyles,
                                                 },
-                                                [ref],
+                                                cellChildren,
                                               );
                                             },
                                           }),
