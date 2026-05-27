@@ -1440,8 +1440,8 @@ export function ListView<T extends Record<string, unknown>>(
       if (props.onMounted) {
         props.onMounted(event);
       }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const child = state.children[i];
+      for (let i = 0; i < _slots.length; i += 1) {
+        const child = _slots[i];
         if (isElement(child) && child.onMounted) {
           child.onMounted({ target: child.$elm });
         }

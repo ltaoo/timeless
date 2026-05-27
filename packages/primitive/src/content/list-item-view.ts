@@ -92,6 +92,10 @@ export function ListItemView<T>(
       methods.cleanup_children(prev_children);
       $elm.removeChildren();
       $elm.insertChildren([data.child]);
+      console.log('after $elm.insertChildren', data.child);
+      if (isElement(data.child) && data.child.onMounted) {
+        data.child.onMounted({ target: data.child.$elm });
+      }
     },
     unbind() {
       const prev_children = [...state.children];

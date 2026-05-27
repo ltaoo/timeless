@@ -22,8 +22,13 @@ function ColumnResizeHandler(colIdx, colWidths_, opts) {
     onMounted(event) {
       var $el = event.target.get$elm();
 
+      // Clean up stale lines from previous mount cycles
+      var $stale = $el.querySelectorAll("[data-col-resize-line]");
+      for (var s = 0; s < $stale.length; s++) $stale[s].remove();
+
       // 1px visible line in the center, non-interactive
       var $line = document.createElement("div");
+      $line.setAttribute("data-col-resize-line", "");
       Object.assign($line.style, {
         position: "absolute",
         left: "50%",
@@ -32,23 +37,45 @@ function ColumnResizeHandler(colIdx, colWidths_, opts) {
         width: "1px",
         marginLeft: "-0.5px",
         pointerEvents: "none",
-        backgroundColor: "var(--border)",
+        // backgroundColor: "var(--border)",
       });
       $el.appendChild($line);
 
-      // Hover highlight: blue glow on hover
-      function onEnter() {
-        $line.style.backgroundColor = "var(--primary)";
+      // Hover highlight with delay timer (like split-view.ts)
+      var hoverTimer = null;
+      var isHighlighted = false;
+
+      function showHighlight() {
+        isHighlighted = true;
+        // $line.style.backgroundColor = "var(--primary)";
         $line.style.width = "2px";
         $line.style.marginLeft = "-1px";
       }
-      function onLeave() {
-        $line.style.backgroundColor = "var(--border)";
+      function hideHighlight() {
+        isHighlighted = false;
+        // $line.style.backgroundColor = "var(--border)";
         $line.style.width = "1px";
         $line.style.marginLeft = "-0.5px";
       }
-      $el.addEventListener("pointerenter", onEnter);
-      $el.addEventListener("pointerleave", onLeave);
+
+      $el.addEventListener("pointerenter", function () {
+        if (hoverTimer) {
+          clearTimeout(hoverTimer);
+        }
+        hoverTimer = setTimeout(function () {
+          showHighlight();
+          hoverTimer = null;
+        }, 600);
+      });
+      $el.addEventListener("pointerleave", function () {
+        if (hoverTimer) {
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+        }
+        if (isHighlighted) {
+          hideHighlight();
+        }
+      });
 
       function onDown(e) {
         e.preventDefault();
@@ -186,6 +213,14 @@ export default function TablesPageView(props) {
       class: "h-full",
       onMounted() {
         openTable(MOCK_TABLES[MOCK_TABLES.length - 1].name);
+        // Inject hover highlight style — !important beats inline styles on sticky cells
+        if (!document.getElementById("row-hover-style")) {
+          var style = document.createElement("style");
+          style.id = "row-hover-style";
+          style.textContent =
+            "[data-grid-row].row-hovered > * { background-color: var(--muted) !important; }";
+          document.head.appendChild(style);
+        }
       },
     },
     [
@@ -378,6 +413,8 @@ export default function TablesPageView(props) {
                         }
                       }
 
+                      var scrollbarWidth_ = ref(0);
+
                       // Scroll-driven shadows on fixed column edges (antd-style)
                       var showLeftShadow_ = ref(false);
                       var showRightShadow_ = ref(false);
@@ -498,6 +535,7 @@ export default function TablesPageView(props) {
                             var cleanupHeaderScroll_ = null;
                             var headerScrollEl_ = null;
                             var isScrollSyncing_ = false;
+                            var hoveredRow_ = ref(-1);
 
                             return View(
                               {
@@ -605,18 +643,20 @@ export default function TablesPageView(props) {
                                               headerStickyStyle[
                                                 "background-color"
                                               ] = "var(--muted)";
-                                              if (
-                                                gridIdx === lastLeftFixedIdx_
-                                              ) {
-                                                headerStickyStyle[
-                                                  "box-shadow"
-                                                ] =
-                                                  "inset -1px 0 0 0 var(--border)";
-                                              }
+                                              headerStickyStyle["border-right"] =
+                                                "1px solid var(--border)";
+                                              // border-right already provides the visual separator;
+                                              // inset box-shadow is no longer needed
                                             } else if (isRightSticky) {
                                               headerStickyStyle.position =
                                                 "sticky";
-                                              headerStickyStyle.right = "0px";
+                                              headerStickyStyle.right =
+                                                computed(
+                                                  scrollbarWidth_,
+                                                  function (w) {
+                                                    return w + "px";
+                                                  },
+                                                );
                                               headerStickyStyle["z-index"] = 5;
                                               headerStickyStyle[
                                                 "background-color"
@@ -635,8 +675,10 @@ export default function TablesPageView(props) {
                                                   "inset 1px 0 0 0 var(--border)";
                                               }
                                             }
-                                            headerStickyStyle["border-right"] =
-                                              "1px solid var(--border)";
+                                            if (!isRightSticky) {
+                                              headerStickyStyle["border-right"] =
+                                                "1px solid var(--border)";
+                                            }
                                             var headerChildren = [
                                               Show({
                                                 when: isRightSticky,
@@ -659,7 +701,12 @@ export default function TablesPageView(props) {
                                                 [col.type],
                                               ),
                                               Show({
-                                                when: !isLast && !isRightSticky,
+                                                when:
+                                                  !isLast &&
+                                                  !isRightSticky &&
+                                                  columns_fixed_right[
+                                                    gridIdx + 1
+                                                  ] !== true,
                                                 ok() {
                                                   return ColumnResizeHandler(
                                                     colIdx,
@@ -710,6 +757,31 @@ export default function TablesPageView(props) {
                                                 }),
                                               );
                                             }
+                                            if (isRightSticky) {
+                                              headerChildren.push(
+                                                View({
+                                                  style: {
+                                                    position: "absolute",
+                                                    top: "0",
+                                                    bottom: "0",
+                                                    right: computed(
+                                                      scrollbarWidth_,
+                                                      function (w) {
+                                                        return -w + "px";
+                                                      },
+                                                    ),
+                                                    width: computed(
+                                                      scrollbarWidth_,
+                                                      function (w) {
+                                                        return w + "px";
+                                                      },
+                                                    ),
+                                                    "background-color":
+                                                      "var(--muted)",
+                                                  },
+                                                }),
+                                              );
+                                            }
                                             return View(
                                               {
                                                 class:
@@ -734,13 +806,16 @@ export default function TablesPageView(props) {
                                     },
                                     key: getRowKey(panel.columns),
                                     size: 30,
-                                    itemHeight: 37,
+                                    itemHeight: 36 + 1,
                                     each: panel.data,
                                     onMounted(event) {
                                       var $elm = event.target.get$elm();
                                       $elm.setAttribute(
                                         "data-table-body-scroll",
                                         "",
+                                      );
+                                      scrollbarWidth_.as(
+                                        $elm.offsetWidth - $elm.clientWidth,
                                       );
                                       // Initialize shadow state
                                       showLeftShadow_.as($elm.scrollLeft > 0);
@@ -799,6 +874,33 @@ export default function TablesPageView(props) {
                                               grid_template_,
                                             "min-width": total_table_width_,
                                           },
+                                          onMounted(event) {
+                                            var $row = event.target.get$elm();
+                                            function onEnter() {
+                                              hoveredRow_.as(idx.value);
+                                              $row.classList.add(
+                                                "row-hovered",
+                                              );
+                                            }
+                                            function onLeave() {
+                                              if (
+                                                hoveredRow_.value === idx.value
+                                              ) {
+                                                hoveredRow_.as(-1);
+                                              }
+                                              $row.classList.remove(
+                                                "row-hovered",
+                                              );
+                                            }
+                                            $row.addEventListener(
+                                              "pointerenter",
+                                              onEnter,
+                                            );
+                                            $row.addEventListener(
+                                              "pointerleave",
+                                              onLeave,
+                                            );
+                                          },
                                           onUnmounted: function () {
                                             rowNum.destroy();
                                             // cellRefs.forEach(function (r) {
@@ -852,12 +954,10 @@ export default function TablesPageView(props) {
                                                 CellStyles["z-index"] = 2;
                                                 CellStyles["background-color"] =
                                                   "var(--background)";
-                                                if (
-                                                  cell_idx === lastLeftFixedIdx_
-                                                ) {
-                                                  CellStyles["box-shadow"] =
-                                                    "inset -1px 0 0 0 var(--border)";
-                                                }
+                                                CellStyles["border-right"] =
+                                                  "1px solid var(--border)";
+                                                // border-right already provides the visual separator;
+                                                // inset box-shadow is no longer needed
                                               } else if (is_right_sticky) {
                                                 CellStyles.position = "sticky";
                                                 CellStyles.right = "0px";
@@ -875,8 +975,10 @@ export default function TablesPageView(props) {
                                                     "inset 1px 0 0 0 var(--border)";
                                                 }
                                               }
-                                              CellStyles["border-right"] =
-                                                "1px solid var(--border)";
+                                              if (!is_right_sticky) {
+                                                CellStyles["border-right"] =
+                                                  "1px solid var(--border)";
+                                              }
                                               CellStyles["border-bottom"] =
                                                 "1px solid var(--border)";
                                               var isEdge =
