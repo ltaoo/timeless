@@ -12,6 +12,7 @@ export default function HomeLayoutView(props) {
     menus: [
       { title: "Home", name: "root.home_layout.index", children: [] },
       { title: "Tables", name: "root.home_layout.tables", children: [] },
+      { title: "Tables2", name: "root.home_layout.tables2", children: [] },
       { title: "Settings", name: "root.home_layout.settings" },
     ],
   });

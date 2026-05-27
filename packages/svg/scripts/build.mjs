@@ -21,6 +21,13 @@ function ensureDir(dir) {
   }
 }
 
+function safeWriteFileSync(filePath, content) {
+  if (existsSync(filePath) && readFileSync(filePath, "utf-8") === content) {
+    return;
+  }
+  writeFileSync(filePath, content);
+}
+
 function parseSvgToAsn(svgContent) {
   const result = optimize(svgContent, {
     plugins: ["removeDimensions", "removeXMLNS", "convertStyleToAttrs"],
@@ -153,11 +160,11 @@ function processIcon(name, svgContent) {
   });
 
   const svgFile = join(SVG_DIR, `${name}.svg`);
-  writeFileSync(svgFile, optimized.data);
+  safeWriteFileSync(svgFile, optimized.data);
 
   const asn = parseSvgToAsn(svgContent);
   const asnFile = join(ASN_DIR, `${name}.ts`);
-  writeFileSync(
+  safeWriteFileSync(
     asnFile,
     `export default ${JSON.stringify(asn, null, 2)} as const;`,
   );
@@ -186,7 +193,7 @@ function main() {
       (name) => `export { default as ${toPascalCase(name)} } from "./${name}";`,
     )
     .join("\n");
-  writeFileSync(join(ASN_DIR, "index.ts"), asnIndexContent);
+  safeWriteFileSync(join(ASN_DIR, "index.ts"), asnIndexContent);
 
   const asnRegistryImports = iconNames
     .map((name) => {
@@ -209,7 +216,7 @@ ${iconNames
   .join("\n")}
 };
 `;
-  writeFileSync(join(ASN_DIR, "registry.ts"), asnRegistryContent);
+  safeWriteFileSync(join(ASN_DIR, "registry.ts"), asnRegistryContent);
 
   const srcRegistryImports = iconNames
     .map((name) => {
@@ -234,7 +241,7 @@ ${iconNames
   .join("\n")}
 };
 `;
-  writeFileSync(join(__dirname, "../src/index.ts"), srcIndexContent);
+  safeWriteFileSync(join(__dirname, "../src/index.ts"), srcIndexContent);
 }
 
 function toPascalCase(str) {

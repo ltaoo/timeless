@@ -1,223 +1,11 @@
-// ============================================================
-// Mock data
-// ============================================================
+import {
+  MOCK_TABLES,
+  generateMockRows,
+  formatCell,
+  getRowKey,
+} from "./index.model.js";
 
-var MOCK_TABLES = [
-  {
-    name: "users",
-    columns: [
-      { cid: 0, name: "id", type: "int", notnull: true, dflt_value: null, pk: true },
-      { cid: 1, name: "username", type: "varchar(50)", notnull: true, dflt_value: null, pk: false },
-      { cid: 2, name: "email", type: "varchar(100)", notnull: true, dflt_value: null, pk: false },
-      { cid: 3, name: "password", type: "varchar(255)", notnull: true, dflt_value: null, pk: false },
-      { cid: 4, name: "avatar", type: "varchar(255)", notnull: false, dflt_value: null, pk: false },
-      { cid: 5, name: "created_at", type: "datetime", notnull: true, dflt_value: null, pk: false },
-    ],
-  },
-  {
-    name: "posts",
-    columns: [
-      { cid: 0, name: "id", type: "int", notnull: true, dflt_value: null, pk: true },
-      { cid: 1, name: "title", type: "varchar(200)", notnull: true, dflt_value: null, pk: false },
-      { cid: 2, name: "content", type: "text", notnull: false, dflt_value: null, pk: false },
-      { cid: 3, name: "user_id", type: "int", notnull: true, dflt_value: null, pk: false },
-      { cid: 4, name: "status", type: "varchar(20)", notnull: false, dflt_value: null, pk: false },
-      { cid: 5, name: "created_at", type: "datetime", notnull: true, dflt_value: null, pk: false },
-    ],
-  },
-  {
-    name: "comments",
-    columns: [
-      { cid: 0, name: "id", type: "int", notnull: true, dflt_value: null, pk: true },
-      { cid: 1, name: "content", type: "text", notnull: true, dflt_value: null, pk: false },
-      { cid: 2, name: "user_id", type: "int", notnull: true, dflt_value: null, pk: false },
-      { cid: 3, name: "post_id", type: "int", notnull: true, dflt_value: null, pk: false },
-      { cid: 4, name: "created_at", type: "datetime", notnull: true, dflt_value: null, pk: false },
-    ],
-  },
-  {
-    name: "tags",
-    columns: [
-      { cid: 0, name: "id", type: "int", notnull: true, dflt_value: null, pk: true },
-      { cid: 1, name: "name", type: "varchar(50)", notnull: true, dflt_value: null, pk: false },
-    ],
-  },
-  {
-    name: "post_tags",
-    columns: [
-      { cid: 0, name: "id", type: "int", notnull: true, dflt_value: null, pk: true },
-      { cid: 1, name: "post_id", type: "int", notnull: true, dflt_value: null, pk: false },
-      { cid: 2, name: "tag_id", type: "int", notnull: true, dflt_value: null, pk: false },
-    ],
-  },
-  {
-    name: "analytics",
-    columns: [
-      { cid: 0, name: "id", type: "int", notnull: true, dflt_value: null, pk: true },
-      { cid: 1, name: "event_name", type: "varchar(100)", notnull: true, dflt_value: null, pk: false },
-      { cid: 2, name: "user_id", type: "int", notnull: false, dflt_value: null, pk: false },
-      { cid: 3, name: "session_id", type: "varchar(64)", notnull: false, dflt_value: null, pk: false },
-      { cid: 4, name: "page_url", type: "varchar(500)", notnull: false, dflt_value: null, pk: false },
-      { cid: 5, name: "referrer", type: "varchar(500)", notnull: false, dflt_value: null, pk: false },
-      { cid: 6, name: "browser", type: "varchar(100)", notnull: false, dflt_value: null, pk: false },
-      { cid: 7, name: "os", type: "varchar(50)", notnull: false, dflt_value: null, pk: false },
-      { cid: 8, name: "device_type", type: "varchar(20)", notnull: false, dflt_value: null, pk: false },
-      { cid: 9, name: "country", type: "varchar(50)", notnull: false, dflt_value: null, pk: false },
-      { cid: 10, name: "city", type: "varchar(100)", notnull: false, dflt_value: null, pk: false },
-      { cid: 11, name: "duration_ms", type: "int", notnull: false, dflt_value: null, pk: false },
-      { cid: 12, name: "scroll_depth_pct", type: "int", notnull: false, dflt_value: null, pk: false },
-      { cid: 13, name: "click_target", type: "varchar(200)", notnull: false, dflt_value: null, pk: false },
-      { cid: 14, name: "custom_event", type: "varchar(100)", notnull: false, dflt_value: null, pk: false },
-      { cid: 15, name: "value", type: "real", notnull: false, dflt_value: null, pk: false },
-      { cid: 16, name: "utm_source", type: "varchar(100)", notnull: false, dflt_value: null, pk: false },
-      { cid: 17, name: "utm_medium", type: "varchar(100)", notnull: false, dflt_value: null, pk: false },
-      { cid: 18, name: "utm_campaign", type: "varchar(200)", notnull: false, dflt_value: null, pk: false },
-      { cid: 19, name: "ip_address", type: "varchar(45)", notnull: false, dflt_value: null, pk: false },
-      { cid: 20, name: "user_agent", type: "text", notnull: false, dflt_value: null, pk: false },
-      { cid: 21, name: "screen_width", type: "int", notnull: false, dflt_value: null, pk: false },
-      { cid: 22, name: "screen_height", type: "int", notnull: false, dflt_value: null, pk: false },
-      { cid: 23, name: "is_bounce", type: "int", notnull: false, dflt_value: null, pk: false },
-      { cid: 24, name: "created_at", type: "datetime", notnull: true, dflt_value: null, pk: false },
-    ],
-  },
-];
-
-var STATUSES = ["draft", "published", "review", "archived"];
-var USERNAMES = ["alice", "bob", "charlie", "diana", "eve", "frank", "grace", "hank", "iris", "jack"];
-var TAG_NAMES = ["sqlite", "database", "tutorial", "performance", "security", "react", "javascript", "api", "devops", "testing"];
-var EVENT_NAMES = ["page_view", "click", "scroll", "form_submit", "video_play", "download", "signup", "login", "search", "share"];
-var PAGE_URLS = ["/home", "/products", "/about", "/contact", "/blog/post-1", "/pricing", "/docs/getting-started", "/dashboard", "/settings", "/profile"];
-var REFERRERS = ["https://google.com", "https://twitter.com", "https://reddit.com", "https://news.ycombinator.com", "https://github.com", null, null, null];
-var BROWSERS = ["Chrome 120", "Firefox 121", "Safari 17", "Edge 120", "Chrome 119", "Firefox 120"];
-var OS_LIST = ["Windows 11", "macOS 14", "Ubuntu 22.04", "iOS 17", "Android 14", "macOS 13"];
-var DEVICE_TYPES = ["desktop", "desktop", "desktop", "mobile", "tablet"];
-var COUNTRIES = ["US", "GB", "DE", "JP", "BR", "IN", "CA", "AU", "FR", "KR"];
-var CITIES = ["New York", "London", "Berlin", "Tokyo", "Sao Paulo", "Mumbai", "Toronto", "Sydney", "Paris", "Seoul"];
-var CLICK_TARGETS = ["#hero-btn", ".nav-link", ".card-title", ".cta-button", "#submit-form", ".dropdown-toggle", null, null, null, null];
-var CUSTOM_EVENTS = ["video_started", "form_abandoned", "cart_add", "wishlist_add", "item_viewed", "checkout_started", null, null, null, null];
-var UTM_SOURCES = ["google", "twitter", "newsletter", "facebook", "linkedin", null, null, null];
-var UTM_MEDIUMS = ["cpc", "social", "email", "banner", "affiliate", null, null, null];
-var UTM_CAMPAIGNS = ["spring_sale", "launch_2024", "black_friday", "back_to_school", "holiday_special", null, null, null, null];
-var SCREEN_SIZES = [[1920, 1080], [1440, 900], [1366, 768], [2560, 1440], [390, 844], [414, 896], [768, 1024], [1280, 720]];
-
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function randDate() {
-  var y = 2024 + Math.floor(Math.random() * 2);
-  var m = String(Math.floor(Math.random() * 12) + 1).padStart(2, "0");
-  var d = String(Math.floor(Math.random() * 28) + 1).padStart(2, "0");
-  var h = String(Math.floor(Math.random() * 24)).padStart(2, "0");
-  var mi = String(Math.floor(Math.random() * 60)).padStart(2, "0");
-  var s = String(Math.floor(Math.random() * 60)).padStart(2, "0");
-  return y + "-" + m + "-" + d + " " + h + ":" + mi + ":" + s;
-}
-
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function generateMockRows(tableName, count) {
-  var rows = [];
-  for (var i = 0; i < count; i++) {
-    switch (tableName) {
-      case "users":
-        rows.push({
-          id: i + 1,
-          username: USERNAMES[i] || "user" + (i + 1),
-          email: (USERNAMES[i] || "user" + (i + 1)) + "@example.com",
-          password: "hash_" + Math.random().toString(36).slice(2, 10),
-          avatar: i % 3 === 0 ? "/avatars/" + (USERNAMES[i] || "user" + (i + 1)) + ".png" : null,
-          created_at: randDate(),
-        });
-        break;
-      case "posts":
-        rows.push({
-          id: i + 1,
-          title: "Post #" + (i + 1) + " — " + pick(["Getting Started", "Advanced Guide", "Tips & Tricks", "Best Practices", "Deep Dive"]),
-          content: i % 3 === 0 ? null : "Full content body for post #" + (i + 1) + ".",
-          user_id: randInt(1, 10),
-          status: pick(STATUSES),
-          created_at: randDate(),
-        });
-        break;
-      case "comments":
-        rows.push({
-          id: i + 1,
-          content: pick(["Great article!", "Thanks for sharing.", "Well written!", "Bookmarked.", "Keep it up!"]),
-          user_id: randInt(1, 10),
-          post_id: randInt(1, 30),
-          created_at: randDate(),
-        });
-        break;
-      case "tags":
-        rows.push({
-          id: i + 1,
-          name: TAG_NAMES[i] || "tag-" + (i + 1),
-        });
-        break;
-      case "post_tags":
-        rows.push({
-          id: i + 1,
-          post_id: randInt(1, 30),
-          tag_id: randInt(1, 10),
-        });
-        break;
-      case "analytics":
-        var screen = pick(SCREEN_SIZES);
-        rows.push({
-          id: i + 1,
-          event_name: pick(EVENT_NAMES),
-          user_id: randInt(1, 5000),
-          session_id: "sess_" + Math.random().toString(36).slice(2, 18),
-          page_url: pick(PAGE_URLS),
-          referrer: pick(REFERRERS),
-          browser: pick(BROWSERS),
-          os: pick(OS_LIST),
-          device_type: pick(DEVICE_TYPES),
-          country: pick(COUNTRIES),
-          city: pick(CITIES),
-          duration_ms: randInt(100, 300000),
-          scroll_depth_pct: randInt(0, 100),
-          click_target: pick(CLICK_TARGETS),
-          custom_event: pick(CUSTOM_EVENTS),
-          value: Math.round(Math.random() * 100000) / 100,
-          utm_source: pick(UTM_SOURCES),
-          utm_medium: pick(UTM_MEDIUMS),
-          utm_campaign: pick(UTM_CAMPAIGNS),
-          ip_address: "192.168." + randInt(1, 255) + "." + randInt(1, 255),
-          user_agent: "Mozilla/5.0 (" + pick(["Windows NT 10.0", "Macintosh", "X11"]) + ") " + pick(["Chrome", "Firefox", "Safari"]) + "/" + randInt(100, 130) + ".0",
-          screen_width: screen[0],
-          screen_height: screen[1],
-          is_bounce: randInt(0, 1),
-          created_at: randDate(),
-        });
-        break;
-    }
-  }
-  return rows;
-}
-
-// ============================================================
-// Helpers
-// ============================================================
-
-function formatCell(val) {
-  if (val === null) return "NULL";
-  if (val === undefined) return "";
-  if (typeof val === "object") return JSON.stringify(val);
-  return String(val);
-}
-
-function getRowKey(columns) {
-  for (var i = 0; i < columns.length; i++) {
-    if (columns[i].pk) return columns[i].name;
-  }
-  return columns.length > 0 ? columns[0].name : "id";
-}
-
-function makeColumnResizeHandle(colIdx, colWidths_, opts) {
+function ColumnResizeHandler(colIdx, colWidths_, opts) {
   // Resize only the column to the LEFT of the handle (mainstream behavior:
   // Excel, Google Sheets, DataGrip, etc.). Right column stays fixed width.
   var leftIdx = colIdx + 1;
@@ -231,7 +19,7 @@ function makeColumnResizeHandle(colIdx, colWidths_, opts) {
     style: onLeft
       ? { "margin-left": "-3px", "z-index": "1" }
       : { "margin-right": "-3px", "z-index": "1" },
-    onMounted: function (event) {
+    onMounted(event) {
       var $el = event.target.get$elm();
 
       // 1px visible line in the center, non-interactive
@@ -244,18 +32,18 @@ function makeColumnResizeHandle(colIdx, colWidths_, opts) {
         width: "1px",
         marginLeft: "-0.5px",
         pointerEvents: "none",
-        backgroundColor: "#d0d0d0",
+        backgroundColor: "var(--border)",
       });
       $el.appendChild($line);
 
       // Hover highlight: blue glow on hover
       function onEnter() {
-        $line.style.backgroundColor = "#3376cd";
+        $line.style.backgroundColor = "var(--primary)";
         $line.style.width = "2px";
         $line.style.marginLeft = "-1px";
       }
       function onLeave() {
-        $line.style.backgroundColor = "#d0d0d0";
+        $line.style.backgroundColor = "var(--border)";
         $line.style.width = "1px";
         $line.style.marginLeft = "-0.5px";
       }
@@ -271,6 +59,8 @@ function makeColumnResizeHandle(colIdx, colWidths_, opts) {
 
         function onMove(me) {
           var delta = me.clientX - startX;
+          // For left-side handles, negate delta: dragging left should expand the column
+          if (onLeft) delta = -delta;
           var arr = colWidths_.value.slice();
           arr[leftIdx] = Math.max(MIN, startLeft + delta);
           colWidths_.as(arr);
@@ -300,15 +90,25 @@ function makeColumnResizeHandle(colIdx, colWidths_, opts) {
 // Main component
 // ============================================================
 
+/**
+ * @typedef {Object} TablePanel
+ * @property {string} name
+ * @property {Array<{name: string, type: string}>} columns
+ * @property {ReturnType<typeof refarr>} data
+ * @property {import("@timeless/timeless").Ref<boolean>} loaded
+ * @property {import("@timeless/timeless").Ref<boolean>} loading
+ */
+
 /** @param {ViewComponentProps} props */
 export default function TablesPageView(props) {
   var tables_ = refarr(MOCK_TABLES);
-  var panels_ = refarr([]);
+  var panels_ = refarr(/** @type {TablePanel[]} */ ([]));
   var curPanel_ = ref(null);
   var searchText_ = ref("");
 
   function findPanel(name) {
     if (!name) return null;
+    // return panels_.find((ps) => ps.name === name) ?? null;
     var ps = panels_.value;
     for (var i = 0; i < ps.length; i++) {
       if (ps[i].name === name) return ps[i];
@@ -336,7 +136,7 @@ export default function TablesPageView(props) {
     var panel = {
       name: name,
       columns: tableMeta.columns,
-      data: refarr([]),
+      data: refarr(/** @type {{}[]} */ ([])),
       loaded: ref(false),
       loading: ref(true),
     };
@@ -358,7 +158,10 @@ export default function TablesPageView(props) {
     var ps = panels_.value;
     var idx = -1;
     for (var i = 0; i < ps.length; i++) {
-      if (ps[i].name === name) { idx = i; break; }
+      if (ps[i].name === name) {
+        idx = i;
+        break;
+      }
     }
     if (idx === -1) return;
 
@@ -380,413 +183,616 @@ export default function TablesPageView(props) {
   }
 
   // === Render ===
-  return View({ class: "h-full" }, [
-    SplitView({
-      resizable: true,
+  return View(
+    {
       class: "h-full",
-      panels: [
-        // ===== Left Sidebar =====
-        {
-          size: 220,
-          minSize: 160,
-          style: { overflow: "hidden" },
-          content: function () {
-            var searchInput$ = new Timeless.ui.InputCore({
-              defaultValue: "",
-              placeholder: "Search tables...",
-            });
-            searchInput$.onStateChange(function () {
-              searchText_.as(searchInput$.value);
-            });
+      onMounted() {
+        openTable(MOCK_TABLES[MOCK_TABLES.length - 1].name);
+      },
+    },
+    [
+      SplitView({
+        resizable: true,
+        class: "h-full",
+        panels: [
+          // ===== Left Sidebar =====
+          {
+            size: 220,
+            minSize: 160,
+            style: { overflow: "hidden" },
+            content() {
+              var searchInput$ = new Timeless.ui.InputCore({
+                defaultValue: "",
+                placeholder: "Search tables...",
+              });
+              searchInput$.onStateChange(function () {
+                searchText_.as(searchInput$.value);
+              });
 
-            return View(
-              { class: "flex flex-col h-full border-r border-border" },
-              [
-                View({ class: "p-3 shrink-0" }, [
-                  Input({ id: "table-search", store: searchInput$ }),
-                ]),
-                View({ class: "flex-1 overflow-y-auto" }, [
-                  For({
-                    each: tables_,
-                    render: function (table) {
-                      var isActive = computed(curPanel_, function (t) {
-                        return t === table.name;
-                      });
-                      var isVisible = computed(searchText_, function (t) {
-                        return !t || table.name.toLowerCase().includes(t.toLowerCase());
-                      });
-
-                      return Show({
-                        when: isVisible,
-                        ok: function () {
-                          return View(
-                            {
-                              class: Timeless.classNames([
-                                "flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer select-none transition-colors",
-                                computed(isActive, function (active) {
-                                  return active
-                                    ? "bg-accent text-accent-foreground font-medium"
-                                    : "hover:bg-muted text-foreground";
-                                }),
-                              ]),
-                              onClick: function () { openTable(table.name); },
-                            },
-                            [
-                              Icon({ name: "table", size: 14 }),
-                              View({ class: "truncate" }, [table.name]),
-                              View({ class: "ml-auto text-xs text-muted-foreground" }, [
-                                String(table.columns.length),
-                              ]),
-                            ],
-                          );
-                        },
-                      });
-                    },
-                  }),
-                ]),
-              ],
-            );
-          },
-        },
-        // ===== Right Main =====
-        {
-          size: "auto",
-          style: { overflow: "hidden" },
-          content: function () {
-            return View({ class: "flex flex-col h-full" }, [
-              // Tab bar
-              View(
-                { class: "flex items-center border-b border-border shrink-0 overflow-x-auto" },
+              return View(
+                { class: "flex flex-col h-full border-r border-border" },
                 [
-                  For({
-                    each: panels_,
-                    render: function (panel) {
-                      var isActive = computed(curPanel_, function (t) {
-                        return t === panel.name;
-                      });
-                      return View(
-                        {
-                          class: Timeless.classNames([
-                            "flex items-center gap-1.5 px-3 py-2 text-sm cursor-pointer select-none border-b-2 transition-colors shrink-0",
-                            computed(isActive, function (active) {
-                              return active
-                                ? "border-primary text-foreground font-medium"
-                                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50";
-                            }),
-                          ]),
-                          onClick: function () { switchTable(panel.name); },
-                        },
-                        [
-                          View({ class: "truncate max-w-[160px]" }, [panel.name]),
-                          View(
-                            {
-                              class: "flex items-center justify-center w-4 h-4 rounded hover:bg-muted-foreground/20 shrink-0",
-                              onClick: function (e) { closeTable(panel.name, e); },
-                            },
-                            [Icon({ name: "x", size: 12 })],
-                          ),
-                        ],
-                      );
-                    },
-                  }),
-                ],
-              ),
-              // Content area
-              View({ class: "flex-1 min-h-0 flex flex-col" }, [
-                // Empty
-                Show({
-                  when: computed(curPanel_, function (t) { return !t; }),
-                  ok: function () {
-                    return View(
-                      { class: "flex items-center justify-center h-full text-sm text-muted-foreground" },
-                      ["Select a table from the sidebar to view its data"],
-                    );
-                  },
-                }),
-                // Active panel
-                Show({
-                  when: computed(curPanel_, function (t) { return !!t; }),
-                  ok: function () {
-                    var panel = findPanel(curPanel_.value);
-                    if (!panel) return null;
-
-                    var colCount = panel.columns.length;
-                    // column 0 = row number (48px), columns 1..colCount = data columns (150px each)
-                    var widths = [48];
-                    for (var ci = 0; ci < colCount; ci++) { widths.push(150); }
-                    var colWidths_ = refarr(widths);
-
-                    // Fixed column detection
-                    var fixedLeftInfo_ = [{ gridIdx: 0, name: "#" }];
-                    for (var ci = 0; ci < colCount; ci++) {
-                      var cn = panel.columns[ci].name;
-                      if (cn === "id" || cn === "event_name") {
-                        fixedLeftInfo_.push({ gridIdx: ci + 1, name: cn });
-                      }
-                    }
-                    var lastLeftFixedIdx_ = fixedLeftInfo_[fixedLeftInfo_.length - 1].gridIdx;
-
-                    var rightFixedSet_ = {};
-                    for (var cri = 0; cri < colCount; cri++) {
-                      if (panel.columns[cri].name === "created_at") {
-                        rightFixedSet_[cri + 1] = true;
-                      }
-                    }
-
-                    // Sticky left offsets (reactive to column resize)
-                    var stickyLefts_ = {};
-                    for (var fi = 0; fi < fixedLeftInfo_.length; fi++) {
-                      (function (gi) {
-                        stickyLefts_[gi] = computed(colWidths_, function (arr) {
-                          var left = 0;
-                          for (var fj = 0; fj < fixedLeftInfo_.length; fj++) {
-                            var gj = fixedLeftInfo_[fj].gridIdx;
-                            if (gj === gi) return left;
-                            left += arr[gj];
-                          }
-                          return 0;
+                  View({ class: "p-3 shrink-0" }, [
+                    Input({ id: "table-search", store: searchInput$ }),
+                  ]),
+                  View({ class: "flex-1 overflow-y-auto" }, [
+                    For({
+                      each: tables_,
+                      render(table) {
+                        var isActive = computed(curPanel_, function (t) {
+                          return t === table.name;
                         });
-                      })(fixedLeftInfo_[fi].gridIdx);
-                    }
-
-                    var gridTemplate_ = computed(colWidths_, function (arr) {
-                      return arr.map(function (w) { return w + "px"; }).join(" ");
-                    });
-                    var totalWidth_ = computed(colWidths_, function (arr) {
-                      var sum = 0;
-                      for (var i = 0; i < arr.length; i++) { sum += arr[i]; }
-                      return sum;
-                    });
-                    return [
-                      // Loading
-                      Show({
-                        when: computed(panel.loading, function (t) { return t; }),
-                        ok: function () {
-                          return View(
-                            { class: "flex items-center justify-center h-full text-sm text-muted-foreground" },
-                            ["Loading data..."],
+                        var isVisible = computed(searchText_, function (t) {
+                          return (
+                            !t ||
+                            table.name.toLowerCase().includes(t.toLowerCase())
                           );
-                        },
-                      }),
-                      // Loaded
-                      Show({
-                        when: computed(panel.loaded, function (t) { return t; }),
-                        ok: function () {
-                          var cleanupScroll_ = null;
-                          var cleanupHeaderScroll_ = null;
-                          var headerScrollEl_ = null;
-                          var isScrollSyncing_ = false;
+                        });
 
-                          return View({ class: "flex flex-col h-full min-h-0" }, [
-                            // Column headers — native scroll synced with body
-                            View(
+                        return Show({
+                          when: isVisible,
+                          ok() {
+                            return View(
                               {
-                                class: "shrink-0 border-b border-border bg-muted/50",
-                                style: {
-                                  overflow: "auto",
-                                  "scrollbar-width": "none",
-                                },
-                                onMounted: function (event) {
-                                  var $hdr = event.target.get$elm();
-                                  headerScrollEl_ = $hdr;
-                                  function onHeaderScroll() {
-                                    if (isScrollSyncing_) return;
-                                    isScrollSyncing_ = true;
-                                    var $data = document.querySelector("[data-table-body-scroll]");
-                                    if ($data) $data.scrollLeft = $hdr.scrollLeft;
-                                    isScrollSyncing_ = false;
-                                  }
-                                  $hdr.addEventListener("scroll", onHeaderScroll);
-                                  cleanupHeaderScroll_ = function () {
-                                    $hdr.removeEventListener("scroll", onHeaderScroll);
-                                  };
-                                },
-                                beforeUnmounted: function () {
-                                  if (cleanupHeaderScroll_) {
-                                    cleanupHeaderScroll_();
-                                    cleanupHeaderScroll_ = null;
-                                  }
-                                  headerScrollEl_ = null;
+                                class: Timeless.classNames([
+                                  "flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer select-none transition-colors",
+                                  computed(isActive, (active) => {
+                                    return active
+                                      ? "bg-accent text-accent-foreground font-medium"
+                                      : "hover:bg-muted text-foreground";
+                                  }),
+                                ]),
+                                onClick() {
+                                  openTable(table.name);
                                 },
                               },
                               [
+                                Icon({ name: "table", size: 14 }),
+                                View({ class: "truncate" }, [table.name]),
                                 View(
                                   {
+                                    class:
+                                      "ml-auto text-xs text-muted-foreground",
+                                  },
+                                  [String(table.columns.length)],
+                                ),
+                              ],
+                            );
+                          },
+                        });
+                      },
+                    }),
+                  ]),
+                ],
+              );
+            },
+          },
+          // ===== Right Main =====
+          {
+            size: "auto",
+            style: { overflow: "hidden" },
+            content() {
+              return View({ class: "flex flex-col h-full" }, [
+                // Tab bar
+                View(
+                  {
+                    class:
+                      "flex items-center border-b border-border shrink-0 overflow-x-auto",
+                  },
+                  [
+                    For({
+                      each: panels_,
+                      render(panel) {
+                        var isActive = computed(curPanel_, function (t) {
+                          return t === panel.name;
+                        });
+                        return View(
+                          {
+                            class: Timeless.classNames([
+                              "flex items-center gap-1.5 px-3 py-2 text-sm cursor-pointer select-none border-b-2 transition-colors shrink-0",
+                              computed(isActive, function (active) {
+                                return active
+                                  ? "border-primary text-foreground font-medium"
+                                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50";
+                              }),
+                            ]),
+                            onClick() {
+                              switchTable(panel.name);
+                            },
+                          },
+                          [
+                            View({ class: "truncate max-w-[160px]" }, [
+                              panel.name,
+                            ]),
+                            View(
+                              {
+                                class:
+                                  "flex items-center justify-center w-4 h-4 rounded hover:bg-muted-foreground/20 shrink-0",
+                                onClick(e) {
+                                  closeTable(panel.name, e);
+                                },
+                              },
+                              [Icon({ name: "x", size: 12 })],
+                            ),
+                          ],
+                        );
+                      },
+                    }),
+                  ],
+                ),
+                // Content area
+                View({ class: "flex-1 min-h-0 flex flex-col" }, [
+                  // Empty
+                  Show({
+                    when: computed(curPanel_, function (t) {
+                      return !t;
+                    }),
+                    ok() {
+                      return View(
+                        {
+                          class:
+                            "flex items-center justify-center h-full text-sm text-muted-foreground",
+                        },
+                        ["Select a table from the sidebar to view its data"],
+                      );
+                    },
+                  }),
+                  // Active panel
+                  Show({
+                    when: computed(curPanel_, (t) => {
+                      return !!t;
+                    }),
+                    ok() {
+                      var panel = findPanel(curPanel_.value);
+                      if (!panel) {
+                        return null;
+                      }
+                      var colCount = panel.columns.length;
+                      // column 0 = row number (48px), columns 1..colCount = data columns (150px each)
+                      var widths = [48];
+                      for (var ci = 0; ci < colCount; ci++) {
+                        widths.push(150);
+                      }
+                      var colWidths_ = refarr(widths);
+
+                      // Fixed column detection
+                      var fixedLeftInfo_ = [{ gridIdx: 0, name: "#" }];
+                      for (var ci = 0; ci < colCount; ci++) {
+                        var cn = panel.columns[ci].name;
+                        if (cn === "id" || cn === "event_name") {
+                          fixedLeftInfo_.push({ gridIdx: ci + 1, name: cn });
+                        }
+                      }
+                      var lastLeftFixedIdx_ =
+                        fixedLeftInfo_[fixedLeftInfo_.length - 1].gridIdx;
+
+                      var columns_fixed_right = {};
+                      for (var cri = 0; cri < colCount; cri++) {
+                        if (panel.columns[cri].name === "created_at") {
+                          columns_fixed_right[cri + 1] = true;
+                        }
+                      }
+
+                      // Sticky left offsets (reactive to column resize)
+                      var columns_sticky_left = {};
+                      for (var fi = 0; fi < fixedLeftInfo_.length; fi++) {
+                        (function (gi) {
+                          columns_sticky_left[gi] = computed(
+                            colWidths_,
+                            function (arr) {
+                              var left = 0;
+                              for (
+                                var fj = 0;
+                                fj < fixedLeftInfo_.length;
+                                fj++
+                              ) {
+                                var gj = fixedLeftInfo_[fj].gridIdx;
+                                if (gj === gi) return left;
+                                left += arr[gj];
+                              }
+                              return 0;
+                            },
+                          );
+                        })(fixedLeftInfo_[fi].gridIdx);
+                      }
+
+                      var grid_template_ = computed(colWidths_, function (arr) {
+                        return arr
+                          .map(function (w) {
+                            return w + "px";
+                          })
+                          .join(" ");
+                      });
+                      var totalWidth_ = computed(colWidths_, function (arr) {
+                        var sum = 0;
+                        for (var i = 0; i < arr.length; i++) {
+                          sum += arr[i];
+                        }
+                        return sum;
+                      });
+                      var total_table_width_ = computed(
+                        totalWidth_,
+                        function (w) {
+                          return w + "px";
+                        },
+                      );
+                      // Direct DOM sync for body rows — bypasses ListView reactive lifecycle issues.
+                      // Must be assigned to a var and read in a rendered View to trigger lazy evaluation.
+                      var _grid_sync_ = computed(colWidths_, function (arr) {
+                        var template = arr
+                          .map(function (w) {
+                            return w + "px";
+                          })
+                          .join(" ");
+                        var totalPx =
+                          arr.reduce(function (a, b) {
+                            return a + b;
+                          }, 0) + "px";
+                        var $rows =
+                          document.querySelectorAll("[data-grid-row]");
+                        for (var ri = 0; ri < $rows.length; ri++) {
+                          $rows[ri].style.gridTemplateColumns = template;
+                          $rows[ri].style.minWidth = totalPx;
+                        }
+                        return template;
+                      });
+                      return [
+                        // Loading
+                        Show({
+                          when: panel.loading,
+                          ok() {
+                            return View(
+                              {
+                                class:
+                                  "flex items-center justify-center h-full text-sm text-muted-foreground",
+                              },
+                              ["Loading data..."],
+                            );
+                          },
+                        }),
+                        // Loaded
+                        Show({
+                          when: computed(panel.loaded, function (t) {
+                            return t;
+                          }),
+                          ok() {
+                            var cleanupScroll_ = null;
+                            var cleanupHeaderScroll_ = null;
+                            var headerScrollEl_ = null;
+                            var isScrollSyncing_ = false;
+
+                            return View(
+                              {
+                                class: "flex flex-col h-full min-h-0",
+                                style: { "--grid-sync": _grid_sync_ },
+                              },
+                              [
+                                // Column headers — native scroll synced with body
+                                View(
+                                  {
+                                    class:
+                                      "shrink-0 border-b border-border bg-muted/50",
                                     style: {
-                                      display: "grid",
-                                      "grid-template-columns": gridTemplate_,
-                                      "min-width": computed(totalWidth_, function (w) { return w + "px"; }),
+                                      overflow: "auto",
+                                      "scrollbar-width": "none",
+                                    },
+                                    onMounted(event) {
+                                      var $hdr = event.target.get$elm();
+                                      headerScrollEl_ = $hdr;
+                                      function onHeaderScroll() {
+                                        if (isScrollSyncing_) return;
+                                        isScrollSyncing_ = true;
+                                        var $data = document.querySelector(
+                                          "[data-table-body-scroll]",
+                                        );
+                                        if ($data) {
+                                          $data.scrollLeft = $hdr.scrollLeft;
+                                          isScrollSyncing_ = false;
+                                        }
+                                      }
+                                      $hdr.addEventListener(
+                                        "scroll",
+                                        onHeaderScroll,
+                                      );
+                                      cleanupHeaderScroll_ = function () {
+                                        $hdr.removeEventListener(
+                                          "scroll",
+                                          onHeaderScroll,
+                                        );
+                                      };
+                                    },
+                                    beforeUnmounted: function () {
+                                      if (cleanupHeaderScroll_) {
+                                        cleanupHeaderScroll_();
+                                        cleanupHeaderScroll_ = null;
+                                      }
+                                      headerScrollEl_ = null;
                                     },
                                   },
                                   [
                                     View(
                                       {
-                                        class: "px-3 py-2 text-xs font-medium text-muted-foreground text-right",
                                         style: {
-                                          position: "sticky",
-                                          left: "0px",
-                                          "z-index": 4,
-                                          "background-color": "var(--muted)",
+                                          display: "grid",
+                                          "grid-template-columns":
+                                            grid_template_,
+                                          "min-width": total_table_width_,
                                         },
                                       },
-                                      ["#"],
+                                      [
+                                        View(
+                                          {
+                                            class:
+                                              "px-3 py-2 text-xs font-medium text-muted-foreground text-right",
+                                            style: {
+                                              position: "sticky",
+                                              left: "0px",
+                                              "z-index": 4,
+                                              "background-color":
+                                                "var(--muted)",
+                                              "border-right":
+                                                "1px solid var(--border)",
+                                            },
+                                          },
+                                          ["#"],
+                                        ),
+                                        For({
+                                          each: panel.columns,
+                                          render(col, idx) {
+                                            var colIdx = idx.value;
+                                            var gridIdx = colIdx + 1;
+                                            var isLeftSticky =
+                                              columns_sticky_left[gridIdx] !==
+                                              undefined;
+                                            var isRightSticky =
+                                              columns_fixed_right[gridIdx] ===
+                                              true;
+                                            var isLast =
+                                              colIdx === colCount - 1;
+                                            var headerStickyStyle = {};
+                                            if (isLeftSticky) {
+                                              headerStickyStyle.position =
+                                                "sticky";
+                                              headerStickyStyle.left = computed(
+                                                columns_sticky_left[gridIdx],
+                                                function (v) {
+                                                  return v + "px";
+                                                },
+                                              );
+                                              headerStickyStyle["z-index"] = 4;
+                                              headerStickyStyle[
+                                                "background-color"
+                                              ] = "var(--muted)";
+                                              if (
+                                                gridIdx === lastLeftFixedIdx_
+                                              ) {
+                                                headerStickyStyle[
+                                                  "box-shadow"
+                                                ] =
+                                                  "inset -1px 0 0 0 var(--border)";
+                                              }
+                                            } else if (isRightSticky) {
+                                              headerStickyStyle.position =
+                                                "sticky";
+                                              headerStickyStyle.right = "0px";
+                                              headerStickyStyle["z-index"] = 5;
+                                              headerStickyStyle[
+                                                "background-color"
+                                              ] = "var(--muted)";
+                                              headerStickyStyle["box-shadow"] =
+                                                "inset 1px 0 0 0 var(--border)";
+                                            }
+                                            headerStickyStyle["border-right"] =
+                                              "1px solid var(--border)";
+                                            return View(
+                                              {
+                                                class:
+                                                  "px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-1 relative",
+                                                style: headerStickyStyle,
+                                              },
+                                              [
+                                                Show({
+                                                  when: isRightSticky,
+                                                  ok() {
+                                                    return ColumnResizeHandler(
+                                                      colIdx,
+                                                      colWidths_,
+                                                      { onLeft: true },
+                                                    );
+                                                  },
+                                                }),
+                                                View({ class: "truncate" }, [
+                                                  col.name,
+                                                ]),
+                                                View(
+                                                  {
+                                                    class:
+                                                      "text-[10px] text-muted-foreground/60 font-mono shrink-0",
+                                                  },
+                                                  [col.type],
+                                                ),
+                                                Show({
+                                                  when:
+                                                    !isLast && !isRightSticky,
+                                                  ok() {
+                                                    return ColumnResizeHandler(
+                                                      colIdx,
+                                                      colWidths_,
+                                                    );
+                                                  },
+                                                }),
+                                              ],
+                                            );
+                                          },
+                                        }),
+                                      ],
                                     ),
-                                    For({
-                                      each: panel.columns,
-                                      render: function (col, idx) {
-                                        var colIdx = idx.value;
-                                        var gridIdx = colIdx + 1;
-                                        var isLeftSticky = stickyLefts_[gridIdx] !== undefined;
-                                        var isRightSticky = rightFixedSet_[gridIdx] === true;
-                                        var isLast = colIdx === colCount - 1;
-                                        var headerStickyStyle = {};
-                                        if (isLeftSticky) {
-                                          headerStickyStyle.position = "sticky";
-                                          headerStickyStyle.left = computed(stickyLefts_[gridIdx], function (v) { return v + "px"; });
-                                          headerStickyStyle["z-index"] = 4;
-                                          headerStickyStyle["background-color"] = "var(--muted)";
-                                          if (gridIdx === lastLeftFixedIdx_) {
-                                            headerStickyStyle["box-shadow"] = "inset -1px 0 0 0 var(--border)";
-                                          }
-                                        } else if (isRightSticky) {
-                                          headerStickyStyle.position = "sticky";
-                                          headerStickyStyle.right = "0px";
-                                          headerStickyStyle["z-index"] = 5;
-                                          headerStickyStyle["background-color"] = "var(--muted)";
-                                          headerStickyStyle["box-shadow"] = "inset 1px 0 0 0 var(--border)";
-                                        }
-                                        return View(
-                                          { class: "px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-1 relative", style: headerStickyStyle },
-                                          [
-                                            isRightSticky ? makeColumnResizeHandle(colIdx, colWidths_, { onLeft: true }) : null,
-                                            View({ class: "truncate" }, [col.name]),
-                                            View(
-                                              { class: "text-[10px] text-muted-foreground/60 font-mono shrink-0" },
-                                              [col.type],
-                                            ),
-                                            !isLast && !isRightSticky ? makeColumnResizeHandle(colIdx, colWidths_) : null,
-                                          ],
-                                        );
-                                      },
-                                    }),
                                   ],
                                 ),
-                              ],
-                            ),
-                            // Data rows (scrollable both axes)
-                            View({ class: "flex-1 min-h-0" }, [
-                              ListView({
-                                style: { "max-height": "100%", overflow: "auto", position: "relative" },
-                                key: getRowKey(panel.columns),
-                                size: 30,
-                                itemHeight: 36,
-                                each: panel.data,
-                                beforeUnmounted: function () {
-                                  if (cleanupScroll_) {
-                                    cleanupScroll_();
-                                    cleanupScroll_ = null;
-                                  }
-                                },
-                                onMounted: function (event) {
-                                  var $elm = event.target.get$elm();
-                                  $elm.setAttribute("data-table-body-scroll", "");
-                                  function onScroll() {
-                                    if (isScrollSyncing_) return;
-                                    isScrollSyncing_ = true;
-                                    if (headerScrollEl_) headerScrollEl_.scrollLeft = $elm.scrollLeft;
-                                    isScrollSyncing_ = false;
-                                  }
-                                  $elm.addEventListener("scroll", onScroll);
-                                  cleanupScroll_ = function () {
-                                    $elm.removeEventListener("scroll", onScroll);
-                                  };
-                                },
-                                render: function (row, idx) {
-                                  var cellRefs = panel.columns.map(function (col) {
-                                    return computed(row, function (t) {
-                                      return formatCell(t[col.name]);
-                                    });
-                                  });
-
-                                  var rowNum = computed(idx, function (i) { return String(i + 1); });
-
-                                  var borderBottom_ = combine(
-                                    { idx: idx, data: panel.data },
-                                    function (t) {
-                                      return t.idx === t.data.length - 1
-                                        ? "none"
-                                        : "1px solid #e5e7eb";
+                                // Data rows (scrollable both axes)
+                                View({ class: "flex-1 min-h-0" }, [
+                                  ListView({
+                                    style: {
+                                      "max-height": "100%",
+                                      overflow: "auto",
+                                      position: "relative",
                                     },
-                                  );
-
-                                  return View(
-                                    {
-                                      style: {
-                                        display: "grid",
-                                        "grid-template-columns": gridTemplate_,
-                                        "min-width": computed(totalWidth_, function (w) { return w + "px"; }),
-                                        "border-bottom": borderBottom_,
-                                      },
-                                      onUnmounted: function () {
-                                        borderBottom_.destroy();
-                                        rowNum.destroy();
-                                        cellRefs.forEach(function (r) { r.destroy(); });
-                                      },
+                                    key: getRowKey(panel.columns),
+                                    size: 30,
+                                    itemHeight: 37,
+                                    each: panel.data,
+                                    onMounted(event) {
+                                      var $elm = event.target.get$elm();
+                                      $elm.setAttribute(
+                                        "data-table-body-scroll",
+                                        "",
+                                      );
+                                      function onScroll() {
+                                        if (isScrollSyncing_) return;
+                                        isScrollSyncing_ = true;
+                                        if (headerScrollEl_)
+                                          headerScrollEl_.scrollLeft =
+                                            $elm.scrollLeft;
+                                        isScrollSyncing_ = false;
+                                      }
+                                      $elm.addEventListener("scroll", onScroll);
+                                      cleanupScroll_ = function () {
+                                        $elm.removeEventListener(
+                                          "scroll",
+                                          onScroll,
+                                        );
+                                      };
                                     },
-                                    [
-                                      View(
+                                    beforeUnmounted() {
+                                      if (cleanupScroll_) {
+                                        cleanupScroll_();
+                                        cleanupScroll_ = null;
+                                      }
+                                    },
+                                    render(row, idx) {
+                                      // var cellRefs = panel.columns.map(
+                                      //   function (col) {
+                                      //     return computed(row, function (t) {
+                                      //       return formatCell(t[col.name]);
+                                      //     });
+                                      //   },
+                                      // );
+
+                                      var rowNum = computed(idx, function (i) {
+                                        return String(i + 1);
+                                      });
+
+                                      return View(
                                         {
-                                          class: "px-3 py-2 text-xs text-muted-foreground text-right font-mono select-none",
+                                          dataset: {
+                                            "grid-row": "",
+                                          },
                                           style: {
-                                            position: "sticky",
-                                            left: "0px",
-                                            "z-index": 2,
-                                            "background-color": "var(--background)",
+                                            display: "grid",
+                                            "grid-template-columns":
+                                              grid_template_,
+                                            "min-width": total_table_width_,
+                                          },
+                                          onUnmounted: function () {
+                                            rowNum.destroy();
+                                            // cellRefs.forEach(function (r) {
+                                            //   r.destroy();
+                                            // });
                                           },
                                         },
-                                        [rowNum],
-                                      ),
-                                      ...cellRefs.map(function (ref, cidx) {
-                                        var cellGridIdx = cidx + 1;
-                                        var isLeftSticky = stickyLefts_[cellGridIdx] !== undefined;
-                                        var isRightSticky = rightFixedSet_[cellGridIdx] === true;
-                                        var cellStickyStyle = {};
-                                        if (isLeftSticky) {
-                                          cellStickyStyle.position = "sticky";
-                                          cellStickyStyle.left = computed(stickyLefts_[cellGridIdx], function (v) { return v + "px"; });
-                                          cellStickyStyle["z-index"] = 2;
-                                          cellStickyStyle["background-color"] = "var(--background)";
-                                          if (cellGridIdx === lastLeftFixedIdx_) {
-                                            cellStickyStyle["box-shadow"] = "inset -1px 0 0 0 var(--border)";
-                                          }
-                                        } else if (isRightSticky) {
-                                          cellStickyStyle.position = "sticky";
-                                          cellStickyStyle.right = "0px";
-                                          cellStickyStyle["z-index"] = 2;
-                                          cellStickyStyle["background-color"] = "var(--background)";
-                                          cellStickyStyle["box-shadow"] = "inset 1px 0 0 0 var(--border)";
-                                        }
-                                        return View(
-                                          { class: "px-3 py-2 text-sm truncate", style: cellStickyStyle },
-                                          [ref],
-                                        );
-                                      }),
-                                    ],
-                                  );
-                                },
-                              }),
-                            ]),
-                          ]);
-                        },
-                      }),
-                    ];
-                  },
-                }),
-              ]),
-            ]);
+                                        [
+                                          View(
+                                            {
+                                              class:
+                                                "px-3 py-2 text-xs text-muted-foreground text-right font-mono select-none",
+                                              style: {
+                                                position: "sticky",
+                                                left: "0px",
+                                                "z-index": 2,
+                                                "background-color":
+                                                  "var(--background)",
+                                                "border-right":
+                                                  "1px solid var(--border)",
+                                                "border-bottom":
+                                                  "1px solid var(--border)",
+                                              },
+                                            },
+                                            [rowNum],
+                                          ),
+                                          For({
+                                            each: panel.columns,
+                                            render(column, cidx) {
+                                              const ref = formatCell(
+                                                row[column.name],
+                                              );
+                                              var cell_idx = cidx.value + 1;
+                                              var is_left_sticky =
+                                                columns_sticky_left[
+                                                  cell_idx
+                                                ] !== undefined;
+                                              var is_right_sticky =
+                                                columns_fixed_right[
+                                                  cell_idx
+                                                ] === true;
+                                              var CellStyles = {};
+                                              if (is_left_sticky) {
+                                                CellStyles.position = "sticky";
+                                                CellStyles.left = computed(
+                                                  columns_sticky_left[cell_idx],
+                                                  function (v) {
+                                                    return v + "px";
+                                                  },
+                                                );
+                                                CellStyles["z-index"] = 2;
+                                                CellStyles["background-color"] =
+                                                  "var(--background)";
+                                                if (
+                                                  cell_idx === lastLeftFixedIdx_
+                                                ) {
+                                                  CellStyles["box-shadow"] =
+                                                    "inset -1px 0 0 0 var(--border)";
+                                                }
+                                              } else if (is_right_sticky) {
+                                                CellStyles.position = "sticky";
+                                                CellStyles.right = "0px";
+                                                CellStyles["z-index"] = 2;
+                                                CellStyles["background-color"] =
+                                                  "var(--background)";
+                                                CellStyles["box-shadow"] =
+                                                  "inset 1px 0 0 0 var(--border)";
+                                              }
+                                              CellStyles["border-right"] =
+                                                "1px solid var(--border)";
+                                              CellStyles["border-bottom"] =
+                                                "1px solid var(--border)";
+                                              return View(
+                                                {
+                                                  class:
+                                                    "px-3 py-2 text-sm truncate",
+                                                  style: CellStyles,
+                                                },
+                                                [ref],
+                                              );
+                                            },
+                                          }),
+                                        ],
+                                      );
+                                    },
+                                  }),
+                                ]),
+                              ],
+                            );
+                          },
+                        }),
+                      ];
+                    },
+                  }),
+                ]),
+              ]);
+            },
           },
-        },
-      ],
-    }),
-  ]);
+        ],
+      }),
+    ],
+  );
 }

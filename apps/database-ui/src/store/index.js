@@ -27,6 +27,11 @@ const routes_configure = /** @type {const} */ ({
         pathname: "/home/tables",
         component: Timeless.lazy("@/pages/tables/index.js"),
       },
+      tables2: {
+        title: "Tables2",
+        pathname: "/home/tables2",
+        component: Timeless.lazy("@/pages/tables2/index.js"),
+      },
       settings: {
         title: "设置",
         pathname: "/settings",
