@@ -308,7 +308,6 @@ export function DOMSplitHandler(props: {
             right: "0",
             top: "-2px",
             bottom: "-2px",
-            "pointer-events": "auto",
             cursor: "row-resize",
             transition: "background-color 0.2s ease",
           });
@@ -333,7 +332,6 @@ export function DOMSplitHandler(props: {
             bottom: "0",
             left: "-2px",
             right: "-2px",
-            "pointer-events": "auto",
             cursor: "col-resize",
             transition: "background-color 0.2s ease",
           });

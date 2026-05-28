@@ -53,7 +53,10 @@
       "Bash(ls apps/web-shadcn/vite.config.* 2>/dev/null; head -50 apps/web-shadcn/vite.config.ts 2>/dev/null || head -50 apps/web-shadcn/vite.config.js 2>/dev/null)",
       "WebSearch",
       "mcp__ide__getDiagnostics",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(cd /Users/mayfair/Documents/other/timeless/packages/primitive && bun run build 2>&1)",
+      "Bash(cd /Users/mayfair/Documents/other/timeless/packages/timeless-dom && bun run build 2>&1)",
+      "Bash(bun run:*)"
     ]
   }
 }

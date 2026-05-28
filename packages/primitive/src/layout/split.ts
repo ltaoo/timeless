@@ -2,13 +2,20 @@ import { ViewProps } from "@/content/view";
 import { ViewChildren, isElement, resolve_children } from "@/content/type";
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
-import { isRef } from "@timeless/reactive";
+import { isRef, type Ref } from "@timeless/reactive";
 import { Text } from "@/content/text";
 import { getPlatform } from "@/platform";
 
 const platform = getPlatform();
 
 export type SplitDirection = "horizontal" | "vertical";
+
+export type CollapseEvent = {
+  data: { collapsed: boolean };
+  $elm: ReturnType<typeof SplitPane> & {
+    disableHandler: (disabled: boolean) => void;
+  };
+};
 
 export type SplitViewProps = BoxProps & {
   direction?: SplitDirection;
@@ -18,6 +25,9 @@ export type SplitViewProps = BoxProps & {
     minSize?: number;
     style: BoxProps["style"];
     content: ViewChildren;
+    collapsed?: Ref<boolean>;
+    onCollapse?: (event: CollapseEvent) => void;
+    onCollapsed?: (event: CollapseEvent) => void;
   }[];
   // dividerStyle?: "thin" | "light" | "dark" | "none";
   onResize?: (sizes: number[]) => void;
@@ -70,12 +80,80 @@ export function SplitView(props: SplitViewProps) {
       // }
       // if (dividerStyle !== undefined) state.dividerStyle = dividerStyle;
     },
+    updateGridTemplate() {
+      if (!$elm) return;
+      const templateProp =
+        state.direction === "vertical"
+          ? "gridTemplateRows"
+          : "gridTemplateColumns";
+      const tracks = state.panels
+        .map((panel: any) => {
+          if (panel.t === "split-handler") return "1px";
+          const size = panel.state.size;
+          if (typeof size === "number") return `${size}px`;
+          if (size === "auto") return "1fr";
+          return String(size);
+        })
+        .join(" ");
+      $elm.setStyleValue(
+        "transition",
+        "grid-template-columns 0.3s ease, grid-template-rows 0.3s ease",
+      );
+      $elm.setStyleValue(templateProp, tracks);
+      setTimeout(() => {
+        $elm.setStyleValue?.("transition", "");
+      }, 300);
+    },
     build_panels() {
       // const panels$: ReturnType<typeof SplitPane> = [];
       for (let i = 0; i < props.panels.length; i += 1) {
         const panel = props.panels[i];
         const panel$ = SplitPane({ ...panel, direction }, panel.content);
         state.panels.push(panel$);
+
+        (panel$ as any).disableHandler = (disabled: boolean) => {
+          const panelIdx = i * 2;
+          const prevHandler = state.panels[panelIdx - 1];
+          const nextHandler = state.panels[panelIdx + 1];
+          for (const h of [prevHandler, nextHandler]) {
+            if (h && h.t === "split-handler") {
+              h.state.isCollapsed = disabled;
+              h.$elm?.setStyleValue?.(
+                "pointerEvents",
+                disabled ? "none" : "",
+              );
+              h.$elm?.setStyleValue?.("opacity", disabled ? "0.3" : "");
+            }
+          }
+        };
+
+        if (isRef(panel.collapsed)) {
+          const ref = panel.collapsed as Ref<boolean>;
+          ref.subscribe({
+            onChange(collapsed: boolean) {
+              const event: CollapseEvent = {
+                data: { collapsed },
+                $elm: panel$ as any,
+              };
+              panel.onCollapse?.(event);
+              if (collapsed) {
+                panel$.state.originalSize = panel$.state.size;
+                panel$.state.size = panel$.state.minSize || 0;
+                panel$.state.isCollapsed = true;
+              } else {
+                const $dom = panel$.$elm?.get$elm?.();
+                if ($dom) $dom.style.visibility = "";
+                panel$.state.size =
+                  panel$.state.originalSize || panel$.state.minSize || 100;
+                panel$.state.isCollapsed = false;
+              }
+              methods.updateGridTemplate();
+              setTimeout(() => {
+                panel.onCollapsed?.(event);
+              }, 300);
+            },
+          });
+        }
         if (resizable && i < props.panels.length - 1) {
           const handler$ = SplitHandler({ direction });
           state.panels.push(handler$);
@@ -159,6 +237,8 @@ export type SplitPaneProps = BoxProps & {
   maxSize?: number;
   collapsible?: boolean;
   direction?: SplitDirection;
+  onCollapse?: (event: CollapseEvent) => void;
+  onCollapsed?: (event: CollapseEvent) => void;
 };
 
 type SplitPaneState = {
@@ -167,6 +247,7 @@ type SplitPaneState = {
   minSize?: number;
   maxSize?: number;
   isCollapsed?: boolean;
+  originalSize?: number;
 };
 
 export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
@@ -176,6 +257,8 @@ export function SplitPane(props: SplitPaneProps, children?: ViewChildren) {
     maxSize = 90,
     collapsible = false,
     direction: paneDirection = "horizontal",
+    onCollapse,
+    onCollapsed,
     // collapsedSize = 0,
     ...rest
   } = props;

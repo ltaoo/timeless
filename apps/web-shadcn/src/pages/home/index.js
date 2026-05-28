@@ -4,24 +4,71 @@
  * @returns
  */
 export default function HomePageView(props) {
+  const collapsed_ = ref(false);
+  const hideText_ = ref(false);
+
   const sidemenu$ = Timeless.RouteMenusModel({
     view: props.view,
     history: props.history,
-    menus: /** @type {{ title: string; name: PageKey }[]} */ ([
-      { title: "General", name: "root.home_layout.index.general" },
-      { title: "Input", name: "root.home_layout.index.form" },
-      { title: "Field", name: "root.home_layout.index.validate" },
-      { title: "LLM", name: "root.home_layout.index.llm" },
-      { title: "Data Display", name: "root.home_layout.index.data" },
-      { title: "ScrollView", name: "root.home_layout.index.scroll" },
-      { title: "Feedback", name: "root.home_layout.index.feedback" },
-      { title: "Navigation", name: "root.home_layout.index.nav" },
-      { title: "Overlay", name: "root.home_layout.index.overlay" },
-      { title: "Command", name: "root.home_layout.index.command" },
-      { title: "Debug", name: "root.home_layout.index.debug" },
-      { title: "Lifecycle", name: "root.home_layout.index.lifecycle" },
-      { title: "Download Task", name: "root.home_layout.index.download_task" },
-      { title: "Flow", name: "root.home_layout.index.flow" },
+    menus: /** @type {{ title: string; name: PageKey; icon: string }[]} */ ([
+      {
+        title: "General",
+        name: "root.home_layout.index.general",
+        icon: "house",
+      },
+      {
+        title: "Input",
+        name: "root.home_layout.index.form",
+        icon: "file-text",
+      },
+      {
+        title: "Field",
+        name: "root.home_layout.index.validate",
+        icon: "check",
+      },
+      { title: "LLM", name: "root.home_layout.index.llm", icon: "bolt" },
+      {
+        title: "Data Display",
+        name: "root.home_layout.index.data",
+        icon: "table",
+      },
+      {
+        title: "ScrollView",
+        name: "root.home_layout.index.scroll",
+        icon: "arrow-down-to-line",
+      },
+      {
+        title: "Feedback",
+        name: "root.home_layout.index.feedback",
+        icon: "message-square-more",
+      },
+      { title: "Navigation", name: "root.home_layout.index.nav", icon: "menu" },
+      {
+        title: "Overlay",
+        name: "root.home_layout.index.overlay",
+        icon: "square-arrow-down",
+      },
+      {
+        title: "Command",
+        name: "root.home_layout.index.command",
+        icon: "play",
+      },
+      {
+        title: "Debug",
+        name: "root.home_layout.index.debug",
+        icon: "circle-alert",
+      },
+      {
+        title: "Lifecycle",
+        name: "root.home_layout.index.lifecycle",
+        icon: "refresh-ccw",
+      },
+      {
+        title: "Download Task",
+        name: "root.home_layout.index.download_task",
+        icon: "download",
+      },
+      { title: "Flow", name: "root.home_layout.index.flow", icon: "git-fork" },
     ]),
   });
 
@@ -41,8 +88,20 @@ export default function HomePageView(props) {
         panels: [
           {
             size: 220,
+            minSize: 40,
+            collapsed: collapsed_,
+            onCollapse(event) {
+              if (!event.data.collapsed) {
+                hideText_.set(false);
+              }
+            },
+            onCollapsed(event) {
+              if (event.data.collapsed) {
+                hideText_.set(true);
+              }
+            },
             content() {
-              return Flex({ direction: "col", class: "py-4" }, [
+              return Flex({ direction: "col", class: "overflow-hidden py-4" }, [
                 Flex(
                   { items: "center", justify: "between", class: "px-3 mb-3" },
                   [
@@ -50,6 +109,10 @@ export default function HomePageView(props) {
                       {
                         class:
                           "text-xs font-bold text-zinc-400 uppercase tracking-widest",
+                        style: {
+                          "white-space": "nowrap",
+                          overflow: "hidden",
+                        },
                       },
                       ["Components"],
                     ),
@@ -69,11 +132,33 @@ export default function HomePageView(props) {
                                 : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50";
                             }),
                           ]),
+                          style: {
+                            "white-space": "nowrap",
+                            overflow: "hidden",
+                          },
                           onClick() {
                             props.history.push(menu.name);
                           },
                         },
-                        [menu.title],
+                        [
+                          Flex({ items: "center", gap: 2 }, [
+                            View(
+                              {
+                                class:
+                                  "flex items-center w-[16px] h-[20px] shrink-0",
+                              },
+                              [Icon({ name: menu.icon, size: 16 })],
+                            ),
+                            View(
+                              {
+                                class: computed(hideText_, (c) =>
+                                  c ? "hidden" : "flex-1",
+                                ),
+                              },
+                              [menu.title],
+                            ),
+                          ]),
+                        ],
                       );
                     },
                   }),
@@ -84,7 +169,22 @@ export default function HomePageView(props) {
           {
             size: "auto",
             content() {
-              return KeepAliveSubViews(props);
+              return View({ class: "flex flex-col h-full" }, [
+                View(
+                  {
+                    onClick() {
+                      collapsed_.toggle();
+                    },
+                  },
+                  [View({}, [Icon({ name: "panel-left" })])],
+                ),
+                View(
+                  {
+                    class: "flex-1",
+                  },
+                  [KeepAliveSubViews(props)],
+                ),
+              ]);
             },
           },
         ],
