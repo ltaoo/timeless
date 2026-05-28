@@ -1,6 +1,7 @@
 export * from "./asn/index";
 
 import arrowDownToLine from "./asn/arrow-down-to-line";
+import arrowLeft from "./asn/arrow-left";
 import bolt from "./asn/bolt";
 import calendar from "./asn/calendar";
 import check from "./asn/check";
@@ -23,11 +24,13 @@ import fileImage from "./asn/file-image";
 import fileLock from "./asn/file-lock";
 import filePlay from "./asn/file-play";
 import fileSymlink from "./asn/file-symlink";
+import fileText from "./asn/file-text";
 import fileVideoCamera from "./asn/file-video-camera";
 import fileVolume from "./asn/file-volume";
 import file from "./asn/file";
 import folderClosed from "./asn/folder-closed";
 import folder from "./asn/folder";
+import funnel from "./asn/funnel";
 import gitFork from "./asn/git-fork";
 import grid3x3 from "./asn/grid-3x3";
 import house from "./asn/house";
@@ -36,6 +39,7 @@ import loader from "./asn/loader";
 import menu from "./asn/menu";
 import messageSquareMore from "./asn/message-square-more";
 import moon from "./asn/moon";
+import panelLeft from "./asn/panel-left";
 import pause from "./asn/pause";
 import play from "./asn/play";
 import plus from "./asn/plus";
@@ -53,6 +57,7 @@ import x from "./asn/x";
 
 export const iconRegistry = {
   "arrow-down-to-line": arrowDownToLine,
+  "arrow-left": arrowLeft,
   "bolt": bolt,
   "calendar": calendar,
   "check": check,
@@ -75,11 +80,13 @@ export const iconRegistry = {
   "file-lock": fileLock,
   "file-play": filePlay,
   "file-symlink": fileSymlink,
+  "file-text": fileText,
   "file-video-camera": fileVideoCamera,
   "file-volume": fileVolume,
   "file": file,
   "folder-closed": folderClosed,
   "folder": folder,
+  "funnel": funnel,
   "git-fork": gitFork,
   "grid-3x3": grid3x3,
   "house": house,
@@ -88,6 +95,7 @@ export const iconRegistry = {
   "menu": menu,
   "message-square-more": messageSquareMore,
   "moon": moon,
+  "panel-left": panelLeft,
   "pause": pause,
   "play": play,
   "plus": plus,

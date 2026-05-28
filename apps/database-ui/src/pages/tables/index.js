@@ -8,15 +8,17 @@ import {
 function ColumnResizeHandler(colIdx, colWidths_, opts) {
   // Resize only the column to the LEFT of the handle (mainstream behavior:
   // Excel, Google Sheets, DataGrip, etc.). Right column stays fixed width.
-  var leftIdx = colIdx + 1;
+  // For right-side handles, the column to the left is the current column (colIdx+1 in grid).
+  // For left-side handles (right-sticky cols), the column to the left is the previous column (colIdx in grid).
   var MIN = 50;
   var onLeft = !!(opts && opts.onLeft);
+  var leftIdx = onLeft ? colIdx : colIdx + 1;
 
   return View({
     class: "absolute top-0 bottom-0 w-3 cursor-col-resize",
     style: onLeft
-      ? { "left": "-6px", "z-index": "100" }
-      : { "right": "-6px", "z-index": "100" },
+      ? { left: "-6px", "z-index": "100" }
+      : { right: "-6px", "z-index": "100" },
     onMounted(event) {
       var $el = event.target.get$elm();
 
@@ -84,8 +86,6 @@ function ColumnResizeHandler(colIdx, colWidths_, opts) {
 
         function onMove(me) {
           var delta = me.clientX - startX;
-          // For left-side handles, negate delta: dragging left should expand the column
-          if (onLeft) delta = -delta;
           var arr = colWidths_.value.slice();
           arr[leftIdx] = Math.max(MIN, startLeft + delta);
           colWidths_.as(arr);
@@ -168,9 +168,10 @@ export default function TablesPageView(props) {
     panels_.push(panel);
     curPanel_.as(name);
 
-    var rowCount = (name === "tags" || name === "posts") ? 5000 : 10;
+    var rowCount = name === "tags" || name === "posts" ? 5000 : 10;
     var rows = generateMockRows(name, rowCount);
     panel.data.as(rows);
+    panel._originalRows = rows.slice();
     panel.loading.as(false);
     panel.loaded.as(true);
   }
@@ -379,6 +380,83 @@ export default function TablesPageView(props) {
                         return null;
                       }
                       var colCount = panel.columns.length;
+
+                      // ---- Sort state ----
+                      // null = no sort, { col, dir: 'asc'|'desc' }
+                      var sortState_ = ref(null);
+
+                      function cycleSort(colName) {
+                        var cur = sortState_.value;
+                        if (!cur || cur.col !== colName) {
+                          sortState_.as({ col: colName, dir: "asc" });
+                          panel.data.sort(function (a, b) {
+                            var va = a[colName];
+                            var vb = b[colName];
+                            if (va == null) return 1;
+                            if (vb == null) return -1;
+                            if (va < vb) return -1;
+                            if (va > vb) return 1;
+                            return 0;
+                          });
+                        } else if (cur.dir === "asc") {
+                          sortState_.as({ col: colName, dir: "desc" });
+                          panel.data.sort(function (a, b) {
+                            var va = a[colName];
+                            var vb = b[colName];
+                            if (va == null) return 1;
+                            if (vb == null) return -1;
+                            if (va < vb) return 1;
+                            if (va > vb) return -1;
+                            return 0;
+                          });
+                        } else {
+                          sortState_.as(null);
+                          panel.data.as(panel._originalRows.slice());
+                        }
+                        // Fire callback
+                        if (props.onSort) {
+                          var next = sortState_.value;
+                          props.onSort(
+                            next
+                              ? { column: next.col, direction: next.dir }
+                              : { column: null, direction: null },
+                          );
+                        }
+                      }
+
+                      // ---- Filter state ----
+                      // { colName: filterText }
+                      var filters_ = ref({});
+                      // Which column's filter input is currently open
+                      var filterOpenCol_ = ref(null);
+
+                      function setFilter(colName, val) {
+                        var next = {};
+                        var cur = filters_.value;
+                        for (var k in cur) {
+                          if (cur.hasOwnProperty(k)) next[k] = cur[k];
+                        }
+                        next[colName] = val;
+                        filters_.as(next);
+                        if (props.onFilter) {
+                          props.onFilter({ column: colName, value: val });
+                        }
+                      }
+
+                      function clearFilter(colName) {
+                        var next = {};
+                        var cur = filters_.value;
+                        for (var k in cur) {
+                          if (cur.hasOwnProperty(k) && k !== colName)
+                            next[k] = cur[k];
+                        }
+                        filters_.as(next);
+                        filterOpenCol_.as(null);
+                        if (props.onFilter) {
+                          props.onFilter({ column: colName, value: "" });
+                        }
+                      }
+
                       // column 0 = row number (48px), columns 1..colCount = data columns (150px each)
                       var widths = [48];
                       for (var ci = 0; ci < colCount; ci++) {
@@ -440,13 +518,23 @@ export default function TablesPageView(props) {
                         })(fixedLeftInfo_[fi].gridIdx);
                       }
 
-                      var grid_template_ = computed(colWidths_, function (arr) {
+                      function gridTemplateCols(arr) {
                         return arr
-                          .map(function (w) {
+                          .map(function (w, i) {
+                            // Last data column fills remaining space.
+                            // i > 0 keeps the row-number column (idx 0) always fixed px.
+                            if (i > 0 && i === arr.length - 1) {
+                              return "minmax(" + w + "px, 1fr)";
+                            }
                             return w + "px";
                           })
                           .join(" ");
-                      });
+                      }
+
+                      var grid_template_ = computed(
+                        colWidths_,
+                        gridTemplateCols,
+                      );
                       var totalWidth_ = computed(colWidths_, function (arr) {
                         var sum = 0;
                         for (var i = 0; i < arr.length; i++) {
@@ -460,14 +548,11 @@ export default function TablesPageView(props) {
                           return w + "px";
                         },
                       );
+
                       // Direct DOM sync for body rows — bypasses ListView reactive lifecycle issues.
                       // Must be assigned to a var and read in a rendered View to trigger lazy evaluation.
                       var _grid_sync_ = computed(colWidths_, function (arr) {
-                        var template = arr
-                          .map(function (w) {
-                            return w + "px";
-                          })
-                          .join(" ");
+                        var template = gridTemplateCols(arr);
                         var totalPx =
                           arr.reduce(function (a, b) {
                             return a + b;
@@ -641,8 +726,9 @@ export default function TablesPageView(props) {
                                               headerStickyStyle[
                                                 "background-color"
                                               ] = "var(--muted)";
-                                              headerStickyStyle["border-right"] =
-                                                "1px solid var(--border)";
+                                              headerStickyStyle[
+                                                "border-right"
+                                              ] = "1px solid var(--border)";
                                               // border-right already provides the visual separator;
                                               // inset box-shadow is no longer needed
                                             } else if (isRightSticky) {
@@ -659,13 +745,25 @@ export default function TablesPageView(props) {
                                               headerStickyStyle[
                                                 "background-color"
                                               ] = "var(--muted)";
-                                              headerStickyStyle["border-right"] =
-                                                "1px solid var(--border)";
+                                              headerStickyStyle[
+                                                "border-right"
+                                              ] = "1px solid var(--border)";
                                             }
                                             if (!isRightSticky) {
-                                              headerStickyStyle["border-right"] =
-                                                "1px solid var(--border)";
+                                              headerStickyStyle[
+                                                "border-right"
+                                              ] = "1px solid var(--border)";
                                             }
+                                            // Sort indicator — dual chevrons stacked
+                                            var sortDir_ = computed(
+                                              sortState_,
+                                              function (s) {
+                                                return s && s.col === col.name
+                                                  ? s.dir
+                                                  : null;
+                                              },
+                                            );
+
                                             var headerChildren = [
                                               Show({
                                                 when: isRightSticky,
@@ -677,15 +775,101 @@ export default function TablesPageView(props) {
                                                   );
                                                 },
                                               }),
-                                              View({ class: "truncate" }, [
-                                                col.name,
-                                              ]),
+                                              // Column name + sort + filter — unified header controls
                                               View(
                                                 {
                                                   class:
-                                                    "text-[10px] text-muted-foreground/60 font-mono shrink-0",
+                                                    "flex items-center gap-0.5 cursor-pointer min-w-0",
+                                                  onClick(e) {
+                                                    e.stopPropagation();
+                                                    cycleSort(col.name);
+                                                  },
                                                 },
-                                                [col.type],
+                                                [
+                                                  View({ class: "truncate" }, [
+                                                    col.name,
+                                                  ]),
+                                                  // Sort indicator: ▲/▼ dual chevron
+                                                  View(
+                                                    {
+                                                      class:
+                                                        "flex flex-col shrink-0",
+                                                      style: {
+                                                        lineHeight: 0,
+                                                      },
+                                                    },
+                                                    [
+                                                      View(
+                                                        {
+                                                          class: computed(
+                                                            sortDir_,
+                                                            function (dir) {
+                                                              return dir ===
+                                                                "asc"
+                                                                ? "text-primary"
+                                                                : "text-muted-foreground/40";
+                                                            },
+                                                          ),
+                                                        },
+                                                        [
+                                                          Icon({
+                                                            name: "chevron-up",
+                                                            size: 14,
+                                                          }),
+                                                        ],
+                                                      ),
+                                                      View(
+                                                        {
+                                                          class: computed(
+                                                            sortDir_,
+                                                            function (dir) {
+                                                              return dir ===
+                                                                "desc"
+                                                                ? "text-primary"
+                                                                : "text-muted-foreground/40";
+                                                            },
+                                                          ),
+                                                          style: {
+                                                            marginTop: "-5px",
+                                                          },
+                                                        },
+                                                        [
+                                                          Icon({
+                                                            name: "chevron-down",
+                                                            size: 14,
+                                                          }),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              // Filter icon
+                                              View(
+                                                {
+                                                  class:
+                                                    "shrink-0 cursor-pointer rounded hover:bg-muted-foreground/15 flex items-center justify-center",
+                                                  style: {
+                                                    width: "18px",
+                                                    height: "18px",
+                                                  },
+                                                  onClick(e) {
+                                                    e.stopPropagation();
+                                                    var cur =
+                                                      filterOpenCol_.value;
+                                                    filterOpenCol_.as(
+                                                      cur === col.name
+                                                        ? null
+                                                        : col.name,
+                                                    );
+                                                  },
+                                                },
+                                                [
+                                                  Icon({
+                                                    name: "funnel",
+                                                    size: 12,
+                                                  }),
+                                                ],
                                               ),
                                               Show({
                                                 when:
@@ -702,6 +886,81 @@ export default function TablesPageView(props) {
                                                 },
                                               }),
                                             ];
+
+                                            // Filter dropdown
+                                            var hasFilter_ = computed(
+                                              filters_,
+                                              function (f) {
+                                                return !!(
+                                                  f[col.name] &&
+                                                  f[col.name].length > 0
+                                                );
+                                              },
+                                            );
+
+                                            headerChildren.push(
+                                              Show({
+                                                when: computed(
+                                                  filterOpenCol_,
+                                                  function (open) {
+                                                    return open === col.name;
+                                                  },
+                                                ),
+                                                ok() {
+                                                  var filterInput$ =
+                                                    new Timeless.ui.InputCore({
+                                                      defaultValue:
+                                                        filters_.value[
+                                                          col.name
+                                                        ] || "",
+                                                      placeholder: "Filter...",
+                                                    });
+                                                  filterInput$.onStateChange(
+                                                    function () {
+                                                      setFilter(
+                                                        col.name,
+                                                        filterInput$.value,
+                                                      );
+                                                    },
+                                                  );
+                                                  return View(
+                                                    {
+                                                      class:
+                                                        "absolute top-full left-0 mt-1 p-2 bg-popover border border-border rounded-md shadow-lg z-50",
+                                                      style: {
+                                                        minWidth: "180px",
+                                                      },
+                                                      onClick(e) {
+                                                        e.stopPropagation();
+                                                      },
+                                                    },
+                                                    [
+                                                      Input({
+                                                        store: filterInput$,
+                                                        autoFocus: true,
+                                                      }),
+                                                      Show({
+                                                        when: hasFilter_,
+                                                        ok() {
+                                                          return View(
+                                                            {
+                                                              class:
+                                                                "text-[10px] text-muted-foreground hover:text-foreground cursor-pointer mt-1 text-right",
+                                                              onClick() {
+                                                                clearFilter(
+                                                                  col.name,
+                                                                );
+                                                              },
+                                                            },
+                                                            ["Clear"],
+                                                          );
+                                                        },
+                                                      }),
+                                                    ],
+                                                  );
+                                                },
+                                              }),
+                                            );
                                             if (gridIdx === lastLeftFixedIdx_) {
                                               headerChildren.push(
                                                 View({
@@ -772,7 +1031,7 @@ export default function TablesPageView(props) {
                                             return View(
                                               {
                                                 class:
-                                                  "px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-1 relative",
+                                                  "px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-0.5 relative",
                                                 style: headerStickyStyle,
                                               },
                                               headerChildren,
@@ -865,9 +1124,7 @@ export default function TablesPageView(props) {
                                             var $row = event.target.get$elm();
                                             function onEnter() {
                                               hoveredRow_.as(idx.value);
-                                              $row.classList.add(
-                                                "row-hovered",
-                                              );
+                                              $row.classList.add("row-hovered");
                                             }
                                             function onLeave() {
                                               if (

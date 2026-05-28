@@ -1,4 +1,5 @@
 import arrowDownToLine from "./arrow-down-to-line";
+import arrowLeft from "./arrow-left";
 import bolt from "./bolt";
 import calendar from "./calendar";
 import check from "./check";
@@ -21,11 +22,13 @@ import fileImage from "./file-image";
 import fileLock from "./file-lock";
 import filePlay from "./file-play";
 import fileSymlink from "./file-symlink";
+import fileText from "./file-text";
 import fileVideoCamera from "./file-video-camera";
 import fileVolume from "./file-volume";
 import file from "./file";
 import folderClosed from "./folder-closed";
 import folder from "./folder";
+import funnel from "./funnel";
 import gitFork from "./git-fork";
 import grid3x3 from "./grid-3x3";
 import house from "./house";
@@ -34,6 +37,7 @@ import loader from "./loader";
 import menu from "./menu";
 import messageSquareMore from "./message-square-more";
 import moon from "./moon";
+import panelLeft from "./panel-left";
 import pause from "./pause";
 import play from "./play";
 import plus from "./plus";
@@ -51,6 +55,7 @@ import x from "./x";
 
 export const iconRegistry = {
   "arrow-down-to-line": arrowDownToLine,
+  "arrow-left": arrowLeft,
   "bolt": bolt,
   "calendar": calendar,
   "check": check,
@@ -73,11 +78,13 @@ export const iconRegistry = {
   "file-lock": fileLock,
   "file-play": filePlay,
   "file-symlink": fileSymlink,
+  "file-text": fileText,
   "file-video-camera": fileVideoCamera,
   "file-volume": fileVolume,
   "file": file,
   "folder-closed": folderClosed,
   "folder": folder,
+  "funnel": funnel,
   "git-fork": gitFork,
   "grid-3x3": grid3x3,
   "house": house,
@@ -86,6 +93,7 @@ export const iconRegistry = {
   "menu": menu,
   "message-square-more": messageSquareMore,
   "moon": moon,
+  "panel-left": panelLeft,
   "pause": pause,
   "play": play,
   "plus": plus,
