@@ -8,7 +8,7 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "@timeless/dev": "workspace:*",
+    "@timeless/types": "workspace:*",
     "@timeless/cli": "workspace:*",
     "eslint": "^8.56.0"
   },

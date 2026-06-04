@@ -67,9 +67,9 @@ importers:
       '@timeless/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@timeless/dev':
+      '@timeless/types':
         specifier: workspace:*
-        version: link:../../packages/dev
+        version: link:../../packages/types
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
@@ -205,9 +205,9 @@ importers:
       '@timeless/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@timeless/dev':
+      '@timeless/types':
         specifier: workspace:*
-        version: link:../../packages/dev
+        version: link:../../packages/types
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
@@ -298,9 +298,9 @@ importers:
       '@timeless/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@timeless/dev':
+      '@timeless/types':
         specifier: workspace:*
-        version: link:../../packages/dev
+        version: link:../../packages/types
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
@@ -517,12 +517,6 @@ importers:
       vite:
         specifier: ^6.3.5
         version: 6.4.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(yaml@2.8.3)
-
-  packages/dev:
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
   packages/icons:
     dependencies:
@@ -766,7 +760,11 @@ importers:
         specifier: workspace:*
         version: link:../timeless
 
-  packages/types: {}
+  packages/types:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/ui-primitive:
     dependencies:

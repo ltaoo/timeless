@@ -107,7 +107,7 @@ func parseTarballPath(path string) (string, string, bool) {
 }
 
 // pkgStorageDir returns the filesystem directory for a package.
-// e.g. "@timeless/dev" → "<storageDir>/@timeless/dev/"
+// e.g. "@timeless/types" → "<storageDir>/@timeless/types/"
 func pkgStorageDir(pkg string) string {
 	return filepath.Join(storageDir, pkg)
 }

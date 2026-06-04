@@ -184,6 +184,10 @@ function generate() {
     "// === Package module aliases ===",
   ];
 
+  dtsLines.push(
+    `declare module "@timeless/types" { export * from "packages/types/src/index"; }`,
+  );
+
   for (const pkg of PACKAGES) {
     const entryModule = pkg.entry.replace(/\.ts$/, "");
     dtsLines.push(

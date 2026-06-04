@@ -1,4 +1,4 @@
-import { globals as timelessGlobals } from "@timeless/dev/eslint";
+import { globals as timelessGlobals } from "@timeless/types/eslint";
 
 export default [
   {
