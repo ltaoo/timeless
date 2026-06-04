@@ -2,6 +2,11 @@ import { Section, Item } from "@/components/index.js";
 
 export default function GeneralView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
+  const list_ = refarr([]);
+
+  setTimeout(() => {
+    list_.as(["Alpha", "Beta", "Gamma"]);
+  }, 3000);
 
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     Flex({ direction: "col", gap: "24px" }, [
@@ -152,6 +157,32 @@ export default function GeneralView() {
             },
             ["Settings"],
           ),
+        ]),
+        Item("Show With For", [
+          Show({
+            when: computed(list_, (list) => list.length > 0),
+            ok() {
+              return View({ class: "space-y-2" }, [
+                For({
+                  each: list_,
+                  render(item) {
+                    return View(
+                      {
+                        class:
+                          "rounded-md border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800",
+                      },
+                      [item],
+                    );
+                  },
+                }),
+              ]);
+            },
+            else() {
+              return View({ class: "text-sm text-zinc-500" }, [
+                "Waiting for list data...",
+              ]);
+            },
+          }),
         ]),
         Item("Disabled", [
           Button({ store: new Timeless.ui.ButtonCore({ disabled: true }) }, [

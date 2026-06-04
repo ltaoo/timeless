@@ -186,9 +186,9 @@ export function SettingsPageModel(props) {
     theme_select$: new Timeless.ui.SelectCore({
       defaultValue: _state.theme,
       options: [
-        { label: "浅色", value: "light" },
-        { label: "深色", value: "dark" },
-        { label: "跟随系统", value: "system" },
+        new Timeless.ui.SelectItemCore({ label: "浅色", value: "light" }),
+        new Timeless.ui.SelectItemCore({ label: "深色", value: "dark" }),
+        new Timeless.ui.SelectItemCore({ label: "跟随系统", value: "system" }),
       ],
       onChange(v) { methods.setTheme(v); },
     }),

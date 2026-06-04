@@ -21,6 +21,8 @@ export * from "./content/text";
 export * from "./content/portal";
 export * as SVG from "./content/svg";
 export * from "./content/img";
+export * from "./content/video";
+export * from "./content/audio";
 export * from "./content/label";
 export * from "./content/rich-text";
 export * from "./content/webview";

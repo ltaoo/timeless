@@ -30,6 +30,7 @@ export function DOMImg(props: {
         $elm.src = elm.state.src;
       }
       box$.methods.set$elm($elm);
+      box$.methods.applyState(elm.state);
       box$.methods.setupEventListener(elm.events);
       return $elm;
     },

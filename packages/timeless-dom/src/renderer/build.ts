@@ -9,6 +9,8 @@ import { DOMFor } from "@/host/for";
 import { DOMFragment } from "@/host/fragment";
 import { DOMLazyView } from "@/host/lazy-view";
 import { DOMImg } from "@/host/img";
+import { DOMVideo } from "@/host/video";
+import { DOMAudio } from "@/host/audio";
 import { DOMIcon } from "@/host/icon";
 import { DOMInput } from "@/host/input";
 import { DOMButton } from "@/host/button";
@@ -112,6 +114,16 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const img$ = DOMImg({ build });
     elm.$elm = img$;
     return img$;
+  }
+  if (elm.t === "video") {
+    const video$ = DOMVideo({ build });
+    elm.$elm = video$;
+    return video$;
+  }
+  if (elm.t === "audio") {
+    const audio$ = DOMAudio({ build });
+    elm.$elm = audio$;
+    return audio$;
   }
   if (elm.t === "list-view") {
     const listview$ = DOMListView({ build });

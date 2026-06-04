@@ -60,6 +60,7 @@ export function DOMIcon(props: {
         $elm.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
         $elm.style.display = "inline-block";
         $elm.style.borderRadius = "4px";
+        $elm.setAttribute("data-name", pascal_name);
         common$.methods.set$elm($elm);
         return $elm;
       }

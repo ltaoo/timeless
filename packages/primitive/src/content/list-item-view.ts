@@ -84,15 +84,13 @@ export function ListItemView<T>(
         state.payload = data.payload;
       }
       state.children = [data.child];
-      $elm.setStyle({
-        position: "absolute",
-        top: `${data.top}px`,
-        width: "100%",
-      });
+      // Reset display in case this slot was previously unbound (display: none)
+      if ($elm) {
+        $elm.setStyleValue("display", "");
+      }
       methods.cleanup_children(prev_children);
       $elm.removeChildren();
       $elm.insertChildren([data.child]);
-      console.log('after $elm.insertChildren', data.child);
       if (isElement(data.child) && data.child.onMounted) {
         data.child.onMounted({ target: data.child.$elm });
       }
@@ -139,9 +137,6 @@ export function ListItemView<T>(
     },
     setTop(v: number) {
       state.top = v;
-      if ($elm) {
-        $elm.setStyleValue("top", `${v}px`);
-      }
     },
     setPayload(v: T) {
       state.payload = v;

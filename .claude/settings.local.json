@@ -56,7 +56,19 @@
       "Bash(git stash:*)",
       "Bash(cd /Users/mayfair/Documents/other/timeless/packages/primitive && bun run build 2>&1)",
       "Bash(cd /Users/mayfair/Documents/other/timeless/packages/timeless-dom && bun run build 2>&1)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "Bash(browser-harness <<'PY'\nnew_tab\\(\"http://127.0.0.1:3000/\"\\)\nwait_for_load\\(\\)\nprint\\(page_info\\(\\)\\)\nPY)",
+      "Bash(browser-harness <<'PY'\njs\\(\"document.querySelector\\('a[href*=\\\\\"table\\\\\"]'\\)?.getAttribute\\('href'\\) || document.querySelector\\('a'\\)?.getAttribute\\('href'\\) || 'no link found'\"\\)\nPY)",
+      "Bash(browser-harness <<'PY'\njs\\(\"document.body.innerText.substring\\(0, 500\\)\"\\)\nPY)",
+      "Bash(browser-harness <<'PY'\ncapture_screenshot\\(\\)\nPY)",
+      "Bash(browser-harness <<'PY'\nnew_tab\\(\"http://127.0.0.1:3000/#/tables\"\\)\nwait_for_load\\(\\)\ncapture_screenshot\\(\\)\nPY)",
+      "Bash(browser-harness <<'PY'\nnew_tab\\(\"http://127.0.0.1:3000/#/tables\"\\)\nwait_for_load\\(\\)\ncapture_screenshot\\(\"/tmp/screenshot1.png\"\\)\nprint\\(\"done\"\\)\nPY)",
+      "Bash(browser-harness <<'PY'\nnew_tab\\(\"http://127.0.0.1:3000/home/tables\"\\)\nwait_for_load\\(\\)\ncapture_screenshot\\(\"/tmp/screenshot1.png\"\\)\nprint\\(\"done\"\\)\nPY)",
+      "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\nprint\\(\"current page:\", page_info\\(\\)['url']\\)\ncapture_screenshot\\(\"/tmp/current.png\"\\)\nprint\\(\"screenshot saved\"\\)\nPY)",
+      "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\ncapture_screenshot\\(\"/tmp/flicker-fix-verify.png\"\\)\nprint\\(\"done\"\\)\nPY)",
+      "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\nimport time; time.sleep\\(0.3\\)\nresult = js\\(\"window.__scrollCheck || 'no result'\"\\)\nprint\\(\"Scroll check:\", result\\)\nPY)",
+      "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\nimport time; time.sleep\\(0.5\\)\nresult = js\\(\"window.__scrollCheck || 'no result'\"\\)\nprint\\(\"Scroll check:\", result\\)\nPY)",
+      "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\ncapture_screenshot\\(\"/tmp/abs-pos-scroll.png\"\\)\nprint\\(\"done\"\\)\nPY)"
     ]
   }
 }

@@ -211,7 +211,7 @@ export default function TablesPageView(props) {
     {
       class: "h-full",
       onMounted() {
-        openTable(MOCK_TABLES[MOCK_TABLES.length - 4].name);
+        openTable(MOCK_TABLES[MOCK_TABLES.length - 3].name);
         // Inject hover highlight style — !important beats inline styles on sticky cells
         if (!document.getElementById("row-hover-style")) {
           var style = document.createElement("style");

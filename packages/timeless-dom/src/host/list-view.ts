@@ -30,6 +30,7 @@ export type DOMListView = VNodeView<HTMLDivElement> & {
   move(from: number, to: number): void;
   swap(from: number, to: number): void;
   render(elm: TimelessElement): HTMLDivElement;
+  reorderSlots(elements: Element[]): void;
 };
 
 export function DOMListView(props: {
@@ -39,6 +40,7 @@ export function DOMListView(props: {
   const t = "list-view";
   //   const $anchor = document.createTextNode("");
   let $content: any | null = null;
+  let $viewport: any | null = null;
   const box$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
@@ -52,21 +54,38 @@ export function DOMListView(props: {
       return true;
     },
     insert(idx, children) {
-      // logger.log("insert", idx, children);
-      return box$.methods.insert(idx, children, { $parent: $content });
+      return box$.methods.insert(idx, children, { $parent: $viewport });
     },
     remove(idx, count) {
-      // logger.log("remove", idx, count);
-      box$.methods.remove(idx, count, { $parent: $content });
+      box$.methods.remove(idx, count, { $parent: $viewport });
     },
     refresh(payload) {
-      // logger.log("refresh", payload.added, payload.removed, payload.moved);
-      box$.methods.refresh(payload, { $parent: $content });
+      box$.methods.refresh(payload, { $parent: $viewport });
     },
     move: box$.methods.move,
     swap: box$.methods.move,
+    reorderSlots(elements: Element[]) {
+      if (!$viewport) return;
+      for (let i = 0; i < elements.length; i++) {
+        const el = elements[i];
+        if (el && $viewport.children[i] !== el) {
+          $viewport.insertBefore(el, $viewport.children[i] || null);
+        }
+      }
+    },
     setStyleValue(k: string, value: string | number) {
-      // logger.log("setStyleValue", $content, k, value);
+      if (k === "viewportOffset") {
+        if ($viewport) {
+          $viewport.style.transform = `translateY(${value}px)`;
+        }
+        return;
+      }
+      if (k === "viewportOpacity") {
+        if ($viewport) {
+          $viewport.style.opacity = String(value);
+        }
+        return;
+      }
       if ($content) {
         $content.style[k] = `${value}px`;
         if (k === "height") {
@@ -81,17 +100,23 @@ export function DOMListView(props: {
     render(elm: TimelessElement) {
       const $elm = document.createElement("div");
       $content = document.createElement("div");
+      $viewport = document.createElement("div");
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state);
       box$.methods.setupEventListener(elm.events);
       $elm.style.position = "relative";
-      // $elm.style.height = "100%";
       $elm.style.overflowY = "auto";
       if (elm.state.height) {
         $content.style.height = `${elm.state.height}px`;
       }
+      $content.style.position = "relative";
+      $viewport.style.position = "absolute";
+      $viewport.style.top = "0";
+      $viewport.style.left = "0";
+      $viewport.style.right = "0";
       $elm.setAttribute("data-list-view-root", "");
       $content.setAttribute("data-list-view-content", "");
+      $viewport.setAttribute("data-list-view-viewport", "");
       $elm.addEventListener("scroll", function (event) {
         const top = (event.target as any).scrollTop;
         (elm.events as any)?.onScroll?.({
@@ -99,7 +124,8 @@ export function DOMListView(props: {
         });
       });
       const $fragment = box$.methods.render(elm.children);
-      $content.appendChild($fragment);
+      $viewport.appendChild($fragment);
+      $content.appendChild($viewport);
       $elm.appendChild($content);
       return $elm;
     },

@@ -49,15 +49,9 @@ export function DOMListItemView(props: {
       box$.methods.set$elm($elm);
       box$.methods.applyState(elm.state, { initial: true });
       $elm.setAttribute("data-list-view-item", "");
-      if (elm.state.bound) {
-        $elm.style.position = "absolute";
-        if (elm.state.top !== undefined) {
-          $elm.style.top = `${elm.state.top}px`;
-        }
-      } else {
+      if (!elm.state.bound) {
         $elm.style.display = "none";
       }
-      $elm.style.width = "100%";
       const $fragment = box$.methods.render(elm.children);
       box$.methods.setupEventListener(elm.events);
       $elm.appendChild($fragment);

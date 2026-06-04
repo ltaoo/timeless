@@ -64,15 +64,15 @@ NumberInput({ store: num$, showControls: true });
 const select$ = new SelectCore({
   defaultValue: "a",
   options: [
-    { value: "a", label: "Option A" },
-    { value: "b", label: "Option B" },
+    new SelectItemCore({ value: "a", label: "Option A" }),
+    new SelectItemCore({ value: "b", label: "Option B" }),
   ],
   onChange(v) {},
 });
 Select({ store: select$, id: "my-select" });
 // state: { value, options, open, focused, disabled, loading, allowClear, search, searchKeyword }
 // 方法：select(v), show(), hide(), setOptions(opts)
-// options 可分组: { label: "Group", items: [{value, label}] }
+// options 的值类型为 SelectItemCore<T>
 ```
 
 ### SearchSelect
@@ -80,7 +80,7 @@ Select({ store: select$, id: "my-select" });
 **Store:** `SelectCore<any>`
 
 ```js
-SearchSelect({ store: new SelectCore({ options: [...], search: true }) });
+SearchSelect({ store: new SelectCore({ options: [new SelectItemCore({ value: "a", label: "Option A" })], search: true }) });
 // 带搜索功能的 Select 变体
 ```
 

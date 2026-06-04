@@ -88,7 +88,7 @@ new NumberInputCore({
 ```js
 new SelectCore({
   defaultValue?: T;
-  options: Array<{ value: T; label: string; disabled?: boolean }>;
+  options: Array<SelectItemCore<T>>;
   onChange?: (v: T) => void;
   search?: boolean;         // 开启搜索
   allowClear?: boolean;

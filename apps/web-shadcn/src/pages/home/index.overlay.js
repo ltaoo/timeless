@@ -842,6 +842,111 @@ export default function OverlayView() {
             ]);
           })(),
         ]),
+        Item("Dynamic Context Menu Items", [
+          (() => {
+            const createInboxItems = () => [
+              new Timeless.ui.MenuItemCore({
+                label: "Archive Thread",
+                icon: Icon({ name: "archive", size: 18 }),
+                onClick() {
+                  console.log("archive thread");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Mark Unread",
+                icon: Icon({ name: "mail", size: 18 }),
+                onClick() {
+                  console.log("mark unread");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Move to Project",
+                icon: Icon({ name: "folder-input", size: 18 }),
+                menu: new Timeless.ui.MenuCore({
+                  items: [
+                    new Timeless.ui.MenuItemCore({
+                      label: "Design Review",
+                      onClick() {
+                        console.log("move to design review");
+                      },
+                    }),
+                    new Timeless.ui.MenuItemCore({
+                      label: "Engineering",
+                      onClick() {
+                        console.log("move to engineering");
+                      },
+                    }),
+                  ],
+                }),
+                onClick() {
+                  console.log("move to project");
+                },
+              }),
+            ];
+            const createCanvasItems = () => [
+              new Timeless.ui.MenuItemCore({
+                label: "Add Frame",
+                icon: Icon({ name: "frame", size: 18 }),
+                onClick() {
+                  console.log("add frame");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Zoom to Selection",
+                shortcut: "⌘2",
+                icon: Icon({ name: "scan-search", size: 18 }),
+                onClick() {
+                  console.log("zoom to selection");
+                },
+              }),
+              new Timeless.ui.MenuItemCore({
+                label: "Export PNG",
+                icon: Icon({ name: "image-down", size: 18 }),
+                onClick() {
+                  console.log("export png");
+                },
+              }),
+            ];
+            const menu$ = new Timeless.ui.ContextMenuCore({
+              view$,
+              items: createInboxItems(),
+            });
+            return ContextMenu({ store: menu$ }, [
+              View({ class: "grid gap-3 md:grid-cols-2" }, [
+                View(
+                  {
+                    class:
+                      "flex h-[150px] w-[300px] select-none flex-col items-center justify-center rounded-md border-2 border-dashed border-sky-300 bg-sky-50 text-sm text-sky-700 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300",
+                    onContextMenu() {
+                      menu$.setItems(createInboxItems());
+                    },
+                  },
+                  [
+                    View({ class: "font-medium" }, ["Inbox View"]),
+                    View({ class: "text-xs opacity-70" }, [
+                      "Right click for inbox actions",
+                    ]),
+                  ],
+                ),
+                View(
+                  {
+                    class:
+                      "flex h-[150px] w-[300px] select-none flex-col items-center justify-center rounded-md border-2 border-dashed border-emerald-300 bg-emerald-50 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
+                    onContextMenu() {
+                      menu$.setItems(createCanvasItems());
+                    },
+                  },
+                  [
+                    View({ class: "font-medium" }, ["Canvas View"]),
+                    View({ class: "text-xs opacity-70" }, [
+                      "Right click for canvas actions",
+                    ]),
+                  ],
+                ),
+              ]),
+            ]);
+          })(),
+        ]),
         Item("Near Page Bottom", [
           View(
             {

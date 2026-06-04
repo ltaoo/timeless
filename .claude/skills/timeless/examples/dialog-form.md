@@ -60,9 +60,9 @@ const emailField = new SingleFieldCore({
 
 // Select 选项
 const roleOptions = [
-  { value: "admin", label: "管理员" },
-  { value: "editor", label: "编辑者" },
-  { value: "viewer", label: "观察者" },
+  new SelectItemCore({ value: "admin", label: "管理员" }),
+  new SelectItemCore({ value: "editor", label: "编辑者" }),
+  new SelectItemCore({ value: "viewer", label: "观察者" }),
 ];
 
 const roleSelect = new SelectCore({

@@ -58,7 +58,7 @@ new ButtonCore({...}), new InputCore({...}), new DialogCore({...})
 | 文本输入 | `Input({ store: new InputCore({...}) })` |
 | 多行文本 | `Textarea({ store: new InputCore({...}) })` |
 | 数字输入 | `NumberInput({ store: new NumberInputCore({...}) })` |
-| 下拉选择 | `Select({ store: new SelectCore({ options: [...] }) })` |
+| 下拉选择 | `Select({ store: new SelectCore({ options: [new SelectItemCore({ value, label })] }) })` |
 | 级联选择 | `Cascader({ store: new CascaderCore({ options: [...] }) })` |
 | 复选框 | `Checkbox({ store: new CheckboxCore({...}) })` |
 | 复选框组 | `CheckboxGroup({ store: new CheckboxGroupCore({ options: [...] }) })` |

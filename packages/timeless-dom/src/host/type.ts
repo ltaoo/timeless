@@ -5,6 +5,8 @@ import { DOMLabel } from "./label";
 import { DOMFragment } from "./fragment";
 import { DOMLazyView } from "./lazy-view";
 import { DOMImg } from "./img";
+import { DOMVideo } from "./video";
+import { DOMAudio } from "./audio";
 import { DOMIcon } from "./icon";
 
 import { DOMInput } from "./input";
@@ -36,6 +38,8 @@ export type DOMHostNode =
   | DOMText
   | DOMLabel
   | DOMImg
+  | DOMVideo
+  | DOMAudio
   | DOMIcon
   | DOMWebview
   | DOMInput

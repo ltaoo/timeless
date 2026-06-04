@@ -1,6 +1,5 @@
-import { refobj } from "@timeless/timeless";
+import { Fragment, refobj } from "@timeless/timeless";
 import {
-  View,
   ViewProps,
   ViewChildren,
   ListenerManager,
@@ -25,12 +24,12 @@ export function Trigger(
   props: ViewProps & { store: ContextMenuCore },
   children?: ViewChildren,
 ) {
-  const { store, ...rest } = props;
+  const { store } = props;
 
   const state_ = refobj(store.state);
   const listener$ = ListenerManager();
 
-  return View(
+  return Fragment(
     {
       onMounted(event) {
         listener$.add(
@@ -39,6 +38,8 @@ export function Trigger(
           }),
         );
         const $elm = event.target;
+        const nodes = $elm.get$children?.() ?? [];
+        const refs = nodes.length ? nodes : [$elm];
         // Don't set reference here - it will be set dynamically on contextmenu event
         // Handle context menu (right-click)
         const handleContextMenu = (e: any) => {
@@ -51,7 +52,13 @@ export function Trigger(
             y: e.clientY - 4,
           });
         };
-        listener$.add($elm.addEventListener("contextmenu", handleContextMenu));
+        for (let i = 0; i < refs.length; i += 1) {
+          const $ref = refs[i];
+          if (!$ref?.addEventListener) {
+            continue;
+          }
+          listener$.add($ref.addEventListener("contextmenu", handleContextMenu));
+        }
 
         return listener$.destroy;
       },

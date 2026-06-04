@@ -56,6 +56,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
   private clickY = 0;
   private offsetX = 0;
   private offsetY = 0;
+  private submenuOffsetX = 0;
+  private submenuOffsetY = 0;
   private view$?: ScrollViewCore;
 
   constructor(
@@ -80,6 +82,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
     this.state.items = items;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
+    this.submenuOffsetX = submenuOffsetX;
+    this.submenuOffsetY = submenuOffsetY;
     this.view$ = view$;
     this.menu = new MenuCore({
       ...options,
@@ -106,10 +110,14 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
       reference: this.menu.popper.reference,
     });
 
+    this._configure_sub_menus(items);
+  }
+
+  private _configure_sub_menus(items: MenuItemCore[]) {
     for (let i = 0; i < items.length; i += 1) {
       const item = items[i];
       if (item.menu) {
-        item.menu.setOffset({ x: submenuOffsetX, y: submenuOffsetY });
+        item.menu.setOffset({ x: this.submenuOffsetX, y: this.submenuOffsetY });
         // Also set parent context menu reference for submenus
         (item.menu as any).parentContextMenu = this;
         // Mark submenus as non-root so they don't auto-close sibling root menus
@@ -182,6 +190,8 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
   }
   setItems(items: MenuItemCore[]) {
     this.state.items = items;
+    this._configure_sub_menus(items);
+    this.menu.setItems(items);
     this.emit(Events.StateChange, { ...this.state });
   }
 
