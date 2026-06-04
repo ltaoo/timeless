@@ -1,0 +1,25 @@
+{
+  "name": "@timeless/chart",
+  "version": "0.26.0",
+  "description": "Host-neutral chart state for Timeless",
+  "main": "dist/index.js",
+  "module": "dist/timeless.chart.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/timeless.chart.esm.js",
+      "require": "./dist/index.js"
+    }
+  }
+}

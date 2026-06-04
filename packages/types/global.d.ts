@@ -2404,6 +2404,241 @@ declare module "packages/primitive/src/content/img" {
     export type Img = ReturnType<typeof Img>;
     export function isImg(v: any): boolean;
 }
+declare module "packages/primitive/src/content/video" {
+    /**
+     * Video - A component for rendering video elements.
+     *
+     * Native video component with support for:
+     * - Reactive src for dynamic video changes
+     * - Playback controls
+     * - Poster images
+     * - All standard video attributes
+     *
+     * @example
+     * ```tsx
+     * <Video
+     *   src={videoUrl}
+     *   controls
+     *   poster={posterUrl}
+     *   onPlay={() => console.log("playing")}
+     * />
+     * ```
+     */
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { RawViewStyleProperties } from "@/style";
+    import { MountedEvent } from "@/event/index";
+    import { VNodeView } from "@/vnode/view";
+    import { BoxProps } from "packages/primitive/src/content/box";
+    /** Props for Video component */
+    export type VideoProps = BoxProps & {
+        /** Video source URL */
+        src?: string | DerivedRef<string> | Ref<string>;
+        /** Poster image URL */
+        poster?: string | DerivedRef<string> | Ref<string>;
+        /** Video width */
+        width?: number | string | DerivedRef<number | string> | Ref<number | string>;
+        /** Video height */
+        height?: number | string | DerivedRef<number | string> | Ref<number | string>;
+        /** Show native playback controls */
+        controls?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Start playback automatically */
+        autoplay?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Loop playback */
+        loop?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Mute audio */
+        muted?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Plays inline on mobile browsers */
+        playsInline?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Preload hint */
+        preload?: "none" | "metadata" | "auto" | "" | DerivedRef<string> | Ref<string>;
+        /** Cross-origin attribute */
+        crossOrigin?: "anonymous" | "use-credentials" | "" | DerivedRef<string> | Ref<string>;
+        /** Load event handler */
+        onLoad?(e: Event): void;
+        /** Error event handler */
+        onError?(e: Event): void;
+        /** Play event handler */
+        onPlay?(e: Event): void;
+        /** Pause event handler */
+        onPause?(e: Event): void;
+        /** Ended event handler */
+        onEnded?(e: Event): void;
+        /** Time update event handler */
+        onTimeUpdate?(e: Event): void;
+        /** Loaded metadata event handler */
+        onLoadedMetadata?(e: Event): void;
+        onMounted?(event: MountedEvent<VNodeView<HTMLVideoElement>>): void | (() => void);
+        beforeUnmounted?: () => void;
+        onUnmounted?: () => void;
+    };
+    /** Internal state for Video */
+    type VideoState = {
+        rendered: boolean;
+        src: string | null;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+    };
+    /**
+     * Creates a Video component.
+     *
+     * @param props - Video component props
+     * @returns A TimelessElement representing a video
+     */
+    export function Video(props: VideoProps): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & VideoState;
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export type Video = ReturnType<typeof Video>;
+    export function isVideo(v: any): boolean;
+}
+declare module "packages/primitive/src/content/audio" {
+    /**
+     * Audio - A component for rendering audio elements.
+     *
+     * Native audio component with support for:
+     * - Reactive src for dynamic audio changes
+     * - Playback controls
+     * - Common media attributes
+     * - Standard audio events
+     *
+     * @example
+     * ```tsx
+     * <Audio
+     *   src={audioUrl}
+     *   controls
+     *   onPlay={() => console.log("playing")}
+     * />
+     * ```
+     */
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { RawViewStyleProperties } from "@/style";
+    import { MountedEvent } from "@/event/index";
+    import { VNodeView } from "@/vnode/view";
+    import { BoxProps } from "packages/primitive/src/content/box";
+    /** Props for Audio component */
+    export type AudioProps = BoxProps & {
+        /** Audio source URL */
+        src?: string | DerivedRef<string> | Ref<string>;
+        /** Show native playback controls */
+        controls?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Start playback automatically */
+        autoplay?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Loop playback */
+        loop?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Mute audio */
+        muted?: boolean | DerivedRef<boolean> | Ref<boolean>;
+        /** Preload hint */
+        preload?: "none" | "metadata" | "auto" | "" | DerivedRef<string> | Ref<string>;
+        /** Cross-origin attribute */
+        crossOrigin?: "anonymous" | "use-credentials" | "" | DerivedRef<string> | Ref<string>;
+        /** Load event handler */
+        onLoad?(e: Event): void;
+        /** Error event handler */
+        onError?(e: Event): void;
+        /** Play event handler */
+        onPlay?(e: Event): void;
+        /** Pause event handler */
+        onPause?(e: Event): void;
+        /** Ended event handler */
+        onEnded?(e: Event): void;
+        /** Time update event handler */
+        onTimeUpdate?(e: Event): void;
+        /** Loaded metadata event handler */
+        onLoadedMetadata?(e: Event): void;
+        onMounted?(event: MountedEvent<VNodeView<HTMLAudioElement>>): void | (() => void);
+        beforeUnmounted?: () => void;
+        onUnmounted?: () => void;
+    };
+    /** Internal state for Audio */
+    type AudioState = {
+        rendered: boolean;
+        src: string | null;
+        style: RawViewStyleProperties;
+        styleSet: string[];
+    };
+    /**
+     * Creates an Audio component.
+     *
+     * @param props - Audio component props
+     * @returns A TimelessElement representing an audio
+     */
+    export function Audio(props: AudioProps): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & AudioState;
+        events: Partial<{
+            onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export type Audio = ReturnType<typeof Audio>;
+    export function isAudio(v: any): boolean;
+}
 declare module "packages/primitive/src/content/label" {
     /**
      * Label - A component for rendering HTML label elements.
@@ -3958,6 +4193,8 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/content/portal";
     export * as SVG from "packages/primitive/src/content/svg";
     export * from "packages/primitive/src/content/img";
+    export * from "packages/primitive/src/content/video";
+    export * from "packages/primitive/src/content/audio";
     export * from "packages/primitive/src/content/label";
     export * from "packages/primitive/src/content/rich-text";
     export * from "packages/primitive/src/content/webview";
@@ -5383,10 +5620,13 @@ declare module "packages/ui-vm/src/context-menu/index" {
         private clickY;
         private offsetX;
         private offsetY;
+        private submenuOffsetX;
+        private submenuOffsetY;
         private view$?;
         constructor(options: Partial<{
             _name: string;
         } & ContextMenuProps>);
+        private _configure_sub_menus;
         show(position?: Partial<{
             x: number;
             y: number;
@@ -13484,8 +13724,29 @@ declare module "packages/kit/src/index" {
     export { RequestCore, type RequestPayload } from "packages/kit/src/request/index";
     export { request_factory } from "packages/kit/src/request/utils";
 }
-declare module "packages/svg/src/asn/arrow-down-to-line" {
+declare module "packages/icons/src/asn/activity" {
     const _default: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-activity-icon lucide-activity";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2";
+            };
+        }];
+    };
+    export default _default;
+}
+declare module "packages/icons/src/asn/arrow-down-to-line" {
+    const _default_1: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13513,10 +13774,10 @@ declare module "packages/svg/src/asn/arrow-down-to-line" {
             };
         }];
     };
-    export default _default;
+    export default _default_1;
 }
-declare module "packages/svg/src/asn/arrow-left" {
-    const _default_1: {
+declare module "packages/icons/src/asn/arrow-left" {
+    const _default_2: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13539,10 +13800,10 @@ declare module "packages/svg/src/asn/arrow-left" {
             };
         }];
     };
-    export default _default_1;
+    export default _default_2;
 }
-declare module "packages/svg/src/asn/bolt" {
-    const _default_2: {
+declare module "packages/icons/src/asn/bolt" {
+    const _default_3: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13567,10 +13828,10 @@ declare module "packages/svg/src/asn/bolt" {
             };
         }];
     };
-    export default _default_2;
+    export default _default_3;
 }
-declare module "packages/svg/src/asn/calendar" {
-    const _default_3: {
+declare module "packages/icons/src/asn/calendar" {
+    const _default_4: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13607,10 +13868,10 @@ declare module "packages/svg/src/asn/calendar" {
             };
         }];
     };
-    export default _default_3;
+    export default _default_4;
 }
-declare module "packages/svg/src/asn/check" {
-    const _default_4: {
+declare module "packages/icons/src/asn/check" {
+    const _default_5: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13628,10 +13889,10 @@ declare module "packages/svg/src/asn/check" {
             };
         }];
     };
-    export default _default_4;
+    export default _default_5;
 }
-declare module "packages/svg/src/asn/chevron-down" {
-    const _default_5: {
+declare module "packages/icons/src/asn/chevron-down" {
+    const _default_6: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13649,10 +13910,10 @@ declare module "packages/svg/src/asn/chevron-down" {
             };
         }];
     };
-    export default _default_5;
+    export default _default_6;
 }
-declare module "packages/svg/src/asn/chevron-left" {
-    const _default_6: {
+declare module "packages/icons/src/asn/chevron-left" {
+    const _default_7: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13670,10 +13931,10 @@ declare module "packages/svg/src/asn/chevron-left" {
             };
         }];
     };
-    export default _default_6;
+    export default _default_7;
 }
-declare module "packages/svg/src/asn/chevron-right" {
-    const _default_7: {
+declare module "packages/icons/src/asn/chevron-right" {
+    const _default_8: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13691,10 +13952,10 @@ declare module "packages/svg/src/asn/chevron-right" {
             };
         }];
     };
-    export default _default_7;
+    export default _default_8;
 }
-declare module "packages/svg/src/asn/chevron-up" {
-    const _default_8: {
+declare module "packages/icons/src/asn/chevron-up" {
+    const _default_9: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13712,10 +13973,10 @@ declare module "packages/svg/src/asn/chevron-up" {
             };
         }];
     };
-    export default _default_8;
+    export default _default_9;
 }
-declare module "packages/svg/src/asn/circle-alert" {
-    const _default_9: {
+declare module "packages/icons/src/asn/circle-alert" {
+    const _default_10: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13751,10 +14012,10 @@ declare module "packages/svg/src/asn/circle-alert" {
             };
         }];
     };
-    export default _default_9;
+    export default _default_10;
 }
-declare module "packages/svg/src/asn/circle-arrow-down" {
-    const _default_10: {
+declare module "packages/icons/src/asn/circle-arrow-down" {
+    const _default_11: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13784,10 +14045,10 @@ declare module "packages/svg/src/asn/circle-arrow-down" {
             };
         }];
     };
-    export default _default_10;
+    export default _default_11;
 }
-declare module "packages/svg/src/asn/circle-ellipsis" {
-    const _default_11: {
+declare module "packages/icons/src/asn/circle-ellipsis" {
+    const _default_12: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13822,10 +14083,10 @@ declare module "packages/svg/src/asn/circle-ellipsis" {
             };
         }];
     };
-    export default _default_11;
+    export default _default_12;
 }
-declare module "packages/svg/src/asn/circle-x" {
-    const _default_12: {
+declare module "packages/icons/src/asn/circle-x" {
+    const _default_13: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13855,10 +14116,10 @@ declare module "packages/svg/src/asn/circle-x" {
             };
         }];
     };
-    export default _default_12;
+    export default _default_13;
 }
-declare module "packages/svg/src/asn/clock-arrow-down" {
-    const _default_13: {
+declare module "packages/icons/src/asn/clock-arrow-down" {
+    const _default_14: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13891,10 +14152,10 @@ declare module "packages/svg/src/asn/clock-arrow-down" {
             };
         }];
     };
-    export default _default_13;
+    export default _default_14;
 }
-declare module "packages/svg/src/asn/clock" {
-    const _default_14: {
+declare module "packages/icons/src/asn/clock" {
+    const _default_15: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13919,10 +14180,10 @@ declare module "packages/svg/src/asn/clock" {
             };
         }];
     };
-    export default _default_14;
+    export default _default_15;
 }
-declare module "packages/svg/src/asn/cloud-download" {
-    const _default_15: {
+declare module "packages/icons/src/asn/cloud-download" {
+    const _default_16: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13950,10 +14211,10 @@ declare module "packages/svg/src/asn/cloud-download" {
             };
         }];
     };
-    export default _default_15;
+    export default _default_16;
 }
-declare module "packages/svg/src/asn/download" {
-    const _default_16: {
+declare module "packages/icons/src/asn/download" {
+    const _default_17: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -13981,10 +14242,10 @@ declare module "packages/svg/src/asn/download" {
             };
         }];
     };
-    export default _default_16;
+    export default _default_17;
 }
-declare module "packages/svg/src/asn/ellipsis-vertical" {
-    const _default_17: {
+declare module "packages/icons/src/asn/ellipsis-vertical" {
+    const _default_18: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14018,10 +14279,10 @@ declare module "packages/svg/src/asn/ellipsis-vertical" {
             };
         }];
     };
-    export default _default_17;
+    export default _default_18;
 }
-declare module "packages/svg/src/asn/ellipsis" {
-    const _default_18: {
+declare module "packages/icons/src/asn/ellipsis" {
+    const _default_19: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14055,10 +14316,10 @@ declare module "packages/svg/src/asn/ellipsis" {
             };
         }];
     };
-    export default _default_18;
+    export default _default_19;
 }
-declare module "packages/svg/src/asn/file-box" {
-    const _default_19: {
+declare module "packages/icons/src/asn/file-box" {
+    const _default_20: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14096,10 +14357,10 @@ declare module "packages/svg/src/asn/file-box" {
             };
         }];
     };
-    export default _default_19;
+    export default _default_20;
 }
-declare module "packages/svg/src/asn/file-image" {
-    const _default_20: {
+declare module "packages/icons/src/asn/file-image" {
+    const _default_21: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14134,10 +14395,10 @@ declare module "packages/svg/src/asn/file-image" {
             };
         }];
     };
-    export default _default_20;
+    export default _default_21;
 }
-declare module "packages/svg/src/asn/file-lock" {
-    const _default_21: {
+declare module "packages/icons/src/asn/file-lock" {
+    const _default_22: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14174,10 +14435,10 @@ declare module "packages/svg/src/asn/file-lock" {
             };
         }];
     };
-    export default _default_21;
+    export default _default_22;
 }
-declare module "packages/svg/src/asn/file-play" {
-    const _default_22: {
+declare module "packages/icons/src/asn/file-play" {
+    const _default_23: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14205,10 +14466,41 @@ declare module "packages/svg/src/asn/file-play" {
             };
         }];
     };
-    export default _default_22;
+    export default _default_23;
 }
-declare module "packages/svg/src/asn/file-symlink" {
-    const _default_23: {
+declare module "packages/icons/src/asn/file-stack" {
+    const _default_24: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-stack-icon lucide-file-stack";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z";
+            };
+        }];
+    };
+    export default _default_24;
+}
+declare module "packages/icons/src/asn/file-symlink" {
+    const _default_25: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14236,10 +14528,10 @@ declare module "packages/svg/src/asn/file-symlink" {
             };
         }];
     };
-    export default _default_23;
+    export default _default_25;
 }
-declare module "packages/svg/src/asn/file-text" {
-    const _default_24: {
+declare module "packages/icons/src/asn/file-text" {
+    const _default_26: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14277,10 +14569,10 @@ declare module "packages/svg/src/asn/file-text" {
             };
         }];
     };
-    export default _default_24;
+    export default _default_26;
 }
-declare module "packages/svg/src/asn/file-video-camera" {
-    const _default_25: {
+declare module "packages/icons/src/asn/file-video-camera" {
+    const _default_27: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14317,10 +14609,10 @@ declare module "packages/svg/src/asn/file-video-camera" {
             };
         }];
     };
-    export default _default_25;
+    export default _default_27;
 }
-declare module "packages/svg/src/asn/file-volume" {
-    const _default_26: {
+declare module "packages/icons/src/asn/file-volume" {
+    const _default_28: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14353,10 +14645,10 @@ declare module "packages/svg/src/asn/file-volume" {
             };
         }];
     };
-    export default _default_26;
+    export default _default_28;
 }
-declare module "packages/svg/src/asn/file" {
-    const _default_27: {
+declare module "packages/icons/src/asn/file" {
+    const _default_29: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14379,10 +14671,70 @@ declare module "packages/svg/src/asn/file" {
             };
         }];
     };
-    export default _default_27;
+    export default _default_29;
 }
-declare module "packages/svg/src/asn/folder-closed" {
-    const _default_28: {
+declare module "packages/icons/src/asn/film" {
+    const _default_30: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-film-icon lucide-film";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M7 3v18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 7.5h4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12h18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 16.5h4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M17 3v18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M17 7.5h4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M17 16.5h4";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "3";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_30;
+}
+declare module "packages/icons/src/asn/folder-closed" {
+    const _default_31: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14405,10 +14757,10 @@ declare module "packages/svg/src/asn/folder-closed" {
             };
         }];
     };
-    export default _default_28;
+    export default _default_31;
 }
-declare module "packages/svg/src/asn/folder" {
-    const _default_29: {
+declare module "packages/icons/src/asn/folder" {
+    const _default_32: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14426,10 +14778,10 @@ declare module "packages/svg/src/asn/folder" {
             };
         }];
     };
-    export default _default_29;
+    export default _default_32;
 }
-declare module "packages/svg/src/asn/funnel" {
-    const _default_30: {
+declare module "packages/icons/src/asn/funnel" {
+    const _default_33: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14447,10 +14799,36 @@ declare module "packages/svg/src/asn/funnel" {
             };
         }];
     };
-    export default _default_30;
+    export default _default_33;
 }
-declare module "packages/svg/src/asn/git-fork" {
-    const _default_31: {
+declare module "packages/icons/src/asn/gauge" {
+    const _default_34: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-gauge-icon lucide-gauge";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m12 14 4-4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3.34 19a10 10 0 1 1 17.32 0";
+            };
+        }];
+    };
+    export default _default_34;
+}
+declare module "packages/icons/src/asn/git-fork" {
+    const _default_35: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14494,10 +14872,10 @@ declare module "packages/svg/src/asn/git-fork" {
             };
         }];
     };
-    export default _default_31;
+    export default _default_35;
 }
-declare module "packages/svg/src/asn/grid-3x3" {
-    const _default_32: {
+declare module "packages/icons/src/asn/grid-3x3" {
+    const _default_36: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14539,10 +14917,122 @@ declare module "packages/svg/src/asn/grid-3x3" {
             };
         }];
     };
-    export default _default_32;
+    export default _default_36;
 }
-declare module "packages/svg/src/asn/house" {
-    const _default_33: {
+declare module "packages/icons/src/asn/hard-drive-download" {
+    const _default_37: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-hard-drive-download-icon lucide-hard-drive-download";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 2v8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m16 6-4 4-4-4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 18h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 18h.01";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "20";
+                readonly height: "8";
+                readonly x: "2";
+                readonly y: "14";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_37;
+}
+declare module "packages/icons/src/asn/hard-drive" {
+    const _default_38: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-hard-drive-icon lucide-hard-drive";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 16h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21.946 12.013H2.054";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 16h.01";
+            };
+        }];
+    };
+    export default _default_38;
+}
+declare module "packages/icons/src/asn/history" {
+    const _default_39: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-history-icon lucide-history";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 3v5h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 7v5l4 2";
+            };
+        }];
+    };
+    export default _default_39;
+}
+declare module "packages/icons/src/asn/house" {
+    const _default_40: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14565,10 +15055,10 @@ declare module "packages/svg/src/asn/house" {
             };
         }];
     };
-    export default _default_33;
+    export default _default_40;
 }
-declare module "packages/svg/src/asn/loader-circle" {
-    const _default_34: {
+declare module "packages/icons/src/asn/loader-circle" {
+    const _default_41: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14586,10 +15076,10 @@ declare module "packages/svg/src/asn/loader-circle" {
             };
         }];
     };
-    export default _default_34;
+    export default _default_41;
 }
-declare module "packages/svg/src/asn/loader" {
-    const _default_35: {
+declare module "packages/icons/src/asn/loader" {
+    const _default_42: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14642,10 +15132,10 @@ declare module "packages/svg/src/asn/loader" {
             };
         }];
     };
-    export default _default_35;
+    export default _default_42;
 }
-declare module "packages/svg/src/asn/menu" {
-    const _default_36: {
+declare module "packages/icons/src/asn/menu" {
+    const _default_43: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14673,10 +15163,10 @@ declare module "packages/svg/src/asn/menu" {
             };
         }];
     };
-    export default _default_36;
+    export default _default_43;
 }
-declare module "packages/svg/src/asn/message-square-more" {
-    const _default_37: {
+declare module "packages/icons/src/asn/message-square-more" {
+    const _default_44: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14709,10 +15199,10 @@ declare module "packages/svg/src/asn/message-square-more" {
             };
         }];
     };
-    export default _default_37;
+    export default _default_44;
 }
-declare module "packages/svg/src/asn/moon" {
-    const _default_38: {
+declare module "packages/icons/src/asn/moon" {
+    const _default_45: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14730,10 +15220,10 @@ declare module "packages/svg/src/asn/moon" {
             };
         }];
     };
-    export default _default_38;
+    export default _default_45;
 }
-declare module "packages/svg/src/asn/panel-left" {
-    const _default_39: {
+declare module "packages/icons/src/asn/panel-left" {
+    const _default_46: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14760,10 +15250,10 @@ declare module "packages/svg/src/asn/panel-left" {
             };
         }];
     };
-    export default _default_39;
+    export default _default_46;
 }
-declare module "packages/svg/src/asn/pause" {
-    const _default_40: {
+declare module "packages/icons/src/asn/pause" {
+    const _default_47: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14794,10 +15284,10 @@ declare module "packages/svg/src/asn/pause" {
             };
         }];
     };
-    export default _default_40;
+    export default _default_47;
 }
-declare module "packages/svg/src/asn/play" {
-    const _default_41: {
+declare module "packages/icons/src/asn/play" {
+    const _default_48: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14815,10 +15305,10 @@ declare module "packages/svg/src/asn/play" {
             };
         }];
     };
-    export default _default_41;
+    export default _default_48;
 }
-declare module "packages/svg/src/asn/plus" {
-    const _default_42: {
+declare module "packages/icons/src/asn/plus" {
+    const _default_49: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14841,10 +15331,63 @@ declare module "packages/svg/src/asn/plus" {
             };
         }];
     };
-    export default _default_42;
+    export default _default_49;
 }
-declare module "packages/svg/src/asn/refresh-ccw" {
-    const _default_43: {
+declare module "packages/icons/src/asn/radio-tower" {
+    const _default_50: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-radio-tower-icon lucide-radio-tower";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4.9 16.1C1 12.2 1 5.8 4.9 1.9";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M7.8 4.7a6.14 6.14 0 0 0-.8 7.5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16.2 4.8c2 2 2.26 5.11.8 7.47";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19.1 1.9a9.96 9.96 0 0 1 0 14.1";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9.5 18h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m8 22 4-11 4 11";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "9";
+                readonly r: "2";
+            };
+        }];
+    };
+    export default _default_50;
+}
+declare module "packages/icons/src/asn/refresh-ccw" {
+    const _default_51: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14877,10 +15420,72 @@ declare module "packages/svg/src/asn/refresh-ccw" {
             };
         }];
     };
-    export default _default_43;
+    export default _default_51;
 }
-declare module "packages/svg/src/asn/rss" {
-    const _default_44: {
+declare module "packages/icons/src/asn/refresh-cw" {
+    const _default_52: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-refresh-cw-icon lucide-refresh-cw";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 3v5h-5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 16H3v5";
+            };
+        }];
+    };
+    export default _default_52;
+}
+declare module "packages/icons/src/asn/rotate-ccw" {
+    const _default_53: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-rotate-ccw-icon lucide-rotate-ccw";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 3v5h5";
+            };
+        }];
+    };
+    export default _default_53;
+}
+declare module "packages/icons/src/asn/rss" {
+    const _default_54: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14910,10 +15515,46 @@ declare module "packages/svg/src/asn/rss" {
             };
         }];
     };
-    export default _default_44;
+    export default _default_54;
 }
-declare module "packages/svg/src/asn/search" {
-    const _default_45: {
+declare module "packages/icons/src/asn/scroll-text" {
+    const _default_55: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-scroll-text-icon lucide-scroll-text";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 12h-5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 8h-5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19 17V5a2 2 0 0 0-2-2H4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3";
+            };
+        }];
+    };
+    export default _default_55;
+}
+declare module "packages/icons/src/asn/search" {
+    const _default_56: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14938,10 +15579,90 @@ declare module "packages/svg/src/asn/search" {
             };
         }];
     };
-    export default _default_45;
+    export default _default_56;
 }
-declare module "packages/svg/src/asn/square-arrow-down" {
-    const _default_46: {
+declare module "packages/icons/src/asn/server" {
+    const _default_57: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-server-icon lucide-server";
+        };
+        readonly children: readonly [{
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "20";
+                readonly height: "8";
+                readonly x: "2";
+                readonly y: "2";
+                readonly rx: "2";
+                readonly ry: "2";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "20";
+                readonly height: "8";
+                readonly x: "2";
+                readonly y: "14";
+                readonly rx: "2";
+                readonly ry: "2";
+            };
+        }, {
+            readonly tag: "line";
+            readonly attrs: {
+                readonly x1: "6";
+                readonly x2: "6.01";
+                readonly y1: "6";
+                readonly y2: "6";
+            };
+        }, {
+            readonly tag: "line";
+            readonly attrs: {
+                readonly x1: "6";
+                readonly x2: "6.01";
+                readonly y1: "18";
+                readonly y2: "18";
+            };
+        }];
+    };
+    export default _default_57;
+}
+declare module "packages/icons/src/asn/settings" {
+    const _default_58: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-settings-icon lucide-settings";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "3";
+            };
+        }];
+    };
+    export default _default_58;
+}
+declare module "packages/icons/src/asn/square-arrow-down" {
+    const _default_59: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -14973,10 +15694,10 @@ declare module "packages/svg/src/asn/square-arrow-down" {
             };
         }];
     };
-    export default _default_46;
+    export default _default_59;
 }
-declare module "packages/svg/src/asn/sun" {
-    const _default_47: {
+declare module "packages/icons/src/asn/sun" {
+    const _default_60: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -15036,10 +15757,10 @@ declare module "packages/svg/src/asn/sun" {
             };
         }];
     };
-    export default _default_47;
+    export default _default_60;
 }
-declare module "packages/svg/src/asn/table" {
-    const _default_48: {
+declare module "packages/icons/src/asn/table" {
+    const _default_61: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -15076,10 +15797,10 @@ declare module "packages/svg/src/asn/table" {
             };
         }];
     };
-    export default _default_48;
+    export default _default_61;
 }
-declare module "packages/svg/src/asn/trash-2" {
-    const _default_49: {
+declare module "packages/icons/src/asn/trash-2" {
+    const _default_62: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -15117,10 +15838,10 @@ declare module "packages/svg/src/asn/trash-2" {
             };
         }];
     };
-    export default _default_49;
+    export default _default_62;
 }
-declare module "packages/svg/src/asn/trash" {
-    const _default_50: {
+declare module "packages/icons/src/asn/trash" {
+    const _default_63: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -15148,10 +15869,10 @@ declare module "packages/svg/src/asn/trash" {
             };
         }];
     };
-    export default _default_50;
+    export default _default_63;
 }
-declare module "packages/svg/src/asn/undo-2" {
-    const _default_51: {
+declare module "packages/icons/src/asn/undo-2" {
+    const _default_64: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -15174,10 +15895,10 @@ declare module "packages/svg/src/asn/undo-2" {
             };
         }];
     };
-    export default _default_51;
+    export default _default_64;
 }
-declare module "packages/svg/src/asn/upload" {
-    const _default_52: {
+declare module "packages/icons/src/asn/upload" {
+    const _default_65: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -15205,10 +15926,97 @@ declare module "packages/svg/src/asn/upload" {
             };
         }];
     };
-    export default _default_52;
+    export default _default_65;
 }
-declare module "packages/svg/src/asn/x" {
-    const _default_53: {
+declare module "packages/icons/src/asn/user" {
+    const _default_66: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-user-icon lucide-user";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "7";
+                readonly r: "4";
+            };
+        }];
+    };
+    export default _default_66;
+}
+declare module "packages/icons/src/asn/users" {
+    const _default_67: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-users-icon lucide-users";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 3.128a4 4 0 0 1 0 7.744";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M22 21v-2a4 4 0 0 0-3-3.87";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "9";
+                readonly cy: "7";
+                readonly r: "4";
+            };
+        }];
+    };
+    export default _default_67;
+}
+declare module "packages/icons/src/asn/wrench" {
+    const _default_68: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-wrench-icon lucide-wrench";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z";
+            };
+        }];
+    };
+    export default _default_68;
+}
+declare module "packages/icons/src/asn/x" {
+    const _default_69: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -15231,67 +16039,101 @@ declare module "packages/svg/src/asn/x" {
             };
         }];
     };
-    export default _default_53;
+    export default _default_69;
 }
-declare module "packages/svg/src/asn/index" {
-    export { default as ArrowDownToLine } from "packages/svg/src/asn/arrow-down-to-line";
-    export { default as ArrowLeft } from "packages/svg/src/asn/arrow-left";
-    export { default as Bolt } from "packages/svg/src/asn/bolt";
-    export { default as Calendar } from "packages/svg/src/asn/calendar";
-    export { default as Check } from "packages/svg/src/asn/check";
-    export { default as ChevronDown } from "packages/svg/src/asn/chevron-down";
-    export { default as ChevronLeft } from "packages/svg/src/asn/chevron-left";
-    export { default as ChevronRight } from "packages/svg/src/asn/chevron-right";
-    export { default as ChevronUp } from "packages/svg/src/asn/chevron-up";
-    export { default as CircleAlert } from "packages/svg/src/asn/circle-alert";
-    export { default as CircleArrowDown } from "packages/svg/src/asn/circle-arrow-down";
-    export { default as CircleEllipsis } from "packages/svg/src/asn/circle-ellipsis";
-    export { default as CircleX } from "packages/svg/src/asn/circle-x";
-    export { default as ClockArrowDown } from "packages/svg/src/asn/clock-arrow-down";
-    export { default as Clock } from "packages/svg/src/asn/clock";
-    export { default as CloudDownload } from "packages/svg/src/asn/cloud-download";
-    export { default as Download } from "packages/svg/src/asn/download";
-    export { default as EllipsisVertical } from "packages/svg/src/asn/ellipsis-vertical";
-    export { default as Ellipsis } from "packages/svg/src/asn/ellipsis";
-    export { default as FileBox } from "packages/svg/src/asn/file-box";
-    export { default as FileImage } from "packages/svg/src/asn/file-image";
-    export { default as FileLock } from "packages/svg/src/asn/file-lock";
-    export { default as FilePlay } from "packages/svg/src/asn/file-play";
-    export { default as FileSymlink } from "packages/svg/src/asn/file-symlink";
-    export { default as FileText } from "packages/svg/src/asn/file-text";
-    export { default as FileVideoCamera } from "packages/svg/src/asn/file-video-camera";
-    export { default as FileVolume } from "packages/svg/src/asn/file-volume";
-    export { default as File } from "packages/svg/src/asn/file";
-    export { default as FolderClosed } from "packages/svg/src/asn/folder-closed";
-    export { default as Folder } from "packages/svg/src/asn/folder";
-    export { default as Funnel } from "packages/svg/src/asn/funnel";
-    export { default as GitFork } from "packages/svg/src/asn/git-fork";
-    export { default as Grid3x3 } from "packages/svg/src/asn/grid-3x3";
-    export { default as House } from "packages/svg/src/asn/house";
-    export { default as LoaderCircle } from "packages/svg/src/asn/loader-circle";
-    export { default as Loader } from "packages/svg/src/asn/loader";
-    export { default as Menu } from "packages/svg/src/asn/menu";
-    export { default as MessageSquareMore } from "packages/svg/src/asn/message-square-more";
-    export { default as Moon } from "packages/svg/src/asn/moon";
-    export { default as PanelLeft } from "packages/svg/src/asn/panel-left";
-    export { default as Pause } from "packages/svg/src/asn/pause";
-    export { default as Play } from "packages/svg/src/asn/play";
-    export { default as Plus } from "packages/svg/src/asn/plus";
-    export { default as RefreshCcw } from "packages/svg/src/asn/refresh-ccw";
-    export { default as Rss } from "packages/svg/src/asn/rss";
-    export { default as Search } from "packages/svg/src/asn/search";
-    export { default as SquareArrowDown } from "packages/svg/src/asn/square-arrow-down";
-    export { default as Sun } from "packages/svg/src/asn/sun";
-    export { default as Table } from "packages/svg/src/asn/table";
-    export { default as Trash2 } from "packages/svg/src/asn/trash-2";
-    export { default as Trash } from "packages/svg/src/asn/trash";
-    export { default as Undo2 } from "packages/svg/src/asn/undo-2";
-    export { default as Upload } from "packages/svg/src/asn/upload";
-    export { default as X } from "packages/svg/src/asn/x";
+declare module "packages/icons/src/asn/index" {
+    export { default as Activity } from "packages/icons/src/asn/activity";
+    export { default as ArrowDownToLine } from "packages/icons/src/asn/arrow-down-to-line";
+    export { default as ArrowLeft } from "packages/icons/src/asn/arrow-left";
+    export { default as Bolt } from "packages/icons/src/asn/bolt";
+    export { default as Calendar } from "packages/icons/src/asn/calendar";
+    export { default as Check } from "packages/icons/src/asn/check";
+    export { default as ChevronDown } from "packages/icons/src/asn/chevron-down";
+    export { default as ChevronLeft } from "packages/icons/src/asn/chevron-left";
+    export { default as ChevronRight } from "packages/icons/src/asn/chevron-right";
+    export { default as ChevronUp } from "packages/icons/src/asn/chevron-up";
+    export { default as CircleAlert } from "packages/icons/src/asn/circle-alert";
+    export { default as CircleArrowDown } from "packages/icons/src/asn/circle-arrow-down";
+    export { default as CircleEllipsis } from "packages/icons/src/asn/circle-ellipsis";
+    export { default as CircleX } from "packages/icons/src/asn/circle-x";
+    export { default as ClockArrowDown } from "packages/icons/src/asn/clock-arrow-down";
+    export { default as Clock } from "packages/icons/src/asn/clock";
+    export { default as CloudDownload } from "packages/icons/src/asn/cloud-download";
+    export { default as Download } from "packages/icons/src/asn/download";
+    export { default as EllipsisVertical } from "packages/icons/src/asn/ellipsis-vertical";
+    export { default as Ellipsis } from "packages/icons/src/asn/ellipsis";
+    export { default as FileBox } from "packages/icons/src/asn/file-box";
+    export { default as FileImage } from "packages/icons/src/asn/file-image";
+    export { default as FileLock } from "packages/icons/src/asn/file-lock";
+    export { default as FilePlay } from "packages/icons/src/asn/file-play";
+    export { default as FileStack } from "packages/icons/src/asn/file-stack";
+    export { default as FileSymlink } from "packages/icons/src/asn/file-symlink";
+    export { default as FileText } from "packages/icons/src/asn/file-text";
+    export { default as FileVideoCamera } from "packages/icons/src/asn/file-video-camera";
+    export { default as FileVolume } from "packages/icons/src/asn/file-volume";
+    export { default as File } from "packages/icons/src/asn/file";
+    export { default as Film } from "packages/icons/src/asn/film";
+    export { default as FolderClosed } from "packages/icons/src/asn/folder-closed";
+    export { default as Folder } from "packages/icons/src/asn/folder";
+    export { default as Funnel } from "packages/icons/src/asn/funnel";
+    export { default as Gauge } from "packages/icons/src/asn/gauge";
+    export { default as GitFork } from "packages/icons/src/asn/git-fork";
+    export { default as Grid3x3 } from "packages/icons/src/asn/grid-3x3";
+    export { default as HardDriveDownload } from "packages/icons/src/asn/hard-drive-download";
+    export { default as HardDrive } from "packages/icons/src/asn/hard-drive";
+    export { default as History } from "packages/icons/src/asn/history";
+    export { default as House } from "packages/icons/src/asn/house";
+    export { default as LoaderCircle } from "packages/icons/src/asn/loader-circle";
+    export { default as Loader } from "packages/icons/src/asn/loader";
+    export { default as Menu } from "packages/icons/src/asn/menu";
+    export { default as MessageSquareMore } from "packages/icons/src/asn/message-square-more";
+    export { default as Moon } from "packages/icons/src/asn/moon";
+    export { default as PanelLeft } from "packages/icons/src/asn/panel-left";
+    export { default as Pause } from "packages/icons/src/asn/pause";
+    export { default as Play } from "packages/icons/src/asn/play";
+    export { default as Plus } from "packages/icons/src/asn/plus";
+    export { default as RadioTower } from "packages/icons/src/asn/radio-tower";
+    export { default as RefreshCcw } from "packages/icons/src/asn/refresh-ccw";
+    export { default as RefreshCw } from "packages/icons/src/asn/refresh-cw";
+    export { default as RotateCcw } from "packages/icons/src/asn/rotate-ccw";
+    export { default as Rss } from "packages/icons/src/asn/rss";
+    export { default as ScrollText } from "packages/icons/src/asn/scroll-text";
+    export { default as Search } from "packages/icons/src/asn/search";
+    export { default as Server } from "packages/icons/src/asn/server";
+    export { default as Settings } from "packages/icons/src/asn/settings";
+    export { default as SquareArrowDown } from "packages/icons/src/asn/square-arrow-down";
+    export { default as Sun } from "packages/icons/src/asn/sun";
+    export { default as Table } from "packages/icons/src/asn/table";
+    export { default as Trash2 } from "packages/icons/src/asn/trash-2";
+    export { default as Trash } from "packages/icons/src/asn/trash";
+    export { default as Undo2 } from "packages/icons/src/asn/undo-2";
+    export { default as Upload } from "packages/icons/src/asn/upload";
+    export { default as User } from "packages/icons/src/asn/user";
+    export { default as Users } from "packages/icons/src/asn/users";
+    export { default as Wrench } from "packages/icons/src/asn/wrench";
+    export { default as X } from "packages/icons/src/asn/x";
 }
-declare module "packages/svg/src/index" {
-    export * from "packages/svg/src/asn/index";
+declare module "packages/icons/src/index" {
+    export * from "packages/icons/src/asn/index";
     export const iconRegistry: {
+        activity: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-activity-icon lucide-activity";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2";
+                };
+            }];
+        };
         "arrow-down-to-line": {
             readonly tag: "svg";
             readonly attrs: {
@@ -15946,6 +16788,34 @@ declare module "packages/svg/src/index" {
                 };
             }];
         };
+        "file-stack": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-stack-icon lucide-file-stack";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z";
+                };
+            }];
+        };
         "file-symlink": {
             readonly tag: "svg";
             readonly attrs: {
@@ -16105,6 +16975,63 @@ declare module "packages/svg/src/index" {
                 };
             }];
         };
+        film: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-film-icon lucide-film";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M7 3v18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 7.5h4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12h18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 16.5h4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M17 3v18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M17 7.5h4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M17 16.5h4";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "3";
+                    readonly rx: "2";
+                };
+            }];
+        };
         "folder-closed": {
             readonly tag: "svg";
             readonly attrs: {
@@ -16161,6 +17088,29 @@ declare module "packages/svg/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z";
+                };
+            }];
+        };
+        gauge: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-gauge-icon lucide-gauge";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m12 14 4-4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3.34 19a10 10 0 1 1 17.32 0";
                 };
             }];
         };
@@ -16247,6 +17197,109 @@ declare module "packages/svg/src/index" {
                     readonly x: "3";
                     readonly y: "3";
                     readonly rx: "2";
+                };
+            }];
+        };
+        "hard-drive-download": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-hard-drive-download-icon lucide-hard-drive-download";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 2v8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m16 6-4 4-4-4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 18h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 18h.01";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "20";
+                    readonly height: "8";
+                    readonly x: "2";
+                    readonly y: "14";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        "hard-drive": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-hard-drive-icon lucide-hard-drive";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 16h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21.946 12.013H2.054";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 16h.01";
+                };
+            }];
+        };
+        history: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-history-icon lucide-history";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 3v5h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 7v5l4 2";
                 };
             }];
         };
@@ -16522,6 +17575,56 @@ declare module "packages/svg/src/index" {
                 };
             }];
         };
+        "radio-tower": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-radio-tower-icon lucide-radio-tower";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4.9 16.1C1 12.2 1 5.8 4.9 1.9";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M7.8 4.7a6.14 6.14 0 0 0-.8 7.5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16.2 4.8c2 2 2.26 5.11.8 7.47";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19.1 1.9a9.96 9.96 0 0 1 0 14.1";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9.5 18h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m8 22 4-11 4 11";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "9";
+                    readonly r: "2";
+                };
+            }];
+        };
         "refresh-ccw": {
             readonly tag: "svg";
             readonly attrs: {
@@ -16555,6 +17658,62 @@ declare module "packages/svg/src/index" {
                 };
             }];
         };
+        "refresh-cw": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-refresh-cw-icon lucide-refresh-cw";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 3v5h-5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 16H3v5";
+                };
+            }];
+        };
+        "rotate-ccw": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-rotate-ccw-icon lucide-rotate-ccw";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 3v5h5";
+                };
+            }];
+        };
         rss: {
             readonly tag: "svg";
             readonly attrs: {
@@ -16585,6 +17744,39 @@ declare module "packages/svg/src/index" {
                 };
             }];
         };
+        "scroll-text": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-scroll-text-icon lucide-scroll-text";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 12h-5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 8h-5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19 17V5a2 2 0 0 0-2-2H4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3";
+                };
+            }];
+        };
         search: {
             readonly tag: "svg";
             readonly attrs: {
@@ -16607,6 +17799,80 @@ declare module "packages/svg/src/index" {
                     readonly cx: "11";
                     readonly cy: "11";
                     readonly r: "8";
+                };
+            }];
+        };
+        server: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-server-icon lucide-server";
+            };
+            readonly children: readonly [{
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "20";
+                    readonly height: "8";
+                    readonly x: "2";
+                    readonly y: "2";
+                    readonly rx: "2";
+                    readonly ry: "2";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "20";
+                    readonly height: "8";
+                    readonly x: "2";
+                    readonly y: "14";
+                    readonly rx: "2";
+                    readonly ry: "2";
+                };
+            }, {
+                readonly tag: "line";
+                readonly attrs: {
+                    readonly x1: "6";
+                    readonly x2: "6.01";
+                    readonly y1: "6";
+                    readonly y2: "6";
+                };
+            }, {
+                readonly tag: "line";
+                readonly attrs: {
+                    readonly x1: "6";
+                    readonly x2: "6.01";
+                    readonly y1: "18";
+                    readonly y2: "18";
+                };
+            }];
+        };
+        settings: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-settings-icon lucide-settings";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "3";
                 };
             }];
         };
@@ -16853,6 +18119,84 @@ declare module "packages/svg/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
+                };
+            }];
+        };
+        user: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-user-icon lucide-user";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "7";
+                    readonly r: "4";
+                };
+            }];
+        };
+        users: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-users-icon lucide-users";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 3.128a4 4 0 0 1 0 7.744";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M22 21v-2a4 4 0 0 0-3-3.87";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "9";
+                    readonly cy: "7";
+                    readonly r: "4";
+                };
+            }];
+        };
+        wrench: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-wrench-icon lucide-wrench";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z";
                 };
             }];
         };
@@ -17495,7 +18839,19 @@ declare module "packages/ui-primitive/src/modules/context-menu" {
     };
     export function Trigger(props: ViewProps & {
         store: ContextMenuCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
     export function Portal(props: ViewProps & {}, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -20353,207 +21709,6 @@ declare module "packages/shadcn/src/index" {
     export * as ui from "packages/ui-vm/src/index";
     export { Input, FileInput, FileDropZone, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
 }
-declare module "packages/icons/src/util/index" {
-    export const defaultWidth = "24";
-    export const defaultHeight = "24";
-    export type IconSize = string | number;
-    export type IconProps = {
-        class?: string;
-        className?: string;
-        style?: string;
-        size?: IconSize;
-        onClick?: (event: MouseEvent) => void;
-        id?: string;
-        onMounted?: (svg: SVGSVGElement) => void;
-        beforeUnmounted?: () => void;
-        onUnmounted?: () => void;
-    };
-    type ASNNode = {
-        tag: string;
-        attrs?: Record<string, string>;
-        children?: readonly ASNNode[];
-    };
-    export function createIcon(asn: ASNNode): (props?: IconProps) => any;
-}
-declare module "packages/icons/src/icons/arrow-down-to-line" {
-    export const ArrowDownToLineOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/calendar" {
-    export const CalendarOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/chevron-down" {
-    export const ChevronDownOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/chevron-left" {
-    export const ChevronLeftOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/chevron-right" {
-    export const ChevronRightOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/circle-arrow-down" {
-    export const CircleArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/circle-x" {
-    export const CircleXOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/clock-arrow-down" {
-    export const ClockArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/cloud-download" {
-    export const CloudDownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/download" {
-    export const DownloadOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/ellipsis-vertical" {
-    export const EllipsisVerticalOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/ellipsis" {
-    export const EllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/file-box" {
-    export const FileBoxOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/file-image" {
-    export const FileImageOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/file-lock" {
-    export const FileLockOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/file-play" {
-    export const FilePlayOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/file-symlink" {
-    export const FileSymlinkOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/file-video-camera" {
-    export const FileVideoCameraOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/file-volume" {
-    export const FileVolumeOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/file" {
-    export const FileOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/folder-closed" {
-    export const FolderClosedOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/folder" {
-    export const FolderOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/pause" {
-    export const PauseOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/play" {
-    export const PlayOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/refresh-ccw" {
-    export const RefreshCcwOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/rss" {
-    export const RssOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/square-arrow-down" {
-    export const SquareArrowDownOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/trash-2" {
-    export const Trash2Outlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/trash" {
-    export const TrashOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/search" {
-    export const SearchOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/undo-2" {
-    export const Undo2Outlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/x" {
-    export const XOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/bolt" {
-    export const BoltOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/loader" {
-    export const LoaderOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/loader-circle" {
-    export const LoaderCircleOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/check" {
-    export const CheckOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/chevron-up" {
-    export const ChevronUpOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/clock" {
-    export const ClockOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/grid-3x3" {
-    export const Grid3x3Outlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/menu" {
-    export const MenuOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/circle-ellipsis" {
-    export const CircleEllipsisOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/house" {
-    export const HouseOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/moon" {
-    export const MoonOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/icons/sun" {
-    export const SunOutlined: (props?: import("packages/icons/src/util").IconProps) => any;
-}
-declare module "packages/icons/src/index" {
-    export * from "packages/icons/src/icons/arrow-down-to-line";
-    export * from "packages/icons/src/icons/calendar";
-    export * from "packages/icons/src/icons/chevron-down";
-    export * from "packages/icons/src/icons/chevron-left";
-    export * from "packages/icons/src/icons/chevron-right";
-    export * from "packages/icons/src/icons/circle-arrow-down";
-    export * from "packages/icons/src/icons/circle-x";
-    export * from "packages/icons/src/icons/clock-arrow-down";
-    export * from "packages/icons/src/icons/cloud-download";
-    export * from "packages/icons/src/icons/download";
-    export * from "packages/icons/src/icons/ellipsis-vertical";
-    export * from "packages/icons/src/icons/ellipsis";
-    export * from "packages/icons/src/icons/file-box";
-    export * from "packages/icons/src/icons/file-image";
-    export * from "packages/icons/src/icons/file-lock";
-    export * from "packages/icons/src/icons/file-play";
-    export * from "packages/icons/src/icons/file-symlink";
-    export * from "packages/icons/src/icons/file-video-camera";
-    export * from "packages/icons/src/icons/file-volume";
-    export * from "packages/icons/src/icons/file";
-    export * from "packages/icons/src/icons/folder-closed";
-    export * from "packages/icons/src/icons/folder";
-    export * from "packages/icons/src/icons/pause";
-    export * from "packages/icons/src/icons/play";
-    export * from "packages/icons/src/icons/refresh-ccw";
-    export * from "packages/icons/src/icons/rss";
-    export * from "packages/icons/src/icons/square-arrow-down";
-    export * from "packages/icons/src/icons/trash-2";
-    export * from "packages/icons/src/icons/trash";
-    export * from "packages/icons/src/icons/search";
-    export * from "packages/icons/src/icons/undo-2";
-    export * from "packages/icons/src/icons/x";
-    export * from "packages/icons/src/icons/bolt";
-    export * from "packages/icons/src/icons/loader";
-    export * from "packages/icons/src/icons/loader-circle";
-    export * from "packages/icons/src/icons/check";
-    export * from "packages/icons/src/icons/chevron-up";
-    export * from "packages/icons/src/icons/clock";
-    export * from "packages/icons/src/icons/grid-3x3";
-    export * from "packages/icons/src/icons/menu";
-    export * from "packages/icons/src/icons/circle-ellipsis";
-    export * from "packages/icons/src/icons/house";
-    export * from "packages/icons/src/icons/moon";
-    export * from "packages/icons/src/icons/sun";
-    export * from "packages/icons/src/util/index";
-}
 
 // === Package module aliases ===
 declare module "@timeless/types" { export * from "packages/types/src/index"; }
@@ -20579,6 +21734,7 @@ declare const Timeless: {
 
 // @timeless/timeless
 declare const ArraySignal: typeof import("@timeless/timeless").ArraySignal;
+declare const Audio: typeof import("@timeless/timeless").Audio;
 declare const Col: typeof import("@timeless/timeless").Col;
 declare const Column: typeof import("@timeless/timeless").Column;
 declare const DepInfo: typeof import("@timeless/timeless").DepInfo;
@@ -20623,6 +21779,7 @@ declare const TabPane: typeof import("@timeless/timeless").TabPane;
 declare const TabView: typeof import("@timeless/timeless").TabView;
 declare const Text: typeof import("@timeless/timeless").Text;
 declare const TimelessRefArray: typeof import("@timeless/timeless").TimelessRefArray;
+declare const Video: typeof import("@timeless/timeless").Video;
 declare const View: typeof import("@timeless/timeless").View;
 declare const Webview: typeof import("@timeless/timeless").Webview;
 declare const WindowView: typeof import("@timeless/timeless").WindowView;
@@ -20648,6 +21805,7 @@ declare const hmrRestore: typeof import("@timeless/timeless").hmrRestore;
 declare const hmrScope: typeof import("@timeless/timeless").hmrScope;
 declare const hmrState: typeof import("@timeless/timeless").hmrState;
 declare const isArrayRef: typeof import("@timeless/timeless").isArrayRef;
+declare const isAudio: typeof import("@timeless/timeless").isAudio;
 declare const isClassNameRef: typeof import("@timeless/timeless").isClassNameRef;
 declare const isElement: typeof import("@timeless/timeless").isElement;
 declare const isFragment: typeof import("@timeless/timeless").isFragment;
@@ -20656,6 +21814,7 @@ declare const isImg: typeof import("@timeless/timeless").isImg;
 declare const isLazyElement: typeof import("@timeless/timeless").isLazyElement;
 declare const isRef: typeof import("@timeless/timeless").isRef;
 declare const isStyleRef: typeof import("@timeless/timeless").isStyleRef;
+declare const isVideo: typeof import("@timeless/timeless").isVideo;
 declare const isWriteableRef: typeof import("@timeless/timeless").isWriteableRef;
 declare const join: typeof import("@timeless/timeless").join;
 declare const lazy: typeof import("@timeless/timeless").lazy;
@@ -20774,7 +21933,6 @@ declare const KeepAliveSubViews: typeof import("@timeless/shadcn").KeepAliveSubV
 declare const LLMProviderForm: typeof import("@timeless/shadcn").LLMProviderForm;
 declare const Label: typeof import("@timeless/shadcn").Label;
 declare const Link: typeof import("@timeless/shadcn").Link;
-declare const Menu: typeof import("@timeless/shadcn").Menu;
 declare const MenuPrimitive: typeof import("@timeless/shadcn").MenuPrimitive;
 declare const NumberInput: typeof import("@timeless/shadcn").NumberInput;
 declare const NumberInputPrimitive: typeof import("@timeless/shadcn").NumberInputPrimitive;
@@ -20815,7 +21973,6 @@ declare const Steps: typeof import("@timeless/shadcn").Steps;
 declare const StepsPrimitive: typeof import("@timeless/shadcn").StepsPrimitive;
 declare const Switch: typeof import("@timeless/shadcn").Switch;
 declare const SwitchPrimitive: typeof import("@timeless/shadcn").SwitchPrimitive;
-declare const Table: typeof import("@timeless/shadcn").Table;
 declare const TableBody: typeof import("@timeless/shadcn").TableBody;
 declare const TableCell: typeof import("@timeless/shadcn").TableCell;
 declare const TableHead: typeof import("@timeless/shadcn").TableHead;
@@ -20846,53 +22003,77 @@ declare const kit: typeof import("@timeless/shadcn").kit;
 declare const ui: typeof import("@timeless/shadcn").ui;
 
 // @timeless/icons
-declare const ArrowDownToLineOutlined: typeof import("@timeless/icons").ArrowDownToLineOutlined;
-declare const BoltOutlined: typeof import("@timeless/icons").BoltOutlined;
-declare const CalendarOutlined: typeof import("@timeless/icons").CalendarOutlined;
-declare const CheckOutlined: typeof import("@timeless/icons").CheckOutlined;
-declare const ChevronDownOutlined: typeof import("@timeless/icons").ChevronDownOutlined;
-declare const ChevronLeftOutlined: typeof import("@timeless/icons").ChevronLeftOutlined;
-declare const ChevronRightOutlined: typeof import("@timeless/icons").ChevronRightOutlined;
-declare const ChevronUpOutlined: typeof import("@timeless/icons").ChevronUpOutlined;
-declare const CircleArrowDownOutlined: typeof import("@timeless/icons").CircleArrowDownOutlined;
-declare const CircleEllipsisOutlined: typeof import("@timeless/icons").CircleEllipsisOutlined;
-declare const CircleXOutlined: typeof import("@timeless/icons").CircleXOutlined;
-declare const ClockArrowDownOutlined: typeof import("@timeless/icons").ClockArrowDownOutlined;
-declare const ClockOutlined: typeof import("@timeless/icons").ClockOutlined;
-declare const CloudDownloadOutlined: typeof import("@timeless/icons").CloudDownloadOutlined;
-declare const DownloadOutlined: typeof import("@timeless/icons").DownloadOutlined;
-declare const EllipsisOutlined: typeof import("@timeless/icons").EllipsisOutlined;
-declare const EllipsisVerticalOutlined: typeof import("@timeless/icons").EllipsisVerticalOutlined;
-declare const FileBoxOutlined: typeof import("@timeless/icons").FileBoxOutlined;
-declare const FileImageOutlined: typeof import("@timeless/icons").FileImageOutlined;
-declare const FileLockOutlined: typeof import("@timeless/icons").FileLockOutlined;
-declare const FileOutlined: typeof import("@timeless/icons").FileOutlined;
-declare const FilePlayOutlined: typeof import("@timeless/icons").FilePlayOutlined;
-declare const FileSymlinkOutlined: typeof import("@timeless/icons").FileSymlinkOutlined;
-declare const FileVideoCameraOutlined: typeof import("@timeless/icons").FileVideoCameraOutlined;
-declare const FileVolumeOutlined: typeof import("@timeless/icons").FileVolumeOutlined;
-declare const FolderClosedOutlined: typeof import("@timeless/icons").FolderClosedOutlined;
-declare const FolderOutlined: typeof import("@timeless/icons").FolderOutlined;
-declare const Grid3x3Outlined: typeof import("@timeless/icons").Grid3x3Outlined;
-declare const HouseOutlined: typeof import("@timeless/icons").HouseOutlined;
-declare const LoaderCircleOutlined: typeof import("@timeless/icons").LoaderCircleOutlined;
-declare const LoaderOutlined: typeof import("@timeless/icons").LoaderOutlined;
-declare const MenuOutlined: typeof import("@timeless/icons").MenuOutlined;
-declare const MoonOutlined: typeof import("@timeless/icons").MoonOutlined;
-declare const PauseOutlined: typeof import("@timeless/icons").PauseOutlined;
-declare const PlayOutlined: typeof import("@timeless/icons").PlayOutlined;
-declare const RefreshCcwOutlined: typeof import("@timeless/icons").RefreshCcwOutlined;
-declare const RssOutlined: typeof import("@timeless/icons").RssOutlined;
-declare const SearchOutlined: typeof import("@timeless/icons").SearchOutlined;
-declare const SquareArrowDownOutlined: typeof import("@timeless/icons").SquareArrowDownOutlined;
-declare const SunOutlined: typeof import("@timeless/icons").SunOutlined;
-declare const Trash2Outlined: typeof import("@timeless/icons").Trash2Outlined;
-declare const TrashOutlined: typeof import("@timeless/icons").TrashOutlined;
-declare const Undo2Outlined: typeof import("@timeless/icons").Undo2Outlined;
-declare const XOutlined: typeof import("@timeless/icons").XOutlined;
-declare const createIcon: typeof import("@timeless/icons").createIcon;
-declare const defaultHeight: typeof import("@timeless/icons").defaultHeight;
-declare const defaultWidth: typeof import("@timeless/icons").defaultWidth;
+declare const Activity: typeof import("@timeless/icons").Activity;
+declare const ArrowDownToLine: typeof import("@timeless/icons").ArrowDownToLine;
+declare const ArrowLeft: typeof import("@timeless/icons").ArrowLeft;
+declare const Bolt: typeof import("@timeless/icons").Bolt;
+declare const Calendar: typeof import("@timeless/icons").Calendar;
+declare const Check: typeof import("@timeless/icons").Check;
+declare const ChevronDown: typeof import("@timeless/icons").ChevronDown;
+declare const ChevronLeft: typeof import("@timeless/icons").ChevronLeft;
+declare const ChevronRight: typeof import("@timeless/icons").ChevronRight;
+declare const ChevronUp: typeof import("@timeless/icons").ChevronUp;
+declare const CircleAlert: typeof import("@timeless/icons").CircleAlert;
+declare const CircleArrowDown: typeof import("@timeless/icons").CircleArrowDown;
+declare const CircleEllipsis: typeof import("@timeless/icons").CircleEllipsis;
+declare const CircleX: typeof import("@timeless/icons").CircleX;
+declare const Clock: typeof import("@timeless/icons").Clock;
+declare const ClockArrowDown: typeof import("@timeless/icons").ClockArrowDown;
+declare const CloudDownload: typeof import("@timeless/icons").CloudDownload;
+declare const Download: typeof import("@timeless/icons").Download;
+declare const Ellipsis: typeof import("@timeless/icons").Ellipsis;
+declare const EllipsisVertical: typeof import("@timeless/icons").EllipsisVertical;
+declare const File: typeof import("@timeless/icons").File;
+declare const FileBox: typeof import("@timeless/icons").FileBox;
+declare const FileImage: typeof import("@timeless/icons").FileImage;
+declare const FileLock: typeof import("@timeless/icons").FileLock;
+declare const FilePlay: typeof import("@timeless/icons").FilePlay;
+declare const FileStack: typeof import("@timeless/icons").FileStack;
+declare const FileSymlink: typeof import("@timeless/icons").FileSymlink;
+declare const FileText: typeof import("@timeless/icons").FileText;
+declare const FileVideoCamera: typeof import("@timeless/icons").FileVideoCamera;
+declare const FileVolume: typeof import("@timeless/icons").FileVolume;
+declare const Film: typeof import("@timeless/icons").Film;
+declare const Folder: typeof import("@timeless/icons").Folder;
+declare const FolderClosed: typeof import("@timeless/icons").FolderClosed;
+declare const Funnel: typeof import("@timeless/icons").Funnel;
+declare const Gauge: typeof import("@timeless/icons").Gauge;
+declare const GitFork: typeof import("@timeless/icons").GitFork;
+declare const Grid3x3: typeof import("@timeless/icons").Grid3x3;
+declare const HardDrive: typeof import("@timeless/icons").HardDrive;
+declare const HardDriveDownload: typeof import("@timeless/icons").HardDriveDownload;
+declare const History: typeof import("@timeless/icons").History;
+declare const House: typeof import("@timeless/icons").House;
+declare const Loader: typeof import("@timeless/icons").Loader;
+declare const LoaderCircle: typeof import("@timeless/icons").LoaderCircle;
+declare const Menu: typeof import("@timeless/icons").Menu;
+declare const MessageSquareMore: typeof import("@timeless/icons").MessageSquareMore;
+declare const Moon: typeof import("@timeless/icons").Moon;
+declare const PanelLeft: typeof import("@timeless/icons").PanelLeft;
+declare const Pause: typeof import("@timeless/icons").Pause;
+declare const Play: typeof import("@timeless/icons").Play;
+declare const Plus: typeof import("@timeless/icons").Plus;
+declare const RadioTower: typeof import("@timeless/icons").RadioTower;
+declare const RefreshCcw: typeof import("@timeless/icons").RefreshCcw;
+declare const RefreshCw: typeof import("@timeless/icons").RefreshCw;
+declare const RotateCcw: typeof import("@timeless/icons").RotateCcw;
+declare const Rss: typeof import("@timeless/icons").Rss;
+declare const ScrollText: typeof import("@timeless/icons").ScrollText;
+declare const Search: typeof import("@timeless/icons").Search;
+declare const Server: typeof import("@timeless/icons").Server;
+declare const Settings: typeof import("@timeless/icons").Settings;
+declare const SquareArrowDown: typeof import("@timeless/icons").SquareArrowDown;
+declare const Sun: typeof import("@timeless/icons").Sun;
+declare const Table: typeof import("@timeless/icons").Table;
+declare const Trash: typeof import("@timeless/icons").Trash;
+declare const Trash2: typeof import("@timeless/icons").Trash2;
+declare const Undo2: typeof import("@timeless/icons").Undo2;
+declare const Upload: typeof import("@timeless/icons").Upload;
+declare const User: typeof import("@timeless/icons").User;
+declare const Users: typeof import("@timeless/icons").Users;
+declare const Wrench: typeof import("@timeless/icons").Wrench;
+declare const X: typeof import("@timeless/icons").X;
+declare const iconRegistry: typeof import("@timeless/icons").iconRegistry;
 
 // @timeless/ui-vm
 declare const AccordionCore: typeof import("@timeless/ui-vm").AccordionCore;

@@ -17,7 +17,7 @@ export default defineConfig({
       ),
       "@timeless/icons": path.resolve(
         __dirname,
-        "../../packages/icons/dist/index.esm.js",
+        "../../packages/icons/dist/index.js",
       ),
       "@timeless/timeless": path.resolve(
         __dirname,

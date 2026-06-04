@@ -24,7 +24,7 @@
     "@timeless/ui-vm": "workspace:*",
     "@timeless/ui-primitive": "workspace:*",
     "@timeless/kit": "workspace:*",
-    "@timeless/svg": "workspace:*",
+    "@timeless/icons": "workspace:*",
     "@timeless/timeless": "workspace:*"
   },
   "peerDependencies": {

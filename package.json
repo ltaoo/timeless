@@ -6,7 +6,7 @@
     "dev": "node scripts/dev.js",
     "build:whole": "pnpm --filter \"./packages/*\" --filter \"!./packages/solidjs\" --filter \"!./packages/vue\" -r run build -- --whole",
     "build:lite": "pnpm --filter \"./packages/vanillalite\" -r run build",
-    "build:icons": "pnpm -C packages/svg run build",
+    "build:icons": "pnpm -C packages/icons run build",
     "build:types": "pnpm -C packages/types run generate",
     "test": "pnpm -r run test",
     "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"

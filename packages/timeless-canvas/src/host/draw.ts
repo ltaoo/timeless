@@ -2,7 +2,7 @@
  * @file canvas 模拟 DOM 实现
  */
 import { isRef } from "@timeless/timeless";
-import * as ASN from "@timeless/svg/asn";
+import * as ASN from "@timeless/icons/asn";
 
 import { Canvas } from "@/biz/canvas";
 import { connectLayer } from "@/biz/canvas/connect.web";
@@ -3258,7 +3258,7 @@ export function createCanvasDocument(
 
       const asnNode = (ASN as any)[pascalName];
       if (!asnNode) {
-        console.warn(`Icon "${iconName}" not found in @timeless/svg/asn`);
+        console.warn(`Icon "${iconName}" not found in @timeless/icons/asn`);
         return;
       }
 

@@ -1,5 +1,5 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
-import * as ASN from "@timeless/svg/asn";
+import * as ASN from "@timeless/icons/asn";
 import { SSRBox } from "./box";
 
 type ASNNode = {
@@ -38,7 +38,7 @@ export function SSRIcon(props: {
         .join("");
       const asn_node = (ASN as any)[pascal_name] as ASNNode | undefined;
       if (!asn_node) {
-        console.warn(`Icon "${name}" not found in @timeless/svg/asn`);
+        console.warn(`Icon "${name}" not found in @timeless/icons/asn`);
         return "";
       }
       return render_asn_to_string(asn_node, elm.state);

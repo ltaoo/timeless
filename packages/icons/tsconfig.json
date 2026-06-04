@@ -4,7 +4,7 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "moduleResolution": "bundler",
+    "moduleResolution": "Node",
     "strict": false,
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -16,12 +16,7 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "declaration": true,
-    "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "@timeless/svg": ["../svg/src/index.ts"],
-      "@timeless/svg/*": ["../svg/src/*"]
-    }
+    "outDir": "dist"
   },
   "include": ["src"]
 }
