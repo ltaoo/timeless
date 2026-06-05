@@ -8,6 +8,16 @@ export { StorageCore } from "./storage";
 export { HistoryCore } from "./history";
 export { NavigatorCore } from "./navigator";
 export { HttpClientCore } from "./http_client";
+export {
+  ChannelCore,
+  onChannelCreated,
+  type ChannelCloseReason,
+  type ChannelCoreProps,
+  type ChannelMessageMeta,
+  type ChannelSentMessage,
+  type ChannelState,
+  type ChannelStatus,
+} from "./channel";
 export { RouteViewCore, RouteMenusModel } from "./route_view";
 export { buildRoutes } from "./route_view/utils";
 export type {

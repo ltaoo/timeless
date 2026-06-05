@@ -325,6 +325,55 @@ const r = await someRequest(params);
 if (r.error) { app.tip?.({ text: [r.error.message] }); return; }
 ```
 
+### ChannelCore — 双向通道 / Velo 事件推送
+
+`ChannelCore` 和 `HttpClientCore` 是同一层概念：它本身就是 provider-facing core，不要给它传 `client$`。底层由 provider 接管，例如 Velo 中使用 `provide_channel()` 对接 `window.onGoMessage` 和 `window.invoke`。
+
+适用场景：
+
+- Go/Native 主动向前端推送消息，例如 Velo `b.SendMessage({ type: "download_progress", ... })`
+- 前端需要通过同一个通道向 host 提交对象消息
+- 非请求-响应模型，不要用 `RequestCore`
+
+```js
+// app 初始化时调用一次 provider
+// Velo 项目：import { provide_channel } from "@timeless/provider-velo";
+provide_channel();
+
+// 业务侧：直接 new ChannelCore(endpoint)
+const channel$ = new Timeless.ChannelCore("/eventnamelisten");
+
+channel$.onConnected(() => {
+  console.log("channel connected");
+});
+
+// onMessage 接收对象本身，不是 { data, raw } 包装
+channel$.onMessage((msg) => {
+  if (msg.type === "download_progress") {
+    console.log(msg.percentage);
+  }
+});
+
+// sendMessage 提交对象
+channel$.sendMessage({ type: "ping", payload: { now: Date.now() } });
+```
+
+如果需要手动接管连接时机：
+
+```js
+provide_channel(undefined, { autoConnect: false });
+
+const channel$ = new Timeless.ChannelCore("/eventnamelisten");
+await channel$.connect();
+```
+
+常见错误：
+
+- 不要写 `new ChannelCore("/event", { client: client$ })`，`ChannelCore` 不需要 client
+- 不要把 Go 推送事件包装成 HTTP 请求；`b.SendMessage(...)` 对应 `channel$.onMessage(...)`
+- `onMessage` 的入参就是业务对象；只有底层 provider/调试场景才需要 raw/meta
+- Velo 中 `sendMessage(obj)` 会调用 `invoke(channel.endpoint, { method: "POST", args: obj })`
+
 ---
 
 ## 9. 常见陷阱
@@ -335,6 +384,7 @@ if (r.error) { app.tip?.({ text: [r.error.message] }); return; }
 4. **不给组件传 store** — 所有带状态组件都需要 `store` prop
 5. **ref 数组 vs .value** — 用 `list.push(item)` 而非 `list.value.push(item)`；前者触发增量通知，后者只触发 refresh
 6. **computed 的 deps 格式错误** — 传给 computed 的 deps 里的 ref 必须是 ref 对象本身，不能是 `.value`
+7. **把 ChannelCore 当 RequestCore 用** — `ChannelCore` 对应 `HttpClientCore`，provider 接管底层连接，不传 `client$`
 
 ---
 
@@ -351,6 +401,7 @@ if (r.error) { app.tip?.({ text: [r.error.message] }); return; }
 | 页面标准写法（Model + View 双文件、defineModel、base 事件总线） | [references/page-pattern.md](references/page-pattern.md) |
 | 路由系统（配置、导航、守卫、链接处理） | [references/routing.md](references/routing.md) |
 | 网络请求（HttpClientCore, request_factory, 接口封装） | [references/request.md](references/request.md) |
+| 双向通道（ChannelCore, Velo SendMessage, provider-velo） | 本文第 8 节 ChannelCore |
 
 ### 示例文件
 

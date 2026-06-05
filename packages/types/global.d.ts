@@ -13709,6 +13709,117 @@ declare module "packages/kit/src/request/index" {
         onResponseChange(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.ResponseChange]>): () => void;
     }
 }
+declare module "packages/kit/src/channel/index" {
+    /**
+     * @file Bidirectional channel core.
+     */
+    import { BaseDomain, BizError, Handler, Result } from "packages/base/src/index";
+    type MaybePromise<T> = T | Promise<T>;
+    export type ChannelStatus = "idle" | "connecting" | "connected" | "closing" | "closed" | "failed";
+    export type ChannelCloseReason = {
+        code?: number;
+        reason?: string;
+        clean?: boolean;
+        event?: unknown;
+    };
+    export type ChannelMessageMeta = {
+        raw: unknown;
+        event?: unknown;
+        receivedAt: number;
+    };
+    export type ChannelSentMessage<T> = {
+        data: T;
+        raw: unknown;
+        sentAt: number;
+    };
+    export type ChannelCoreProps<TMessage = unknown, TSend = unknown> = {
+        _name?: string;
+        hostname?: string;
+        headers?: Record<string, string | number>;
+        query?: Record<string, string | number | boolean | null | undefined>;
+        params?: any;
+        initialMessage?: TSend;
+        process?: (v: unknown, meta: ChannelMessageMeta) => TMessage;
+        encode?: (v: TSend) => unknown;
+        onConnected?: () => void;
+        onMessage?: (message: TMessage) => void;
+        onSent?: (message: ChannelSentMessage<TSend>) => void;
+        onClose?: (reason: ChannelCloseReason) => void;
+        onFailed?: (error: BizError) => void;
+        onStatusChange?: (status: ChannelStatus) => void;
+        onConnecting?: (connecting: boolean) => void;
+    };
+    export type ChannelState<TMessage, TSend> = {
+        initial: boolean;
+        connecting: boolean;
+        connected: boolean;
+        status: ChannelStatus;
+        error: BizError | null;
+        lastMessage: TMessage | null;
+        lastSent: TSend | null;
+        closeReason: ChannelCloseReason | null;
+    };
+    export function onChannelCreated(h: (v: ChannelCore<any, any>) => void): void;
+    export type TheMessageOfChannelCore<T extends ChannelCore<any, any>> = NonNullable<T["lastMessage"]>;
+    export type TheSendMessageOfChannelCore<T extends ChannelCore<any, any>> = NonNullable<T["lastSent"]>;
+    export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain<any> {
+        _name: string;
+        endpoint: unknown;
+        hostname: string;
+        headers: Record<string, string | number>;
+        query?: Record<string, string | number | boolean | null | undefined>;
+        params?: any;
+        initialMessage?: TSend;
+        process?: (v: unknown, meta: ChannelMessageMeta) => TMessage;
+        encode?: (v: TSend) => unknown;
+        initial: boolean;
+        connecting: boolean;
+        connected: boolean;
+        status: ChannelStatus;
+        error: BizError | null;
+        lastMessage: TMessage | null;
+        lastSent: TSend | null;
+        closeReason: ChannelCloseReason | null;
+        pending: Promise<Result<null>> | null;
+        id: string;
+        get state(): ChannelState<TMessage, TSend>;
+        constructor(endpoint: unknown, props?: ChannelCoreProps<TMessage, TSend>);
+        connect(): Promise<Result<null>>;
+        sendMessage(data: TSend): Promise<Result<null>>;
+        send(data: TSend): Promise<Result<null>>;
+        close(code?: number, reason?: string): Promise<Result<null>>;
+        disconnect(code?: number, reason?: string): Promise<Result<null>>;
+        reconnect(): Promise<Result<null>>;
+        clear(): void;
+        getHostname(): string;
+        setHostname(hostname: string): void;
+        setHeaders(headers: Record<string, string | number>): void;
+        appendHeaders(headers: Record<string, string | number>): void;
+        setError(error: BizError): void;
+        destroy(): void;
+        openConnection(): MaybePromise<Result<null> | void>;
+        postMessage(data: unknown): MaybePromise<Result<null> | void>;
+        closeConnection(code?: number, reason?: string): MaybePromise<Result<null> | void>;
+        handleConnected(): void;
+        receiveMessage(data: unknown, extra?: Partial<ChannelMessageMeta>): void;
+        handleClose(reason?: ChannelCloseReason): void;
+        handleError(error: unknown): BizError;
+        beforeConnect(handler: Handler<void>): () => void;
+        onConnectingChange(handler: Handler<boolean>): () => void;
+        onStatusChange(handler: Handler<ChannelStatus>): () => void;
+        onConnected(handler: Handler<void>): () => void;
+        onOpen(handler: Handler<void>): () => void;
+        onMessage(handler: Handler<TMessage>): () => void;
+        onMessageChange(handler: Handler<TMessage | null>): () => void;
+        onSent(handler: Handler<ChannelSentMessage<TSend>>): () => void;
+        onClose(handler: Handler<ChannelCloseReason>): () => void;
+        onFailed(handler: Handler<BizError>, opt?: Partial<{
+            override: boolean;
+        }>): () => void;
+        onError(handler: Handler<BizError>): () => void;
+        onStateChange(handler: Handler<ChannelState<TMessage, TSend>>): () => void;
+    }
+}
 declare module "packages/kit/src/index" {
     export { ApplicationModel } from "packages/kit/src/app/index";
     export type { ThemeTypes, OrientationTypes, KeyboardEvent } from "packages/kit/src/app/types";
@@ -13717,6 +13828,7 @@ declare module "packages/kit/src/index" {
     export { HistoryCore } from "packages/kit/src/history/index";
     export { NavigatorCore } from "packages/kit/src/navigator/index";
     export { HttpClientCore } from "packages/kit/src/http_client/index";
+    export { ChannelCore, onChannelCreated, type ChannelCloseReason, type ChannelCoreProps, type ChannelMessageMeta, type ChannelSentMessage, type ChannelState, type ChannelStatus, } from "packages/kit/src/channel/index";
     export { RouteViewCore, RouteMenusModel } from "packages/kit/src/route_view/index";
     export { buildRoutes } from "packages/kit/src/route_view/utils";
     export type { OriginalRouteConfigure, PageKeysType, PathnameKey, RouteConfig, RouteConfigure, BuildRoutesPageKeys, ConfigureForPageKeys, } from "packages/kit/src/route_view/utils";
@@ -21848,6 +21960,7 @@ declare const use: typeof import("@timeless/timeless").use;
 // @timeless/kit
 declare const ApplicationModel: typeof import("@timeless/kit").ApplicationModel;
 declare const ClipboardModel: typeof import("@timeless/kit").ClipboardModel;
+declare const ChannelCore: typeof import("@timeless/kit").ChannelCore;
 declare const HistoryCore: typeof import("@timeless/kit").HistoryCore;
 declare const HttpClientCore: typeof import("@timeless/kit").HttpClientCore;
 declare const ListCore: typeof import("@timeless/kit").ListCore;
@@ -21858,6 +21971,7 @@ declare const RouteMenusModel: typeof import("@timeless/kit").RouteMenusModel;
 declare const RouteViewCore: typeof import("@timeless/kit").RouteViewCore;
 declare const StorageCore: typeof import("@timeless/kit").StorageCore;
 declare const buildRoutes: typeof import("@timeless/kit").buildRoutes;
+declare const onChannelCreated: typeof import("@timeless/kit").onChannelCreated;
 declare const request_factory: typeof import("@timeless/kit").request_factory;
 
 // @timeless/shadcn
