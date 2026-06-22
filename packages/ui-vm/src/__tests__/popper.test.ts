@@ -71,6 +71,13 @@ describe("Popper platform injection", () => {
 });
 
 describe("Popper item-aligned placement", () => {
+  it("未完成定位前不应设置 height，避免首次测量被压成 0", () => {
+    const popper = new PopperCore();
+
+    expect(popper.state.isPlaced).toBe(false);
+    expect(popper.state.height).toBeUndefined();
+  });
+
   it("应在 floating 后挂载时补算已到达的 item-aligned 定位", () => {
     const popper = new PopperCore({
       mode: "item-aligned",
@@ -93,7 +100,7 @@ describe("Popper item-aligned placement", () => {
       },
     });
 
-    expect(popper.state.height).toBe(0);
+    expect(popper.state.height).toBeUndefined();
 
     popper.setReference({
       getRect: () => ({

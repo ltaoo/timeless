@@ -1,12 +1,29 @@
-import { Button, Dialog, ui } from "@timeless/shadcn";
+import { Button, Dialog, DropdownMenu, ui } from "@timeless/shadcn";
 import { View } from "@timeless/timeless";
 
 const viewportDialog$ = new ui.DialogCore({
   title: "Dialog With Viewport",
 });
 
+const bottomDropdown$ = new ui.DropdownMenuCore({
+  trigger: "click",
+  side: "bottom",
+  align: "end",
+  offsetY: 4,
+  items: [
+    new ui.MenuItemCore({ label: "Profile" }),
+    new ui.MenuItemCore({ label: "Billing" }),
+    new ui.MenuItemCore({ label: "Notifications" }),
+    new ui.MenuItemCore({ label: "Team" }),
+    new ui.MenuItemCore({ label: "Integrations" }),
+    new ui.MenuItemCore({ label: "Settings" }),
+    new ui.MenuItemCore({ label: "Support" }),
+    new ui.MenuItemCore({ label: "Logout" }),
+  ],
+});
+
 export default function HomeIndexOverlayView(props) {
-  return View({}, [
+  return View({ class: "relative h-full p-6" }, [
     View(
       {
         class:
@@ -33,6 +50,18 @@ export default function HomeIndexOverlayView(props) {
           },
           ["Open Viewport Dialog"],
         ),
+      ],
+    ),
+    View(
+      {
+        class: "fixed bottom-6 right-6 z-40",
+      },
+      [
+        DropdownMenu({ store: bottomDropdown$ }, [
+          Button({ store: new ui.ButtonCore({ variant: "outline" }) }, [
+            "Bottom Dropdown",
+          ]),
+        ]),
       ],
     ),
     Dialog({ store: viewportDialog$ }, [

@@ -180,8 +180,6 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     y: 0,
     placement: "bottom",
     isPlaced: false,
-    height: 0,
-    maxHeight: 0,
     reference: false,
     arrow: null,
     availableHeight: 0,
@@ -672,10 +670,10 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     let available_height = undefined;
     let available_width = undefined;
     if (middleware_data.size) {
-      if (middleware_data.size.availableHeight) {
+      if (typeof middleware_data.size.availableHeight === "number") {
         available_height = middleware_data.size.availableHeight;
       }
-      if (middleware_data.size.availableWidth) {
+      if (typeof middleware_data.size.availableWidth === "number") {
         available_width = middleware_data.size.availableWidth;
       }
     }
@@ -798,7 +796,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.state.y = 0;
     this.state.top = undefined;
     this.state.bottom = undefined;
-    this.state.height = 0;
+    this.state.height = undefined;
     this._pending_item_aligned_adjustment = null;
     if (this._scrolling_subscriber) {
       this._scrolling_subscriber();
