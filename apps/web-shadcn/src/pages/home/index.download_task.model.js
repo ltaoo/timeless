@@ -56,7 +56,7 @@ export function DownloadTaskViewModel(props) {
   }
 
   const services = {
-    list: new Timeless.kit.RequestCore(
+    list: new Timeless.RequestCore(
       (params) => request.get("/api/task/list", params),
       {
         client,
@@ -77,24 +77,24 @@ export function DownloadTaskViewModel(props) {
         },
       },
     ),
-    delete: new Timeless.kit.RequestCore(
+    delete: new Timeless.RequestCore(
       (id) => request.post("/api/task/delete", { id }),
       { client },
     ),
-    pause: new Timeless.kit.RequestCore(
+    pause: new Timeless.RequestCore(
       (id) => request.post("/api/task/pause", { id }),
       { client },
     ),
-    resume: new Timeless.kit.RequestCore(
+    resume: new Timeless.RequestCore(
       (id) => request.post("/api/task/resume", { id }),
       { client },
     ),
-    clear: new Timeless.kit.RequestCore(() => request.post("/api/task/clear"), {
+    clear: new Timeless.RequestCore(() => request.post("/api/task/clear"), {
       client,
     }),
   };
 
-  const list$ = new Timeless.kit.ListCore(services.list, {
+  const list$ = new Timeless.ListCore(services.list, {
     pageSize: PAGE_SIZE,
   });
 
