@@ -112,7 +112,10 @@ export function ListView<T extends Record<string, unknown>>(
 
   // ---- height-cache helpers ----
   const getItemHeight = (idx: number): number => {
-    return _heightCache[idx] ?? _estimatedHeight;
+    const itemHeight = Number(state.items[idx]?.height);
+    return _heightCache[idx] ?? (Number.isFinite(itemHeight) && itemHeight > 0
+      ? itemHeight
+      : _estimatedHeight);
   };
   /** 计算下标 idx 对应的 scroll offset（该行顶部距离内容顶部的位置） */
   const getItemOffset = (idx: number): number => {
@@ -1311,7 +1314,7 @@ export function ListView<T extends Record<string, unknown>>(
       // Walk to exact position using cached heights.
       // Start from the estimated position and walk backward/forward.
       idx = Math.max(0, idx - 1);
-      let offset = idx * estItemHeight; // estimate-based offset
+      let offset = getItemOffset(idx);
       // Refine by walking: only needed when heights differ from estimate
       if (offset > scroll_top) {
         // Walk backward to find correct position
