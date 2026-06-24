@@ -1408,9 +1408,11 @@ export function ListView<T extends Record<string, unknown>>(
             }
             return null;
           })();
-          if (currentKey !== null && slot.state.bound) {
-            methods.release_slot(slot);
+          if (currentKey !== null) {
             _slot_bindings.delete(currentKey);
+          }
+          if (slot.state.bound) {
+            methods.release_slot(slot);
           }
         }
       }

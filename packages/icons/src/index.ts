@@ -17,6 +17,7 @@ import circleX from "./asn/circle-x";
 import clockArrowDown from "./asn/clock-arrow-down";
 import clock from "./asn/clock";
 import cloudDownload from "./asn/cloud-download";
+import copy from "./asn/copy";
 import download from "./asn/download";
 import ellipsisVertical from "./asn/ellipsis-vertical";
 import ellipsis from "./asn/ellipsis";
@@ -41,6 +42,8 @@ import hardDriveDownload from "./asn/hard-drive-download";
 import hardDrive from "./asn/hard-drive";
 import history from "./asn/history";
 import house from "./asn/house";
+import inbox from "./asn/inbox";
+import listFilter from "./asn/list-filter";
 import loaderCircle from "./asn/loader-circle";
 import loader from "./asn/loader";
 import menu from "./asn/menu";
@@ -55,6 +58,7 @@ import refreshCcw from "./asn/refresh-ccw";
 import refreshCw from "./asn/refresh-cw";
 import rotateCcw from "./asn/rotate-ccw";
 import rss from "./asn/rss";
+import save from "./asn/save";
 import scrollText from "./asn/scroll-text";
 import search from "./asn/search";
 import server from "./asn/server";
@@ -89,6 +93,7 @@ export const iconRegistry = {
   "clock-arrow-down": clockArrowDown,
   "clock": clock,
   "cloud-download": cloudDownload,
+  "copy": copy,
   "download": download,
   "ellipsis-vertical": ellipsisVertical,
   "ellipsis": ellipsis,
@@ -113,6 +118,8 @@ export const iconRegistry = {
   "hard-drive": hardDrive,
   "history": history,
   "house": house,
+  "inbox": inbox,
+  "list-filter": listFilter,
   "loader-circle": loaderCircle,
   "loader": loader,
   "menu": menu,
@@ -127,6 +134,7 @@ export const iconRegistry = {
   "refresh-cw": refreshCw,
   "rotate-ccw": rotateCcw,
   "rss": rss,
+  "save": save,
   "scroll-text": scrollText,
   "search": search,
   "server": server,

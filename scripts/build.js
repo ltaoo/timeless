@@ -23,10 +23,14 @@ const INCLUDED_PACKAGES = [
   // "timeless-tui",
   "cli",
   "provider-web",
+  "icons",
   "shadcn",
 ];
 
 const packageDirs = INCLUDED_PACKAGES;
+const ARTIFACT_PACKAGES = new Set(
+  INCLUDED_PACKAGES.filter((name) => name !== "icons"),
+);
 
 const buildTargets = [];
 for (const name of packageDirs) {
@@ -68,7 +72,9 @@ fs.mkdirSync(outDir, { recursive: true });
 
 // Copy *.umd.min.js and *.css from each package's dist/
 let copied = 0;
-for (const target of buildTargets) {
+for (const target of buildTargets.filter((target) =>
+  ARTIFACT_PACKAGES.has(target.dir),
+)) {
   const distPath = path.join(PACKAGES_DIR, target.dir, "dist");
   if (!fs.existsSync(distPath)) {
     console.warn(`Warning: ${target.dir}/dist not found, skipping`);

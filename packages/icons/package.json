@@ -31,7 +31,7 @@
     "src"
   ],
   "scripts": {
-    "build": "node scripts/build.mjs && tsc",
+    "build": "rm -rf dist && node scripts/build.mjs && tsc",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

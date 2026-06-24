@@ -15,6 +15,7 @@ import circleX from "./circle-x";
 import clockArrowDown from "./clock-arrow-down";
 import clock from "./clock";
 import cloudDownload from "./cloud-download";
+import copy from "./copy";
 import download from "./download";
 import ellipsisVertical from "./ellipsis-vertical";
 import ellipsis from "./ellipsis";
@@ -39,6 +40,8 @@ import hardDriveDownload from "./hard-drive-download";
 import hardDrive from "./hard-drive";
 import history from "./history";
 import house from "./house";
+import inbox from "./inbox";
+import listFilter from "./list-filter";
 import loaderCircle from "./loader-circle";
 import loader from "./loader";
 import menu from "./menu";
@@ -53,6 +56,7 @@ import refreshCcw from "./refresh-ccw";
 import refreshCw from "./refresh-cw";
 import rotateCcw from "./rotate-ccw";
 import rss from "./rss";
+import save from "./save";
 import scrollText from "./scroll-text";
 import search from "./search";
 import server from "./server";
@@ -87,6 +91,7 @@ export const iconRegistry = {
   "clock-arrow-down": clockArrowDown,
   "clock": clock,
   "cloud-download": cloudDownload,
+  "copy": copy,
   "download": download,
   "ellipsis-vertical": ellipsisVertical,
   "ellipsis": ellipsis,
@@ -111,6 +116,8 @@ export const iconRegistry = {
   "hard-drive": hardDrive,
   "history": history,
   "house": house,
+  "inbox": inbox,
+  "list-filter": listFilter,
   "loader-circle": loaderCircle,
   "loader": loader,
   "menu": menu,
@@ -125,6 +132,7 @@ export const iconRegistry = {
   "refresh-cw": refreshCw,
   "rotate-ccw": rotateCcw,
   "rss": rss,
+  "save": save,
   "scroll-text": scrollText,
   "search": search,
   "server": server,
