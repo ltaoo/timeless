@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { compute_position } from "./compute-position";
 import { flip, shift, offset, size } from "./middleware";
+import { getDOMPlatform } from "./platform/dom";
 import { getMockPlatform } from "./platform/mock";
 import { detect_overflow } from "./detect-overflow";
 import type { Platform, ComputePositionConfig, MiddlewareState } from "./types";
@@ -103,6 +104,35 @@ function create_test_platform(
 }
 
 describe("computePosition", () => {
+  describe("DOM platform", () => {
+    it("应支持 Timeless primitive 传入的 getRect 包装对象", async () => {
+      const platform = getDOMPlatform();
+      const referenceRect = build_element(630, 444, 58, 58);
+      const floatingRect = build_element(0, 0, 128, 136);
+
+      const rects = await platform.getElementRects({
+        reference: { getRect: () => referenceRect },
+        floating: { getRect: () => floatingRect },
+        strategy: "fixed",
+      });
+
+      expect(rects.reference).toEqual({
+        ...referenceRect,
+        top: 444,
+        left: 630,
+        right: 688,
+        bottom: 502,
+      });
+      expect(rects.floating).toEqual({
+        ...floatingRect,
+        top: 0,
+        left: 0,
+        right: 128,
+        bottom: 136,
+      });
+    });
+  });
+
   describe("基础位置计算", () => {
     it("应正确计算 bottom 放置位置", async () => {
       const reference = build_reference(build_element(100, 100, 200, 50));
@@ -245,11 +275,11 @@ describe("computePosition", () => {
     const result = await compute_position(reference, floating, {
       platform,
       placement: "bottom",
-      middleware: [offset(4), flip()],
+      middleware: [offset(4), flip(), shift({ padding: 8 })],
     });
 
     expect(result.placement).toBe("top");
-    expect(result.y).toBe(VIEWPORT_HEIGHT - 100 - 150); // ref.y - floating.height
+    expect(result.y).toBe(8);
   });
 
   describe("offset + flip + shift 完整管线", () => {
@@ -279,8 +309,8 @@ describe("computePosition", () => {
     });
   });
 
-  describe("BUG 复现: y=-2308 — 浮动元素未约束高度导致错误翻转", () => {
-    it("浮动元素高度远超视口时，flip 翻转到 top 导致 y 为大负数", async () => {
+  describe("超高浮动元素的 viewport 约束", () => {
+    it("浮动元素高度远超视口时，flip + shift 后仍保持可见", async () => {
       // 真实场景：Select 有大量选项，弹出层没有 max-height 约束
       // reference 在视口中下部 (x:266, y:336)
       // floating 包含全部选项，高度 ~2644px（未约束）
@@ -308,26 +338,13 @@ describe("computePosition", () => {
         ],
       });
 
-      console.log("[BUG] result:", {
-        placement: result.placement,
-        x: result.x,
-        y: result.y,
-        availableHeight: result.middlewareData.size?.availableHeight,
-      });
-
-      // flip 的 bestFit 逻辑：
-      // bottom 溢出: y_bottom + floating.height - viewport.height
-      //   = (336+36+4) + 2644 - 600 = 2420
-      // top 溢出: 0 - (336 - 2644 - 4) = 2312
-      // top 溢出 (2312) < bottom 溢出 (2420)，所以 flip 选择 top
-      //
-      // 翻转后 y = ref.y - floating.height - offset = 336 - 2644 - 4 = -2312
-      // shift 不改变主轴，所以最终 y 仍是大负数
       expect(result.placement).toMatch(/^top/);
-      expect(result.y).toBeLessThan(-2000);
+      expect(result.y).toBeGreaterThanOrEqual(8);
+      expect(result.middlewareData.size?.availableHeight).toBeLessThan(2644);
+      expect(result.middlewareData.size?.availableHeight).toBeGreaterThan(0);
     });
 
-    it("BUG: flip 翻转后 y=-2315 超出视口，完全不可见", async () => {
+    it("flip 翻转后应通过 shift 回到 viewport 内", async () => {
       // 用户实际遇到的数据：reference 在视口下半部 (y=497)
       // 2*497 + 32 = 1026 > 800(viewport)，满足翻转条件
       const reference = build_reference(build_element(266, 497, 169, 32));
@@ -345,12 +362,10 @@ describe("computePosition", () => {
         ],
       });
 
-      // 当前实现的 bug：flip 选择 top 后 y = ref.y - floating.height - offset = -2315
-      // 完全不可见
       expect(result.placement).toMatch(/^top/);
       expect(result.x).toBe(266);
-      expect(result.y).toBe(-2315);
-      expect(result.y).toBeLessThan(0);
+      expect(result.y).toBe(8);
+      expect(result.y).toBeGreaterThanOrEqual(0);
     });
 
     it("FIX: 使用 flip 默认行为，size 约束高度后可正确显示", async () => {

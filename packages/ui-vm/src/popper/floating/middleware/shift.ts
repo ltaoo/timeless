@@ -58,8 +58,8 @@ export const shift = (
       state,
       detectOverflowOptions,
     );
-    const crossAxis = getSideAxis(getSide(placement));
-    const mainAxis = getOppositeAxis(crossAxis);
+    const mainAxis = getSideAxis(getSide(placement));
+    const crossAxis = getOppositeAxis(mainAxis);
 
     let mainAxisCoord = coords[mainAxis];
     let crossAxisCoord = coords[crossAxis];
@@ -156,8 +156,8 @@ export const limitShift = (
     } = evaluate(options, state);
 
     const coords = { x, y };
-    const crossAxis = getSideAxis(placement);
-    const mainAxis = getOppositeAxis(crossAxis);
+    const mainAxis = getSideAxis(placement);
+    const crossAxis = getOppositeAxis(mainAxis);
 
     let mainAxisCoord = coords[mainAxis];
     let crossAxisCoord = coords[crossAxis];

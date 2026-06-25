@@ -1,5 +1,11 @@
 import type { Platform } from "../types";
-import type { Dimensions, ElementRects, Rect, Strategy } from "../utils";
+import type {
+  ClientRectObject,
+  Dimensions,
+  ElementRects,
+  Rect,
+  Strategy,
+} from "../utils";
 
 /**
  * Check if we're in a browser environment
@@ -8,12 +14,65 @@ function isBrowser(): boolean {
   return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
+const zeroRect: ClientRectObject = {
+  x: 0,
+  y: 0,
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  width: 0,
+  height: 0,
+};
+
+function numberOr(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : fallback;
+}
+
+function normalizeRect(
+  rect: Partial<ClientRectObject> | null | undefined,
+): ClientRectObject {
+  if (!rect) {
+    return { ...zeroRect };
+  }
+  const x = numberOr(rect.x, numberOr(rect.left, 0));
+  const y = numberOr(rect.y, numberOr(rect.top, 0));
+  const width = numberOr(rect.width, 0);
+  const height = numberOr(rect.height, 0);
+  const left = numberOr(rect.left, x);
+  const top = numberOr(rect.top, y);
+  return {
+    x,
+    y,
+    top,
+    left,
+    width,
+    height,
+    right: numberOr(rect.right, left + width),
+    bottom: numberOr(rect.bottom, top + height),
+  };
+}
+
+function unwrapElement(value: any): any {
+  if (value && typeof value === "object") {
+    if (value.$el) {
+      return value.$el;
+    }
+    if (value.contextElement) {
+      return value.contextElement;
+    }
+  }
+  return value;
+}
+
 /**
  * Check if a value is an Element
  */
 function isElement(value: any): boolean {
   if (!isBrowser()) return false;
-  return value instanceof Element;
+  return unwrapElement(value) instanceof Element;
 }
 
 /**
@@ -21,7 +80,7 @@ function isElement(value: any): boolean {
  */
 function isHTMLElement(value: any): boolean {
   if (!isBrowser()) return false;
-  return value instanceof HTMLElement;
+  return unwrapElement(value) instanceof HTMLElement;
 }
 
 /**
@@ -29,21 +88,19 @@ function isHTMLElement(value: any): boolean {
  */
 function getBoundingClientRect(element: any): Rect {
   if (!element) {
-    return { x: 0, y: 0, width: 0, height: 0 };
+    return { ...zeroRect };
   }
 
-  // Virtual element with getBoundingClientRect method
-  if (typeof element.getBoundingClientRect === "function") {
-    const rect = element.getBoundingClientRect();
-    return {
-      x: rect.x ?? rect.left ?? 0,
-      y: rect.y ?? rect.top ?? 0,
-      width: rect.width ?? 0,
-      height: rect.height ?? 0,
-    };
+  if (typeof element.getRect === "function") {
+    return normalizeRect(element.getRect());
   }
 
-  return { x: 0, y: 0, width: 0, height: 0 };
+  const unwrapped = unwrapElement(element);
+  if (typeof unwrapped.getBoundingClientRect === "function") {
+    return normalizeRect(unwrapped.getBoundingClientRect());
+  }
+
+  return { ...zeroRect };
 }
 
 /**
@@ -54,10 +111,11 @@ function getDimensions(element: any): Dimensions {
     return { width: 0, height: 0 };
   }
 
-  if (isHTMLElement(element)) {
+  const unwrapped = unwrapElement(element);
+  if (isHTMLElement(unwrapped)) {
     return {
-      width: element.offsetWidth,
-      height: element.offsetHeight,
+      width: unwrapped.offsetWidth,
+      height: unwrapped.offsetHeight,
     };
   }
 
@@ -72,20 +130,20 @@ function getDimensions(element: any): Dimensions {
 function getViewportRect(): Rect {
   if (!isBrowser()) {
     // SSR fallback - return infinite viewport
-    return {
+    return normalizeRect({
       x: 0,
       y: 0,
       width: Infinity,
       height: Infinity,
-    };
+    });
   }
 
-  return {
+  return normalizeRect({
     x: 0,
     y: 0,
     width: window.innerWidth,
     height: window.innerHeight,
-  };
+  });
 }
 
 /**
@@ -122,35 +180,38 @@ function getClippingRect(_args: {
  * Get the offset parent of an element
  */
 function getOffsetParent(element: any): any {
-  if (!isHTMLElement(element)) {
+  const unwrapped = unwrapElement(element);
+  if (!isHTMLElement(unwrapped)) {
     return null;
   }
-  return element.offsetParent || document.body;
+  return unwrapped.offsetParent || document.body;
 }
 
 /**
  * Check if the element's text direction is RTL
  */
 function isRTL(element: any): boolean {
-  if (!isHTMLElement(element)) {
+  const unwrapped = unwrapElement(element);
+  if (!isHTMLElement(unwrapped)) {
     return false;
   }
-  return getComputedStyle(element).direction === "rtl";
+  return getComputedStyle(unwrapped).direction === "rtl";
 }
 
 /**
  * Get the scale of an element (for CSS transforms)
  */
 function getScale(element: any): { x: number; y: number } {
-  if (!isHTMLElement(element)) {
+  const unwrapped = unwrapElement(element);
+  if (!isHTMLElement(unwrapped)) {
     return { x: 1, y: 1 };
   }
 
-  const rect = element.getBoundingClientRect();
+  const rect = unwrapped.getBoundingClientRect();
   const scaleX =
-    rect.width > 0 ? Math.round(rect.width) / element.offsetWidth || 1 : 1;
+    rect.width > 0 ? Math.round(rect.width) / unwrapped.offsetWidth || 1 : 1;
   const scaleY =
-    rect.height > 0 ? Math.round(rect.height) / element.offsetHeight || 1 : 1;
+    rect.height > 0 ? Math.round(rect.height) / unwrapped.offsetHeight || 1 : 1;
 
   return { x: scaleX, y: scaleY };
 }
@@ -162,8 +223,9 @@ function getDocumentElement(element: any): any {
   if (!isBrowser()) {
     return null;
   }
-  if (isElement(element)) {
-    return element.ownerDocument?.documentElement || document.documentElement;
+  const unwrapped = unwrapElement(element);
+  if (isElement(unwrapped)) {
+    return unwrapped.ownerDocument?.documentElement || document.documentElement;
   }
   return document.documentElement;
 }
