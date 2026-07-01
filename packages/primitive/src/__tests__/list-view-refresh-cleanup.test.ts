@@ -343,4 +343,76 @@ describe("ListView refresh cleanup", () => {
     expect((list.children as any[])[0].children[0]).not.toBe(prevSlotChild0);
     expect((list.children as any[])[0].children[0].state.dataset.version).toBe(2);
   });
+
+  it("recomputes wrapped item positions after keyed deletions", () => {
+    const users = refarr<(User & { height: number })>(
+      [
+        { id: 1, name: "first", height: 20 },
+        { id: 2, name: "second", height: 40 },
+        { id: 3, name: "third", height: 60 },
+      ],
+      { key: "id" },
+    );
+
+    const list = ListView<User & { height: number }>({
+      key: "id",
+      each: users,
+      size: 3,
+      buffer: 0,
+      itemHeight: 20,
+      gutter: 5,
+      render(item) {
+        return View({}, [item.name]);
+      },
+    });
+
+    for (const slot of list.children as any[]) {
+      slot.$elm = {
+        setStyle: vi.fn(),
+        setStyleValue: vi.fn(),
+        insertChildren: vi.fn(),
+        removeChildren: vi.fn(),
+        getBoundingClientRect() {
+          return { height: slot.state.payload?.height ?? 20 };
+        },
+      };
+    }
+
+    list.$elm = {
+      setStyleValue: vi.fn(),
+      setScrollTop: vi.fn(),
+    };
+    list.state.rendered = true;
+
+    const previousRaf = globalThis.requestAnimationFrame;
+    const previousCancel = globalThis.cancelAnimationFrame;
+    globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    }) as typeof requestAnimationFrame;
+    globalThis.cancelAnimationFrame = vi.fn() as typeof cancelAnimationFrame;
+
+    try {
+      users.as([
+        { id: 2, name: "second", height: 40 },
+        { id: 3, name: "third", height: 60 },
+      ]);
+    } finally {
+      globalThis.requestAnimationFrame = previousRaf;
+      globalThis.cancelAnimationFrame = previousCancel;
+    }
+
+    expect((list.state.wrapped_items as any[]).map((item) => item.top)).toEqual([
+      0,
+      45,
+    ]);
+
+    const boundSlotTopById = new Map(
+      (list.children as any[])
+        .filter((slot) => slot.state.bound)
+        .map((slot) => [slot.state.payload.id, slot.state.top]),
+    );
+    expect(boundSlotTopById.get(2)).toBe(0);
+    expect(boundSlotTopById.get(3)).toBe(45);
+  });
 });

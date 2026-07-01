@@ -143,6 +143,49 @@ export function ListView<T extends Record<string, unknown>>(
     item.top = getItemOffset(idx);
     item.height = getItemHeight(idx);
   };
+  const getItemKey = (item: T | undefined | null) => {
+    return _key && item ? item[_key] : item;
+  };
+  const getWrappedItemKey = (item: WrappedItemInListView<T>) => {
+    return getItemKey(item.v);
+  };
+  const realignHeightCache = (
+    prevItems: T[],
+    prevCache: (number | null)[],
+    nextItems: T[],
+  ) => {
+    const prevCacheByKey = new Map<any, (number | null)[]>();
+    for (let i = 0; i < prevItems.length; i += 1) {
+      const key = getItemKey(prevItems[i]);
+      let cacheItems = prevCacheByKey.get(key);
+      if (!cacheItems) {
+        cacheItems = [];
+        prevCacheByKey.set(key, cacheItems);
+      }
+      cacheItems.push(prevCache[i] ?? null);
+    }
+    _heightCache = nextItems.map((item) => {
+      return prevCacheByKey.get(getItemKey(item))?.shift() ?? null;
+    });
+  };
+  const recomputeWrappedItemPositions = (
+    items: WrappedItemInListView<T>[],
+  ) => {
+    let top = 0;
+    for (let i = 0; i < items.length; i += 1) {
+      const wrappedItem = items[i];
+      const itemHeight = Number(wrappedItem.v?.height);
+      const cachedHeight = _heightCache[i];
+      const height =
+        cachedHeight ??
+        (Number.isFinite(itemHeight) && itemHeight > 0
+          ? itemHeight
+          : _estimatedHeight);
+      wrappedItem.top = top;
+      wrappedItem.height = height;
+      top += height + _gutter;
+    }
+  };
   // ---- end height-cache helpers ----
 
   let _visible_count = _size;
@@ -673,6 +716,7 @@ export function ListView<T extends Record<string, unknown>>(
         // _slot_bindings.clear();
       }
       const prev_items = [...state.items];
+      const prev_height_cache = [..._heightCache];
       const prev_wrapped_items = [...state.wrapped_items];
       const prev_elements = [...state.children];
       const prev_index_computed = state.idx_arr;
@@ -682,8 +726,7 @@ export function ListView<T extends Record<string, unknown>>(
         if (!wrapped_item) {
           continue;
         }
-        const wrapped_key =
-          _key && wrapped_item.v ? wrapped_item.v[_key] : wrapped_item.v;
+        const wrapped_key = getWrappedItemKey(wrapped_item);
         let wrapped_items = prev_wrapped_by_key.get(wrapped_key);
         if (!wrapped_items) {
           wrapped_items = [];
@@ -696,7 +739,7 @@ export function ListView<T extends Record<string, unknown>>(
       );
       for (let i = 0; i < v.length; i += 1) {
         const item = v[i];
-        const item_key = _key && item ? item[_key] : item;
+        const item_key = getItemKey(item);
         const existing = prev_wrapped_by_key.get(item_key)?.shift();
         if (existing) {
           registryGet(existing.v)?.diff(item);
@@ -712,6 +755,8 @@ export function ListView<T extends Record<string, unknown>>(
           height: _estimatedHeight,
         };
       }
+      realignHeightCache(prev_items, prev_height_cache, v);
+      recomputeWrappedItemPositions(next_wrapped_items);
       state.wrapped_items = next_wrapped_items;
       const visible_items = v.slice(_start, _end);
       const new_visible_wrapped_items: WrappedItemInListView<T>[] = [];
@@ -730,7 +775,7 @@ export function ListView<T extends Record<string, unknown>>(
       // 2. Index old items for O(1) lookup
       const old_map = new Map<any, number[]>();
       prev_items.forEach((item, index) => {
-        const k = _key && item ? item[_key] : item;
+        const k = getItemKey(item);
         let indices = old_map.get(k);
         if (!indices) {
           indices = [];
@@ -743,7 +788,7 @@ export function ListView<T extends Record<string, unknown>>(
       // Formula: expected_new_idx = old_idx - deletions_before_old_idx + insertions_before_new_idx
       const new_key_set = new Set<any>();
       for (const item of new_visible_wrapped_items) {
-        const k = _key && item ? item.v[_key] : item.v;
+        const k = getWrappedItemKey(item);
         new_key_set.add(k);
       }
       // removed_old_prefix[i] = number of old items at indices [0, i) that are NOT in new array
@@ -752,13 +797,13 @@ export function ListView<T extends Record<string, unknown>>(
       ).fill(0);
       for (let i = 0; i < prev_items.length; i++) {
         const item = prev_items[i];
-        const k = _key && item ? item[_key] : item;
+        const k = getItemKey(item);
         removed_old_prefix[i + 1] =
           removed_old_prefix[i] + (new_key_set.has(k) ? 0 : 1);
       }
       const old_key_set = new Set<any>();
       for (const item of prev_items) {
-        const k = _key && item ? item[_key] : item;
+        const k = getItemKey(item);
         old_key_set.add(k);
       }
       // insertion_new_prefix[i] = number of new items at indices [0, i) that are NOT in old array
@@ -767,7 +812,7 @@ export function ListView<T extends Record<string, unknown>>(
       ).fill(0);
       for (let i = 0; i < new_visible_wrapped_items.length; i++) {
         const item = new_visible_wrapped_items[i];
-        const k = _key && item ? item.v[_key] : item.v;
+        const k = getWrappedItemKey(item);
         insertion_new_prefix[i + 1] =
           insertion_new_prefix[i] + (old_key_set.has(k) ? 0 : 1);
       }
@@ -783,7 +828,7 @@ export function ListView<T extends Record<string, unknown>>(
       // Iterate new items -> Determine Reused vs Added
       for (let i = 0; i < new_visible_wrapped_items.length; i++) {
         const new_item = new_visible_wrapped_items[i];
-        const k = _key && new_item ? new_item.v[_key] : new_item.v;
+        const k = getWrappedItemKey(new_item);
         const prev_indices = old_map.get(k);
         if (prev_indices && prev_indices.length > 0) {
           // Reused - same key found in old list
