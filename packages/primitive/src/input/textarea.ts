@@ -436,6 +436,7 @@ export function Textarea(props: TextareaProps) {
     },
     value: state.value,
     state,
+    events,
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
         props.onMounted(event);

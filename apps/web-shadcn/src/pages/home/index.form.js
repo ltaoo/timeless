@@ -174,6 +174,9 @@ export default function FormView() {
             store: new Timeless.ui.InputCore({
               defaultValue: "",
               placeholder: "Enter your message...",
+              onChange(e) {
+                console.log(e);
+              },
             }),
           }),
         ]),

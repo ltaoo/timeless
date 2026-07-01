@@ -31,25 +31,25 @@ export function Textarea(
 ) {
   const { store } = props;
 
-  const value$ = refobj(store.value || "");
-  const placeholder$ = ref(store.placeholder || "");
-  const disabled$ = ref(store.disabled || false);
+  const value_ = refobj(store.value || "");
+  const placeholder_ = ref(store.placeholder || "");
+  const disabled_ = ref(store.disabled || false);
 
   const listener$ = ListenerManager();
 
   listener$.push(
     store.onStateChange((state) => {
-      value$.as(state.value || "");
-      placeholder$.as(state.placeholder || "");
-      disabled$.as(state.disabled || false);
+      value_.as(state.value || "");
+      placeholder_.as(state.placeholder || "");
+      disabled_.as(state.disabled || false);
     }),
   );
 
   return NativeTextarea({
     ...props,
-    placeholder: placeholder$,
-    disabled: disabled$,
-    value: value$,
+    placeholder: placeholder_,
+    disabled: disabled_,
+    value: value_,
     onMounted(event) {
       if (props.onMounted) {
         props.onMounted(event);

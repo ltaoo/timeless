@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 import fs from "fs";
 
+import { prefixTailwindClassesPlugin } from "./build/vite-plugin-tailwind-prefix";
 import pkg from "./package.json";
 import { isProd } from "../../vite.config.base";
 
@@ -138,6 +139,7 @@ export default defineConfig({
   },
   plugins: [
     // redirectToPrimitive(),
+    ...prefixTailwindClassesPlugin(resolve(__dirname, "src")),
     dts({
       insertTypesEntry: true,
       rollupTypes: false,

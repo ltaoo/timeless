@@ -102,6 +102,11 @@
       "import": "./dist/dismissable-layer/index.esm.js",
       "require": "./dist/dismissable-layer/index.js"
     },
+    "./drag-drop": {
+      "types": "./dist/drag-drop/index.d.ts",
+      "import": "./dist/drag-drop/index.esm.js",
+      "require": "./dist/drag-drop/index.js"
+    },
     "./drag-zone": {
       "types": "./dist/drag-zone/index.d.ts",
       "import": "./dist/drag-zone/index.esm.js",
@@ -326,6 +331,11 @@
       "types": "./dist/waterfall/index.d.ts",
       "import": "./dist/waterfall/index.esm.js",
       "require": "./dist/waterfall/index.js"
+    },
+    "./window": {
+      "types": "./dist/window/index.d.ts",
+      "import": "./dist/window/index.esm.js",
+      "require": "./dist/window/index.js"
     }
   }
 }
