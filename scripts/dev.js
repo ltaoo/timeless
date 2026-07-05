@@ -9,7 +9,8 @@ const packagesDir = path.join(rootDir, "packages");
 // const playgroundDir = path.join(rootDir, "apps/js-heap-size");
 // const playgroundDir = path.join(rootDir, "apps/web-stress-test");
 // const playgroundDir = path.join(rootDir, "apps/web-vanilla");
-const playgroundDir = path.join(rootDir, "apps/web-shadcn");
+// const playgroundDir = path.join(rootDir, "apps/web-shadcn");
+const playgroundDir = path.join(rootDir, "apps/web-weui");
 // const playgroundDir = path.join(rootDir, "apps/database-ui");
 // const playgroundDir = path.join(rootDir, "apps/ssr-demo");
 // const playgroundDir = path.join(rootDir, "apps/download-task-list");
@@ -45,6 +46,11 @@ const artifacts = [
     dest: "timeless.shadcn.umd.min.js",
   },
   {
+    pkg: "weui",
+    src: "packages/weui/dist/timeless.weui.umd.min.js",
+    dest: "timeless.weui.umd.min.js",
+  },
+  {
     pkg: "timeless-dom",
     src: "packages/timeless-dom/dist/timeless.dom.umd.min.js",
     dest: "timeless.dom.umd.min.js",
@@ -77,7 +83,7 @@ const buildRelations = {
   // shadcn: ["timeless"],
   // icons: ["timeless"],
   primitive: ["timeless"],
-  timeless: ["shadcn", "timeless-dom"],
+  timeless: ["shadcn", "weui", "timeless-dom"],
 };
 
 let buildQueue = null;
@@ -101,6 +107,8 @@ function copyArtifacts() {
     "timeless.dom.umd.min.js",
     "timeless.shadcn.umd.min.js",
     "timeless.shadcn.css",
+    "timeless.weui.umd.min.js",
+    "timeless.weui.css",
     "timeless.web.umd.min.js",
   ]);
   for (const dir of [distDir, publicDir]) {
@@ -116,7 +124,7 @@ function copyArtifacts() {
 
   // Also copy CSS files from each package's dist/
   const cssFiles = [];
-  const cssWhitelist = new Set(["shadcn"]);
+  const cssWhitelist = new Set(["shadcn", "weui"]);
   for (const pkg of cssWhitelist) {
     const pkgDist = path.join(packagesDir, pkg, "dist");
     if (!fs.existsSync(pkgDist)) continue;

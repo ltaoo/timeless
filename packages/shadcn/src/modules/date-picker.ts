@@ -147,12 +147,12 @@ export function DatePicker(
               ]),
               // Calendar Body
               For({
-                each: computed(calendar_state_, (s) => s.weeks),
-                render(week) {
+                each: computed(calendar_state_, (s) => s.weeks) as any,
+                render(week: any) {
                   return View({ class: "grid grid-cols-7" }, [
                     For({
-                      each: computed(week, (t) => t.dates),
-                      render(day) {
+                      each: computed(week, (t: any) => t.dates) as any,
+                      render(day: any) {
                         return DatePickerPrimitive.CalendarCell(
                           {
                             store,

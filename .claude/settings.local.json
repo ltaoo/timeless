@@ -68,7 +68,11 @@
       "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\ncapture_screenshot\\(\"/tmp/flicker-fix-verify.png\"\\)\nprint\\(\"done\"\\)\nPY)",
       "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\nimport time; time.sleep\\(0.3\\)\nresult = js\\(\"window.__scrollCheck || 'no result'\"\\)\nprint\\(\"Scroll check:\", result\\)\nPY)",
       "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\nimport time; time.sleep\\(0.5\\)\nresult = js\\(\"window.__scrollCheck || 'no result'\"\\)\nprint\\(\"Scroll check:\", result\\)\nPY)",
-      "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\ncapture_screenshot\\(\"/tmp/abs-pos-scroll.png\"\\)\nprint\\(\"done\"\\)\nPY)"
+      "Bash(browser-harness <<'PY'\nensure_real_tab\\(\\)\ncapture_screenshot\\(\"/tmp/abs-pos-scroll.png\"\\)\nprint\\(\"done\"\\)\nPY)",
+      "Bash(ls:*)",
+      "Bash(npx timeless frontend --help:*)",
+      "Bash(npx vite --help:*)",
+      "Bash(timeout 5 npx vite:*)"
     ]
   }
 }

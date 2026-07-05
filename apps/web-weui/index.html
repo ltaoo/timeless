@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Timeless WeUI Demo</title>
+  <base href="/" />
+  <script type="importmap">
+    {
+      "imports": {
+        "@/": "./src/"
+      }
+    }
+  </script>
+  <link href="public/timeless/0.27.0/timeless.weui.css" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      background: var(--weui-BG-1);
+      color: var(--weui-FG-0);
+      font-size: var(--weui-FONT-SIZE);
+      -webkit-font-smoothing: antialiased;
+    }
+    #root { min-height: 100vh; }
+  </style>
+  <script src="public/timeless/0.27.0/timeless.umd.min.js"></script>
+  <script src="public/timeless/0.27.0/timeless.dom.umd.min.js"></script>
+  <script src="public/timeless/0.27.0/timeless.weui.umd.min.js"></script>
+  <script src="public/timeless/0.27.0/timeless.web.umd.min.js"></script>
+  <script src="public/timeless/0.27.0/timeless.utils.umd.min.js"></script>
+  <script>
+    console.log("[weui-setup] Timeless.weui exports:", Object.keys(Timeless.weui || {}).length);
+    if (Timeless.weui && Timeless.weui.kit) {
+      Object.assign(Timeless, Timeless.weui.kit);
+    }
+    Timeless.ui = Timeless.weui.ui;
+    Object.assign(window, Timeless);
+    Object.assign(window, Timeless.weui);
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="src/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,117 @@
+import { resolve } from "path";
+import { defineConfig } from "vite";
+import dts from "vite-plugin-dts";
+import fs from "fs";
+
+import pkg from "./package.json";
+import { isProd } from "../../vite.config.base";
+
+const name = "timeless.weui";
+const externals = ["@timeless/timeless"] as const;
+
+function isExternal(id: string) {
+  return externals.some(
+    (pkgName) => id === pkgName || id.startsWith(`${pkgName}/`),
+  );
+}
+
+function rewriteDtsImports() {
+  const distDir = resolve(__dirname, "dist");
+  const replacements: Array<[string, string]> = [
+    ['"@timeless/reactive"', '"@timeless/timeless"'],
+    ["'@timeless/reactive'", "'@timeless/timeless'"],
+    ['"@timeless/base"', '"@timeless/timeless"'],
+    ["'@timeless/base'", "'@timeless/timeless'"],
+    ['"@timeless/kit"', '"@timeless/timeless"'],
+    ["'@timeless/kit'", "'@timeless/timeless'"],
+  ];
+
+  function walk(dir: string) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = resolve(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+        continue;
+      }
+      if (!entry.isFile() || !fullPath.endsWith(".d.ts")) continue;
+      const before = fs.readFileSync(fullPath, "utf-8");
+      let after = before;
+      for (const [from, to] of replacements) {
+        after = after.split(from).join(to);
+      }
+      if (after !== before) {
+        fs.writeFileSync(fullPath, after, "utf-8");
+      }
+    }
+  }
+
+  return {
+    name: "weui-rewrite-dts-imports",
+    apply: "build",
+    enforce: "post",
+    closeBundle() {
+      walk(distDir);
+    },
+  };
+}
+
+export default defineConfig({
+  css: {
+    preprocessorOptions: {
+      less: {
+        math: "always",
+      },
+    },
+  },
+  define: {
+    __Version: JSON.stringify(pkg.version),
+  },
+  build: {
+    lib: {
+      entry: resolve(__dirname, "src/index.ts"),
+      formats: ["es", "cjs", "umd"],
+      fileName: (format) => {
+        if (format === "es") {
+          return `index.esm.js`;
+        }
+        if (format === "umd") {
+          return `${name}.umd.min.js`;
+        }
+        return "index.js";
+      },
+      name: "Timeless.weui",
+    },
+    minify: isProd ? "terser" : false,
+    ...(isProd && {
+      terserOptions: {
+        compress: {
+          drop_console: true,
+        },
+      },
+    }),
+    sourcemap: isProd ? false : true,
+    rollupOptions: {
+      external: ["@timeless/timeless"],
+      output: {
+        extend: true,
+        globals: {
+          "@timeless/timeless": "Timeless",
+        },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith(".css")) {
+            return "timeless.weui.css";
+          }
+          return assetInfo.name || "assets/[name]-[hash][extname]";
+        },
+      },
+    },
+  },
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+      rollupTypes: false,
+    }),
+    rewriteDtsImports(),
+  ],
+});

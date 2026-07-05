@@ -1,0 +1,13 @@
+{
+  "name": "@timeless/web-weui",
+  "version": "1.0.0",
+  "description": "WeUI component demo application",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev"
+  },
+  "devDependencies": {
+    "@timeless/cli": "workspace:*",
+    "@timeless/types": "workspace:*"
+  }
+}

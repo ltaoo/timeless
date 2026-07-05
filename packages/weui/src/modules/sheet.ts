@@ -1,0 +1,102 @@
+import { computed, Icon, refobj } from "@timeless/timeless";
+import { View, ViewChildren, ViewProps } from "@timeless/timeless";
+import { SheetPrimitive } from "@timeless/ui-primitive";
+import { DialogCore } from "@timeless/ui-vm";
+
+const SIDE_POS: Record<string, Record<string, string>> = {
+  right: { top: "0", right: "0", bottom: "0", width: "75%", "max-width": "400px" },
+  left: { top: "0", left: "0", bottom: "0", width: "75%", "max-width": "400px" },
+  top: { top: "0", left: "0", right: "0" },
+  bottom: { bottom: "0", left: "0", right: "0" },
+};
+
+export function Sheet(
+  props: ViewProps & {
+    store: DialogCore;
+    side?: "right" | "top" | "bottom" | "left";
+  },
+  children: ViewChildren | (() => ViewChildren) = [],
+) {
+  const { store, side = "right", ...rest } = props;
+  const state_ = refobj(store.state);
+
+  store.onStateChange((v) => {
+    state_.as(v);
+  });
+
+  return SheetPrimitive.Root({ store }, () => [
+    SheetPrimitive.Overlay({
+      store,
+      style: computed(state_, (d) => {
+        const result: Record<string, string> = {
+          position: "fixed",
+          inset: "0",
+          "z-index": "50",
+          background: "var(--weui-OVERLAY)",
+        };
+        if (d.enter) {
+          result.animation = "weui-fade-in 0.2s ease-out";
+        }
+        if (d.exit) {
+          result.animation = "weui-fade-out 0.18s ease-in forwards";
+        }
+        return result;
+      }),
+    }),
+    View(
+      {
+        style: {
+          position: "fixed",
+          "z-index": "50",
+          ...(SIDE_POS[side] || SIDE_POS.right),
+        },
+      },
+      [
+        SheetPrimitive.Content(
+          {
+            store,
+            side,
+            style: computed(state_, (d) => {
+              const sideKey = SIDE_POS[side] ? side : "right";
+              const result: Record<string, string> = {
+                position: "relative",
+                height: "100%",
+                width: "100%",
+                background: "var(--weui-BG-2)",
+                padding: "var(--weui-CELL-GAP)",
+                "box-shadow": "-2px 0 8px rgba(0,0,0,.1)",
+              };
+              if (d.enter) {
+                result.animation = `weui-sheet-in-${sideKey} 0.2s ease-out forwards`;
+              }
+              if (d.exit) {
+                result.animation = `weui-sheet-out-${sideKey} 0.16s ease-in forwards`;
+              }
+              return result;
+            }),
+            ...rest,
+          },
+          [
+            SheetPrimitive.Close(
+              {
+                store,
+                style: {
+                  position: "absolute",
+                  right: "16px",
+                  top: "16px",
+                  cursor: "pointer",
+                  color: "var(--weui-FG-2)",
+                  "font-size": "18px",
+                },
+              },
+              [Icon({ name: "x", size: 18 })],
+            ),
+            ...(typeof children === "function"
+              ? (children() as any[])
+              : (children as any[])),
+          ],
+        ),
+      ],
+    ),
+  ]);
+}

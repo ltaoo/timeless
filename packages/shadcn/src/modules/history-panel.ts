@@ -182,7 +182,7 @@ export function HistoryPanel(
                         [
                           For({
                             each: histories,
-                            render(history) {
+                            render(history: any) {
                               const { pathname } = history;
                               return View(
                                 {

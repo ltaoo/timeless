@@ -136,12 +136,12 @@ function CalendarPanel(props: {
       For({
         each: computed(calendar_state_, (s) =>
           side === "left" ? s.left.weeks : s.right.weeks,
-        ),
-        render(week) {
+        ) as any,
+        render(week: any) {
           return View({ class: "grid grid-cols-7" }, [
             For({
-              each: computed(week, (t) => t.dates),
-              render(day) {
+              each: computed(week, (t: any) => t.dates) as any,
+              render(day: any) {
                 return DateRangePickerPrimitive.CalendarCell(
                   {
                     store,

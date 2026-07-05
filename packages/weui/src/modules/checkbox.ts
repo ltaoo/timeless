@@ -1,0 +1,78 @@
+import { View, ViewProps, Icon } from "@timeless/timeless";
+import { ref, computed, ListenerManager } from "@timeless/timeless";
+import { CheckboxPrimitive } from "@timeless/ui-primitive";
+import { CheckboxCore } from "@timeless/ui-vm";
+
+export function Checkbox(
+  props: ViewProps & { store: CheckboxCore; id?: string },
+) {
+  const { store, id, ...rest } = props;
+  const state_ = ref(store.state);
+  const listener$ = ListenerManager([state_]);
+
+  listener$.add(
+    store.onStateChange(() => {
+      state_.as(store.state);
+    }),
+  );
+
+  return CheckboxPrimitive.Root(
+    {
+      store,
+    },
+    [
+      CheckboxPrimitive.Input({ store, id }),
+      CheckboxPrimitive.Box(
+        {
+          ...rest,
+          store,
+          style: computed(state_, (s) => {
+            const result: Record<string, string> = {
+              width: "20px",
+              height: "20px",
+              "border-radius": "50%",
+              display: "flex",
+              "align-items": "center",
+              "justify-content": "center",
+              "flex-shrink": "0",
+              transition: "all .2s",
+              cursor: "pointer",
+            };
+            if (s.checked) {
+              result.background = "var(--weui-BRAND)";
+              result.border = "1px solid var(--weui-BRAND)";
+            } else {
+              result.background = "transparent";
+              result.border = "1px solid var(--weui-FG-2)";
+            }
+            if (s.disabled) {
+              result.opacity = "0.3";
+              result.cursor = "not-allowed";
+            }
+            return result;
+          }),
+          onUnmounted() {
+            listener$.destroy();
+          },
+        },
+        [
+          View(
+            {
+              style: computed(state_, (s) => {
+                if (s.checked) {
+                  return {
+                    color: "#fff",
+                    "font-size": "12px",
+                    "line-height": "1",
+                  };
+                }
+                return { display: "none" };
+              }),
+            },
+            [Icon({ name: "check", size: 12 })],
+          ),
+        ],
+      ),
+    ],
+  );
+}
