@@ -41,7 +41,7 @@ export function Dialog(
         store,
         class: computed(presence_state_, (d) => {
           const baseClass =
-            "fixed inset-0 isolate z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs";
+            "fixed inset-0 isolate z-100 bg-black/10 supports-backdrop-filter:backdrop-blur-xs";
           const enterClass = d.enter
             ? "animate-in fill-mode-both fade-in-0 duration-100 ease-out"
             : "";
@@ -57,7 +57,9 @@ export function Dialog(
       }),
       View(
         {
-          class: "fixed inset-0 z-50 flex items-start justify-center p-4 pt-[10vh]",
+          class:
+            "fixed inset-0 z-100 flex items-start justify-center p-4 pt-[10vh]",
+          style: sty,
         },
         [
           View(

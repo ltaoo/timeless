@@ -21,14 +21,14 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/ui-vm": "workspace:*",
-    "@timeless/ui-primitive": "workspace:*",
-    "@timeless/kit": "workspace:*",
     "@timeless/icons": "workspace:*",
-    "@timeless/timeless": "workspace:*"
+    "@timeless/kit": "workspace:*",
+    "@timeless/timeless": "workspace:*",
+    "@timeless/ui-primitive": "workspace:*",
+    "@timeless/ui-vm": "workspace:*"
   },
   "devDependencies": {
-    "less": "^4.2.0",
+    "less": "^4.6.7",
     "typescript": "^5.9.3"
   }
 }

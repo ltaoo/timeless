@@ -427,12 +427,23 @@ function prefixCssSelector(selector: string) {
   return next;
 }
 
+function unwrapLayers(root: postcss.Root) {
+  root.walkAtRules("layer", (atRule) => {
+    if (atRule.nodes && atRule.nodes.length > 0) {
+      atRule.replaceWith(atRule.nodes);
+    } else {
+      atRule.remove();
+    }
+  });
+}
+
 function prefixTailwindCss(css: string) {
   const root = postcss.parse(css);
   root.walkRules((rule) => {
     if (!isInLayer(rule, "utilities")) return;
     rule.selector = prefixCssSelector(rule.selector);
   });
+  unwrapLayers(root);
   return root.toString();
 }
 

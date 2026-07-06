@@ -15,6 +15,7 @@ import { Toast } from "./modules/toast";
 import { Badge } from "./modules/badge";
 import { Separator } from "./modules/separator";
 import { Skeleton } from "./modules/skeleton";
+import { DropdownMenu } from "./modules/dropdown-menu";
 import {
   Card,
   CardHeader,
@@ -51,6 +52,7 @@ export {
   Badge,
   Separator,
   Skeleton,
+  DropdownMenu,
   Card,
   CardHeader,
   CardTitle,
