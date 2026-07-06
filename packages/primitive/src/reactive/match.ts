@@ -1,6 +1,12 @@
 import { isRef, Ref } from "@timeless/reactive";
 
-import { TimelessElement, ViewChildren, ViewChildrenArray, isElement, resolve_children } from "@/content/type";
+import {
+  TimelessElement,
+  ViewChildren,
+  ViewChildrenArray,
+  isElement,
+  resolve_children,
+} from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
@@ -106,26 +112,23 @@ export function Match(props: MatchProps) {
             if (value === state.value) {
               return;
             }
-
+            state.value = value;
             // 清理旧内容的生命周期
-            methods.cleanup_old_children();
+            // methods.cleanup_old_children();
 
             // 移除旧内容
             if (typeof $elm.removeChildren === "function") {
               $elm.removeChildren();
             }
-            // 获取新内容
-            const target = methods.build_children_with_value(value);
-
-            // 添加新内容
-            if (
-              target.length > 0 &&
-              typeof $elm.insertChildren === "function"
-            ) {
-              $elm.insertChildren(target);
-            } else {
-              state.children = [];
+            for (const child of state.children) {
+              if (isElement(child)) {
+                if (child.beforeUnmounted) child.beforeUnmounted();
+                if (child.onUnmounted) child.onUnmounted();
+              }
             }
+            const target = methods.build_children_with_value(value);
+            state.children = target;
+            $elm.insertChildren(target);
           },
         });
         listener$.push(unsub);

@@ -36,7 +36,7 @@ export function DOMButton(props: {
     },
     hydrate(elm: TimelessElement, $elm: HTMLButtonElement) {
       // console.log("hydrate button element", $elm, elm.events);
-      if ($elm instanceof Text) {
+      if ($elm.nodeType === 3) {
         return;
       }
       common$.methods.set$elm($elm);

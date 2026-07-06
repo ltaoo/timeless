@@ -27,24 +27,48 @@ function APageView() {
     console.log("counter changed");
     return t * 2;
   });
+  const status_ = ref(1);
 
   return View(
     {
       onMounted() {
-        const timer = setInterval(() => {
-          console.log("updater timer");
-          counter.as((prev) => prev + 1);
-        }, 1000);
-        return function () {
-          clearInterval(timer);
-          // counter.destroy();
-        };
+        // const timer = setInterval(() => {
+        //   console.log("updater timer");
+        //   counter.as((prev) => prev + 1);
+        // }, 1000);
+        // return function () {
+        //   clearInterval(timer);
+        //   // counter.destroy();
+        // };
       },
     },
     [
       View({ style: { padding: "12px" } }, [
-        View({}, ["Hello World", counter]),
-        View({}, [Icon({ name: "check" })]),
+        View(
+          {
+            onClick() {
+              status_.as((prev) => {
+                if (prev > 4) {
+                  return 0;
+                }
+                return (prev += 1);
+              });
+            },
+          },
+          [Icon({ name: "check" })],
+        ),
+        Match({
+          when: status_,
+          cases: {
+            1() {
+              return "1";
+            },
+            2() {
+              return "2";
+            },
+          },
+        }),
+        View({}, ["a"]),
       ]),
     ],
   );

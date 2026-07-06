@@ -63,7 +63,7 @@ export function HostElement(props: {
       style: ViewStyleProperties,
       opt: Partial<{ initial?: boolean }> = {},
     ) {
-      if (!$elm || $elm instanceof Text) {
+      if (!$elm || $elm.nodeType === 3) {
         return;
       }
       const cssText = viewStyleToCssText(style);
@@ -81,7 +81,7 @@ export function HostElement(props: {
     },
     setStyleSet(styleSet: string[], opt: Partial<{ initial?: boolean }> = {}) {
       // console.log(`[dom]${props.t} - setStyleSet`, $elm, styleSet, opt);
-      if (!$elm || $elm instanceof Text || !styleSet) {
+      if (!$elm || $elm.nodeType === 3 || !styleSet) {
         return;
       }
       if (!opt.initial) {
@@ -98,20 +98,20 @@ export function HostElement(props: {
     },
     setStyleValue(key: any, value: string) {
       // console.log(props.t + "[HostElement]setStyleValue", key, value, $elm);
-      if (!$elm || $elm instanceof Text) {
+      if (!$elm || $elm.nodeType === 3) {
         return;
       }
       $elm.style[key] = value;
     },
     setAttribute(key: string, value: string) {
       // console.log(props.t + "[dom]box - setAttribute", key, value, $elm);
-      if (!$elm || $elm instanceof Text) {
+      if (!$elm || $elm.nodeType === 3) {
         return;
       }
       $elm.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      if (!$elm || $elm instanceof Text) {
+      if (!$elm || $elm.nodeType === 3) {
         return;
       }
       $elm.removeAttribute(key);
@@ -132,13 +132,13 @@ export function HostElement(props: {
       return $elm.getBoundingClientRect();
     },
     blur() {
-      if (!$elm || $elm instanceof Text) {
+      if (!$elm || $elm.nodeType === 3) {
         return;
       }
       $elm.blur();
     },
     focus() {
-      if (!$elm || $elm instanceof Text) {
+      if (!$elm || $elm.nodeType === 3) {
         return;
       }
       $elm.focus();
@@ -148,12 +148,12 @@ export function HostElement(props: {
       handler: (event: any) => void,
       options?: any,
     ) {
-      if (!$elm || $elm instanceof Text) {
+      if (!$elm || $elm.nodeType === 3) {
         return;
       }
       $elm.addEventListener(type, handler, options);
       return function () {
-        if (!$elm || $elm instanceof Text) {
+        if (!$elm || $elm.nodeType === 3) {
           return;
         }
         $elm.removeEventListener(type, handler, options);
@@ -164,13 +164,13 @@ export function HostElement(props: {
       handler: (event: any) => void,
       options?: any,
     ) {
-      if (!$elm || $elm instanceof Text) {
+      if (!$elm || $elm.nodeType === 3) {
         return;
       }
       $elm.removeEventListener(type, handler, options);
     },
     setupEventListener(events: any) {
-      if (!events || !$elm || $elm instanceof Text) {
+      if (!events || !$elm || $elm.nodeType === 3) {
         return;
       }
       if (events.onClick) {
@@ -238,7 +238,7 @@ export function HostElement(props: {
       }
     },
     teardownEventListener(events: any) {
-      if (!events || !$elm || $elm instanceof Text) {
+      if (!events || !$elm || $elm.nodeType === 3) {
         return;
       }
       _events = events;
@@ -414,12 +414,12 @@ export function HostElement(props: {
     // 这个应该叫 insert sibling 更合理
     insertChildren(
       children: (TimelessElement | null)[],
-      opt?: { $parent: any },
+      opt?: { $parent: any; logger?: any },
     ) {
       const r = methods.buildChildren(children);
       const $parent = opt?.$parent || methods.getParent();
       if ($parent) {
-        if ($elm && $elm instanceof Text) {
+        if ($elm && $elm.nodeType === 3) {
           $parent.insertBefore(r.$fragment, $elm);
         } else {
           $parent.appendChild(r.$fragment);

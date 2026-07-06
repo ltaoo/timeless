@@ -1,38 +1,129 @@
-import { isElement, TimelessElement, VNodeView } from "@timeless/timeless";
+import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { HostElement } from "./box";
+import { hydrate_node } from "@/renderer/hydrate";
+import { Logger } from "@/util/logger";
+
+import {
+  HostElement,
+  countRenderedNodes,
+  insertedAnchor,
+  isEmptyNode,
+  isFragment,
+} from "./box";
+
+const logger = Logger({
+  prefix: "dom",
+  scope: "match",
+  prefixColor: "#ff6b6b",
+});
 
 export type DOMMatch = VNodeView<Text> & {
   t: "match";
   render(elm: TimelessElement): DocumentFragment;
-  hydrate(elm: TimelessElement, $dom: Text): void;
+  // hydrate(elm: TimelessElement, $elm: Text): void;
 };
 
 export function DOMMatch(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
 }): DOMMatch {
-  // const $fragment = document.createDocumentFragment();
   const t = "match";
   const $anchor = document.createTextNode("");
-  const common$ = HostElement({ $elm: $anchor, t, build: props.build });
+  const box$ = HostElement({ $elm: $anchor, t, build: props.build });
 
   return {
-    ...common$.methods,
+    ...box$.methods,
     t,
     getType() {
       return "reactive";
     },
-    get$elm: common$.methods.get$elm,
     isDocumentFragment() {
-      return true;
+      return false;
     },
     render(elm: TimelessElement) {
-      const $fragment = common$.methods.render(elm.children);
+      const $fragment = box$.methods.render(elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
     },
-    hydrate(elm: TimelessElement, $dom: Text) {
-      // common$.methods.hydrate(elm, $dom);
+    hydrate(
+      elm: TimelessElement,
+      $elm: HTMLElement | Text,
+      opt: { $parent: HTMLElement; offset: number; idx: number },
+    ) {
+      logger.log("hydrate", elm, opt.$parent, opt.offset, opt.idx);
+      const $anchor = document.createTextNode("");
+      box$.methods.set$elm($anchor);
+
+      const $v = opt.$parent || $elm;
+      const idx = opt.offset;
+
+      const hydrated_child_nodes: (VNodeView | null)[] = [];
+      const hydrated_child_elements: (TimelessElement | null)[] = [];
+
+      if ($v && $v instanceof HTMLElement && idx !== undefined) {
+        if (elm.children) {
+          const total_nodes = countRenderedNodes(elm);
+          // console.log("[]match totalNodes", total_nodes);
+          const $children = Array.from($v.childNodes) as (HTMLElement | Text)[];
+
+          // const idx = $children.indexOf($elm);
+          const $children_belong_me = $children.slice(idx, idx + total_nodes);
+          box$.methods.set$childrne($children_belong_me);
+
+          const $last = $children[idx + total_nodes];
+          logger.log("find my $children", idx, $children_belong_me, $last);
+          if ($last) {
+            $v.insertBefore($anchor, $last);
+          } else {
+            $v.appendChild($anchor);
+          }
+          let offset = idx;
+          let $child_offset = 0;
+          for (let i = 0; i < elm.children.length; i += 1) {
+            const child = elm.children[i];
+            const $child = $children_belong_me[$child_offset] as
+              | HTMLElement
+              | Text;
+            logger.log("each child", i, child, $child, offset);
+            if (child) {
+              hydrated_child_elements.push(child);
+              const child$ = hydrate_node(child, $child, {
+                $parent: $v,
+                offset,
+                idx: i,
+              });
+              if (child$) {
+                if (isEmptyNode(child)) {
+                } else if (isFragment(child)) {
+                  const count_$children = child$.get$children().length;
+                  offset += count_$children;
+                  offset += insertedAnchor(child) ? 1 : 0;
+                  $child_offset += count_$children;
+                } else {
+                  offset += 1;
+                  $child_offset += 1;
+                }
+                hydrated_child_nodes.push(child$);
+              }
+            }
+          }
+          box$.methods.setchildnode(hydrated_child_nodes);
+          box$.methods.setchildrenelement(hydrated_child_elements);
+        }
+      }
+    },
+    getChildren: box$.methods.getChildren,
+    buildChildren: box$.methods.buildChildren,
+    insertChildren(children: TimelessElement[]) {
+      logger.log("before insert children", children);
+      // box$.methods.removeChildren();
+      box$.methods.insertChildren(children);
+    },
+    removeChildren() {
+      // console.log("[]match remove children");
+      box$.methods.removeChildren();
+    },
+    getParent() {
+      return $anchor.parentElement;
     },
   };
 }

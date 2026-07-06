@@ -54,7 +54,7 @@ export function DOMText(props: {
       return $text;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {
-      if ($elm instanceof Text) {
+      if ($elm.nodeType === 3) {
         $text = $elm;
         box$.methods.set$elm($text);
         box$.methods.setupEventListener(elm.events);

@@ -93,7 +93,7 @@ export function hydrate_node(
   //   return null;
   // }
   if (vnode.t === "view") {
-    if ($elm instanceof Text) {
+    if ($elm.nodeType === 3) {
       return null;
     }
     const view$ = build(vnode);
@@ -102,7 +102,7 @@ export function hydrate_node(
     return view$;
   }
   if (vnode.t === "text") {
-    if (!($elm instanceof Text)) {
+    if (!($elm.nodeType === 3)) {
       return null;
     }
     const text$ = build(vnode);
