@@ -82,14 +82,13 @@ export default defineConfig({
       },
       name: "Timeless.weui",
     },
-    minify: isProd ? "terser" : false,
-    ...(isProd && {
-      terserOptions: {
-        compress: {
-          drop_console: true,
-        },
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true,
       },
-    }),
+    },
+    cssMinify: true,
     sourcemap: isProd ? false : true,
     rollupOptions: {
       external: ["@timeless/timeless"],

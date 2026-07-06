@@ -50,17 +50,7 @@ export function DropdownMenu(
       () => [
         View(
           {
-            style: {
-              position: "relative",
-              "z-index": "50",
-              "min-width": "140px",
-              overflow: "hidden",
-              background: "#1b1b1b",
-              border: "1px solid var(--weui-BG-4)",
-              "border-radius": "8px",
-              "box-shadow": "0 6px 30px rgba(0, 0, 0, 0.15)",
-              padding: "6px",
-            },
+            class: "weui-dropdown-menu",
           },
           [
             For({
@@ -86,11 +76,7 @@ export function DropdownMenu(
 
 function DropdownMenuSeparator(_props: ViewProps) {
   return DropdownMenuPrimitive.Separator({
-    style: {
-      height: "1px",
-      margin: "4px 8px",
-      background: "rgba(255, 255, 255, 0.1)",
-    },
+    class: "weui-dropdown-menu__separator",
   });
 }
 
@@ -105,11 +91,7 @@ function DropdownMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
         return [
           View(
             {
-              style: {
-                padding: "6px 10px",
-                "font-size": "12px",
-                color: "rgba(255, 255, 255, 0.5)",
-              },
+              class: "weui-dropdown-menu__group-label",
             },
             [computed(state_, (t) => t.label)],
           ),
@@ -184,28 +166,11 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
       DropdownMenuPrimitive.Item(
         {
           store: props.store,
-          style: computed(state_, (t) => {
-            const result: Record<string, string> = {
-              padding: "6px",
-              "font-size": "14px",
-              "line-height": "1.4",
-              color: "rgba(255, 255, 255, 0.9)",
-              cursor: "pointer",
-              display: "flex",
-              "align-items": "center",
-              gap: "8px",
-              "border-radius": "6px",
-              transition: "background .15s",
-            };
-            if (t.focused) {
-              result.background = "var(--weui-BRAND)";
-              result.color = "#fff";
-            }
-            if (t.disabled) {
-              result.opacity = "0.3";
-              result["pointer-events"] = "none";
-            }
-            return result;
+          class: computed(state_, (t) => {
+            let cls = "weui-dropdown-menu__item";
+            if (t.focused) cls += " weui-dropdown-menu__item--focused";
+            if (t.disabled) cls += " weui-dropdown-menu__item--disabled";
+            return cls;
           }),
         },
         [
@@ -215,21 +180,14 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
               return [
                 View(
                   {
-                    style: {
-                      width: "20px",
-                      height: "20px",
-                      display: "flex",
-                      "align-items": "center",
-                      "justify-content": "center",
-                      "flex-shrink": "0",
-                    },
+                    class: "weui-dropdown-menu__icon",
                   },
                   [props.store.icon as TimelessElement],
                 ),
               ];
             },
           }),
-          View({ style: { flex: "1" } }, [props.store.label]),
+          View({ class: "weui-dropdown-menu__label" }, [props.store.label]),
           Show({
             when: is_checked_,
             ok() {
@@ -249,7 +207,7 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
                 Icon({
                   name: "chevron-right",
                   size: 14,
-                  style: { "flex-shrink": "0", opacity: "0.6" },
+                  class: "weui-dropdown-menu__chevron",
                 }),
               ];
             },
@@ -276,17 +234,7 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
                     [
                       View(
                         {
-                          style: {
-                            position: "relative",
-                            "z-index": "50",
-                            "min-width": "120px",
-                            overflow: "hidden",
-                            background: "#1b1b1b",
-                            border: "1px solid var(--weui-BG-4)",
-                            "border-radius": "8px",
-                            "box-shadow": "0 6px 30px rgba(0, 0, 0, 0.15)",
-                            padding: "6px",
-                          },
+                          class: "weui-dropdown-menu weui-dropdown-menu__submenu",
                         },
                         [
                           Show({

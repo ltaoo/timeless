@@ -1,0 +1,762 @@
+[33m[33m[MISSING_GLOBAL_NAME] Warning:[0m No name was provided for external module "@timeless/base" in "output.globals" – guessing "_timeless_base".
+[39m
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugin `vite:dts`. See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugin `vite:dts`. See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugin `vite:dts`. See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[33m[33m[MISSING_GLOBAL_NAME] Warning:[0m No name was provided for external module "@timeless/kit" in "output.globals" – guessing "_timeless_kit".
+[39m
+[33m[33m[MISSING_GLOBAL_NAME] Warning:[0m No name was provided for external module "@timeless/timeless" in "output.globals" – guessing "_timeless_timeless".
+[39m
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugins. Here is a breakdown:
+  - shadcn-prefix-tailwind-source-classes (72%)
+  - vite:dts (24%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[31m✗[39m Build failed in 1.88s
+[31merror during build:
+[31mBuild failed with 1 error:
+
+[plugin vite:dts]
+Error: Internal Error: The referenced path was not found: C:/Users/litao/Documents/workspace/timeless/packages/utils/dist/primitive.d.ts
+
+You have encountered a software defect. Please consider reporting the issue to the maintainers of this application.
+    at SourceMapper._getMappedSourceLocation (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\@microsoft+api-extractor@7.58.1_@types+node@25.0.9\node_modules\@microsoft\api-extractor\lib-commonjs\collector\SourceMapper.js:70:19)
+    at SourceMapper.getSourceLocation (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\@microsoft+api-extractor@7.58.1_@types+node@25.0.9\node_modules\@microsoft\api-extractor\lib-commonjs\collector\SourceMapper.js:63:43)
+    at ApiModelGenerator._getFileUrlPath (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\@microsoft+api-extractor@7.58.1_@types+node@25.0.9\node_modules\@microsoft\api-extractor\lib-commonjs\generators\ApiModelGenerator.js:879:61)
+    at ApiModelGenerator._processApiFunction (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\@microsoft+api-extractor@7.58.1_@types+node@25.0.9\node_modules\@microsoft\api-extractor\lib-commonjs\generators\ApiModelGenerator.js:449:38)
+    at ApiModelGenerator._processDeclaration (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\@microsoft+api-extractor@7.58.1_@types+node@25.0.9\node_modules\@microsoft\api-extractor\lib-commonjs\generators\ApiModelGenerator.js:177:22)
+    at ApiModelGenerator._processAstEntity (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\@microsoft+api-extractor@7.58.1_@types+node@25.0.9\node_modules\@microsoft\api-extractor\lib-commonjs\generators\ApiModelGenerator.js:96:22)
+    at ApiModelGenerator.buildApiPackage (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\@microsoft+api-extractor@7.58.1_@types+node@25.0.9\node_modules\@microsoft\api-extractor\lib-commonjs\generators\ApiModelGenerator.js:83:22)
+    at Extractor.invoke (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\@microsoft+api-extractor@7.58.1_@types+node@25.0.9\node_modules\@microsoft\api-extractor\lib-commonjs\api\Extractor.js:149:41)
+    at rollupDeclarationFiles (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\vite-plugin-dts@4.5.4_@type_79377cd62e8cf36c6f2010a75b856a30\node_modules\vite-plugin-dts\dist\index.cjs:402:33)
+    at rollup (C:\Users\litao\Documents\workspace\timeless\node_modules\.pnpm\vite-plugin-dts@4.5.4_@type_79377cd62e8cf36c6f2010a75b856a30\node_modules\vite-plugin-dts\dist\index.cjs:1269:28)[31m
+    at aggregateBindingErrorsIntoJsError (file:///C:/Users/litao/Documents/workspace/timeless/node_modules/.pnpm/rolldown@1.0.0-rc.6/node_modules/rolldown/dist/shared/error-BYPsvVEN.mjs:52:18)
+    at unwrapBindingResult (file:///C:/Users/litao/Documents/workspace/timeless/node_modules/.pnpm/rolldown@1.0.0-rc.6/node_modules/rolldown/dist/shared/error-BYPsvVEN.mjs:22:128)
+    at #build (file:///C:/Users/litao/Documents/workspace/timeless/node_modules/.pnpm/rolldown@1.0.0-rc.6/node_modules/rolldown/dist/shared/rolldown-build-BsRSEDqH.mjs:3356:34)
+    at async buildEnvironment (file:///C:/Users/litao/Documents/workspace/timeless/node_modules/.pnpm/vite@8.0.0-beta.16_@types+n_5ceeedadbdef4a7402ed7afd60cdf447/node_modules/vite/dist/node/chunks/node.js:32703:64)
+    at async Object.build (file:///C:/Users/litao/Documents/workspace/timeless/node_modules/.pnpm/vite@8.0.0-beta.16_@types+n_5ceeedadbdef4a7402ed7afd60cdf447/node_modules/vite/dist/node/chunks/node.js:33125:19)
+    at async Object.buildApp (file:///C:/Users/litao/Documents/workspace/timeless/node_modules/.pnpm/vite@8.0.0-beta.16_@types+n_5ceeedadbdef4a7402ed7afd60cdf447/node_modules/vite/dist/node/chunks/node.js:33122:153)
+    at async CAC.<anonymous> (file:///C:/Users/litao/Documents/workspace/timeless/node_modules/.pnpm/vite@8.0.0-beta.16_@types+n_5ceeedadbdef4a7402ed7afd60cdf447/node_modules/vite/dist/node/cli.js:642:3) {
+  errors: [Getter/Setter]
+}[39m
+@timeless/utils build failed with code 1
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugins. Here is a breakdown:
+  - shadcn-prefix-tailwind-source-classes (87%)
+  - vite:dts (10%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugins. Here is a breakdown:
+  - shadcn-prefix-tailwind-source-classes (70%)
+  - vite:dts (26%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[96msrc/modules/date-picker.ts[0m:[93m154[0m:[93m23[0m - [91merror[0m[90m TS2322: [0mType 'DerivedRef<unknown>' is not assignable to type 'unknown[] | DerivedRef<unknown[]> | Ref<unknown[]>'.
+  Type 'DerivedRef<unknown>' is not assignable to type 'DerivedRef<unknown[]>'.
+    Type '{}' is missing the following properties from type 'unknown[]': length, pop, push, concat, and 35 more.
+
+[7m154[0m                       each: computed(week, (t) => t.dates),
+[7m   [0m [91m                      ~~~~[0m
+
+  [96m../types/global.d.ts[0m:[93m711[0m:[93m9[0m
+    [7m711[0m         each: T[] | DerivedRef<T[]> | Ref<T[]>;
+    [7m   [0m [96m        ~~~~[0m
+    The expected type comes from property 'each' which is declared here on type 'ForProps<unknown>'
+[96msrc/modules/date-picker.ts[0m:[93m154[0m:[93m38[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'Ref<unknown> | DerivedRef<unknown>'.
+
+[7m154[0m                       each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                     ~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m154[0m:[93m53[0m - [91merror[0m[90m TS2339: [0mProperty 'dates' does not exist on type 'unknown'.
+
+[7m154[0m                       each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                                    ~~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m159[0m:[93m40[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m159[0m                             value: day.value,
+[7m   [0m [91m                                       ~~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m160[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'is_today' does not exist on type 'unknown'.
+
+[7m160[0m                             isToday: day.is_today,
+[7m   [0m [91m                                         ~~~~~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m161[0m:[93m46[0m - [91merror[0m[90m TS2339: [0mProperty 'is_prev_month' does not exist on type 'unknown'.
+
+[7m161[0m                             isPrevMonth: day.is_prev_month,
+[7m   [0m [91m                                             ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m162[0m:[93m46[0m - [91merror[0m[90m TS2339: [0mProperty 'is_next_month' does not exist on type 'unknown'.
+
+[7m162[0m                             isNextMonth: day.is_next_month,
+[7m   [0m [91m                                             ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m165[0m:[93m61[0m - [91merror[0m[90m TS2339: [0mProperty 'time' does not exist on type 'unknown'.
+
+[7m165[0m                                 s.selectedDay?.time === day.time;
+[7m   [0m [91m                                                            ~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m174[0m:[93m46[0m - [91merror[0m[90m TS2339: [0mProperty 'is_today' does not exist on type 'unknown'.
+
+[7m174[0m                               } else if (day.is_today) {
+[7m   [0m [91m                                             ~~~~~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m179[0m:[93m37[0m - [91merror[0m[90m TS2339: [0mProperty 'is_prev_month' does not exist on type 'unknown'.
+
+[7m179[0m                                 day.is_prev_month ||
+[7m   [0m [91m                                    ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m180[0m:[93m37[0m - [91merror[0m[90m TS2339: [0mProperty 'is_next_month' does not exist on type 'unknown'.
+
+[7m180[0m                                 day.is_next_month
+[7m   [0m [91m                                    ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m194[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'text' does not exist on type 'unknown'.
+
+[7m194[0m                           [day.text],
+[7m   [0m [91m                               ~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m143[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType 'DerivedRef<unknown>' is not assignable to type 'unknown[] | DerivedRef<unknown[]> | Ref<unknown[]>'.
+  Type 'DerivedRef<unknown>' is not assignable to type 'DerivedRef<unknown[]>'.
+    Type '{}' is missing the following properties from type 'unknown[]': length, pop, push, concat, and 35 more.
+
+[7m143[0m               each: computed(week, (t) => t.dates),
+[7m   [0m [91m              ~~~~[0m
+
+  [96m../types/global.d.ts[0m:[93m711[0m:[93m9[0m
+    [7m711[0m         each: T[] | DerivedRef<T[]> | Ref<T[]>;
+    [7m   [0m [96m        ~~~~[0m
+    The expected type comes from property 'each' which is declared here on type 'ForProps<unknown>'
+[96msrc/modules/date-range-picker.ts[0m:[93m143[0m:[93m30[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'Ref<unknown> | DerivedRef<unknown>'.
+
+[7m143[0m               each: computed(week, (t) => t.dates),
+[7m   [0m [91m                             ~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m143[0m:[93m45[0m - [91merror[0m[90m TS2339: [0mProperty 'dates' does not exist on type 'unknown'.
+
+[7m143[0m               each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                            ~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m148[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m148[0m                     value: day.value,
+[7m   [0m [91m                               ~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m149[0m:[93m34[0m - [91merror[0m[90m TS2339: [0mProperty 'is_today' does not exist on type 'unknown'.
+
+[7m149[0m                     isToday: day.is_today,
+[7m   [0m [91m                                 ~~~~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m150[0m:[93m38[0m - [91merror[0m[90m TS2339: [0mProperty 'is_prev_month' does not exist on type 'unknown'.
+
+[7m150[0m                     isPrevMonth: day.is_prev_month,
+[7m   [0m [91m                                     ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m151[0m:[93m38[0m - [91merror[0m[90m TS2339: [0mProperty 'is_next_month' does not exist on type 'unknown'.
+
+[7m151[0m                     isNextMonth: day.is_next_month,
+[7m   [0m [91m                                     ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m153[0m:[93m71[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m153[0m                       const isInRange = store.$calendar.isInRange(day.value);
+[7m   [0m [91m                                                                      ~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m155[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m155[0m                         day.value,
+[7m   [0m [91m                            ~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m157[0m:[93m73[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m157[0m                       const isRangeEnd = store.$calendar.isRangeEnd(day.value);
+[7m   [0m [91m                                                                        ~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m189[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m189[0m                             day.value,
+[7m   [0m [91m                                ~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m192[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m192[0m                             day.value,
+[7m   [0m [91m                                ~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m195[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m195[0m                             day.value,
+[7m   [0m [91m                                ~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m208[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'is_prev_month' does not exist on type 'unknown'.
+
+[7m208[0m                           } else if (day.is_prev_month || day.is_next_month) {
+[7m   [0m [91m                                         ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m208[0m:[93m63[0m - [91merror[0m[90m TS2339: [0mProperty 'is_next_month' does not exist on type 'unknown'.
+
+[7m208[0m                           } else if (day.is_prev_month || day.is_next_month) {
+[7m   [0m [91m                                                              ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m212[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'is_today' does not exist on type 'unknown'.
+
+[7m212[0m                           } else if (day.is_today) {
+[7m   [0m [91m                                         ~~~~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m223[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'is_today' does not exist on type 'unknown'.
+
+[7m223[0m                             day.is_today &&
+[7m   [0m [91m                                ~~~~~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m232[0m:[93m28[0m - [91merror[0m[90m TS2339: [0mProperty 'text' does not exist on type 'unknown'.
+
+[7m232[0m                       [day.text],
+[7m   [0m [91m                           ~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m280[0m:[93m33[0m - [91merror[0m[90m TS2322: [0mType 'DerivedRef<unknown>' is not assignable to type 'unknown[] | DerivedRef<unknown[]> | Ref<unknown[]>'.
+  Type 'DerivedRef<unknown>' is not assignable to type 'DerivedRef<unknown[]>'.
+    Type '{}' is missing the following properties from type 'unknown[]': length, pop, push, concat, and 35 more.
+
+[7m280[0m                                 each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                ~~~~[0m
+
+  [96m../types/global.d.ts[0m:[93m711[0m:[93m9[0m
+    [7m711[0m         each: T[] | DerivedRef<T[]> | Ref<T[]>;
+    [7m   [0m [96m        ~~~~[0m
+    The expected type comes from property 'each' which is declared here on type 'ForProps<unknown>'
+[96msrc/modules/date-time-picker.ts[0m:[93m280[0m:[93m48[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'Ref<unknown> | DerivedRef<unknown>'.
+
+[7m280[0m                                 each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                               ~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m280[0m:[93m63[0m - [91merror[0m[90m TS2339: [0mProperty 'dates' does not exist on type 'unknown'.
+
+[7m280[0m                                 each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                                              ~~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m285[0m:[93m50[0m - [91merror[0m[90m TS2339: [0mProperty 'value' does not exist on type 'unknown'.
+
+[7m285[0m                                       value: day.value,
+[7m   [0m [91m                                                 ~~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m286[0m:[93m52[0m - [91merror[0m[90m TS2339: [0mProperty 'is_today' does not exist on type 'unknown'.
+
+[7m286[0m                                       isToday: day.is_today,
+[7m   [0m [91m                                                   ~~~~~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m287[0m:[93m56[0m - [91merror[0m[90m TS2339: [0mProperty 'is_prev_month' does not exist on type 'unknown'.
+
+[7m287[0m                                       isPrevMonth: day.is_prev_month,
+[7m   [0m [91m                                                       ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m288[0m:[93m56[0m - [91merror[0m[90m TS2339: [0mProperty 'is_next_month' does not exist on type 'unknown'.
+
+[7m288[0m                                       isNextMonth: day.is_next_month,
+[7m   [0m [91m                                                       ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m291[0m:[93m71[0m - [91merror[0m[90m TS2339: [0mProperty 'time' does not exist on type 'unknown'.
+
+[7m291[0m                                           s.selectedDay?.time === day.time;
+[7m   [0m [91m                                                                      ~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m299[0m:[93m56[0m - [91merror[0m[90m TS2339: [0mProperty 'is_today' does not exist on type 'unknown'.
+
+[7m299[0m                                         } else if (day.is_today) {
+[7m   [0m [91m                                                       ~~~~~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m304[0m:[93m47[0m - [91merror[0m[90m TS2339: [0mProperty 'is_prev_month' does not exist on type 'unknown'.
+
+[7m304[0m                                           day.is_prev_month ||
+[7m   [0m [91m                                              ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m305[0m:[93m47[0m - [91merror[0m[90m TS2339: [0mProperty 'is_next_month' does not exist on type 'unknown'.
+
+[7m305[0m                                           day.is_next_month
+[7m   [0m [91m                                              ~~~~~~~~~~~~~[0m
+[96msrc/modules/date-time-picker.ts[0m:[93m321[0m:[93m42[0m - [91merror[0m[90m TS2339: [0mProperty 'text' does not exist on type 'unknown'.
+
+[7m321[0m                                     [day.text],
+[7m   [0m [91m                                         ~~~~[0m
+[96msrc/modules/history-panel.ts[0m:[93m186[0m:[93m39[0m - [91merror[0m[90m TS2339: [0mProperty 'pathname' does not exist on type '{}'.
+
+[7m186[0m                               const { pathname } = history;
+[7m   [0m [91m                                      ~~~~~~~~[0m
+
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugins. Here is a breakdown:
+  - shadcn-prefix-tailwind-source-classes (72%)
+  - vite:dts (25%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[96msrc/accordion/index.ts[0m:[93m30[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType 'TimelessRefArray<number>' is missing the following properties from type 'RefArray<number>': eq, dump, update, reset, and 7 more.
+
+[7m30[0m   const openItems: RefArray<number> = refarr(props.defaultOpenItems || []);
+[7m  [0m [91m        ~~~~~~~~~[0m
+
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugin `vite:dts`. See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugin `vite:dts`. See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
+[96msrc/modules/button.ts[0m:[93m21[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m21[0m       onClick(e) {
+[7m  [0m [91m              ~[0m
+[96msrc/modules/cascader.ts[0m:[93m71[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m71[0m           store.onStateChange((v) => {
+[7m  [0m [91m                               ~[0m
+[96msrc/modules/cascader.ts[0m:[93m128[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m128[0m           store.onStateChange((v) => {
+[7m   [0m [91m                               ~[0m
+[96msrc/modules/cascader.ts[0m:[93m229[0m:[93m39[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m229[0m         store.presence.onStateChange((v) => {
+[7m   [0m [91m                                      ~[0m
+[96msrc/modules/cascader.ts[0m:[93m376[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m376[0m         store.onStateChange((v) => {
+[7m   [0m [91m                             ~[0m
+[96msrc/modules/cascader.ts[0m:[93m392[0m:[93m21[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m392[0m           onMounted(event) {
+[7m   [0m [91m                    ~~~~~[0m
+[96msrc/modules/cascader.ts[0m:[93m422[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m422[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/checkbox.ts[0m:[93m44[0m:[93m17[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m44[0m       onMounted(event) {
+[7m  [0m [91m                ~~~~~[0m
+[96msrc/modules/checkbox.ts[0m:[93m66[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m66[0m       onClick(e) {
+[7m  [0m [91m              ~[0m
+[96msrc/modules/checkbox.ts[0m:[93m87[0m:[93m26[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m87[0m     store.onStateChange((v) => {
+[7m  [0m [91m                         ~[0m
+[96msrc/modules/checkbox.ts[0m:[93m129[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m129[0m     onMounted(event) {
+[7m   [0m [91m              ~~~~~[0m
+[96msrc/modules/context-menu.ts[0m:[93m36[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m36[0m           store.onStateChange((v) => {
+[7m  [0m [91m                               ~[0m
+[96msrc/modules/date-picker.ts[0m:[93m129[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m129[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/date-picker.ts[0m:[93m195[0m:[93m34[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m195[0m   store.$presence.onStateChange((v) => {
+[7m   [0m [91m                                 ~[0m
+[96msrc/modules/date-picker.ts[0m:[93m264[0m:[93m29[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m264[0m   store.$calendar.onChange((v) => {
+[7m   [0m [91m                            ~[0m
+[96msrc/modules/date-picker.ts[0m:[93m347[0m:[93m29[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m347[0m   store.$calendar.onChange((v) => {
+[7m   [0m [91m                            ~[0m
+[96msrc/modules/date-picker.ts[0m:[93m361[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType 'DerivedRef<unknown>' is not assignable to type 'unknown[] | DerivedRef<unknown[]> | Ref<unknown[]>'.
+  Type 'DerivedRef<unknown>' is not assignable to type 'DerivedRef<unknown[]>'.
+    Type 'unknown' is not assignable to type 'unknown[]'.
+
+[7m361[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m            ~~~~[0m
+
+  [96m../types/global.d.ts[0m:[93m711[0m:[93m9[0m
+    [7m711[0m         each: T[] | DerivedRef<T[]> | Ref<T[]>;
+    [7m   [0m [96m        ~~~~[0m
+    The expected type comes from property 'each' which is declared here on type 'ForProps<unknown>'
+[96msrc/modules/date-picker.ts[0m:[93m361[0m:[93m28[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'Ref<unknown> | DerivedRef<unknown>'.
+
+[7m361[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m                           ~~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m361[0m:[93m41[0m - [91merror[0m[90m TS18046: [0m't' is of type 'unknown'.
+
+[7m361[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                        ~[0m
+[96msrc/modules/date-picker.ts[0m:[93m364[0m:[93m35[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type '{ text: string; value: Date; is_today: boolean; is_prev_month: boolean; is_next_month: boolean; }'.
+
+[7m364[0m                 return renderCell(day);
+[7m   [0m [91m                                  ~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m369[0m:[93m26[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m369[0m                   value: day.value,
+[7m   [0m [91m                         ~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m370[0m:[93m28[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m370[0m                   isToday: day.is_today,
+[7m   [0m [91m                           ~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m371[0m:[93m32[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m371[0m                   isPrevMonth: day.is_prev_month,
+[7m   [0m [91m                               ~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m372[0m:[93m32[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m372[0m                   isNextMonth: day.is_next_month,
+[7m   [0m [91m                               ~~~[0m
+[96msrc/modules/date-picker.ts[0m:[93m374[0m:[93m18[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m374[0m                 [day.text],
+[7m   [0m [91m                 ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m127[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m127[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m169[0m:[93m34[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m169[0m   store.$presence.onStateChange((v) => {
+[7m   [0m [91m                                 ~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m256[0m:[93m29[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m256[0m   store.$calendar.onChange((v) => {
+[7m   [0m [91m                            ~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m278[0m:[93m29[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m278[0m   store.$calendar.onChange((v) => {
+[7m   [0m [91m                            ~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m393[0m:[93m29[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m393[0m   store.$calendar.onChange((v) => {
+[7m   [0m [91m                            ~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m408[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType 'DerivedRef<unknown>' is not assignable to type 'unknown[] | DerivedRef<unknown[]> | Ref<unknown[]>'.
+  Type 'DerivedRef<unknown>' is not assignable to type 'DerivedRef<unknown[]>'.
+    Type 'unknown' is not assignable to type 'unknown[]'.
+
+[7m408[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m            ~~~~[0m
+
+  [96m../types/global.d.ts[0m:[93m711[0m:[93m9[0m
+    [7m711[0m         each: T[] | DerivedRef<T[]> | Ref<T[]>;
+    [7m   [0m [96m        ~~~~[0m
+    The expected type comes from property 'each' which is declared here on type 'ForProps<unknown>'
+[96msrc/modules/date-range-picker.ts[0m:[93m408[0m:[93m28[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'Ref<unknown> | DerivedRef<unknown>'.
+
+[7m408[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m                           ~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m408[0m:[93m41[0m - [91merror[0m[90m TS18046: [0m't' is of type 'unknown'.
+
+[7m408[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                        ~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m414[0m:[93m26[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m414[0m                   value: day.value,
+[7m   [0m [91m                         ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m415[0m:[93m28[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m415[0m                   isToday: day.is_today,
+[7m   [0m [91m                           ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m416[0m:[93m32[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m416[0m                   isPrevMonth: day.is_prev_month,
+[7m   [0m [91m                               ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m417[0m:[93m32[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m417[0m                   isNextMonth: day.is_next_month,
+[7m   [0m [91m                               ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m419[0m:[93m18[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m419[0m                 [day.text],
+[7m   [0m [91m                 ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m439[0m:[93m29[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m439[0m   store.$calendar.onChange((v) => {
+[7m   [0m [91m                            ~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m454[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType 'DerivedRef<unknown>' is not assignable to type 'unknown[] | DerivedRef<unknown[]> | Ref<unknown[]>'.
+  Type 'DerivedRef<unknown>' is not assignable to type 'DerivedRef<unknown[]>'.
+    Type 'unknown' is not assignable to type 'unknown[]'.
+
+[7m454[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m            ~~~~[0m
+
+  [96m../types/global.d.ts[0m:[93m711[0m:[93m9[0m
+    [7m711[0m         each: T[] | DerivedRef<T[]> | Ref<T[]>;
+    [7m   [0m [96m        ~~~~[0m
+    The expected type comes from property 'each' which is declared here on type 'ForProps<unknown>'
+[96msrc/modules/date-range-picker.ts[0m:[93m454[0m:[93m28[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'Ref<unknown> | DerivedRef<unknown>'.
+
+[7m454[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m                           ~~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m454[0m:[93m41[0m - [91merror[0m[90m TS18046: [0m't' is of type 'unknown'.
+
+[7m454[0m             each: computed(week, (t) => t.dates),
+[7m   [0m [91m                                        ~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m460[0m:[93m26[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m460[0m                   value: day.value,
+[7m   [0m [91m                         ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m461[0m:[93m28[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m461[0m                   isToday: day.is_today,
+[7m   [0m [91m                           ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m462[0m:[93m32[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m462[0m                   isPrevMonth: day.is_prev_month,
+[7m   [0m [91m                               ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m463[0m:[93m32[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m463[0m                   isNextMonth: day.is_next_month,
+[7m   [0m [91m                               ~~~[0m
+[96msrc/modules/date-range-picker.ts[0m:[93m465[0m:[93m18[0m - [91merror[0m[90m TS18046: [0m'day' is of type 'unknown'.
+
+[7m465[0m                 [day.text],
+[7m   [0m [91m                 ~~~[0m
+[96msrc/modules/dropdown-menu.ts[0m:[93m38[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m38[0m           store.onStateChange((v) => {
+[7m  [0m [91m                               ~[0m
+[96msrc/modules/field.ts[0m:[93m20[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m20[0m   props.store.onStateChange((v) => state_.as(v));
+[7m  [0m [91m                             ~[0m
+[96msrc/modules/field.ts[0m:[93m38[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m38[0m   props.store.onStateChange((v) => state_.as(v));
+[7m  [0m [91m                             ~[0m
+[96msrc/modules/input.ts[0m:[93m60[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m60[0m     onMounted(event) {
+[7m  [0m [91m              ~~~~~[0m
+[96msrc/modules/input.ts[0m:[93m62[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'state' implicitly has an 'any' type.
+
+[7m62[0m         store.onStateChange((state) => {
+[7m  [0m [91m                             ~~~~~[0m
+[96msrc/modules/input.ts[0m:[93m78[0m:[93m13[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m78[0m     onInput(e) {
+[7m  [0m [91m            ~[0m
+[96msrc/modules/input.ts[0m:[93m168[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m168[0m         store.onStateChange((v) => {
+[7m   [0m [91m                             ~[0m
+[96msrc/modules/menu.ts[0m:[93m88[0m:[93m36[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m88[0m         props.store.onStateChange((v) => {
+[7m  [0m [91m                                   ~[0m
+[96msrc/modules/menu.ts[0m:[93m91[0m:[93m45[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m91[0m         props.store.presence.onStateChange((v) => {
+[7m  [0m [91m                                            ~[0m
+[96msrc/modules/menu.ts[0m:[93m209[0m:[93m36[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m209[0m         props.store.onStateChange((v) => {
+[7m   [0m [91m                                   ~[0m
+[96msrc/modules/number-input.ts[0m:[93m29[0m:[93m26[0m - [91merror[0m[90m TS7006: [0mParameter 'state' implicitly has an 'any' type.
+
+[7m29[0m     store.onStateChange((state) => {
+[7m  [0m [91m                         ~~~~~[0m
+[96msrc/modules/number-input.ts[0m:[93m42[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m42[0m     onMounted(event) {
+[7m  [0m [91m              ~~~~~[0m
+[96msrc/modules/popconfirm.ts[0m:[93m43[0m:[93m34[0m - [91merror[0m[90m TS7006: [0mParameter 'n' implicitly has an 'any' type.
+
+[7m43[0m         const $ref = nodes.find((n) => n && n.getType() === "view") || $e;
+[7m  [0m [91m                                 ~[0m
+[96msrc/modules/popover.ts[0m:[93m53[0m:[93m34[0m - [91merror[0m[90m TS7006: [0mParameter 'n' implicitly has an 'any' type.
+
+[7m53[0m         const $ref = nodes.find((n) => n && n.getType() === "view") || nodes[0];
+[7m  [0m [91m                                 ~[0m
+[96msrc/modules/popper.ts[0m:[93m162[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m162[0m           store.onStateChange((v) => {
+[7m   [0m [91m                               ~[0m
+[96msrc/modules/popper.ts[0m:[93m237[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m237[0m           store.onStateChange((v) => {
+[7m   [0m [91m                               ~[0m
+[96msrc/modules/popper.ts[0m:[93m264[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m264[0m         store.onStateChange((v) => {
+[7m   [0m [91m                             ~[0m
+[96msrc/modules/popper.ts[0m:[93m305[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m305[0m         store.onStateChange((v) => {
+[7m   [0m [91m                             ~[0m
+[96msrc/modules/presence.ts[0m:[93m15[0m:[93m44[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m15[0m   const unsubscribe = store.onStateChange((v) => {
+[7m  [0m [91m                                           ~[0m
+[96msrc/modules/radio.ts[0m:[93m38[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m38[0m       onClick(e) {
+[7m  [0m [91m              ~[0m
+[96msrc/modules/radio.ts[0m:[93m102[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m102[0m     onMounted(event) {
+[7m   [0m [91m              ~~~~~[0m
+[96msrc/modules/resizable-panels.ts[0m:[93m65[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'state' implicitly has an 'any' type.
+
+[7m65[0m   store.onStateChange((state) => {
+[7m  [0m [91m                       ~~~~~[0m
+[96msrc/modules/select.ts[0m:[93m80[0m:[93m17[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m80[0m       onMounted(event) {
+[7m  [0m [91m                ~~~~~[0m
+[96msrc/modules/select.ts[0m:[93m116[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m116[0m           store.onStateChange((v) => {
+[7m   [0m [91m                               ~[0m
+[96msrc/modules/select.ts[0m:[93m144[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m144[0m           store.onStateChange((v) => {
+[7m   [0m [91m                               ~[0m
+[96msrc/modules/select.ts[0m:[93m248[0m:[93m40[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m248[0m         store.presence$.onStateChange((v) => {
+[7m   [0m [91m                                       ~[0m
+[96msrc/modules/select.ts[0m:[93m402[0m:[93m17[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m402[0m       onMounted(event) {
+[7m   [0m [91m                ~~~~~[0m
+[96msrc/modules/select.ts[0m:[93m410[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m410[0m           store.onStateChange((v) => {
+[7m   [0m [91m                               ~[0m
+[96msrc/modules/select.ts[0m:[93m469[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m469[0m           store.onStateChange((v) => {
+[7m   [0m [91m                               ~[0m
+[96msrc/modules/select.ts[0m:[93m517[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m517[0m         store.onStateChange((v) => {
+[7m   [0m [91m                             ~[0m
+[96msrc/modules/select.ts[0m:[93m522[0m:[93m44[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m522[0m         store.search_input$.onStateChange((v) => {
+[7m   [0m [91m                                           ~[0m
+[96msrc/modules/select.ts[0m:[93m538[0m:[93m21[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m538[0m           onMounted(event) {
+[7m   [0m [91m                    ~~~~~[0m
+[96msrc/modules/select.ts[0m:[93m547[0m:[93m25[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m547[0m           onPointerDown(e) {
+[7m   [0m [91m                        ~[0m
+[96msrc/modules/select.ts[0m:[93m559[0m:[93m19[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m559[0m           onInput(e) {
+[7m   [0m [91m                  ~[0m
+[96msrc/modules/select.ts[0m:[93m572[0m:[93m21[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m572[0m           onKeyDown(e) {
+[7m   [0m [91m                    ~[0m
+[96msrc/modules/standard-sub-views.ts[0m:[93m89[0m:[93m51[0m - [91merror[0m[90m TS18046: [0m'i' is of type 'unknown'.
+
+[7m89[0m                   "z-index": computed(idx, (i) => i + 1),
+[7m  [0m [91m                                                  ~[0m
+[96msrc/modules/steps.ts[0m:[93m25[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m25[0m   store.onStateChange((v) => {
+[7m  [0m [91m                       ~[0m
+[96msrc/modules/steps.ts[0m:[93m77[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m77[0m   store.onStateChange((v) => {
+[7m  [0m [91m                       ~[0m
+[96msrc/modules/steps.ts[0m:[93m103[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m103[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/steps.ts[0m:[93m142[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m142[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/switch.ts[0m:[93m41[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m41[0m       onClick(e) {
+[7m  [0m [91m              ~[0m
+[96msrc/modules/switch.ts[0m:[93m47[0m:[93m17[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m47[0m       onKeyDown(e) {
+[7m  [0m [91m                ~[0m
+[96msrc/modules/switch.ts[0m:[93m55[0m:[93m17[0m - [91merror[0m[90m TS7006: [0mParameter 'el' implicitly has an 'any' type.
+
+[7m55[0m       onMounted(el) {
+[7m  [0m [91m                ~~[0m
+[96msrc/modules/switch.ts[0m:[93m57[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m57[0m           store.onStateChange((v) => {
+[7m  [0m [91m                               ~[0m
+[96msrc/modules/switch.ts[0m:[93m84[0m:[93m17[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m84[0m         onClick(e) {
+[7m  [0m [91m                ~[0m
+[96msrc/modules/switch.ts[0m:[93m87[0m:[93m18[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m87[0m         onChange(e) {
+[7m  [0m [91m                 ~[0m
+[96msrc/modules/tabs.ts[0m:[93m39[0m:[93m17[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m39[0m       onMounted(event) {
+[7m  [0m [91m                ~~~~~[0m
+[96msrc/modules/tag-select.ts[0m:[93m38[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m38[0m   store.onStateChange((v) => {
+[7m  [0m [91m                       ~[0m
+[96msrc/modules/tag-select.ts[0m:[93m67[0m:[93m13[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m67[0m     onClick(e) {
+[7m  [0m [91m            ~[0m
+[96msrc/modules/tag-select.ts[0m:[93m70[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m70[0m     onMounted(event) {
+[7m  [0m [91m              ~~~~~[0m
+[96msrc/modules/tag-select.ts[0m:[93m141[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m141[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/tag-select.ts[0m:[93m221[0m:[93m33[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m221[0m   store.presence.onStateChange((v) => {
+[7m   [0m [91m                                ~[0m
+[96msrc/modules/tag-select.ts[0m:[93m307[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m307[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/tag-select.ts[0m:[93m332[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m332[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/tag-select.ts[0m:[93m385[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m385[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/tag-select.ts[0m:[93m440[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m440[0m     onMounted(event) {
+[7m   [0m [91m              ~~~~~[0m
+[96msrc/modules/tag-select.ts[0m:[93m443[0m:[93m28[0m - [91merror[0m[90m TS7006: [0mParameter 'state' implicitly has an 'any' type.
+
+[7m443[0m       store.onStateChange((state) => {
+[7m   [0m [91m                           ~~~~~[0m
+[96msrc/modules/textarea.ts[0m:[93m41[0m:[93m26[0m - [91merror[0m[90m TS7006: [0mParameter 'state' implicitly has an 'any' type.
+
+[7m41[0m     store.onStateChange((state) => {
+[7m  [0m [91m                         ~~~~~[0m
+[96msrc/modules/textarea.ts[0m:[93m53[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'event' implicitly has an 'any' type.
+
+[7m53[0m     onMounted(event) {
+[7m  [0m [91m              ~~~~~[0m
+[96msrc/modules/textarea.ts[0m:[93m68[0m:[93m13[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m68[0m     onInput(e) {
+[7m  [0m [91m            ~[0m
+[96msrc/modules/time-picker.ts[0m:[93m127[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m127[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/time-picker.ts[0m:[93m193[0m:[93m34[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m193[0m   store.$presence.onStateChange((v) => {
+[7m   [0m [91m                                 ~[0m
+[96msrc/modules/time-picker.ts[0m:[93m264[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m264[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/time-picker.ts[0m:[93m315[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m315[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/time-picker.ts[0m:[93m366[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m366[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+[96msrc/modules/toggle.ts[0m:[93m28[0m:[93m15[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m28[0m       onClick(e) {
+[7m  [0m [91m              ~[0m
+[96msrc/modules/tooltip.ts[0m:[93m79[0m:[93m28[0m - [91merror[0m[90m TS7006: [0mParameter 'n' implicitly has an 'any' type.
+
+[7m79[0m         $ref = nodes.find((n) => n && n.getType() === "view") || $e;
+[7m  [0m [91m                           ~[0m
+[96msrc/modules/waterfall.ts[0m:[93m21[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m21[0m   store.onStateChange((v) => {
+[7m  [0m [91m                       ~[0m
+[96msrc/modules/waterfall.ts[0m:[93m84[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m84[0m   store.onStateChange((v) => {
+[7m  [0m [91m                       ~[0m
+[96msrc/modules/waterfall.ts[0m:[93m143[0m:[93m24[0m - [91merror[0m[90m TS7006: [0mParameter 'v' implicitly has an 'any' type.
+
+[7m143[0m   store.onStateChange((v) => {
+[7m   [0m [91m                       ~[0m
+
+[33m[33m[MISSING_GLOBAL_NAME] Warning:[0m No name was provided for external module "@timeless/kit" in "output.globals" – guessing "_timeless_kit".
+[39m
+[33m[33m[MISSING_GLOBAL_NAME] Warning:[0m No name was provided for external module "@timeless/timeless" in "output.globals" – guessing "_timeless_timeless".
+[39m
+[33m[33m[PLUGIN_TIMINGS] Warning:[0m Your build spent significant time in plugins. Here is a breakdown:
+  - shadcn-prefix-tailwind-source-classes (77%)
+  - vite:dts (21%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+[39m
