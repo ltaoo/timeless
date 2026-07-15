@@ -39,6 +39,7 @@ export type TimelessComponent = TimelessNormalComponent | TimelessLazyComponent;
  * - children: Child elements
  * - onMounted: Lifecycle called when mounted
  * - onUnmounted: Lifecycle called when unmounted
+ * - destroy: Permanent teardown — VNode is being destroyed
  *
  * @example
  * ```typescript
@@ -63,6 +64,20 @@ export interface TimelessElement<T = any, Elm = any> {
   onMounted(event: MountedEvent): void;
   beforeUnmounted?(): void;
   onUnmounted(): void;
+  /** Permanent teardown — VNode is being destroyed, not just unmounted */
+  destroy?(): void;
+}
+
+/** Permanently destroy an element, falling back to onUnmounted if no destroy */
+export function destroyElement(
+  el: TimelessElement | null | undefined,
+): void {
+  if (!el) return;
+  if (typeof el.destroy === "function") {
+    el.destroy();
+  } else if (typeof el.onUnmounted === "function") {
+    el.onUnmounted();
+  }
 }
 
 export interface VNodeA11y {

@@ -8,13 +8,7 @@ export function Checkbox(
 ) {
   const { store, id, ...rest } = props;
   const state_ = ref(store.state);
-  const listener$ = ListenerManager([state_]);
-
-  listener$.add(
-    store.onStateChange(() => {
-      state_.as(store.state);
-    }),
-  );
+  const listener$ = ListenerManager();
 
   return CheckboxPrimitive.Root(
     {
@@ -51,26 +45,35 @@ export function Checkbox(
             }
             return result;
           }),
+          onMounted() {
+            listener$.add(
+              store.onStateChange(() => {
+                state_.as(store.state);
+              }),
+            );
+          },
           onUnmounted() {
             listener$.destroy();
           },
         },
         [
-          View(
-            {
-              style: computed(state_, (s) => {
-                if (s.checked) {
-                  return {
+          Show({
+            when: computed(state_, (t) => {
+              return t.checked;
+            }),
+            ok() {
+              return View(
+                {
+                  style: {
                     color: "#fff",
                     "font-size": "12px",
                     "line-height": "1",
-                  };
-                }
-                return { display: "none" };
-              }),
+                  },
+                },
+                [Icon({ name: "check", size: 12 })],
+              );
             },
-            [Icon({ name: "check", size: 12 })],
-          ),
+          }),
         ],
       ),
     ],

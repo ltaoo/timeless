@@ -1,4 +1,6 @@
 import { Section, Item } from "@/components/index.js";
+import { TaskDeleteConfirmDialog } from "./task-delete-confirm-dialog.js";
+import { ClearTasksConfirmDialog } from "./clear-tasks-confirm-dialog.js";
 
 export default function HomePageView() {
   const view$ = new Timeless.ui.ScrollViewCore({});
@@ -471,10 +473,22 @@ export default function HomePageView() {
                 dialog$.show();
               },
             });
+            const checkbox$ = new Timeless.ui.CheckboxCore({});
             return Fragment({}, [
               Button({ store: btn$ }, ["打开弹窗"]),
               Dialog({ store: dialog$ }, [
                 "确定要执行此操作吗？此操作不可撤销。",
+                View(
+                  {
+                    style: {
+                      display: "flex",
+                      "align-items": "center",
+                      gap: "8px",
+                      "margin-top": "12px",
+                    },
+                  },
+                  [Checkbox({ store: checkbox$ }), "记住我的选择"],
+                ),
               ]),
             ]);
           })(),
@@ -495,6 +509,116 @@ export default function HomePageView() {
             return Fragment({}, [
               Button({ store: btn$ }, ["自动关闭弹窗"]),
               Dialog({ store: dialog$ }, ["2秒后自动关闭..."]),
+            ]);
+          })(),
+        ]),
+        Item("With Custom Checkbox", [
+          (() => {
+            const dialog$ = new Timeless.ui.DialogCore({
+              title: "删除下载记录",
+              footer: true,
+              onOk() {
+                dialog$.hide();
+              },
+              onCancel() {
+                dialog$.hide();
+              },
+            });
+            const btn$ = new Timeless.ui.ButtonCore({
+              variant: "warn",
+              onClick() {
+                dialog$.show();
+              },
+            });
+            const store = {
+              state: {
+                delete_delete_files: ref(false),
+              },
+              ui: {
+                deleteConfirmDialog$: dialog$,
+              },
+              methods: {
+                handleClickCheckboxConfirmDeleteFiles() {
+                  const current = store.state.delete_delete_files.value;
+                  store.state.delete_delete_files.as(!current);
+                },
+              },
+            };
+            return Fragment({}, [
+              Button({ store: btn$ }, ["删除记录（含 Checkbox）"]),
+              TaskDeleteConfirmDialog({ store }),
+            ]);
+          })(),
+        ]),
+        Item("Shared State Between Dialogs", [
+          (() => {
+            // Shared ref — same pattern as production code
+            // where ClearTasksConfirmDialog and TaskDeleteConfirmDialog
+            // share delete_delete_files_ ref
+            const sharedDeleteFiles$ = ref(false);
+
+            const deleteDialog$ = new Timeless.ui.DialogCore({
+              title: "删除下载记录",
+              footer: true,
+              onOk() {
+                alert("同时删除已下载的文件: " + sharedDeleteFiles$.value);
+                deleteDialog$.hide();
+              },
+              onCancel() { deleteDialog$.hide(); },
+            });
+            const clearDialog$ = new Timeless.ui.DialogCore({
+              title: "清空下载记录",
+              footer: true,
+              onOk() {
+                alert("同时删除已下载的文件: " + sharedDeleteFiles$.value);
+                clearDialog$.hide();
+              },
+              onCancel() { clearDialog$.hide(); },
+            });
+
+            const sharedStore = {
+              state: {
+                delete_delete_files: sharedDeleteFiles$,
+              },
+              ui: {
+                deleteConfirmDialog$: deleteDialog$,
+                clearConfirmDialog$: clearDialog$,
+              },
+              methods: {
+                handleClickCheckboxConfirmDeleteFiles() {
+                  const current = sharedDeleteFiles$.value;
+                  console.log("[sharedStore] toggle delete_delete_files:", current, "→", !current);
+                  sharedDeleteFiles$.as(!current);
+                  console.log("[sharedStore] after toggle, ref value =", sharedDeleteFiles$.value);
+                },
+              },
+            };
+
+            const openDeleteBtn$ = new Timeless.ui.ButtonCore({
+              variant: "warn",
+              onClick() { deleteDialog$.show(); },
+            });
+            const openClearBtn$ = new Timeless.ui.ButtonCore({
+              variant: "default",
+              onClick() { clearDialog$.show(); },
+            });
+
+            return Fragment({}, [
+              View(
+                {
+                  style: {
+                    display: "flex",
+                    gap: "8px",
+                    "flex-wrap": "wrap",
+                  },
+                },
+                [
+                  Button({ store: openDeleteBtn$ }, ["删除记录弹窗"]),
+                  Button({ store: openClearBtn$ }, ["清空记录弹窗"]),
+                ],
+              ),
+              TaskDeleteConfirmDialog({ store: sharedStore }),
+              ClearTasksConfirmDialog({ store: sharedStore }),
             ]);
           })(),
         ]),

@@ -14,6 +14,7 @@ import {
   ViewChildren,
   isElement,
   resolve_children,
+  destroyElement,
 } from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
@@ -264,6 +265,10 @@ export function For<T>(
         // );
         removed_idx.push(state.idx_arr[index + i]);
         removed_owners.push(state.item_owners[index + i]);
+      }
+      // Destroy child VNodes before tearing down refs/owners
+      for (let i = 0; i < count; i += 1) {
+        destroyElement(state.children[index + i]);
       }
       // console.log("[primitive]for - remove before destroy idx", removed_idx);
       for (const idx of removed_idx) {
@@ -536,6 +541,12 @@ export function For<T>(
       //   moved_nodes,
       // );
 
+      // Destroy child VNodes before tearing down refs/owners
+      for (const { idx, count } of removed_nodes) {
+        for (let i = 0; i < count; i++) {
+          destroyElement(prev_elements[idx + i]);
+        }
+      }
       // Destroy idx_computed and dispose owners for removed items
       for (const { idx, count } of removed_nodes) {
         for (let i = 0; i < count; i++) {

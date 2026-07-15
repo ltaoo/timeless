@@ -6,6 +6,7 @@ import {
   ViewChildrenArray,
   isElement,
   resolve_children,
+  destroyElement,
 } from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
@@ -202,6 +203,11 @@ export function Match(props: MatchProps) {
       }
     },
     onMounted(event: MountedEvent) {
+      // Re-subscribe to when prop when remounting after unmount
+      // (listener$ is cleared by destroy() in onUnmounted)
+      if (listener$.length === 0) {
+        methods.setup_value_subscribe();
+      }
       state.rendered = true;
       if (onMounted) {
         onMounted(event);
@@ -225,6 +231,13 @@ export function Match(props: MatchProps) {
         $elm.removeChildren();
         state.children = [];
       }
+    },
+    destroy() {
+      // Permanent teardown — propagate to children and clear state
+      for (const child of state.children) {
+        destroyElement(child);
+      }
+      state.children = [];
     },
   };
 }

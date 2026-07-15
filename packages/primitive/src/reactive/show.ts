@@ -5,11 +5,11 @@ import {
   ViewChildren,
   isElement,
   resolve_children,
+  destroyElement,
 } from "@/content/type";
 import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
-import { Logger } from "@/util/logger";
 import {
   get_owner,
   create_owner,
@@ -18,8 +18,6 @@ import {
   clear_owner_disposables,
 } from "@/context/context";
 import { useErrorBoundary } from "@/content/error-boundary-context";
-
-const logger = Logger({ prefix: "primitive", scope: "reactive/show" });
 
 export type ShowProps = {
   when:
@@ -44,7 +42,7 @@ export function Show(props: ShowProps) {
   let $elm: any = null;
   const _parent_owner = get_owner();
   // Create own owner so render-created refs are tracked separately from parent
-  const _owner = create_owner(_parent_owner);
+  let _owner = create_owner(_parent_owner);
 
   const state: ShowState = {
     rendered: false,
@@ -116,7 +114,6 @@ export function Show(props: ShowProps) {
         const unsubscribe = when.subscribe({
           onChange(value) {
             const condition = !!value;
-            // logger.log("the when is changed", condition, state.value);
             if (condition === state.value) {
               return;
             }
@@ -135,18 +132,18 @@ export function Show(props: ShowProps) {
               if (props.else) {
                 const target = methods.build_children_with_condition(condition);
                 state.children = target;
-                // logger.log("before insert", target, !!$elm?.insertChildren);
-                $elm.insertChildren(target);
+                if ($elm && typeof $elm.insertChildren === "function") {
+                  $elm.insertChildren(target);
+                }
                 return;
               }
               state.children = [];
-              // logger.log("before remove", !!$elm?.insertChildren);
             } else {
               const target = methods.build_children_with_condition(condition);
               state.children = target;
-              // logger.log("before insert children", target.length);
-              // logger.log("before insert", !!$elm?.insertChildren);
-              $elm.insertChildren(target);
+              if ($elm && typeof $elm.insertChildren === "function") {
+                $elm.insertChildren(target);
+              }
             }
           },
         });
@@ -178,6 +175,27 @@ export function Show(props: ShowProps) {
       state.children = v;
     },
     onMounted(event: MountedEvent) {
+      // Re-subscribe to when prop when remounting after unmount
+      // (listener$ is cleared by destroy() in onUnmounted)
+      if (listener$.length === 0) {
+        // _owner was disposed in onUnmounted, re-create it
+        // so build_children_with_condition can track new render-created refs
+        dispose_owner(_owner);
+        _owner = create_owner(_parent_owner);
+        methods.subscribe_props();
+        // Rebuild children to match current ref value.
+        // When remounting after unmount, state.children may be stale
+        // (e.g. checkmark VNodes from a previous render when ref was true).
+        // The parent's insertChildren has already rendered stale children
+        // into DOM at this point, so we need to replace them.
+        if ($elm && typeof $elm.removeChildren === "function") {
+          const freshChildren = methods.build_children_with_condition(state.value);
+          state.children = freshChildren;
+          if ($elm && typeof $elm.insertChildren === "function") {
+            $elm.insertChildren(freshChildren);
+          }
+        }
+      }
       if (onMounted) {
         listener$.add(onMounted(event));
       }
@@ -211,6 +229,13 @@ export function Show(props: ShowProps) {
       // Don't clear state.children here — they are needed if this Show
       // is re-mounted by a parent (e.g. Presence show/hide cycle).
       // When Show's own condition flips false, onChange already clears children.
+    },
+    destroy() {
+      // Permanent teardown — propagate to children and clear state
+      for (const child of state.children) {
+        destroyElement(child);
+      }
+      state.children = [];
     },
     _hmr_dispose() {
       // Only unsubscribe — do NOT destroy the shared ref (visible_ etc.)
