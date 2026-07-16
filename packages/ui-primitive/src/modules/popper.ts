@@ -13,7 +13,11 @@ import {
   PopperCore,
   DismissableLayerCore,
   initGlobalPointerListener,
+  getGlobalLayerManager,
 } from "@timeless/ui-vm";
+
+const POPOVER_BASE_Z = 300;
+const Z_INDEX_NEST_GAP = 50;
 
 import * as ScrollViewPrimitive from "@/modules/scroll-view";
 
@@ -66,11 +70,13 @@ export function Content(
 ) {
   const {
     store,
-    zIndex = 99,
+    zIndex: manualZIndex,
     onDismiss,
     onReferenceOutOfView,
     ...rest
   } = props;
+
+  const zIndex = manualZIndex ?? POPOVER_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   const state_ = refobj(store.state);
   const listener$ = ListenerManager();
@@ -148,6 +154,7 @@ export function Content(
         }),
       ]),
       onMounted(event) {
+        console.log("[DEBUG] PopperPrimitive.Content onMounted", store.mode);
         store.platform = getPlatform();
         const $elm = event.target;
         const dismissableLayer$ = new DismissableLayerCore();

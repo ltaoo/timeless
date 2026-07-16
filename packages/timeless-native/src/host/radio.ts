@@ -4,12 +4,13 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeRadio = VNodeView<any> & {
   t: "radio";
-  render(elm: TimelessElement): any;
+  render(): any;
   setChecked(checked: boolean): void;
 };
 
 export function NativeRadio(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeRadio {
   const t = "radio";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -79,20 +80,20 @@ export function NativeRadio(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+      methods.applyState(props.elm.state, { initial: true });
+      methods.setupEventListener(props.elm.events);
 
-      $elm.checked = !!elm.state.value;
-      if (elm.state.id) {
-        $elm.attrs.id = elm.state.id;
+      $elm.checked = !!props.elm.state.value;
+      if (props.elm.state.id) {
+        $elm.attrs.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.attrs.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.attrs.name = props.elm.state.name;
       }
 
-      const events = elm.events;
+      const events = props.elm.events;
       if (events && events.onChange) {
         $elm.listeners.click = events.onChange;
       }

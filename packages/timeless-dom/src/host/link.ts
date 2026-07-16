@@ -6,12 +6,13 @@ import { HostElement } from "./box";
 
 export type DOMLink = VNodeView<HTMLAnchorElement> & {
   t: "link";
-  render(elm: TimelessElement): HTMLAnchorElement;
+  render(): HTMLAnchorElement;
   // hydrate(elm: TimelessElement, $e: HTMLAnchorElement): void;
 };
 
 export function DOMLink(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLAnchorElement>;
+  elm: TimelessElement;
 }): DOMLink {
   const t = "link";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -25,21 +26,21 @@ export function DOMLink(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("a");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
-      if (elm.state.href) {
-        $elm.href = elm.state.href;
+      box$.methods.applyState(props.elm.state, { initial: true });
+      if (props.elm.state.href) {
+        $elm.href = props.elm.state.href;
       }
-      if (elm.state.target) {
-        $elm.target = elm.state.target;
+      if (props.elm.state.target) {
+        $elm.target = props.elm.state.target;
       }
-      if (elm.state.rel) {
-        $elm.rel = elm.state.rel;
+      if (props.elm.state.rel) {
+        $elm.rel = props.elm.state.rel;
       }
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },

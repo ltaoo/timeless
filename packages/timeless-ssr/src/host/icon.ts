@@ -10,12 +10,13 @@ type ASNNode = {
 
 export type SSRIcon = VNodeView<string> & {
   t: "icon";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRIcon(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRIcon {
   const t = "icon";
   const box$ = SSRBox();
@@ -26,8 +27,8 @@ export function SSRIcon(props: {
     getType() {
       return "view";
     },
-    render(elm: TimelessElement) {
-      const name = elm.state.name as string;
+    render() {
+      const name = props.elm.state.name as string;
       if (!name) {
         console.warn(`Icon must have a name`);
         return "";
@@ -41,7 +42,7 @@ export function SSRIcon(props: {
         console.warn(`Icon "${name}" not found in @timeless/icons/asn`);
         return "";
       }
-      return render_asn_to_string(asn_node, elm.state);
+      return render_asn_to_string(asn_node, props.elm.state);
     },
     hydrate(elm: TimelessElement, $dom: any) {},
   };

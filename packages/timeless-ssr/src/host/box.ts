@@ -71,7 +71,7 @@ function buildChildren(
   for (const child of children) {
     if (child) {
       const child$ = build(child);
-      result += child$.render(child);
+      result += child$.render();
     }
   }
   return result;

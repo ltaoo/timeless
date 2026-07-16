@@ -53,7 +53,7 @@ export function render(
     );
     return;
   }
-  const $elm = host$.render(elm);
+  const $elm = host$.render();
   if (!$elm) {
     return;
   }

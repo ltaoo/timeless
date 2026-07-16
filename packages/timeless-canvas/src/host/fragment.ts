@@ -26,12 +26,13 @@ export type CanvasFragment = VNodeView<any> & {
   isDocumentFragment(): boolean;
   addContent(children: (TimelessElement | null)[]): void;
   removeContent(): void;
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function CanvasFragment(props: {
   canvas: CanvasDocument;
   build: (elm: TimelessElement, canvas: CanvasDocument) => CanvasHostNode;
+  elm: TimelessElement;
 }): CanvasFragment {
   const canvas = props.canvas;
 
@@ -98,14 +99,14 @@ export function CanvasFragment(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       $elm = canvas.createDocumentFragment();
       $anchor = canvas.createTextNode("");
 
-      const props = (elm as any).props ?? (elm as any)._props ?? {};
-      const when = props.when;
-      const okFn = (elm as any)._ok ?? props.ok;
-      const elseFn = (elm as any)._else ?? props.else;
+      const elmProps = (props.elm as any).props ?? (props.elm as any)._props ?? {};
+      const when = elmProps.when;
+      const okFn = (props.elm as any)._ok ?? elmProps.ok;
+      const elseFn = (props.elm as any)._else ?? elmProps.else;
 
       const condition = isRef(when) ? !!when.value : !!when;
       const chosen = condition ? (okFn ? okFn() : []) : elseFn ? elseFn() : [];

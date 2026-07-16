@@ -4,12 +4,13 @@ import { HostElement } from "./box";
 
 export type DOMWebview = VNodeView<HTMLDivElement> & {
   t: "webview";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $e: HTMLDivElement): void;
 };
 
 export function DOMWebview(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMWebview {
   const t = "webview";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -23,14 +24,14 @@ export function DOMWebview(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("iframe");
-      if (elm.state.href) {
-        $elm.src = elm.state.href;
+      if (props.elm.state.href) {
+        $elm.src = props.elm.state.href;
       }
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement | Text) {

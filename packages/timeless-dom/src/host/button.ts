@@ -6,12 +6,13 @@ import { HostElement } from "./box";
 
 export type DOMButton = VNodeView<HTMLButtonElement> & {
   t: "button";
-  render(elm: TimelessElement): HTMLButtonElement;
+  render(): HTMLButtonElement;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMButton(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLButtonElement>;
+  elm: TimelessElement;
 }): DOMButton {
   const t = "button" as const;
   const $elm = document.createElement("button");
@@ -27,10 +28,10 @@ export function DOMButton(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
-      common$.methods.applyState(elm.state, { initial: true });
-      const $fragment = common$.methods.render(elm.children);
-      common$.methods.setupEventListener(elm.events);
+    render() {
+      common$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = common$.methods.render(props.elm.children);
+      common$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },

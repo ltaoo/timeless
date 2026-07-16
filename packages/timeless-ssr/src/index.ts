@@ -31,21 +31,21 @@ export function getPortalContent(): string {
 }
 
 function build(elm: TimelessElement): VNodeView<string> {
-  if (elm.t === "show") return SSRShow({ build });
-  if (elm.t === "match") return SSRMatch({ build });
-  if (elm.t === "for") return SSRFor({ build });
-  if (elm.t === "fragment") return SSRFragment({ build });
-  if (elm.t === "portal") return SSRPortal({ build });
-  if (elm.t === "view") return SSRView({ build });
-  if (elm.t === "text") return SSRText({ build });
-  if (elm.t === "row") return SSRRow({ build });
-  if (elm.t === "button") return SSRButton({ build });
-  if (elm.t === "link") return SSRLink({ build });
-  if (elm.t === "input") return SSRInput({ build });
-  if (elm.t === "checkbox") return SSRCheckbox({ build });
-  if (elm.t === "img") return SSRImg({ build });
-  if (elm.t === "label") return SSRLabel({ build });
-  return SSRView({ build });
+  if (elm.t === "show") return SSRShow({ build, elm });
+  if (elm.t === "match") return SSRMatch({ build, elm });
+  if (elm.t === "for") return SSRFor({ build, elm });
+  if (elm.t === "fragment") return SSRFragment({ build, elm });
+  if (elm.t === "portal") return SSRPortal({ build, elm });
+  if (elm.t === "view") return SSRView({ build, elm });
+  if (elm.t === "text") return SSRText({ build, elm });
+  if (elm.t === "row") return SSRRow({ build, elm });
+  if (elm.t === "button") return SSRButton({ build, elm });
+  if (elm.t === "link") return SSRLink({ build, elm });
+  if (elm.t === "input") return SSRInput({ build, elm });
+  if (elm.t === "checkbox") return SSRCheckbox({ build, elm });
+  if (elm.t === "img") return SSRImg({ build, elm });
+  if (elm.t === "label") return SSRLabel({ build, elm });
+  return SSRView({ build, elm });
 }
 
 export function renderToString(elm: TimelessElement): string {
@@ -70,5 +70,5 @@ export function renderToString(elm: TimelessElement): string {
   // print(elm);
   const root$ = build(elm);
   if (!root$) return "";
-  return root$.render(elm);
+  return root$.render();
 }

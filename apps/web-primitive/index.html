@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Timeless Primitive</title>
+    <script src="public/tailwindcss@4.js">
+      // @import "tailwindcss";
+      // @custom-variant dark (&:where(.dark, .dark *));
+      // @theme {
+      //   --color-background: #ffffff;
+      //   --color-foreground: #09090b;
+      //   --color-card: #ffffff;
+      //   --color-card-foreground: #09090b;
+      //   --color-popover: #ffffff;
+      //   --color-popover-foreground: #09090b;
+      //   --color-primary: #18181b;
+      //   --color-primary-foreground: #fafafa;
+      //   --color-secondary: #f4f4f5;
+      //   --color-secondary-foreground: #18181b;
+      //   --color-muted: #f4f4f5;
+      //   --color-muted-foreground: #71717a;
+      //   --color-accent: #f4f4f5;
+      //   --color-accent-foreground: #18181b;
+      //   --color-destructive: #ef4444;
+      //   --color-destructive-foreground: #fafafa;
+      //   --color-border: #e4e4e7;
+      //   --color-input: #e4e4e7;
+      //   --color-ring: #a1a1aa;
+      //   --color-radius: 0.5rem;
+      // }
+    </script>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-background text-foreground dark:bg-zinc-950 dark:text-zinc-50">
+    <div id="root"></div>
+    <script src="public/timeless/0.29.0/timeless.umd.min.js"></script>
+    <script src="public/timeless/0.29.0/timeless.dom.umd.min.js"></script>
+    <script src="public/timeless/0.29.0/timeless.web.umd.min.js"></script>
+    <script src="public/timeless/0.29.0/timeless.utils.umd.min.js"></script>
+    <script type="module" src="src/index.js"></script>
+  </body>
+</html>

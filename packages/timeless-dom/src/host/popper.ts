@@ -5,12 +5,13 @@ import { HostElement } from "./box";
 export type DOMPopper = VNodeView<HTMLDivElement> & {
   t: "popper";
   $elm: HTMLDivElement;
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMPopper(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMPopper {
   const t = "popper";
   const $elm = document.createElement("div");
@@ -29,23 +30,23 @@ export function DOMPopper(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
-      if (elm.state) {
+    render() {
+      if (props.elm.state) {
         common$.methods.setStyle({
-          "z-index": elm.state.zIndex,
+          "z-index": props.elm.state.zIndex,
           position: "fixed",
           left: 0,
           top: 0,
-          opacity: elm.state.placed ? 1 : 0,
-          "pointer-events": elm.state.placed ? "initial" : "none",
-          transform: elm.state.placed
-            ? `translate3d(${Math.round(elm.state.x)}px, ${Math.round(elm.state.y)}px, 0)`
+          opacity: props.elm.state.placed ? 1 : 0,
+          "pointer-events": props.elm.state.placed ? "initial" : "none",
+          transform: props.elm.state.placed
+            ? `translate3d(${Math.round(props.elm.state.x)}px, ${Math.round(props.elm.state.y)}px, 0)`
             : "translate3d(0, 0, 0)",
         });
       }
-      const $fragments = common$.methods.render(elm.children);
+      const $fragments = common$.methods.render(props.elm.children);
       $elm.appendChild($fragments);
-      common$.methods.setupEventListener(elm.events);
+      common$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: HTMLDivElement) {

@@ -1,18 +1,23 @@
 import { computed, Fragment, Icon, ref, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps, Show } from "@timeless/timeless";
 import { DialogPrimitive } from "@timeless/ui-primitive";
-import { DialogCore } from "@timeless/ui-vm";
+import { DialogCore, getGlobalLayerManager } from "@timeless/ui-vm";
+
+const DIALOG_BASE_Z = 200;
+const Z_INDEX_NEST_GAP = 50;
 
 import { Button } from "./button";
 
 export function Dialog(
-  props: ViewProps & { store: DialogCore },
+  props: ViewProps & { store: DialogCore; zIndex?: number },
   children?: ViewChildren | (() => ViewChildren),
 ) {
-  const { store, class: cls, style: sty, ...rest } = props;
+  const { store, class: cls, style: sty, zIndex: manualZIndex, ...rest } = props;
   const state_ = refobj(store.state);
   const presence_state_ = refobj(store.presence.state);
   const was_exiting_ = ref(false);
+
+  const zIndex = manualZIndex ?? DIALOG_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   const unlistens = [
     store.onStateChange((v) => {
@@ -39,9 +44,10 @@ export function Dialog(
     () => [
       DialogPrimitive.Overlay({
         store,
+        zIndex,
         class: computed(presence_state_, (d) => {
           const baseClass =
-            "fixed inset-0 isolate z-100 bg-black/10 supports-backdrop-filter:backdrop-blur-xs";
+            "fixed inset-0 isolate bg-black/10 supports-backdrop-filter:backdrop-blur-xs";
           const enterClass = d.enter
             ? "animate-in fill-mode-both fade-in-0 duration-100 ease-out"
             : "";
@@ -58,8 +64,8 @@ export function Dialog(
       View(
         {
           class:
-            "fixed inset-0 z-100 flex items-start justify-center p-4 pt-[10vh]",
-          style: sty,
+            "fixed inset-0 flex items-start justify-center p-4 pt-[10vh]",
+          style: { ...(sty as any), "z-index": zIndex },
         },
         [
           View(
@@ -82,6 +88,7 @@ export function Dialog(
                 {
                   ...rest,
                   store,
+                  zIndex,
                   class: computed(presence_state_, (d) => {
                     const baseClass =
                       "relative w-full flex flex-col rounded-xl bg-popover text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none transform-gpu max-h-[calc(90vh-2rem)]";

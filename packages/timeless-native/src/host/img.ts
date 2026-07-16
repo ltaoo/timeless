@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeImg = VNodeView<any> & {
   t: "img";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeImg(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeImg {
   const t = "img";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -77,13 +78,13 @@ export function NativeImg(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
-      if (elm.state.src) {
-        $elm.src = String(elm.state.src);
+    render() {
+      if (props.elm.state.src) {
+        $elm.src = String(props.elm.state.src);
       }
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+      methods.applyState(props.elm.state, { initial: true });
+      methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {

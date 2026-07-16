@@ -5,11 +5,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeGrid = VNodeView<any> & {
   t: "grid";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeGrid(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeGrid {
   const view$ = NativeView(props);
   const box$ = HostElement({ t: "grid", $elm: null, build: props.build });
@@ -42,12 +43,12 @@ export function NativeGrid(props: {
     addEventListener: view$.addEventListener,
     removeEventListener: view$.removeEventListener,
     getBoundingClientRect: view$.getBoundingClientRect,
-    render(elm: TimelessElement) {
-      view$.render(elm);
+    render() {
+      view$.render();
 
-      if (elm.state) {
-        const cols = elm.state.columns ?? 4;
-        const gap = elm.state.gap ?? 16;
+      if (props.elm.state) {
+        const cols = props.elm.state.columns ?? 4;
+        const gap = props.elm.state.gap ?? 16;
         $elm.style["display"] = "grid";
         $elm.style["grid-template-columns"] = `repeat(${cols}, 1fr)`;
         $elm.style["gap"] = `${gap}px`;

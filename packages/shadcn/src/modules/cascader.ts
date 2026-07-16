@@ -116,7 +116,7 @@ export function Cascader(
           },
           store,
           class:
-            "cn-menu-target cn-menu-translucent cascader__content relative z-50 flex flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
+            "cn-menu-target cn-menu-translucent cascader__content relative flex flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
           // style: computed(state_, () => {
           //   const width = store.reference?.width || 0;
           //   return width > 0

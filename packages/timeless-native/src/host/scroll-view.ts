@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeScrollView = VNodeView<any> & {
   t: "scroll-view";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeScrollView(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeScrollView {
   const t = "scroll-view";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -79,35 +80,35 @@ export function NativeScrollView(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
       $elm.style["display"] = "flex";
       $elm.style["flex-direction"] = "column";
       $elm.style["overflow"] = "auto";
 
-      if (elm.state.horizontal) {
-        $elm.horizontal = elm.state.horizontal;
-        if (elm.state.horizontal === "hidden") {
+      if (props.elm.state.horizontal) {
+        $elm.horizontal = props.elm.state.horizontal;
+        if (props.elm.state.horizontal === "hidden") {
           $elm.style["overflow-x"] = "hidden";
-        } else if (elm.state.horizontal === "visible") {
+        } else if (props.elm.state.horizontal === "visible") {
           $elm.style["overflow-x"] = "visible";
         }
       }
-      if (elm.state.vertical) {
-        $elm.vertical = elm.state.vertical;
-        if (elm.state.vertical === "hidden") {
+      if (props.elm.state.vertical) {
+        $elm.vertical = props.elm.state.vertical;
+        if (props.elm.state.vertical === "hidden") {
           $elm.style["overflow-y"] = "hidden";
-        } else if (elm.state.vertical === "visible") {
+        } else if (props.elm.state.vertical === "visible") {
           $elm.style["overflow-y"] = "visible";
         }
       }
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },

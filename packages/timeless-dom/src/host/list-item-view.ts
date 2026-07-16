@@ -15,12 +15,13 @@ const logger = Logger({ prefix: "dom", scope: "list-item-view" });
 
 export type DOMListItemView = VNodeView<HTMLDivElement> & {
   t: "list-item-view";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $e: HTMLDivElement): void;
 };
 
 export function DOMListItemView(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMListItemView {
   const t = "list-item-view";
   let $elm: any = null;
@@ -43,17 +44,17 @@ export function DOMListItemView(props: {
       // logger.log("removeChildren");
       box$.methods.removeChildren({ $parent: $elm });
     },
-    render(elm: TimelessElement) {
-      // console.log("[dom]list-item-view - render", elm.state);
+    render() {
+      // console.log("[dom]list-item-view - render", props.elm.state);
       $elm = document.createElement("div");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
       $elm.setAttribute("data-list-view-item", "");
-      if (!elm.state.bound) {
+      if (!props.elm.state.bound) {
         $elm.style.display = "none";
       }
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },

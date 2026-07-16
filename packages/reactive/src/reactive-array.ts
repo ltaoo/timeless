@@ -167,6 +167,16 @@ export function refArray<T>(
 
   let raw_value = items;
   const _arr_deps: SubscriberWithId<T[]>[] = [];
+  const warn = (msg: string) => console.warn(`[refArray] ${msg}`);
+  function checkIndex(idx: unknown, method: string): idx is number {
+    if (typeof idx !== "number" || isNaN(idx)) {
+      warn(
+        `${method}: expected number index, got ${JSON.stringify(idx)} — ignoring`,
+      );
+      return false;
+    }
+    return true;
+  }
   function destroy_inner() {
     for (let i = 0; i < _inner.length; i += 1) {
       const proxy = _inner[i];
@@ -274,19 +284,23 @@ export function refArray<T>(
       // });
     },
     get(idx: number) {
+      if (!checkIndex(idx, "get")) return undefined;
       const vv = raw_value[idx];
       return get_computed_value(vv, idx);
     },
     set(idx: number, item: any) {
+      if (!checkIndex(idx, "set")) return;
       Array.prototype.splice.call(raw_value, idx, 1, item);
       notify({ type: "update", index: idx, item });
     },
     splice(idx: number, dcount: number, ...items: any[]) {
+      if (!checkIndex(idx, "splice")) return [];
       const res = Array.prototype.splice.call(raw_value, idx, dcount, ...items);
       notify({ type: "refresh" });
       return res.map((item: any) => get_computed_value(item));
     },
     insert(idx: number, ...items: any[]) {
+      if (!checkIndex(idx, "insert")) return raw_value.length;
       Array.prototype.splice.call(raw_value, idx, 0, ...items);
       notify({
         type: "insert",
@@ -337,6 +351,7 @@ export function refArray<T>(
       return get_computed_value(item);
     },
     delete(idx: number) {
+      if (!checkIndex(idx, "delete")) return;
       Array.prototype.splice.call(raw_value, idx, 1);
       notify({ type: "delete", index: idx, deleteCount: 1 });
     },
@@ -514,6 +529,8 @@ export function refArray<T>(
       return raw_value.toLocaleString();
     },
     move(fromIndex: number, toIndex: number) {
+      if (!checkIndex(fromIndex, "move")) return r;
+      if (!checkIndex(toIndex, "move")) return r;
       if (fromIndex === toIndex) return r;
       if (
         fromIndex < 0 ||
@@ -530,15 +547,25 @@ export function refArray<T>(
     },
     up(index: number | DerivedRef<number> | Ref<number>) {
       const v = isRef(index) ? index.value : index;
+      if (typeof v !== "number" || isNaN(v)) {
+        warn(`up: expected number index, got ${JSON.stringify(v)} — ignoring`);
+        return r;
+      }
       if (v <= 0 || v >= raw_value.length) return r;
       return r.move(v, v - 1);
     },
     down(index: number | DerivedRef<number> | Ref<number>) {
       const v = isRef(index) ? index.value : index;
+      if (typeof v !== "number" || isNaN(v)) {
+        warn(`down: expected number index, got ${JSON.stringify(v)} — ignoring`);
+        return r;
+      }
       if (v < 0 || v >= raw_value.length - 1) return r;
       return r.move(v, v + 1);
     },
     swap(indexA: number, indexB: number) {
+      if (!checkIndex(indexA, "swap")) return r;
+      if (!checkIndex(indexB, "swap")) return r;
       if (indexA === indexB) return r;
       if (
         indexA < 0 ||
@@ -601,6 +628,7 @@ export function refArray<T>(
       return get_computed_value(raw_value[idx], idx);
     },
     nth(index: number) {
+      if (!checkIndex(index, "nth")) return undefined;
       const len = raw_value.length;
       const idx = index < 0 ? len + index : index;
       if (idx < 0 || idx >= len) return undefined;
@@ -762,6 +790,7 @@ export function refArray<T>(
       return raw_value.length === 0;
     },
     at(index: number) {
+      if (!checkIndex(index, "at")) return undefined;
       const idx = index < 0 ? raw_value.length + index : index;
       if (idx < 0 || idx >= raw_value.length) return undefined;
       return get_computed_value(raw_value[idx], idx);

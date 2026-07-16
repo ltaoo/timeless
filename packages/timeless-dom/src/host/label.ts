@@ -9,12 +9,13 @@ import { HostElement } from "./box";
 
 export type DOMLabel = VNodeView<HTMLLabelElement> & {
   t: "label";
-  render(elm: TimelessElement): HTMLLabelElement;
+  render(): HTMLLabelElement;
   hydrate(elm: TimelessElement, $dom: HTMLLabelElement): void;
 };
 
 export function DOMLabel(props: {
   build: (elm: TimelessElement) => VNodeView;
+  elm: TimelessElement;
 }): DOMLabel {
   const t = "label";
   const $elm = document.createElement("label");
@@ -30,12 +31,12 @@ export function DOMLabel(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
-      if (elm.state.for) {
-        common$.methods.setAttribute("for", elm.state.for);
+    render() {
+      if (props.elm.state.for) {
+        common$.methods.setAttribute("for", props.elm.state.for);
       }
-      common$.methods.setupEventListener(elm.events);
-      const $fragment = common$.methods.render(elm.children);
+      common$.methods.setupEventListener(props.elm.events);
+      const $fragment = common$.methods.render(props.elm.children);
       $elm.appendChild($fragment);
       return $elm;
     },

@@ -1,7 +1,10 @@
 import { computed, Icon, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps } from "@timeless/timeless";
 import { SheetPrimitive } from "@timeless/ui-primitive";
-import { DialogCore } from "@timeless/ui-vm";
+import { DialogCore, getGlobalLayerManager } from "@timeless/ui-vm";
+
+const SHEET_BASE_Z = 100;
+const Z_INDEX_NEST_GAP = 50;
 
 const SIDE_POS: Record<string, Record<string, string>> = {
   right: { top: "0", right: "0", bottom: "0", width: "75%", "max-width": "400px" },
@@ -14,11 +17,14 @@ export function Sheet(
   props: ViewProps & {
     store: DialogCore;
     side?: "right" | "top" | "bottom" | "left";
+    zIndex?: number;
   },
   children: ViewChildren | (() => ViewChildren) = [],
 ) {
-  const { store, side = "right", ...rest } = props;
+  const { store, side = "right", zIndex: manualZIndex, ...rest } = props;
   const state_ = refobj(store.state);
+
+  const zIndex = manualZIndex ?? SHEET_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   store.onStateChange((v) => {
     state_.as(v);
@@ -31,7 +37,7 @@ export function Sheet(
         const result: Record<string, string> = {
           position: "fixed",
           inset: "0",
-          "z-index": "50",
+          "z-index": `${zIndex}`,
           background: "var(--weui-OVERLAY)",
         };
         if (d.enter) {
@@ -47,7 +53,7 @@ export function Sheet(
       {
         style: {
           position: "fixed",
-          "z-index": "50",
+          "z-index": `${zIndex}`,
           ...(SIDE_POS[side] || SIDE_POS.right),
         },
       },

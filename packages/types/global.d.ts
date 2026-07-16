@@ -3746,6 +3746,127 @@ declare module "packages/primitive/src/input/radio" {
         onUnmounted(): void;
     };
 }
+declare module "packages/primitive/src/input/cascader" {
+    import { Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    export type CascaderOption<T = any> = {
+        label: string;
+        value: T;
+        disabled?: boolean;
+        children?: CascaderOption<T>[];
+    };
+    export type CascaderProps<T = any> = BoxProps & {
+        value?: T[] | Ref<T[]>;
+        options?: CascaderOption<T>[] | Ref<CascaderOption<T>[]>;
+        placeholder?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
+        onChange?: (path: T[]) => void;
+    };
+    export function Cascader(props?: CascaderProps, children?: any): any;
+}
+declare module "packages/primitive/src/input/date-picker" {
+    import { Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    export type DatePickerProps = BoxProps & {
+        value?: string | Date | Ref<string | Date | null> | null;
+        placeholder?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
+        min?: Date | Ref<Date | null> | null;
+        max?: Date | Ref<Date | null> | null;
+        onChange?: (value: Date | null) => void;
+    };
+    export function DatePicker(props?: DatePickerProps, children?: any): any;
+}
+declare module "packages/primitive/src/input/date-range-picker" {
+    import { Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    export type DateRange = [Date | null, Date | null];
+    export type DateRangePickerProps = BoxProps & {
+        value?: DateRange | Ref<DateRange>;
+        placeholder?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
+        min?: Date | Ref<Date | null> | null;
+        max?: Date | Ref<Date | null> | null;
+        onChange?: (value: DateRange) => void;
+    };
+    export function DateRangePicker(props?: DateRangePickerProps, children?: any): any;
+}
+declare module "packages/primitive/src/input/time-picker" {
+    import { Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    export type TimeFormat = "12h" | "24h";
+    export type TimePickerProps = BoxProps & {
+        value?: string | Ref<string | null> | null;
+        placeholder?: string | Ref<string>;
+        format?: TimeFormat | Ref<TimeFormat>;
+        disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
+        step?: number | Ref<number>;
+        onChange?: (value: string | null) => void;
+    };
+    export function TimePicker(props?: TimePickerProps, children?: any): any;
+}
+declare module "packages/primitive/src/input/date-time-picker" {
+    import { Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    export type DateTimePickerProps = BoxProps & {
+        value?: string | Date | Ref<string | Date | null> | null;
+        placeholder?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
+        min?: Date | Ref<Date | null> | null;
+        max?: Date | Ref<Date | null> | null;
+        onChange?: (value: Date | null) => void;
+    };
+    export function DateTimePicker(props?: DateTimePickerProps, children?: any): any;
+}
+declare module "packages/primitive/src/input/search-select" {
+    import { Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    export type SearchSelectOption<T = any> = {
+        label: string;
+        value: T;
+        disabled?: boolean;
+    };
+    export type SearchSelectProps<T = any> = BoxProps & {
+        value?: T | Ref<T | null> | null;
+        options?: SearchSelectOption<T>[] | Ref<SearchSelectOption<T>[]>;
+        searchValue?: string | Ref<string>;
+        placeholder?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
+        allowClear?: boolean | Ref<boolean>;
+        loading?: boolean | Ref<boolean>;
+        onSearch?: (keyword: string) => void;
+        onChange?: (value: T | null) => void;
+    };
+    export function SearchSelect<T = any>(props?: SearchSelectProps<T>, children?: any): any;
+}
+declare module "packages/primitive/src/input/tree-select" {
+    import { Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    export type TreeSelectNode<T = any> = {
+        label: string;
+        value: T;
+        disabled?: boolean;
+        children?: TreeSelectNode<T>[];
+    };
+    export type TreeSelectProps<T = any> = BoxProps & {
+        value?: T | T[] | Ref<T | T[] | null> | null;
+        nodes?: TreeSelectNode<T>[] | Ref<TreeSelectNode<T>[]>;
+        placeholder?: string | Ref<string>;
+        disabled?: boolean | Ref<boolean>;
+        readonly?: boolean | Ref<boolean>;
+        multiple?: boolean | Ref<boolean>;
+        checkChildNodesAuto?: boolean | Ref<boolean>;
+        onlyLeafNode?: boolean | Ref<boolean>;
+        onChange?: (node: TreeSelectNode<T>, checked: boolean) => void;
+    };
+    export function TreeSelect<T = any>(props?: TreeSelectProps<T>, children?: any): any;
+}
 declare module "packages/primitive/src/interaction/dismissable" {
     type Box = {
         x: number;
@@ -3984,7 +4105,7 @@ declare module "packages/primitive/src/vnode/view" {
         addEventListener(type: string, handler: (event: VNodeEvent<VNodeView<HostElm>>) => void, options?: any): void;
         removeEventListener(type: string, handler: (event: VNodeEvent<VNodeView<HostElm>>) => void, options?: any): void;
         /** 构建宿主 node tree */
-        render(elm: TimelessElement): any;
+        render(): any;
         /** 水合 */
         hydrate(elm: TimelessElement, $dom: HostElm, opt: {
             initial?: boolean;
@@ -4200,7 +4321,14 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/content/webview";
     export * from "packages/primitive/src/content/style";
     export * from "packages/primitive/src/content/lazy-view";
-    export * from "packages/primitive/src/content/popper";
+    export * from "packages/primitive/src/floating/popper";
+    export * from "packages/primitive/src/floating/dialog";
+    export * from "packages/primitive/src/floating/tooltip";
+    export * from "packages/primitive/src/floating/drawer";
+    export * from "packages/primitive/src/floating/popconfirm";
+    export * from "packages/primitive/src/floating/toaster";
+    export * from "packages/primitive/src/floating/dropdown-menu";
+    export * from "packages/primitive/src/floating/context-menu";
     export * from "packages/primitive/src/content/list-view";
     export * from "packages/primitive/src/content/icon";
     export * from "packages/primitive/src/content/aspect-ratio";
@@ -4223,6 +4351,13 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/input/file-picker";
     export * from "packages/primitive/src/input/textarea";
     export * from "packages/primitive/src/input/radio";
+    export * from "packages/primitive/src/input/cascader";
+    export * from "packages/primitive/src/input/date-picker";
+    export * from "packages/primitive/src/input/date-range-picker";
+    export * from "packages/primitive/src/input/time-picker";
+    export * from "packages/primitive/src/input/date-time-picker";
+    export * from "packages/primitive/src/input/search-select";
+    export * from "packages/primitive/src/input/tree-select";
     export * from "packages/primitive/src/interaction/dismissable";
     export * from "packages/primitive/src/event/index";
     export * from "packages/primitive/src/interaction/link";

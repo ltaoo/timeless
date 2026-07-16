@@ -98,6 +98,7 @@ export function Trigger(
         );
         const handlePointerDown = (e: any) => {
           const target = e.target as HTMLElement | null;
+          console.log("[DEBUG] Select Trigger pointerdown FIRED", store.disabled, store.open);
           logger.log("Trigger handlePointerDown", target?.isContentEditable);
           if (
             target &&

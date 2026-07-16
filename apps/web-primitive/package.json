@@ -1,0 +1,17 @@
+{
+  "name": "@timeless/web-primitive",
+  "type": "module",
+  "scripts": {
+    "dev": "timeless frontend",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix"
+  },
+  "devDependencies": {
+    "@timeless/cli": "workspace:*",
+    "@timeless/types": "workspace:*",
+    "eslint": "^8.56.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0"
+  }
+}

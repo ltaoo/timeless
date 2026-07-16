@@ -5,12 +5,13 @@ import { HostElement } from "./box";
 export type DOMAudio = VNodeView<HTMLAudioElement> & {
   t: "audio";
   setSrc(v: string): void;
-  render(elm: TimelessElement): HTMLAudioElement;
+  render(): HTMLAudioElement;
   hydrate(elm: TimelessElement, $dom: HTMLAudioElement): void;
 };
 
 export function DOMAudio(props: {
   build: (elm: TimelessElement) => VNodeView;
+  elm: TimelessElement;
 }): DOMAudio {
   const t = "audio";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -46,19 +47,19 @@ export function DOMAudio(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("audio");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
-      if (elm.state.src) {
-        $elm.src = elm.state.src;
+      box$.methods.applyState(props.elm.state, { initial: true });
+      if (props.elm.state.src) {
+        $elm.src = props.elm.state.src;
       }
-      const $children = box$.methods.render(elm.children);
+      const $children = box$.methods.render(props.elm.children);
       if ($children) {
         $elm.appendChild($children);
       }
-      box$.methods.setupEventListener(elm.events);
-      setupAudioEventListener($elm, elm.events as Record<string, any>);
+      box$.methods.setupEventListener(props.elm.events);
+      setupAudioEventListener($elm, props.elm.events as Record<string, any>);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLAudioElement) {

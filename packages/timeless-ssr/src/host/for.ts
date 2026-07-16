@@ -7,12 +7,13 @@ export type SSRFor = VNodeView<string> & {
   // insert(idx: number, element: (TimelessElement | null)[]): void;
   // remove(idx: number, count: number): void;
   // refresh(data: any): void;
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRFor(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRFor {
   const box$ = SSRBox();
   return {
@@ -21,14 +22,14 @@ export function SSRFor(props: {
     getType() {
       return "reactive";
     },
-    render(elm: TimelessElement) {
-      // console.log("[ssr]for - render", elm.children);
-      if (!elm.children) return "";
+    render() {
+      // console.log("[ssr]for - render", props.elm.children);
+      if (!props.elm.children) return "";
       let result = "";
-      for (const child of elm.children) {
+      for (const child of props.elm.children) {
         if (child) {
           const child$ = props.build(child);
-          result += child$.render(child);
+          result += child$.render();
         }
       }
       // console.log("[ssr]for - render result", result);

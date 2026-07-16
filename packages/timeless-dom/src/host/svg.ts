@@ -4,12 +4,13 @@ import { HostElement } from "./box";
 
 export type DOMSVG = VNodeView<SVGSVGElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGSVGElement;
+  render(): SVGSVGElement;
   hydrate(elm: TimelessElement, $elm: SVGSVGElement): void;
 };
 
 export function DOMSVG(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMSVG {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -23,15 +24,15 @@ export function DOMSVG(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "svg",
       ) as SVGSVGElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -44,12 +45,13 @@ export function DOMSVG(props: {
 
 export type DOMG = VNodeView<SVGGElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGGElement;
+  render(): SVGGElement;
   hydrate(elm: TimelessElement, $elm: SVGGElement): void;
 };
 
 export function DOMG(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMG {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -63,15 +65,15 @@ export function DOMG(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "g",
       ) as SVGGElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -84,12 +86,13 @@ export function DOMG(props: {
 
 export type DOMCircle = VNodeView<SVGCircleElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGCircleElement;
+  render(): SVGCircleElement;
   hydrate(elm: TimelessElement, $elm: SVGCircleElement): void;
 };
 
 export function DOMCircle(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMCircle {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -103,14 +106,14 @@ export function DOMCircle(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "circle",
       ) as SVGCircleElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGCircleElement) {
@@ -122,12 +125,13 @@ export function DOMCircle(props: {
 
 export type DOMRect = VNodeView<SVGRectElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGRectElement;
+  render(): SVGRectElement;
   hydrate(elm: TimelessElement, $elm: SVGRectElement): void;
 };
 
 export function DOMRect(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMRect {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -141,14 +145,14 @@ export function DOMRect(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "rect",
       ) as SVGRectElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGRectElement) {
@@ -160,12 +164,13 @@ export function DOMRect(props: {
 
 export type DOMPath = VNodeView<SVGPathElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGPathElement;
+  render(): SVGPathElement;
   hydrate(elm: TimelessElement, $elm: SVGPathElement): void;
 };
 
 export function DOMPath(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMPath {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -179,16 +184,16 @@ export function DOMPath(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "path",
       ) as SVGPathElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
-      if (elm.state.d) {
-        $elm.setAttribute("d", elm.state.d);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
+      if (props.elm.state.d) {
+        $elm.setAttribute("d", props.elm.state.d);
       }
       return $elm;
     },
@@ -201,12 +206,13 @@ export function DOMPath(props: {
 
 export type DOMLine = VNodeView<SVGLineElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGLineElement;
+  render(): SVGLineElement;
   hydrate(elm: TimelessElement, $elm: SVGLineElement): void;
 };
 
 export function DOMLine(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMLine {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -220,14 +226,14 @@ export function DOMLine(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "line",
       ) as SVGLineElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGLineElement) {
@@ -239,12 +245,13 @@ export function DOMLine(props: {
 
 export type DOMPolyline = VNodeView<SVGPolylineElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGPolylineElement;
+  render(): SVGPolylineElement;
   hydrate(elm: TimelessElement, $elm: SVGPolylineElement): void;
 };
 
 export function DOMPolyline(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMPolyline {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -258,14 +265,14 @@ export function DOMPolyline(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "polyline",
       ) as SVGPolylineElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGPolylineElement) {
@@ -277,12 +284,13 @@ export function DOMPolyline(props: {
 
 export type DOMPolygon = VNodeView<SVGPolygonElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGPolygonElement;
+  render(): SVGPolygonElement;
   hydrate(elm: TimelessElement, $elm: SVGPolygonElement): void;
 };
 
 export function DOMPolygon(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMPolygon {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -296,14 +304,14 @@ export function DOMPolygon(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "polygon",
       ) as SVGPolygonElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGPolygonElement) {
@@ -315,12 +323,13 @@ export function DOMPolygon(props: {
 
 export type DOMEllipse = VNodeView<SVGEllipseElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGEllipseElement;
+  render(): SVGEllipseElement;
   hydrate(elm: TimelessElement, $elm: SVGEllipseElement): void;
 };
 
 export function DOMEllipse(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMEllipse {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -334,14 +343,14 @@ export function DOMEllipse(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "ellipse",
       ) as SVGEllipseElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGEllipseElement) {
@@ -353,12 +362,13 @@ export function DOMEllipse(props: {
 
 export type DOMSVGText = VNodeView<SVGTextElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGTextElement;
+  render(): SVGTextElement;
   hydrate(elm: TimelessElement, $elm: SVGTextElement): void;
 };
 
 export function DOMSVGText(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMSVGText {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -372,15 +382,15 @@ export function DOMSVGText(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text",
       ) as SVGTextElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -393,12 +403,13 @@ export function DOMSVGText(props: {
 
 export type DOMDefs = VNodeView<SVGDefsElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGDefsElement;
+  render(): SVGDefsElement;
   hydrate(elm: TimelessElement, $elm: SVGDefsElement): void;
 };
 
 export function DOMDefs(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMDefs {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -412,15 +423,15 @@ export function DOMDefs(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "defs",
       ) as SVGDefsElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -433,12 +444,13 @@ export function DOMDefs(props: {
 
 export type DOMSymbol = VNodeView<SVGSymbolElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGSymbolElement;
+  render(): SVGSymbolElement;
   hydrate(elm: TimelessElement, $elm: SVGSymbolElement): void;
 };
 
 export function DOMSymbol(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMSymbol {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -452,15 +464,15 @@ export function DOMSymbol(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "symbol",
       ) as SVGSymbolElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -473,12 +485,13 @@ export function DOMSymbol(props: {
 
 export type DOMUse = VNodeView<SVGUseElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGUseElement;
+  render(): SVGUseElement;
   hydrate(elm: TimelessElement, $elm: SVGUseElement): void;
 };
 
 export function DOMUse(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMUse {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -492,14 +505,14 @@ export function DOMUse(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "use",
       ) as SVGUseElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGUseElement) {
@@ -511,12 +524,13 @@ export function DOMUse(props: {
 
 export type DOMLinearGradient = VNodeView<SVGLinearGradientElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGLinearGradientElement;
+  render(): SVGLinearGradientElement;
   hydrate(elm: TimelessElement, $elm: SVGLinearGradientElement): void;
 };
 
 export function DOMLinearGradient(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMLinearGradient {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -530,15 +544,15 @@ export function DOMLinearGradient(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "linearGradient",
       ) as SVGLinearGradientElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -551,12 +565,13 @@ export function DOMLinearGradient(props: {
 
 export type DOMRadialGradient = VNodeView<SVGRadialGradientElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGRadialGradientElement;
+  render(): SVGRadialGradientElement;
   hydrate(elm: TimelessElement, $elm: SVGRadialGradientElement): void;
 };
 
 export function DOMRadialGradient(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMRadialGradient {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -570,15 +585,15 @@ export function DOMRadialGradient(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "radialGradient",
       ) as SVGRadialGradientElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -591,12 +606,13 @@ export function DOMRadialGradient(props: {
 
 export type DOMStop = VNodeView<SVGStopElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGStopElement;
+  render(): SVGStopElement;
   hydrate(elm: TimelessElement, $elm: SVGStopElement): void;
 };
 
 export function DOMStop(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMStop {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -610,14 +626,14 @@ export function DOMStop(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "stop",
       ) as SVGStopElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGStopElement) {
@@ -629,12 +645,13 @@ export function DOMStop(props: {
 
 export type DOMMask = VNodeView<SVGMaskElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGMaskElement;
+  render(): SVGMaskElement;
   hydrate(elm: TimelessElement, $elm: SVGMaskElement): void;
 };
 
 export function DOMMask(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMMask {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -648,15 +665,15 @@ export function DOMMask(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "mask",
       ) as SVGMaskElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -669,12 +686,13 @@ export function DOMMask(props: {
 
 export type DOMClipPath = VNodeView<SVGClipPathElement> & {
   t: "svg";
-  render(elm: TimelessElement): SVGClipPathElement;
+  render(): SVGClipPathElement;
   hydrate(elm: TimelessElement, $elm: SVGClipPathElement): void;
 };
 
 export function DOMClipPath(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMClipPath {
   const t = "svg";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -688,15 +706,15 @@ export function DOMClipPath(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "clipPath",
       ) as SVGClipPathElement;
       box$.methods.set$elm($elm as any);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },

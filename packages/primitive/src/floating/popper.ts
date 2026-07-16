@@ -27,9 +27,9 @@ import { styleNames } from "@/style";
 import { MountedEvent } from "@/event";
 import { ListenerManager } from "@/util/listener";
 
-import { Text } from "./text";
-import { View, ViewProps } from "./view";
-import { isElement, TimelessElement, ViewChildren, resolve_children } from "./type";
+import { Text } from "../content/text";
+import { View, ViewProps } from "../content/view";
+import { isElement, TimelessElement, ViewChildren, resolve_children } from "../content/type";
 
 /** Props for Popper component */
 type PopperProps = ViewProps & {
@@ -145,7 +145,7 @@ export function Popper(props: PopperProps, children?: ViewChildren) {
           onChange(v) {
             state.placed = v as boolean;
             style_.as({
-              "z-index": 99,
+              "z-index": 150,
               position: "fixed",
               left: 0,
               top: 0,

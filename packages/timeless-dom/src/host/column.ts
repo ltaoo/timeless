@@ -55,12 +55,13 @@ function normalizeWidth(v: number | string): string {
 
 export type DOMColumn = VNodeView<HTMLDivElement> & {
   t: "column";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMColumn(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMColumn {
   const box$ = HostElement({ $elm: null, t: "column", build: props.build });
 
@@ -73,18 +74,18 @@ export function DOMColumn(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
-      const s = elm.state ?? {};
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const s = props.elm.state ?? {};
       $elm.style.display = "flex";
       $elm.style.flexDirection = "column";
       if (s.gap !== undefined) $elm.style.gap = `${s.gap}px`;
       if (s.align) $elm.style.alignItems = normalizeAlign(s.align);
       if (s.justify) $elm.style.justifyContent = normalizeJustify(s.justify);
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },
@@ -104,7 +105,7 @@ export function isDOMColumn(value: any): value is DOMColumn {
 
 export type DOMCol = VNodeView<HTMLDivElement> & {
   t: "col";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
@@ -127,6 +128,7 @@ function buildColBpCSS(cls: string, flexBp: Record<string, any>): string {
 
 export function DOMCol(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMCol {
   const box$ = HostElement({ $elm: null, t: "col", build: props.build });
 
@@ -139,12 +141,12 @@ export function DOMCol(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
 
-      const s = elm.state ?? {};
+      const s = props.elm.state ?? {};
       const flex = s.flex;
 
       if (flex !== undefined && typeof flex === "object") {
@@ -170,8 +172,8 @@ export function DOMCol(props: {
       if (s.rowStart !== undefined) $elm.style.gridRowStart = String(s.rowStart);
       if (s.rowEnd !== undefined) $elm.style.gridRowEnd = String(s.rowEnd);
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },

@@ -4,7 +4,7 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeFor = VNodeView<any> & {
   t: "for";
-  render(elm: TimelessElement): any;
+  render(): any;
   insert(idx: number, element: (TimelessElement | null)[]): void;
   remove(idx: number, count: number): void;
   refresh(data: {
@@ -19,6 +19,7 @@ export type NativeFor = VNodeView<any> & {
 
 export function NativeFor(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeFor {
   const t = "for";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -87,14 +88,14 @@ export function NativeFor(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },

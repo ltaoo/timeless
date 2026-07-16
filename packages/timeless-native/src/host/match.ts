@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeMatch = VNodeView<any> & {
   t: "match";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeMatch(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeMatch {
   const t = "match";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -77,14 +78,14 @@ export function NativeMatch(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },

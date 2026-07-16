@@ -6,13 +6,14 @@ export type CanvasText = VNodeView<any> & {
   $elm: any;
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
-  render(elm: TimelessElement): any;
+  render(): any;
   setText: (v: string | number | null) => void;
 };
 
 export function CanvasText(
   value: string | null,
   canvas: CanvasDocument,
+  elm: TimelessElement,
 ): CanvasText {
   const $text = canvas.createTextNode(String(value ?? ""));
 
@@ -31,7 +32,7 @@ export function CanvasText(
         $text.setTextContent(String(v ?? ""));
       }
     },
-    render(elm: TimelessElement) {
+    render() {
       if (!elm.state.value) {
         return null;
       }

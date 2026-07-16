@@ -4,7 +4,7 @@ import { HostElement } from "./box";
 
 export type DOMNumberInput = VNodeView<HTMLInputElement> & {
   t: "number-input";
-  render(elm: TimelessElement): HTMLInputElement;
+  render(): HTMLInputElement;
   hydrate(elm: TimelessElement, $dom: any): void;
   setValue(value: string): void;
   focus(): void;
@@ -14,6 +14,7 @@ export type DOMNumberInput = VNodeView<HTMLInputElement> & {
 export function DOMNumberInput(props: {
   // canvas: Document;
   build: (elm: TimelessElement) => VNodeView<HTMLInputElement>;
+  elm: TimelessElement;
 }): DOMNumberInput {
   // const canvas = props.canvas;
   // const $elm = canvas.createElement("div");
@@ -30,31 +31,31 @@ export function DOMNumberInput(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("input");
       // $elm.style.backgroundColor = "transparent";
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
       $elm.type = "text";
-      if (elm.state.id !== undefined) {
-        $elm.id = elm.state.id;
+      if (props.elm.state.id !== undefined) {
+        $elm.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.name = props.elm.state.name;
       }
-      if (elm.state.value !== undefined) {
-        $elm.value = elm.state.value;
+      if (props.elm.state.value !== undefined) {
+        $elm.value = props.elm.state.value;
       }
-      if (elm.state.placeholder !== undefined) {
-        $elm.placeholder = elm.state.placeholder;
+      if (props.elm.state.placeholder !== undefined) {
+        $elm.placeholder = props.elm.state.placeholder;
       }
-      if (elm.state.disabled !== undefined) {
-        $elm.disabled = elm.state.disabled;
+      if (props.elm.state.disabled !== undefined) {
+        $elm.disabled = props.elm.state.disabled;
       }
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
-      const events = elm.events;
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
+      const events = props.elm.events;
       if (events) {
         if (events.onInput) {
           $elm.addEventListener("input", events.onInput);

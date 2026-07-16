@@ -205,12 +205,12 @@ export function Select(
           onMouseLeave() {
             hovering_.as(false);
           },
-          onMouseDown(e) {
-            if (store.search) {
-              return;
-            }
-            e.stopPropagation();
-          },
+          // onMouseDown(e) {
+          //   if (store.search) {
+          //     return;
+          //   }
+          //   e.stopPropagation();
+          // },
           // onPointerDown(e) {
           //   if (!store.search) {
           //     return;
@@ -297,7 +297,7 @@ export function Select(
       ),
       SelectPrimitive.Content(
         {
-          ...rest,
+          // ...rest,
           dataset: {
             slot: "select-content",
             "align-trigger": store.position === "item-aligned" ? "" : undefined,
@@ -311,7 +311,7 @@ export function Select(
           },
           store,
           class: classNames([
-            "cn-menu-target cn-menu-translucent relative z-50 min-w-36 overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none flex flex-col",
+            "cn-menu-target cn-menu-translucent relative min-w-36 overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none flex flex-col",
             "max-h-(--radix-select-content-available-height) origin-(--radix-select-content-transform-origin) ",
             "max-h-[var(--radix-select-content-available-height)] origin-[var(--radix-select-content-transform-origin)] ",
             "data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
@@ -329,85 +329,62 @@ export function Select(
             "pointer-events": "auto",
           },
         },
-        () => [
-          // View({}, [
-          //   SelectPrimitive.ScrollUpButton(
-          //     {
-          //       store,
-          //       dataset: {
-          //         "scroll-up-button": "",
-          //       },
-          //       class:
-          //         "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-          //     },
-          //     [Icon({ name: "chevron-up", size: 16 })],
-          //   ),
-          // ]),
-          SelectPrimitive.Viewport(
-            {
-              store,
-              class: classNames([
-                "scroll-my-1 p-1",
-                // SelectGroupClassName,
-                // "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
-              ]),
-            },
-            [
-              Show({
-                when: computed(state_, (t) => t.loading),
-                ok() {
-                  return View(
-                    {
-                      class:
-                        "py-6 text-center text-sm text-muted-foreground select-none",
-                    },
-                    ["加载中..."],
-                  );
-                },
-                else() {
-                  return Show({
-                    when: computed(
-                      filtered_entries_,
-                      (list) => list.length > 0,
-                    ),
-                    ok() {
-                      return [
-                        For({
-                          each: filtered_entries_,
-                          render: methods.render_entry,
-                        }),
-                      ];
-                    },
-                    else() {
-                      return [
-                        View(
-                          {
-                            class:
-                              "py-6 text-center text-sm text-muted-foreground select-none",
-                          },
-                          ["暂无数据"],
-                        ),
-                      ];
-                    },
-                  });
-                },
-              }),
-            ],
-          ),
-          // View({}, [
-          //   SelectPrimitive.ScrollDownButton(
-          //     {
-          //       store,
-          //       dataset: {
-          //         "scroll-down-button": "",
-          //       },
-          //       class:
-          //         "z-10 flex cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-          //     },
-          //     [Icon({ name: "chevron-down", size: 16 })],
-          //   ),
-          // ]),
-        ],
+        [
+          View({}, ["Som"]),
+        ]
+        // () => [
+        //   SelectPrimitive.Viewport(
+        //     {
+        //       store,
+        //       class: classNames([
+        //         "scroll-my-1 p-1",
+        //         SelectGroupClassName,
+        //         "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
+        //       ]),
+        //     },
+        //     [
+        //       Show({
+        //         when: computed(state_, (t) => t.loading),
+        //         ok() {
+        //           return View(
+        //             {
+        //               class:
+        //                 "py-6 text-center text-sm text-muted-foreground select-none",
+        //             },
+        //             ["加载中..."],
+        //           );
+        //         },
+        //         else() {
+        //           return Show({
+        //             when: computed(
+        //               filtered_entries_,
+        //               (list) => list.length > 0,
+        //             ),
+        //             ok() {
+        //               return [
+        //                 For({
+        //                   each: filtered_entries_,
+        //                   render: methods.render_entry,
+        //                 }),
+        //               ];
+        //             },
+        //             else() {
+        //               return [
+        //                 View(
+        //                   {
+        //                     class:
+        //                       "py-6 text-center text-sm text-muted-foreground select-none",
+        //                   },
+        //                   ["暂无数据"],
+        //                 ),
+        //               ];
+        //             },
+        //           });
+        //         },
+        //       }),
+        //     ],
+        //   ),
+        // ],
       ),
     ],
   );

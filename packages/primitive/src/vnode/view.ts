@@ -52,7 +52,7 @@ export type VNodeView<HostElm = any> = {
     options?: any,
   ): void;
   /** 构建宿主 node tree */
-  render(elm: TimelessElement): any;
+  render(): any;
   /** 水合 */
   hydrate(
     elm: TimelessElement,

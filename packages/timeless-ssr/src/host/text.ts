@@ -3,12 +3,13 @@ import { SSRBox } from "./box";
 
 export type SSRText = VNodeView<string> & {
   t: "text";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRText(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRText {
   const t = "text";
   const box$ = SSRBox();
@@ -18,9 +19,9 @@ export function SSRText(props: {
     getType() {
       return "text";
     },
-    render(elm: TimelessElement) {
-      // console.log("render text element", elm);
-      const value = elm.state.value;
+    render() {
+      // console.log("render text element", props.elm);
+      const value = props.elm.state.value;
       if (value !== null && value !== undefined) {
         return textEscape(String(value));
       }

@@ -17,6 +17,8 @@ export default defineConfig({
       "@": resolve(__dirname, "src"),
       "@timeless/primitive": resolve(__dirname, "../primitive"),
       "@timeless/reactive": resolve(__dirname, "../reactive"),
+      "@timeless/ui-primitive": resolve(__dirname, "../ui-primitive"),
+      "@timeless/ui-vm": resolve(__dirname, "../ui-vm"),
     },
   },
   build: {

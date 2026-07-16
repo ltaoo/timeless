@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeLabel = VNodeView<any> & {
   t: "label";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeLabel(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeLabel {
   const t = "label";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -81,18 +82,18 @@ export function NativeLabel(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+      methods.applyState(props.elm.state, { initial: true });
+      methods.setupEventListener(props.elm.events);
 
-      if (elm.state.for) {
-        $elm.for = elm.state.for as string;
-        $elm.attrs["for"] = elm.state.for as string;
+      if (props.elm.state.for) {
+        $elm.for = props.elm.state.for as string;
+        $elm.attrs["for"] = props.elm.state.for as string;
       }
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
 
       return $elm;

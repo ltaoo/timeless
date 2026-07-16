@@ -731,6 +731,12 @@ importers:
       '@timeless/reactive':
         specifier: workspace:^
         version: link:../reactive
+      '@timeless/ui-primitive':
+        specifier: workspace:^
+        version: link:../ui-primitive
+      '@timeless/ui-vm':
+        specifier: workspace:^
+        version: link:../ui-vm
       tailwindcss:
         specifier: ^3.0.0 || ^4.0.0
         version: 4.2.1

@@ -17,11 +17,11 @@ export type NativeText = {
   isDocumentFragment(): boolean;
   getChildNodes(): any[];
   setStyle(style: Record<string, string>): void;
-  render(elm: TimelessElement): any;
+  render(): any;
   setText(value: string | number | null): void;
 };
 
-export function NativeText(): NativeText {
+export function NativeText(props: { elm: TimelessElement }): NativeText {
   const $text: NativeTextElm = {
     type: "text",
     value: "",
@@ -56,10 +56,10 @@ export function NativeText(): NativeText {
         $text._onStyleChange($text.style);
       }
     },
-    render(elm: TimelessElement) {
+    render() {
       $text.value = (() => {
-        if (elm.state.value !== null && elm.state.value !== undefined) {
-          return String(elm.state.value);
+        if (props.elm.state.value !== null && props.elm.state.value !== undefined) {
+          return String(props.elm.state.value);
         }
         return "";
       })();

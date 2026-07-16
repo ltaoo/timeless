@@ -11,11 +11,12 @@ import { HostElement } from "./box";
 
 export type DOMStyle = VNodeView<HTMLStyleElement> & {
   t: "style";
-  render(elm: TimelessElement): DocumentFragment;
+  render(): DocumentFragment;
 };
 
 export function DOMStyle(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLStyleElement>;
+  elm: TimelessElement;
 }): DOMStyle {
   const t = "style";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -29,11 +30,11 @@ export function DOMStyle(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("style");
       $elm.type = "text/css";
-      if (elm.state.content) {
-        $elm.textContent = elm.state.content;
+      if (props.elm.state.content) {
+        $elm.textContent = props.elm.state.content;
       }
       box$.methods.set$elm($elm);
       document.head.appendChild($elm);

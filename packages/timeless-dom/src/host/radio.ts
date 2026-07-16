@@ -4,13 +4,14 @@ import { HostElement } from "./box";
 
 export type DOMRadio = VNodeView<HTMLInputElement> & {
   t: "radio";
-  render(elm: TimelessElement): HTMLInputElement;
+  render(): HTMLInputElement;
   hydrate(elm: TimelessElement, $dom: any): void;
   setChecked(checked: boolean): void;
 };
 
 export function DOMRadio(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLInputElement>;
+  elm: TimelessElement;
 }): DOMRadio {
   const t = "radio";
   const common$ = HostElement({ $elm: null, t, build: props.build });
@@ -26,24 +27,24 @@ export function DOMRadio(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("input");
       $elm.type = "radio";
-      $elm.checked = !!elm.state.value;
-      if (elm.state.id) {
-        $elm.id = elm.state.id;
+      $elm.checked = !!props.elm.state.value;
+      if (props.elm.state.id) {
+        $elm.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.name = props.elm.state.name;
       }
       common$.methods.set$elm($elm);
-      common$.methods.applyState(elm.state, { initial: true });
-      if (elm.state.tabindex !== undefined) {
-        $elm.setAttribute("tabindex", elm.state.tabindex);
+      common$.methods.applyState(props.elm.state, { initial: true });
+      if (props.elm.state.tabindex !== undefined) {
+        $elm.setAttribute("tabindex", props.elm.state.tabindex);
       }
-      delete elm.state.value;
-      common$.methods.setupEventListener(elm.events);
-      const events = elm.events;
+      delete props.elm.state.value;
+      common$.methods.setupEventListener(props.elm.events);
+      const events = props.elm.events;
       $elm.addEventListener("click", function (event) {
         if (events && events.onChange) {
           events.onChange(event);

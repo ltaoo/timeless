@@ -15,7 +15,7 @@ const logger = Logger({ prefix: "dom", scope: "portal" });
 
 export type DOMPortal = VNodeView<Text> & {
   t: "portal";
-  render(elm: TimelessElement): DocumentFragment;
+  render(): DocumentFragment;
 };
 
 let _hydratePortalCounter = 0;
@@ -26,6 +26,7 @@ export function resetPortalCounter() {
 
 export function DOMPortal(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
+  elm: TimelessElement;
 }): DOMPortal {
   const t = "portal";
   const $anchor = document.createTextNode("");
@@ -41,10 +42,10 @@ export function DOMPortal(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
-      box$.methods.applyState(elm.state, { initial: true });
-      box$.methods.setupEventListener(elm.events);
-      const $fragment = box$.methods.render(elm.children);
+    render() {
+      box$.methods.applyState(props.elm.state, { initial: true });
+      box$.methods.setupEventListener(props.elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
       $fragment.appendChild($anchor);
       console.log(
         "[DOMPortal.render] appending to body, children count=",

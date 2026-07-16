@@ -15,12 +15,13 @@ const logger = Logger({ prefix: "dom", scope: "view" });
 
 export type DOMWindow = VNodeView<HTMLDivElement> & {
   t: "window";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $e: HTMLDivElement): void;
 };
 
 export function DOMWindow(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMWindow {
   const t = "window";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -34,13 +35,13 @@ export function DOMWindow(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       $elm.style.cssText = "width: 100vw; height: 100vh;";
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state, { initial: true });
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },

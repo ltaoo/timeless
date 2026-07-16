@@ -44,7 +44,7 @@ export function Popover(
                 "animate-out fill-mode-both fade-out-0 zoom-out-95";
               return [
                 "popover-content",
-                "relative z-50 flex w-72 flex-col gap-2.5 rounded-lg bg-popover p-2.5 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
+                "relative flex w-72 flex-col gap-2.5 rounded-lg bg-popover p-2.5 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
                 t.enter ? inClass : "",
                 t.exit ? outClass : "",
                 !t.mounted && was_exiting_.value ? outClass : "",

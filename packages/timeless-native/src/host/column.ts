@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeColumn = VNodeView<any> & {
   t: "column";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeColumn(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeColumn {
   const t = "column";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -77,20 +78,20 @@ export function NativeColumn(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
       $elm.style["display"] = "flex";
       $elm.style["flex-direction"] = "column";
-      if (elm.state.gap) {
-        $elm.style["gap"] = `${elm.state.gap}px`;
+      if (props.elm.state.gap) {
+        $elm.style["gap"] = `${props.elm.state.gap}px`;
       }
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },

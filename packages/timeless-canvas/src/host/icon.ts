@@ -16,12 +16,13 @@ export type CanvasIcon = VNodeView<any> & {
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
   setStyleSet(key: string): void;
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function CanvasIcon(props: {
   canvas: CanvasDocument;
   build: (elm: TimelessElement, canvas: CanvasDocument) => CanvasHostNode;
+  elm: TimelessElement;
 }): CanvasIcon {
   const canvas = props.canvas;
   const $elm = canvas.createElement("div");
@@ -109,15 +110,15 @@ export function CanvasIcon(props: {
     setStyleSet(name: string) {
       canvas.setClassName($elm, name);
     },
-    render(elm: TimelessElement) {
-      const name = elm.value.name as string;
+    render() {
+      const name = props.elm.value.name as string;
       if (!name) {
         return $elm;
       }
 
       // Set size
-      const props = elm.value as any;
-      const size = props?.size ? String(props.size) : "24";
+      const iconProps = props.elm.value as any;
+      const size = iconProps?.size ? String(iconProps.size) : "24";
       const sizeNum = parseFloat(size);
       canvas.setAttribute($elm, "width", size);
       canvas.setAttribute($elm, "height", size);
@@ -125,7 +126,7 @@ export function CanvasIcon(props: {
       // Store icon data on the element for rendering
       ($elm as any)._iconName = name;
       ($elm as any)._iconSize = sizeNum;
-      ($elm as any)._iconColor = props?.color || "white";
+      ($elm as any)._iconColor = iconProps?.color || "white";
 
       // console.log("[Icon.render]", { name, size, color: props?.color, $elm });
 

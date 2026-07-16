@@ -1,7 +1,10 @@
 import { computed, Icon, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps } from "@timeless/timeless";
 import { SheetPrimitive } from "@timeless/ui-primitive";
-import { DialogCore } from "@timeless/ui-vm";
+import { DialogCore, getGlobalLayerManager } from "@timeless/ui-vm";
+
+const SHEET_BASE_Z = 100;
+const Z_INDEX_NEST_GAP = 50;
 
 const WRAPPER_CLASSES = {
   right: "inset-y-0 right-0 h-full w-3/4 max-w-sm",
@@ -35,11 +38,14 @@ export function Sheet(
   props: ViewProps & {
     store: DialogCore;
     side?: "right" | "top" | "bottom" | "left";
+    zIndex?: number;
   },
   children: ViewChildren | (() => ViewChildren) = [],
 ) {
-  const { store, side = "right", ...rest } = props;
+  const { store, side = "right", zIndex: manualZIndex, ...rest } = props;
   const state_ = refobj(store.state);
+
+  const zIndex = manualZIndex ?? SHEET_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   store.onStateChange((v) => {
     state_.as(v);
@@ -48,8 +54,9 @@ export function Sheet(
   return SheetPrimitive.Root({ store }, () => [
     SheetPrimitive.Overlay({
       store,
+      zIndex,
       class: computed(state_, (d) => {
-        const baseClass = "fixed inset-0 z-50 bg-black/80";
+        const baseClass = "fixed inset-0 bg-black/80";
         const enterClass = d.enter ? "animate-in fade-in duration-300" : "";
         const exitClass = d.exit ? "animate-out fade-out duration-300" : "";
         return [baseClass, enterClass, exitClass].filter(Boolean).join(" ");
@@ -57,7 +64,8 @@ export function Sheet(
     }),
     View(
       {
-        class: `fixed z-50 ${WRAPPER_CLASSES[side]}`,
+        class: `fixed ${WRAPPER_CLASSES[side]}`,
+        style: { "z-index": zIndex },
       },
       [
         SheetPrimitive.Content(

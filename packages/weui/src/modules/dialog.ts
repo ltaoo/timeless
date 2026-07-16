@@ -1,15 +1,20 @@
 import { computed, Fragment, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps, Show } from "@timeless/timeless";
 import { DialogPrimitive } from "@timeless/ui-primitive";
-import { DialogCore } from "@timeless/ui-vm";
+import { DialogCore, getGlobalLayerManager } from "@timeless/ui-vm";
+
+const DIALOG_BASE_Z = 200;
+const Z_INDEX_NEST_GAP = 50;
 
 export function Dialog(
-  props: ViewProps & { store: DialogCore },
+  props: ViewProps & { store: DialogCore; zIndex?: number },
   children?: ViewChildren | (() => ViewChildren),
 ) {
-  const { store, ...rest } = props;
+  const { store, zIndex: manualZIndex, ...rest } = props;
   const state_ = refobj(store.state);
   const presence_state_ = refobj(store.presence.state);
+
+  const zIndex = manualZIndex ?? DIALOG_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   const unlistens = [
     store.onStateChange((v) => {
@@ -34,7 +39,7 @@ export function Dialog(
           const result: Record<string, string> = {
             position: "fixed",
             inset: "0",
-            "z-index": "1000",
+            "z-index": `${zIndex}`,
             background: "var(--weui-OVERLAY)",
           };
           if (d.enter) {
@@ -52,7 +57,7 @@ export function Dialog(
             position: "fixed",
             left: "50%",
             top: "50%",
-            "z-index": "1001",
+            "z-index": `${zIndex + 1}`,
             transform: "translate(-50%,-50%)",
             width: "calc(100% - 64px)",
             "max-width": "320px",

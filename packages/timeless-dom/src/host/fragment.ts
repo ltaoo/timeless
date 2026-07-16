@@ -15,7 +15,7 @@ const logger = Logger({ prefix: "dom", scope: "fragment" });
 
 export type DOMFragment = VNodeView<Text> & {
   t: "fragment";
-  render(elm: TimelessElement): DocumentFragment;
+  render(): DocumentFragment;
   hydrate(
     elm: TimelessElement,
     $dom: Text,
@@ -25,6 +25,7 @@ export type DOMFragment = VNodeView<Text> & {
 
 export function DOMFragment(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
+  elm: TimelessElement;
 }): DOMFragment {
   const t = "fragment";
   let $anchor: Text;
@@ -40,10 +41,10 @@ export function DOMFragment(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
+    render() {
       $anchor = document.createTextNode("");
       box$.methods.set$elm($anchor);
-      const $fragment = box$.methods.render(elm.children);
+      const $fragment = box$.methods.render(props.elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
     },

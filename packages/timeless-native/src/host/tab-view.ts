@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeTabView = VNodeView<any> & {
   t: "tab-view";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeTabView(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeTabView {
   const t = "tab-view";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -79,24 +80,24 @@ export function NativeTabView(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
       $elm.style["display"] = "flex";
       $elm.style["flex-direction"] = "column";
 
-      if (elm.state.activeIndex !== undefined) {
-        $elm.activeIndex = elm.state.activeIndex;
+      if (props.elm.state.activeIndex !== undefined) {
+        $elm.activeIndex = props.elm.state.activeIndex;
       }
-      if (elm.state.position !== undefined) {
-        $elm.position = elm.state.position;
+      if (props.elm.state.position !== undefined) {
+        $elm.position = props.elm.state.position;
       }
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },
@@ -127,11 +128,12 @@ export function NativeTabView(props: {
 
 export type NativeTabPane = VNodeView<any> & {
   t: "tab-pane";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeTabPane(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeTabPane {
   const t = "tab-pane";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -202,23 +204,23 @@ export function NativeTabPane(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
       $elm.style["flex"] = "1";
 
-      if (elm.state.label !== undefined) {
-        $elm.label = elm.state.label;
+      if (props.elm.state.label !== undefined) {
+        $elm.label = props.elm.state.label;
       }
-      if (elm.state.icon !== undefined) {
-        $elm.icon = elm.state.icon;
+      if (props.elm.state.icon !== undefined) {
+        $elm.icon = props.elm.state.icon;
       }
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },

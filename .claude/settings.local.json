@@ -72,7 +72,9 @@
       "Bash(ls:*)",
       "Bash(npx timeless frontend --help:*)",
       "Bash(npx vite --help:*)",
-      "Bash(timeout 5 npx vite:*)"
+      "Bash(timeout 5 npx vite:*)",
+      "Bash(echo 'import { getGlobalLayerManager } from \"@timeless/ui-vm\";\nconst lm = getGlobalLayerManager\\(\\);\n// @ts-ignore\nconst z = lm.getZIndex\\(\"dialog\"\\);\nconsole.log\\(z\\);' > src/test_trace2.ts && npx tsc --noEmit src/test_trace2.ts --moduleResolution bundler --module ESNext --target ESNext --skipLibCheck --esModuleInterop 2>&1)",
+      "Bash(echo 'import { getGlobalLayerManager } from \"@timeless/ui-vm\";\nconst lm = getGlobalLayerManager\\(\\);\nconst z = lm.getZIndex\\(\"dialog\"\\);\nconsole.log\\(z\\);' > src/test_trace2.ts && npx tsc --noEmit src/test_trace2.ts --moduleResolution bundler --module ESNext --target ESNext --skipLibCheck --esModuleInterop 2>&1)"
     ]
   }
 }

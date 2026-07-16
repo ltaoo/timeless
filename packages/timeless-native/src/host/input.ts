@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeInput = VNodeView<any> & {
   t: "input";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeInput(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeInput {
   const t = "input";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -84,15 +85,15 @@ export function NativeInput(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
-      if (elm.state.value !== undefined) {
-        $elm.value = String(elm.state.value);
+      methods.applyState(props.elm.state, { initial: true });
+      methods.setupEventListener(props.elm.events);
+      if (props.elm.state.value !== undefined) {
+        $elm.value = String(props.elm.state.value);
       }
-      if (elm.state.placeholder !== undefined) {
-        $elm.placeholder = String(elm.state.placeholder);
+      if (props.elm.state.placeholder !== undefined) {
+        $elm.placeholder = String(props.elm.state.placeholder);
       }
       if (!$elm.style["height"]) {
         $elm.style["height"] = "28px";

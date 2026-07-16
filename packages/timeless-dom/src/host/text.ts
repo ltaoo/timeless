@@ -3,13 +3,14 @@ import { HostElement } from "./box";
 
 export type DOMText = VNodeView<Text> & {
   t: "text";
-  render(elm: TimelessElement): Text | null;
+  render(): Text | null;
   hydrate(elm: TimelessElement, $text: HTMLElement | Text): void;
   setText(value: string | number | null): void;
 };
 
 export function DOMText(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMText {
   const t = "text";
   let $text: any = null;
@@ -38,14 +39,14 @@ export function DOMText(props: {
       $text = null;
       box$.methods.destroy();
     },
-    render(elm: TimelessElement) {
-      // if (elm.state.value === undefined || elm.state.value === null) {
+    render() {
+      // if (props.elm.state.value === undefined || props.elm.state.value === null) {
       //   return $text;
       // }
       $text = document.createTextNode(
         (() => {
-          if (elm.state.value !== null && elm.state.value !== undefined) {
-            return String(elm.state.value);
+          if (props.elm.state.value !== null && props.elm.state.value !== undefined) {
+            return String(props.elm.state.value);
           }
           return "";
         })(),

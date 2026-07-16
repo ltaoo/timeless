@@ -5,12 +5,13 @@ import { HostElement } from "./box";
 export type DOMLazyView = VNodeView<Text> & {
   t: "lazy-view";
   replaceChildren(children: (TimelessElement | null)[]): void;
-  render(elm: TimelessElement): DocumentFragment;
+  render(): DocumentFragment;
   hydrate(elm: TimelessElement, $dom: Text): void;
 };
 
 export function DOMLazyView(props: {
   build: (elm: TimelessElement) => VNodeView;
+  elm: TimelessElement;
 }): DOMLazyView {
   const t = "lazy-view";
   const $anchor = document.createTextNode("");
@@ -27,9 +28,9 @@ export function DOMLazyView(props: {
     },
     setupEventListener() {},
     teardownEventListener() {},
-    render(elm: TimelessElement) {
+    render() {
       common$.methods.set$elm($anchor);
-      const $fragment = common$.methods.render(elm.children);
+      const $fragment = common$.methods.render(props.elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
     },

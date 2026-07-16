@@ -342,7 +342,7 @@ export function HostElement(props: {
       for (const child of children) {
         if (isElement(child)) {
           const child$ = props.build(child);
-          const $child = child$.render(child);
+          const $child = child$.render();
           child_elements.push(child);
           child_nodes.push(child$);
           if ($child) {
@@ -397,7 +397,7 @@ export function HostElement(props: {
             continue;
           }
           child_nodes.push(child$);
-          const $child = child$.render(child);
+          const $child = child$.render();
           if ($child) {
             child_host_nodes.push($child);
             $fragment.appendChild($child);
@@ -507,7 +507,7 @@ export function HostElement(props: {
         if (child) {
           const child$ = props.build(child);
           inserted_child.push(child$);
-          const $child = child$.render(child);
+          const $child = child$.render();
           if ($child) {
             inserted_host_nodes.push($child);
             inserted_elements.push(child);

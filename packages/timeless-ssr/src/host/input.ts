@@ -4,12 +4,13 @@ import { SSRBox } from "./box";
 
 export type SSRInput = VNodeView<string> & {
   t: "input";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRInput(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRInput {
   const box$ = SSRBox();
   return {
@@ -18,11 +19,11 @@ export function SSRInput(props: {
     getType() {
       return "input";
     },
-    render(elm: TimelessElement) {
-      const attrs = box$.buildAttributes(elm.state);
+    render() {
+      const attrs = box$.buildAttributes(props.elm.state);
       attrs.push(`type="text"`);
-      if (elm.state.value) {
-        attrs.push(`value="${elm.state.value}"`);
+      if (props.elm.state.value) {
+        attrs.push(`value="${props.elm.state.value}"`);
       }
       return `<input${box$.stringifyAttrs(attrs)}/>`;
     },

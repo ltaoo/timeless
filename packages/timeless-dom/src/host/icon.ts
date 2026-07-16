@@ -11,12 +11,13 @@ export { type ASNNode, type IconRegistry };
 
 export type DOMIcon = VNodeView<SVGSVGElement> & {
   t: "icon";
-  render(elm: TimelessElement): SVGSVGElement | null;
+  render(): SVGSVGElement | null;
   hydrate(elm: TimelessElement, $dom: SVGSVGElement): void;
 };
 
 export function DOMIcon(props: {
   build: (elm: TimelessElement) => VNodeView<SVGSVGElement>;
+  elm: TimelessElement;
 }): DOMIcon {
   const t = "icon";
   let $elm: any = null;
@@ -32,8 +33,8 @@ export function DOMIcon(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
-      const name = elm.state.name as string;
+    render() {
+      const name = props.elm.state.name as string;
       // console.log("[]icon - render name", name);
       if (!name) {
         console.warn(`Icon must have a name`);
@@ -54,8 +55,8 @@ export function DOMIcon(props: {
       // );
       if (!asn_node) {
         $elm = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        $elm.setAttribute("width", String(elm.state.size || 24));
-        $elm.setAttribute("height", String(elm.state.size || 24));
+        $elm.setAttribute("width", String(props.elm.state.size || 24));
+        $elm.setAttribute("height", String(props.elm.state.size || 24));
         $elm.setAttribute("viewBox", "0 0 24 24");
         $elm.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
         $elm.style.display = "inline-block";
@@ -64,9 +65,9 @@ export function DOMIcon(props: {
         common$.methods.set$elm($elm);
         return $elm;
       }
-      $elm = render_asn_to_svg(asn_node, elm.state) as SVGSVGElement;
+      $elm = render_asn_to_svg(asn_node, props.elm.state) as SVGSVGElement;
       common$.methods.set$elm($elm);
-      // common$.methods.applyState(elm.state);
+      // common$.methods.applyState(props.elm.state);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: any) {

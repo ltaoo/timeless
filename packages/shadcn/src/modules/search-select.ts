@@ -130,7 +130,7 @@ export function SearchSelect<T>(
           out: "animate-out fill-mode-both fade-out-0 zoom-out-95 slide-out-to-top-2",
         },
         class:
-          "cn-menu-target cn-menu-translucent select__content relative z-50 max-h-96 min-w-36 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
+          "cn-menu-target cn-menu-translucent select__content relative max-h-96 min-w-36 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none",
         style: computed(state_, () => {
           const width = store.reference?.width || 0;
           return width > 0

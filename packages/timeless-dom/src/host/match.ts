@@ -19,12 +19,13 @@ const logger = Logger({
 
 export type DOMMatch = VNodeView<Text> & {
   t: "match";
-  render(elm: TimelessElement): DocumentFragment;
+  render(): DocumentFragment;
   // hydrate(elm: TimelessElement, $elm: Text): void;
 };
 
 export function DOMMatch(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
+  elm: TimelessElement;
 }): DOMMatch {
   const t = "match";
   const $anchor = document.createTextNode("");
@@ -39,8 +40,8 @@ export function DOMMatch(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
-      const $fragment = box$.methods.render(elm.children);
+    render() {
+      const $fragment = box$.methods.render(props.elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
     },

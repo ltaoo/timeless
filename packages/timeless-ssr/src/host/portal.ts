@@ -4,12 +4,13 @@ import { _collectPortal } from "../index";
 
 export type SSRPortal = VNodeView<string> & {
   t: "portal";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRPortal(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRPortal {
   const t = "portal";
   const box$ = SSRBox();
@@ -19,13 +20,13 @@ export function SSRPortal(props: {
     getType() {
       return "portal";
     },
-    render(elm: TimelessElement) {
-      if (!elm.children) return "";
+    render() {
+      if (!props.elm.children) return "";
       let html = "";
-      for (const child of elm.children) {
+      for (const child of props.elm.children) {
         if (child) {
           const child$ = props.build(child);
-          html += child$.render(child);
+          html += child$.render();
         }
       }
       if (html) {

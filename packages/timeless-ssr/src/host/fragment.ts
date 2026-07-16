@@ -3,12 +3,13 @@ import { SSRBox } from "./box";
 
 export type SSRFragment = VNodeView<string> & {
   t: "fragment";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRFragment(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRFragment {
   const t = "fragment";
   const box$ = SSRBox();
@@ -18,13 +19,13 @@ export function SSRFragment(props: {
     getType() {
       return "fragment";
     },
-    render(elm: TimelessElement) {
-      if (!elm.children) return "";
+    render() {
+      if (!props.elm.children) return "";
       let result = "";
-      for (const child of elm.children) {
+      for (const child of props.elm.children) {
         if (child) {
           const child$ = props.build(child);
-          result += child$.render(child);
+          result += child$.render();
         }
       }
       return result;

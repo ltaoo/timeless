@@ -202,7 +202,6 @@ export function Select(
           },
           style: {
             position: "relative",
-            "z-index": "50",
             "min-width": "120px",
             "overflow-x": "hidden",
             "overflow-y": "auto",

@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeIcon = VNodeView<any> & {
   t: "icon";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeIcon(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeIcon {
   const t = "icon";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -79,19 +80,19 @@ export function NativeIcon(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+      methods.applyState(props.elm.state, { initial: true });
+      methods.setupEventListener(props.elm.events);
 
-      if (elm.state.name) {
-        $elm.name = elm.state.name as string;
+      if (props.elm.state.name) {
+        $elm.name = props.elm.state.name as string;
       }
-      if (elm.state.color) {
-        $elm.color = elm.state.color as string;
+      if (props.elm.state.color) {
+        $elm.color = props.elm.state.color as string;
       }
-      if (elm.state.size !== undefined) {
-        $elm.size = elm.state.size as number;
+      if (props.elm.state.size !== undefined) {
+        $elm.size = props.elm.state.size as number;
       }
 
       return $elm;

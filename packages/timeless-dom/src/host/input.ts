@@ -5,13 +5,14 @@ import { HostElement } from "./box";
 export type DOMInput = VNodeView<HTMLInputElement> & {
   t: "input";
   setValue(value: string): void;
-  render(elm: TimelessElement): HTMLInputElement;
+  render(): HTMLInputElement;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMInput(props: {
   // canvas: Document;
   build: (elm: TimelessElement) => VNodeView<HTMLInputElement>;
+  elm: TimelessElement;
 }): DOMInput {
   const t = "input";
   const common$ = HostElement({ $elm: null, t, build: props.build });
@@ -25,37 +26,37 @@ export function DOMInput(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("input");
       $elm.type = "text";
-      $elm.value = elm.state.value;
-      if (elm.state.id) {
-        $elm.id = elm.state.id;
+      $elm.value = props.elm.state.value;
+      if (props.elm.state.id) {
+        $elm.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.name = props.elm.state.name;
       }
-      if (elm.state.placeholder) {
-        $elm.placeholder = elm.state.placeholder;
+      if (props.elm.state.placeholder) {
+        $elm.placeholder = props.elm.state.placeholder;
       }
-      if (elm.state.disabled) {
-        $elm.disabled = elm.state.disabled;
+      if (props.elm.state.disabled) {
+        $elm.disabled = props.elm.state.disabled;
       }
       common$.methods.set$elm($elm);
-      common$.methods.applyState(elm.state, { initial: true });
-      if (elm.state.maxLength !== undefined) {
-        $elm.setAttribute("max-length", elm.state.maxLength);
+      common$.methods.applyState(props.elm.state, { initial: true });
+      if (props.elm.state.maxLength !== undefined) {
+        $elm.setAttribute("max-length", props.elm.state.maxLength);
       }
-      if (elm.state.tabindex !== undefined) {
-        $elm.setAttribute("tabindex", elm.state.tabindex);
+      if (props.elm.state.tabindex !== undefined) {
+        $elm.setAttribute("tabindex", props.elm.state.tabindex);
       }
-      if (elm.state.autoComplete !== undefined) {
-        $elm.setAttribute("autocomplete", elm.state.autoComplete);
+      if (props.elm.state.autoComplete !== undefined) {
+        $elm.setAttribute("autocomplete", props.elm.state.autoComplete);
       }
       // $elm.style.width = "100%";
-      // console.log("[dom]input render - before setupEvent", elm.events);
-      common$.methods.setupEventListener(elm.events);
-      const events = elm.events;
+      // console.log("[dom]input render - before setupEvent", props.elm.events);
+      common$.methods.setupEventListener(props.elm.events);
+      const events = props.elm.events;
       $elm.addEventListener("input", function (event) {
         event.preventDefault();
         if (events && events.onInput) {

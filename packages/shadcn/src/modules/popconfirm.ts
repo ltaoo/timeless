@@ -43,7 +43,7 @@ export function Popconfirm(
             class: computed(state_, (t) => {
               return [
                 "popconfirm-content",
-                "relative z-50 w-72 rounded-md border border-zinc-200 bg-white p-4 text-sm text-zinc-500 shadow-md outline-none",
+                "relative w-72 rounded-md border border-zinc-200 bg-white p-4 text-sm text-zinc-500 shadow-md outline-none",
                 "dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400",
                 t.enter ? "animate-in fade-in-0 zoom-in-95" : "",
                 t.exit ? "animate-out fade-out-0 zoom-out-95" : "",

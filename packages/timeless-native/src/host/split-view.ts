@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeSplitView = VNodeView<any> & {
   t: "split-view";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeSplitView(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeSplitView {
   const t = "split-view";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -81,31 +82,31 @@ export function NativeSplitView(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
       $elm.style["display"] = "flex";
       $elm.style["flex-direction"] =
-        elm.state.direction === "horizontal" ? "row" : "column";
+        props.elm.state.direction === "horizontal" ? "row" : "column";
 
-      if (elm.state.direction) {
-        $elm.direction = elm.state.direction;
+      if (props.elm.state.direction) {
+        $elm.direction = props.elm.state.direction;
       }
-      if (elm.state.sizes) {
-        $elm.defaultSizes = elm.state.sizes;
+      if (props.elm.state.sizes) {
+        $elm.defaultSizes = props.elm.state.sizes;
       }
-      if (elm.state.minSizes) {
-        $elm.minSizes = elm.state.minSizes;
+      if (props.elm.state.minSizes) {
+        $elm.minSizes = props.elm.state.minSizes;
       }
-      if (elm.state.maxSizes) {
-        $elm.maxSizes = elm.state.maxSizes;
+      if (props.elm.state.maxSizes) {
+        $elm.maxSizes = props.elm.state.maxSizes;
       }
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },
@@ -136,11 +137,12 @@ export function NativeSplitView(props: {
 
 export type NativeSplitPane = VNodeView<any> & {
   t: "split-pane";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeSplitPane(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeSplitPane {
   const t = "split-pane";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -214,32 +216,32 @@ export function NativeSplitPane(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
-      $elm.style["flex"] = `${(elm.state.size || 50) / 100}`;
+      $elm.style["flex"] = `${(props.elm.state.size || 50) / 100}`;
 
-      if (elm.state.size !== undefined) {
-        $elm.size = elm.state.size;
+      if (props.elm.state.size !== undefined) {
+        $elm.size = props.elm.state.size;
       }
-      if (elm.state.minSize !== undefined) {
-        $elm.minSize = elm.state.minSize;
+      if (props.elm.state.minSize !== undefined) {
+        $elm.minSize = props.elm.state.minSize;
       }
-      if (elm.state.maxSize !== undefined) {
-        $elm.maxSize = elm.state.maxSize;
+      if (props.elm.state.maxSize !== undefined) {
+        $elm.maxSize = props.elm.state.maxSize;
       }
-      if (elm.state.collapsible !== undefined) {
-        $elm.collapsible = elm.state.collapsible;
+      if (props.elm.state.collapsible !== undefined) {
+        $elm.collapsible = props.elm.state.collapsible;
       }
-      if (elm.state.collapsedSize !== undefined) {
-        $elm.collapsedSize = elm.state.collapsedSize;
+      if (props.elm.state.collapsedSize !== undefined) {
+        $elm.collapsedSize = props.elm.state.collapsedSize;
       }
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },

@@ -4,12 +4,13 @@ import { HostElement } from "./box";
 
 export type DOMScrollView = VNodeView<HTMLDivElement> & {
   t: "scroll-view";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMScrollView(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMScrollView {
   const box$ = HostElement({
     $elm: null,
@@ -26,19 +27,19 @@ export function DOMScrollView(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       $elm.setAttribute("data-scroll-view", "");
       // $elm.style.cssText = "overflow-y: auto; max-height: 100%;";
-      Object.assign(elm.state.style, {
+      Object.assign(props.elm.state.style, {
         "overflow-y": "auto",
         "max-height": "100%",
       });
 
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
 
-      // const s = elm.state ?? {};
+      // const s = props.elm.state ?? {};
       // const horizontal = s.horizontal ?? "auto";
       // const vertical = s.vertical ?? "auto";
 
@@ -57,8 +58,8 @@ export function DOMScrollView(props: {
       //   $elm.style.overflowY = "visible";
       // }
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
 
       return $elm;

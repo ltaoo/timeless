@@ -4,7 +4,7 @@ import { HostElement } from "./box";
 
 export type DOMCheckbox = VNodeView<HTMLInputElement> & {
   t: "checkbox";
-  render(elm: TimelessElement): HTMLInputElement;
+  render(): HTMLInputElement;
   hydrate(elm: TimelessElement, $dom: any): void;
   setChecked(checked: boolean): void;
 };
@@ -12,6 +12,7 @@ export type DOMCheckbox = VNodeView<HTMLInputElement> & {
 export function DOMCheckbox(props: {
   // canvas: Document;
   build: (elm: TimelessElement) => VNodeView<HTMLInputElement>;
+  elm: TimelessElement;
 }): DOMCheckbox {
   const t = "checkbox";
   const common$ = HostElement({ $elm: null, t, build: props.build });
@@ -25,33 +26,33 @@ export function DOMCheckbox(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("input");
-      console.log('[dom]create checkbox', elm.state);
+      console.log('[dom]create checkbox', props.elm.state);
       // $elm.style.backgroundColor = "transparent";
       // console.log("[DOMCheckbox] render", elm.value);
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
       $elm.type = "checkbox";
-      if (elm.state !== undefined) {
-        $elm.checked = !!elm.state.checked;
-        if (elm.state.checked) {
+      if (props.elm.state !== undefined) {
+        $elm.checked = !!props.elm.state.checked;
+        if (props.elm.state.checked) {
           $elm.setAttribute("checked", "checked");
         }
       }
-      if (elm.state.id) {
-        $elm.id = elm.state.id;
+      if (props.elm.state.id) {
+        $elm.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.name = props.elm.state.name;
       }
       common$.methods.set$elm($elm);
-      common$.methods.applyState(elm.state, { initial: true });
-      if (elm.state.tabindex !== undefined) {
-        $elm.setAttribute("tabindex", elm.state.tabindex);
+      common$.methods.applyState(props.elm.state, { initial: true });
+      if (props.elm.state.tabindex !== undefined) {
+        $elm.setAttribute("tabindex", props.elm.state.tabindex);
       }
-      common$.methods.setupEventListener(elm.events);
-      const events = elm.events;
+      common$.methods.setupEventListener(props.elm.events);
+      const events = props.elm.events;
       $elm.addEventListener("click", function (event) {
         // event.preventDefault();
         if (events && events.onChange) {

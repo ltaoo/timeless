@@ -25,11 +25,12 @@ export type DOMFor = VNodeView<Text> & {
   }): void;
   move(from: number, to: number): void;
   swap(from: number, to: number): void;
-  render(elm: TimelessElement): DocumentFragment;
+  render(): DocumentFragment;
 };
 
 export function DOMFor(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
+  elm: TimelessElement;
 }): DOMFor {
   // const $fragment = document.createDocumentFragment();
   const t = "for";
@@ -56,8 +57,8 @@ export function DOMFor(props: {
     refresh: box$.methods.refresh,
     move: box$.methods.move,
     swap: box$.methods.move,
-    render(elm: TimelessElement) {
-      const $fragment = box$.methods.render(elm.children);
+    render() {
+      const $fragment = box$.methods.render(props.elm.children);
       $fragment.appendChild($anchor);
       // common$.methods.handleElementsMounted();
       return $fragment;

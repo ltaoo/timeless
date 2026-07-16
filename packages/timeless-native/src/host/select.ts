@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeSelect = VNodeView<any> & {
   t: "select";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativeSelect(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeSelect {
   const t = "select";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -77,15 +78,15 @@ export function NativeSelect(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
       $elm.attrs.class = "t-select";
       $elm.style["display"] = "inline-block";
 
-      if (elm.children) {
-        const r = methods.buildChildren(elm.children);
+      if (props.elm.children) {
+        const r = methods.buildChildren(props.elm.children);
         for (const $child of r.child_host_nodes) {
           if ($elm.children) {
             $elm.children.push($child);
@@ -93,7 +94,7 @@ export function NativeSelect(props: {
         }
       }
 
-      methods.setupEventListener(elm.events);
+      methods.setupEventListener(props.elm.events);
 
       return $elm;
     },

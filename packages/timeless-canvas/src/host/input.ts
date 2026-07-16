@@ -17,12 +17,12 @@ export type CanvasInput = VNodeView<any> & {
   getChildNodes(): any[];
   setStyle(style: ViewStyleProperties): void;
   setStyleValue(key: string, value: string): void;
-  render(elm: TimelessElement): any;
+  render(): any;
 };
-
 export function CanvasInput(props: {
   canvas: CanvasDocument;
   build: (elm: TimelessElement, canvas: CanvasDocument) => CanvasHostNode;
+  elm: TimelessElement;
 }): CanvasInput {
   const canvas = props.canvas;
   const $elm = canvas.createElement("div");
@@ -107,18 +107,18 @@ export function CanvasInput(props: {
       // console.log("[View] setStyleValue", key, value);
       canvas.patchStyle?.($elm, { [key]: value });
     },
-    render(elm: TimelessElement) {
-      if (elm.state?.style) {
-        methods.setStyle(elm.state.style);
+    render() {
+      if (props.elm.state?.style) {
+        methods.setStyle(props.elm.state.style);
       }
-      if (elm.state.styleSet) {
-        methods.setStyleSet(elm.state.styleSet);
+      if (props.elm.state.styleSet) {
+        methods.setStyleSet(props.elm.state.styleSet);
       }
-      if (elm.events) {
-        methods.setupEventListener(elm.events);
+      if (props.elm.events) {
+        methods.setupEventListener(props.elm.events);
       }
-      if (elm.children) {
-        for (const child of elm.children) {
+      if (props.elm.children) {
+        for (const child of props.elm.children) {
           if (isElement(child)) {
             const $sub = props.build(child, canvas);
             if ($sub && $sub.$elm) {

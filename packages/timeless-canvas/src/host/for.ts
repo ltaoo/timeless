@@ -7,13 +7,14 @@ export type CanvasFor = VNodeView<any> & {
   $elm: any;
   getChildNodes(): any[];
   isDocumentFragment(): boolean;
-  render(elm: TimelessElement): any;
+  render(): any;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function CanvasFor(props: {
   canvas: CanvasDocument;
   build: (elm: TimelessElement, canvas: CanvasDocument) => CanvasHostNode;
+  elm: TimelessElement;
 }): CanvasFor {
   const canvas = props.canvas;
   const $elm = canvas.createDocumentFragment();
@@ -28,9 +29,9 @@ export function CanvasFor(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
-      if (elm.children) {
-        for (const child of elm.children) {
+    render() {
+      if (props.elm.children) {
+        for (const child of props.elm.children) {
           if (isElement(child)) {
             const $sub = props.build(child, canvas);
             if ($sub && $sub.$elm) {

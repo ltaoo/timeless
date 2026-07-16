@@ -4,7 +4,7 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeNumberInput = VNodeView<any> & {
   t: "number-input";
-  render(elm: TimelessElement): any;
+  render(): any;
   setValue(value: string): void;
   focus(): void;
   blur(): void;
@@ -12,6 +12,7 @@ export type NativeNumberInput = VNodeView<any> & {
 
 export function NativeNumberInput(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeNumberInput {
   const t = "number-input";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -82,28 +83,28 @@ export function NativeNumberInput(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+      methods.applyState(props.elm.state, { initial: true });
+      methods.setupEventListener(props.elm.events);
 
-      if (elm.state.id !== undefined) {
-        $elm.attrs.id = elm.state.id;
+      if (props.elm.state.id !== undefined) {
+        $elm.attrs.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.attrs.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.attrs.name = props.elm.state.name;
       }
-      if (elm.state.value !== undefined) {
-        $elm.value = String(elm.state.value);
+      if (props.elm.state.value !== undefined) {
+        $elm.value = String(props.elm.state.value);
       }
-      if (elm.state.placeholder !== undefined) {
-        $elm.placeholder = String(elm.state.placeholder);
+      if (props.elm.state.placeholder !== undefined) {
+        $elm.placeholder = String(props.elm.state.placeholder);
       }
-      if (elm.state.disabled !== undefined) {
-        $elm.disabled = elm.state.disabled;
+      if (props.elm.state.disabled !== undefined) {
+        $elm.disabled = props.elm.state.disabled;
       }
 
-      const events = elm.events;
+      const events = props.elm.events;
       if (events) {
         if (events.onInput) {
           $elm.listeners.input = events.onInput;

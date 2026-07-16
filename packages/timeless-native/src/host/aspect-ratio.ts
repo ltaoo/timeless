@@ -12,6 +12,7 @@ export type NativeAspectRatio = VNodeView & {
 
 export function NativeAspectRatio(props: {
   build: (elm: TimelessElement) => VNodeView;
+  elm: TimelessElement;
 }): NativeAspectRatio {
   const $elm = {
     type: "aspect-ratio",
@@ -101,18 +102,18 @@ export function NativeAspectRatio(props: {
     ) {
       delete $elm.listeners[type];
     },
-    render(elm: TimelessElement) {
+    render() {
       box$.methods.set$elm($elm);
-      if (elm.state) {
-        box$.methods.applyState(elm.state);
-        if (elm.state.ratio !== undefined) {
-          ($elm as any).ratio = elm.state.ratio;
+      if (props.elm.state) {
+        box$.methods.applyState(props.elm.state);
+        if (props.elm.state.ratio !== undefined) {
+          ($elm as any).ratio = props.elm.state.ratio;
         }
       }
-      if (elm.events) {
-        methods.setupEventListener(elm.events);
+      if (props.elm.events) {
+        methods.setupEventListener(props.elm.events);
       }
-      if (elm.children) {
+      if (props.elm.children) {
         // Extract inheritable text styles from parent view
         const inheritableKeys = [
           "font-size",
@@ -131,10 +132,10 @@ export function NativeAspectRatio(props: {
             inherited_style[key] = $elm.style[key];
           }
         }
-        for (const child of elm.children) {
+        for (const child of props.elm.children) {
           if (isElement(child)) {
             const child$ = props.build(child);
-            const $child = child$.render(child);
+            const $child = child$.render();
             if (child$ && $child) {
               // Propagate inherited text styles to text children
               if (

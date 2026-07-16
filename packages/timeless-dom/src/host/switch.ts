@@ -4,7 +4,7 @@ import { HostElement } from "./box";
 
 export type DOMSwitch = VNodeView<HTMLDivElement> & {
   t: "switch";
-  render(elm: TimelessElement): HTMLButtonElement;
+  render(): HTMLButtonElement;
   hydrate(elm: TimelessElement, $dom: any): void;
   setChecked(checked: boolean): void;
   setLoading(loading: boolean): void;
@@ -12,6 +12,7 @@ export type DOMSwitch = VNodeView<HTMLDivElement> & {
 
 export function DOMSwitch(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMSwitch {
   const t = "switch";
   let $root: null | HTMLButtonElement = null;
@@ -29,7 +30,7 @@ export function DOMSwitch(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       $root = document.createElement("button");
       $root.style.cssText =
         "position: relative; display: inline-flex; flex-shrink: 0; width: 32px; height: 18px; padding: 0; border-width: 1px; border-color: transparent; border-radius: 3.40282e38px; background-color: buttonface; transition-property: background-color; transition-timing-function: cubic-bezier(.4,0,.2,1); transition-duration: .15s;";
@@ -45,29 +46,29 @@ export function DOMSwitch(props: {
       //       $checkbox.type = "checkbox";
       //       $checkbox.style.cssText = `position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;`;
 
-      if (elm.state !== undefined) {
-        state.checked = elm.state.checked;
-        state.loading = elm.state.loading;
-        if (elm.state.checked) {
+      if (props.elm.state !== undefined) {
+        state.checked = props.elm.state.checked;
+        state.loading = props.elm.state.loading;
+        if (props.elm.state.checked) {
           $root.setAttribute("checked", "checked");
         }
-        if (elm.state.id) {
-          $root.id = elm.state.id;
+        if (props.elm.state.id) {
+          $root.id = props.elm.state.id;
         }
       }
 
       $root.appendChild($thumb);
 
       common$.methods.set$elm($root);
-      common$.methods.applyState(elm.state, { initial: true });
-      common$.methods.setupEventListener(elm.events);
-      const events = elm.events;
+      common$.methods.applyState(props.elm.state, { initial: true });
+      common$.methods.setupEventListener(props.elm.events);
+      const events = props.elm.events;
       $root.addEventListener("click", function (event) {
         // event.preventDefault();
         if (events && events.onChange) {
           if (event.target) {
             // @ts-ignore
-            event.target.checked = !elm.state.checked;
+            event.target.checked = !props.elm.state.checked;
           }
           events.onChange(event);
         }

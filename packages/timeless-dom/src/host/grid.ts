@@ -67,12 +67,13 @@ function buildGridBpCSS(cls: string, colsBp: Record<string, number>): string {
 
 export type DOMGrid = VNodeView<HTMLDivElement> & {
   t: "grid";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMGrid(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMGrid {
   const box$ = HostElement({ $elm: null, t: "grid", build: props.build });
 
@@ -85,12 +86,12 @@ export function DOMGrid(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
 
-      const s = elm.state ?? {};
+      const s = props.elm.state ?? {};
 
       // ── Columns (responsive or static) ──────────────────────────────────
       const cols = s.cols;
@@ -151,8 +152,8 @@ export function DOMGrid(props: {
         $elm.style.marginRight = `${s.marginRight}px`;
       if (s.padding !== undefined) $elm.style.padding = `${s.padding}px`;
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },

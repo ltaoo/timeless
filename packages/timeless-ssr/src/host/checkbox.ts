@@ -4,12 +4,13 @@ import { SSRBox } from "./box";
 
 export type SSRCheckbox = VNodeView<string> & {
   t: "checkbox";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRCheckbox(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRCheckbox {
   const box$ = SSRBox();
   return {
@@ -18,10 +19,10 @@ export function SSRCheckbox(props: {
     getType() {
       return "input";
     },
-    render(elm: TimelessElement) {
-      const attrs = box$.buildAttributes(elm.state);
+    render() {
+      const attrs = box$.buildAttributes(props.elm.state);
       attrs.push(`type="checkbox"`);
-      if (elm.state.checked) {
+      if (props.elm.state.checked) {
         attrs.push(`checked="checked"`);
       }
       return `<input${box$.stringifyAttrs(attrs)}/>`;

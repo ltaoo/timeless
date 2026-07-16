@@ -4,7 +4,7 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeFilePicker = VNodeView<any> & {
   t: "file-picker";
-  render(elm: TimelessElement): any;
+  render(): any;
   setValue(file: File): void;
   focus(): void;
   blur(): void;
@@ -12,6 +12,7 @@ export type NativeFilePicker = VNodeView<any> & {
 
 export function NativeFilePicker(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeFilePicker {
   const t = "file-picker";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -84,31 +85,31 @@ export function NativeFilePicker(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+      methods.applyState(props.elm.state, { initial: true });
+      methods.setupEventListener(props.elm.events);
 
-      if (elm.state.id) {
-        $elm.attrs.id = elm.state.id;
+      if (props.elm.state.id) {
+        $elm.attrs.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.attrs.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.attrs.name = props.elm.state.name;
       }
-      if (elm.state.placeholder) {
-        $elm.placeholder = elm.state.placeholder;
+      if (props.elm.state.placeholder) {
+        $elm.placeholder = props.elm.state.placeholder;
       }
-      if (elm.state.disabled) {
-        $elm.disabled = elm.state.disabled;
+      if (props.elm.state.disabled) {
+        $elm.disabled = props.elm.state.disabled;
       }
-      if (elm.state.accept) {
-        $elm.accept = elm.state.accept;
+      if (props.elm.state.accept) {
+        $elm.accept = props.elm.state.accept;
       }
-      if (elm.state.multiple) {
-        $elm.multiple = elm.state.multiple;
+      if (props.elm.state.multiple) {
+        $elm.multiple = props.elm.state.multiple;
       }
 
-      const events = elm.events;
+      const events = props.elm.events;
       if (events) {
         if (events.onChange) {
           $elm.listeners.change = events.onChange;

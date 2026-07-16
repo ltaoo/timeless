@@ -5,12 +5,13 @@ import { HostElement } from "./box";
 export type DOMImg = VNodeView<HTMLImageElement> & {
   t: "img";
   setSrc(v: string): void;
-  render(elm: TimelessElement): HTMLImageElement;
+  render(): HTMLImageElement;
   hydrate(elm: TimelessElement, $dom: HTMLImageElement): void;
 };
 
 export function DOMImg(props: {
   build: (elm: TimelessElement) => VNodeView;
+  elm: TimelessElement;
 }): DOMImg {
   const t = "img";
   const box$ = HostElement({ $elm: null, t, build: props.build });
@@ -24,14 +25,14 @@ export function DOMImg(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("img");
-      if (elm.state.src) {
-        $elm.src = elm.state.src;
+      if (props.elm.state.src) {
+        $elm.src = props.elm.state.src;
       }
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state);
+      box$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLImageElement) {

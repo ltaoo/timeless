@@ -3,12 +3,13 @@ import { SSRBox } from "./box";
 
 export type SSRMatch = VNodeView<string> & {
   t: "match";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRMatch(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRMatch {
   const box$ = SSRBox();
   return {
@@ -20,13 +21,13 @@ export function SSRMatch(props: {
     isDocumentFragment() {
       return true;
     },
-    render(elm: TimelessElement) {
-      if (!elm.children) return "";
+    render() {
+      if (!props.elm.children) return "";
       let result = "";
-      for (const child of elm.children) {
+      for (const child of props.elm.children) {
         if (child) {
           const child$ = props.build(child);
-          result += child$.render(child);
+          result += child$.render();
         }
       }
       return result;

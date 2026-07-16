@@ -3,12 +3,13 @@ import { SSRBox } from "./box";
 
 export type SSRLabel = VNodeView<string> & {
   t: "label";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRLabel(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRLabel {
   const box$ = SSRBox();
   return {
@@ -17,11 +18,11 @@ export function SSRLabel(props: {
     getType() {
       return "view";
     },
-    render(elm: TimelessElement) {
-      const attrs = box$.buildAttributes(elm.state);
-      const children = box$.buildChildren(elm.children, props.build);
-      if (elm.state.for) {
-        attrs.push(`for="${elm.state.for}"`);
+    render() {
+      const attrs = box$.buildAttributes(props.elm.state);
+      const children = box$.buildChildren(props.elm.children, props.build);
+      if (props.elm.state.for) {
+        attrs.push(`for="${props.elm.state.for}"`);
       }
       return `<label${box$.stringifyAttrs(attrs)}>${children}</label>`;
     },

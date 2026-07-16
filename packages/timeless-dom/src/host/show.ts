@@ -15,12 +15,13 @@ const logger = Logger({ prefix: "dom", scope: "show", prefixColor: "#ff6b6b" });
 
 export type DOMShow = VNodeView<Text> & {
   t: "show";
-  render(elm: TimelessElement): DocumentFragment;
+  render(): DocumentFragment;
   // hydrate(elm: TimelessElement, $elm: Text): void;
 };
 
 export function DOMShow(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
+  elm: TimelessElement;
 }): DOMShow {
   const t = "show";
   const $anchor = document.createTextNode("");
@@ -35,8 +36,8 @@ export function DOMShow(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
-      const $fragment = box$.methods.render(elm.children);
+    render() {
+      const $fragment = box$.methods.render(props.elm.children);
       $fragment.appendChild($anchor);
       return $fragment;
     },

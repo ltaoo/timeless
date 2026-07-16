@@ -9,14 +9,9 @@ import { isProd } from "../../vite.config.base";
 
 const name = "timeless.shadcn";
 const externals = [
-  // "@timeless/base",
-  // "@timeless/kit",
-  // "@timeless/primitive",
-  // "@timeless/reactive",
   "@timeless/timeless",
-  // "@timeless/icons",
-  // "@timeless/ui-vm",
-  // "@timeless/utils",
+  "@timeless/ui-vm",
+  "@timeless/ui-primitive",
 ] as const;
 
 function isExternal(id: string) {
@@ -116,17 +111,13 @@ export default defineConfig({
     }),
     sourcemap: isProd ? false : true,
     rollupOptions: {
-      external: ["@timeless/timeless"],
+      external: externals,
       output: {
         extend: true,
         globals: {
           "@timeless/timeless": "Timeless",
-          // "@timeless/base": "Timeless",
-          // "@timeless/kit": "Timeless.kit",
-          // "@timeless/primitive": "Timeless",
-          // "@timeless/reactive": "Timeless.reactive",
-          // "@timeless/ui-vm": "Timeless.ui",
-          // "@timeless/utils": "Timeless.utils",
+          "@timeless/ui-vm": "Timeless.ui",
+          "@timeless/ui-primitive": "Timeless",
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith(".css")) {

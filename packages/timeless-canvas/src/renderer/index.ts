@@ -16,47 +16,47 @@ function build(
   opt: Partial<{ root: boolean }> = {},
 ): VNodeView<any> {
   if (elm.t === "view") {
-    const view$ = CanvasView({ canvas, build });
+    const view$ = CanvasView({ canvas, build, elm });
     elm.$elm = view$;
-    // view$.render(elm);
+    // view$.render();
     return view$;
   }
   if (elm.t === "text") {
-    const text$ = CanvasText(elm.state.value as any, canvas);
+    const text$ = CanvasText(elm.state.value as any, canvas, elm);
     elm.$elm = text$;
     return text$;
   }
   if (elm.t === "img") {
-    const img$ = CanvasImg({ canvas, build });
+    const img$ = CanvasImg({ canvas, build, elm });
     elm.$elm = img$;
-    // img$.render(elm);
+    // img$.render();
     return img$;
   }
   if (elm.t === "icon") {
-    const icon$ = CanvasIcon({ canvas, build });
+    const icon$ = CanvasIcon({ canvas, build, elm });
     elm.$elm = icon$;
-    // icon$.render(elm);
+    // icon$.render();
     return icon$;
   }
   if (elm.t === "grid") {
-    const grid$ = CanvasGrid({ canvas, build });
+    const grid$ = CanvasGrid({ canvas, build, elm });
     elm.$elm = grid$;
-    // grid$.render(elm);
+    // grid$.render();
     return grid$;
   }
   if (elm.t === "show") {
-    const show$ = CanvasShow({ canvas, build });
+    const show$ = CanvasShow({ canvas, build, elm });
     elm.$elm = show$;
-    // show$.render(elm);
+    // show$.render();
     return show$;
   }
   if (elm.t === "for") {
-    const for$ = CanvasFor({ canvas, build });
+    const for$ = CanvasFor({ canvas, build, elm });
     elm.$elm = for$;
-    // for$.render(elm);
+    // for$.render();
     return for$;
   }
-  return CanvasView({ canvas, build });
+  return CanvasView({ canvas, build, elm });
 }
 
 export function render(

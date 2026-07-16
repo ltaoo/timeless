@@ -131,12 +131,13 @@ function setupDragResize(
 
 export type DOMSplitView = VNodeView<HTMLDivElement> & {
   t: "split-view";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMSplitView(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMSplitView {
   const box$ = HostElement({ $elm: null, t: "split-view", build: props.build });
 
@@ -149,9 +150,9 @@ export function DOMSplitView(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
-      const isVertical = elm.state.direction === "vertical";
+      const isVertical = props.elm.state.direction === "vertical";
 
       $elm.setAttribute("data-split-view", "");
       $elm.setAttribute(
@@ -161,7 +162,7 @@ export function DOMSplitView(props: {
 
       $elm.style.display = "grid";
       $elm.style.height = "100%";
-      const columns = elm.state.panels
+      const columns = props.elm.state.panels
         .map((panel: { t: string; state: { size: string | number } }) => {
           if (panel.t === "split-handler") {
             return "1px";
@@ -181,10 +182,10 @@ export function DOMSplitView(props: {
       $elm.style[templateProp as any] = columns;
 
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
 
       return $elm;
@@ -198,12 +199,13 @@ export function DOMSplitView(props: {
 
 export type DOMSplitPane = VNodeView<HTMLDivElement> & {
   t: "split-pane";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMSplitPane(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMSplitPane {
   const box$ = HostElement({ $elm: null, t: "split-pane", build: props.build });
 
@@ -216,32 +218,32 @@ export function DOMSplitPane(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
 
       $elm.setAttribute("data-split-view-panel", "");
-      if (elm.state.minSize) {
-        $elm.setAttribute("data-min-size", String(elm.state.minSize));
+      if (props.elm.state.minSize) {
+        $elm.setAttribute("data-min-size", String(props.elm.state.minSize));
       }
-      Object.assign(elm.state.style, {
+      Object.assign(props.elm.state.style, {
         overflow: "clip",
         width: "100%",
         height: "100%",
         "min-height": "0",
       });
-      if (elm.state.minSize) {
-        const isVertical = elm.state.direction === "vertical";
-        elm.state.style[isVertical ? "min-height" : "min-width"] =
-          `${elm.state.minSize}px`;
+      if (props.elm.state.minSize) {
+        const isVertical = props.elm.state.direction === "vertical";
+        props.elm.state.style[isVertical ? "min-height" : "min-width"] =
+          `${props.elm.state.minSize}px`;
       }
 
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
       $elm.style.position = "relative";
       $elm.style.zIndex = "0";
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
 
       return $elm;
@@ -257,12 +259,13 @@ export function DOMSplitPane(props: {
 
 export type DOMSplitHandler = VNodeView<HTMLDivElement> & {
   t: "split-handler";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMSplitHandler(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMSplitHandler {
   const box$ = HostElement({ $elm: null, t: "split-pane", build: props.build });
 
@@ -275,7 +278,7 @@ export function DOMSplitHandler(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       const $line = document.createElement("div");
       const $hover_zone = document.createElement("div");
@@ -286,9 +289,9 @@ export function DOMSplitHandler(props: {
 
       // Use direction from element state
       const applyDirection = () => {
-        const isVertical = elm.state.direction === "vertical";
+        const isVertical = props.elm.state.direction === "vertical";
         if (isVertical) {
-          Object.assign(elm.state.style, {
+          Object.assign(props.elm.state.style, {
             display: "flex",
             width: "100%",
             height: "1px",
@@ -312,7 +315,7 @@ export function DOMSplitHandler(props: {
             transition: "background-color 0.2s ease",
           });
         } else {
-          Object.assign(elm.state.style, {
+          Object.assign(props.elm.state.style, {
             display: "flex",
             width: "1px",
             height: "100%",
@@ -340,7 +343,7 @@ export function DOMSplitHandler(props: {
 
       box$.methods.set$elm($elm);
       applyDirection();
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
       $elm.style.zIndex = "2";
 
       const setHoverHighlight = (highlighted: boolean) => {
@@ -377,13 +380,13 @@ export function DOMSplitHandler(props: {
             "[data-split-view]",
           ) as HTMLElement;
           if ($splitView) {
-            setupDragResize($hover_zone, $splitView, elm, event);
+            setupDragResize($hover_zone, $splitView, props.elm, event);
           }
         },
       );
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($line);
       $elm.appendChild($hover_zone);
       $elm.appendChild($fragment);

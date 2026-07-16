@@ -16,6 +16,17 @@
 
 import { BaseDomain, Handler } from "@timeless/base";
 
+export type LayerType = 'sheet' | 'dialog' | 'popover' | 'tooltip';
+
+export const BASE_Z_INDEX: Record<LayerType, number> = {
+  sheet: 100,
+  dialog: 200,
+  popover: 300,
+  tooltip: 400,
+};
+
+export const Z_INDEX_NEST_GAP = 50;
+
 export interface Layer {
   id: string;
   /** 检查坐标是否在层内（各平台实现不同） */
@@ -98,6 +109,16 @@ export class LayerManager extends BaseDomain<TheTypesOfEvents> {
   }
 
   /**
+   * 计算 z-index
+   * 基于层类型的基础值 + 栈深度 * 嵌套增量
+   * 手动传入 zIndex 时跳过自动计算
+   */
+  getZIndex(type: LayerType, manualZIndex?: number): number {
+    if (manualZIndex !== undefined) return manualZIndex;
+    return BASE_Z_INDEX[type] + this.stack.length * Z_INDEX_NEST_GAP;
+  }
+
+  /**
    * 处理点击/触摸事件
    * 只允许栈顶层消费一次 outside 交互，避免子层关闭后父层继续关闭。
    */
@@ -115,10 +136,18 @@ export class LayerManager extends BaseDomain<TheTypesOfEvents> {
       return;
     }
 
-    if (layer.containsPoint(x, pointY)) {
+    const inside = layer.containsPoint(x, pointY);
+    console.log("[DEBUG] LayerManager.handlePointerDown", {
+      stackSize: this.stack.length,
+      topLayerId: layer.id,
+      x, y: pointY,
+      inside,
+    });
+    if (inside) {
       return;
     }
 
+    console.log("[DEBUG] LayerManager DISMISSING top layer", layer.id);
     this.markPointerDownConsumed(x, pointY);
     layer.dismiss(event);
 
@@ -202,6 +231,17 @@ export function getGlobalLayerManager(): LayerManager {
     globalLayerManager = new LayerManager();
   }
   return globalLayerManager;
+}
+
+/**
+ * 计算 z-index（便捷函数）
+ * 基于层类型的基础值 + 全局 LayerManager 栈深度 * 嵌套增量
+ * 手动传入 zIndex 时跳过自动计算
+ */
+export function computeZIndex(type: LayerType, manualZIndex?: number): number {
+  if (manualZIndex !== undefined) return manualZIndex;
+  const lm = getGlobalLayerManager();
+  return BASE_Z_INDEX[type] + lm.size * Z_INDEX_NEST_GAP;
 }
 
 /**

@@ -6,7 +6,7 @@ let _tabSeq = 0;
 
 export type DOMTabView = VNodeView<HTMLDivElement> & {
   t: "tab-view";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
   switchPanel(children: TimelessElement[], options: { from: number; to: number }): void;
 };
@@ -23,6 +23,7 @@ function injectTabCSS(id: string, css: string) {
 
 export function DOMTabView(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMTabView {
   let $contents: any = null;
   let $track: any = null;
@@ -38,10 +39,10 @@ export function DOMTabView(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
 
       $elm.setAttribute("data-tab-view", "");
       $elm.style.height = "100%";
@@ -58,14 +59,14 @@ export function DOMTabView(props: {
       const $tabs = document.createElement("div");
       $tabs.setAttribute("data-tab-view-tabs", "");
       $tabs.style.cssText = "display: flex;";
-      if (elm.state.tabs) {
+      if (props.elm.state.tabs) {
         const $tab_fragment = document.createDocumentFragment();
-        for (let i = 0; i < elm.state.tabs.length; i += 1) {
-          const t = elm.state.tabs[i];
+        for (let i = 0; i < props.elm.state.tabs.length; i += 1) {
+          const t = props.elm.state.tabs[i];
           const $tab = document.createElement("div");
           $tab.setAttribute("data-tab-view-tab", t.tab);
           $tab.addEventListener("click", function (event) {
-            (elm as any).handleClickTab(t);
+            (props.elm as any).handleClickTab(t);
           });
 
           $tab.innerText = t.label;
@@ -86,7 +87,7 @@ export function DOMTabView(props: {
       $content.setAttribute("data-tab-view-panel", "");
       $content.style.cssText = "flex-shrink: 0; width: 100%; height: 100%;";
 
-      const $fragment = box$.methods.render(elm.children);
+      const $fragment = box$.methods.render(props.elm.children);
       $content.appendChild($fragment);
 
       $track.appendChild($content);
@@ -109,7 +110,7 @@ export function DOMTabView(props: {
       $elm.appendChild($tabs);
       $elm.appendChild($contents);
 
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.setupEventListener(props.elm.events);
 
       return $elm;
     },
@@ -169,12 +170,13 @@ export function DOMTabView(props: {
 
 export type DOMTabPane = VNodeView<HTMLDivElement> & {
   t: "tab-pane";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMTabPane(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMTabPane {
   const box$ = HostElement({ $elm: null, t: "tab-pane", build: props.build });
 
@@ -187,13 +189,13 @@ export function DOMTabPane(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
 
       return $elm;

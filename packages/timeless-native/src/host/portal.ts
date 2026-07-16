@@ -4,11 +4,12 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativePortal = VNodeView<any> & {
   t: "portal";
-  render(elm: TimelessElement): any;
+  render(): any;
 };
 
 export function NativePortal(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativePortal {
   const t = "portal";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -77,13 +78,13 @@ export function NativePortal(props: {
         bottom: 0,
       };
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
+      methods.applyState(props.elm.state, { initial: true });
+      methods.setupEventListener(props.elm.events);
 
-      if (elm.children) {
-        methods.render(elm.children);
+      if (props.elm.children) {
+        methods.render(props.elm.children);
       }
 
       return $elm;

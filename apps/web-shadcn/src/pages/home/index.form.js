@@ -527,6 +527,120 @@ export default function FormView() {
       // Section("Slider", [
       //   Item("Default", [Slider({ value: ref(50), min: 0, max: 100 })]),
       // ]),
+      Section("Dialog Form", [
+        Item("Form in Dialog", [
+          (() => {
+            const platform = getPlatform();
+
+            const nameField$ = new Timeless.ui.SingleFieldCore({
+              label: "Name",
+              name: "name",
+              input: new Timeless.ui.InputCore({
+                defaultValue: "",
+                placeholder: "Enter your name",
+              }),
+              rules: [{ required: true, message: "Name is required" }],
+            });
+
+            const emailField$ = new Timeless.ui.SingleFieldCore({
+              label: "Email",
+              name: "email",
+              input: new Timeless.ui.InputCore({
+                defaultValue: "",
+                placeholder: "Enter your email",
+              }),
+              rules: [
+                { required: true, message: "Email is required" },
+                { type: "email", message: "Invalid email format" },
+              ],
+            });
+
+            const roleField$ = new Timeless.ui.SingleFieldCore({
+              label: "Role",
+              name: "role",
+              input: new Timeless.ui.SelectCore({
+                defaultValue: "admin",
+                placeholder: "Select a role",
+                platform,
+                options: [
+                  new Timeless.ui.SelectItemCore({
+                    value: "admin",
+                    label: "Admin",
+                  }),
+                  new Timeless.ui.SelectItemCore({
+                    value: "editor",
+                    label: "Editor",
+                  }),
+                  new Timeless.ui.SelectItemCore({
+                    value: "viewer",
+                    label: "Viewer",
+                  }),
+                ],
+              }),
+              rules: [{ required: true, message: "Role is required" }],
+            });
+
+            const bioField$ = new Timeless.ui.SingleFieldCore({
+              label: "Bio",
+              name: "bio",
+              input: new Timeless.ui.InputCore({
+                defaultValue: "",
+                placeholder: "Tell us about yourself",
+              }),
+            });
+
+            const form$ = new Timeless.ui.ObjectFieldCore({
+              fields: {
+                name: nameField$,
+                email: emailField$,
+                role: roleField$,
+                bio: bioField$,
+              },
+            });
+
+            const dialog$ = new Timeless.ui.DialogCore({
+              title: "User Form",
+              footer: true,
+              async onOk() {
+                const r = await form$.validate();
+                if (r.error) return;
+                dialog$.okBtn.setLoading(true);
+                setTimeout(() => {
+                  dialog$.okBtn.setLoading(false);
+                  dialog$.hide();
+                  console.log("Form submitted:", r.data);
+                }, 1000);
+              },
+            });
+
+            return View({}, [
+              Button({
+                store: new Timeless.ui.ButtonCore({
+                  onClick() {
+                    dialog$.show();
+                  },
+                }),
+              }, ["Open Form Dialog"]),
+              Dialog({ store: dialog$ }, () => [
+                View({ class: "space-y-4" }, [
+                  Field({ store: nameField$ }, [
+                    Input({ id: nameField$.name, store: nameField$.input }),
+                  ]),
+                  Field({ store: emailField$ }, [
+                    Input({ id: emailField$.name, store: emailField$.input }),
+                  ]),
+                  Field({ store: roleField$ }, [
+                    Select({ store: roleField$.input }),
+                  ]),
+                  Field({ store: bioField$ }, [
+                    Textarea({ store: bioField$.input }),
+                  ]),
+                ]),
+              ]),
+            ]);
+          })(),
+        ]),
+      ]),
     ]),
   ]);
 }

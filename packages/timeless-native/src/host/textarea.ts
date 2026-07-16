@@ -4,7 +4,7 @@ import { HostElement, BoxMethods } from "./box";
 
 export type NativeTextarea = VNodeView<any> & {
   t: "textarea";
-  render(elm: TimelessElement): any;
+  render(): any;
   setValue(value: string): void;
   focus(): void;
   blur(): void;
@@ -12,6 +12,7 @@ export type NativeTextarea = VNodeView<any> & {
 
 export function NativeTextarea(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): NativeTextarea {
   const t = "textarea";
   const box$ = HostElement({ t, $elm: null, build: props.build });
@@ -85,28 +86,28 @@ export function NativeTextarea(props: {
     setValue(value: string) {
       $elm.value = value;
     },
-    render(elm: TimelessElement) {
+    render() {
       methods.set$elm($elm);
-      methods.applyState(elm.state, { initial: true });
+      methods.applyState(props.elm.state, { initial: true });
 
-      if (elm.state.value !== undefined) {
-        $elm.value = String(elm.state.value);
+      if (props.elm.state.value !== undefined) {
+        $elm.value = String(props.elm.state.value);
       }
-      if (elm.state.id) {
-        $elm.attrs.id = elm.state.id;
+      if (props.elm.state.id) {
+        $elm.attrs.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.attrs.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.attrs.name = props.elm.state.name;
       }
-      if (elm.state.placeholder) {
-        $elm.placeholder = elm.state.placeholder;
+      if (props.elm.state.placeholder) {
+        $elm.placeholder = props.elm.state.placeholder;
       }
-      if (elm.state.disabled) {
-        $elm.disabled = elm.state.disabled;
+      if (props.elm.state.disabled) {
+        $elm.disabled = props.elm.state.disabled;
       }
 
-      methods.setupEventListener(elm.events);
-      const events = elm.events;
+      methods.setupEventListener(props.elm.events);
+      const events = props.elm.events;
       if (events) {
         if (events.onInput) {
           $elm.listeners.input = events.onInput;

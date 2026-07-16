@@ -39,154 +39,154 @@ function build(elm: TimelessElement): any {
   );
 
   if (elm.t === "view") {
-    const view$ = NativeView({ build });
+    const view$ = NativeView({ build, elm });
     elm.$elm = view$;
     return view$;
   }
   if (elm.t === "text") {
-    const text$ = NativeText();
+    const text$ = NativeText({ elm });
     // @ts-ignore
     elm.$elm = text$;
     return text$;
   }
   if (elm.t === "img") {
-    const img$ = NativeImg({ build });
+    const img$ = NativeImg({ build, elm });
     elm.$elm = img$;
     return img$;
   }
   if (elm.t === "button") {
-    const button$ = NativeButton({ build });
+    const button$ = NativeButton({ build, elm });
     elm.$elm = button$;
     return button$;
   }
   if (elm.t === "input") {
-    const input$ = NativeInput({ build });
+    const input$ = NativeInput({ build, elm });
     elm.$elm = input$;
     return input$;
   }
   if (elm.t === "row") {
-    const row$ = NativeRow({ build });
+    const row$ = NativeRow({ build, elm });
     elm.$elm = row$;
     return row$;
   }
   if (elm.t === "column") {
-    const column$ = NativeColumn({ build });
+    const column$ = NativeColumn({ build, elm });
     elm.$elm = column$;
     return column$;
   }
   if (elm.t === "aspect-ratio") {
-    const ratio$ = NativeAspectRatio({ build });
+    const ratio$ = NativeAspectRatio({ build, elm });
     elm.$elm = ratio$;
     return ratio$;
   }
   if (elm.t === "checkbox") {
-    const checkbox$ = NativeCheckbox({ build });
+    const checkbox$ = NativeCheckbox({ build, elm });
     elm.$elm = checkbox$;
     return checkbox$;
   }
   if (elm.t === "radio") {
-    const radio$ = NativeRadio({ build });
+    const radio$ = NativeRadio({ build, elm });
     elm.$elm = radio$;
     return radio$;
   }
   if (elm.t === "textarea") {
-    const textarea$ = NativeTextarea({ build });
+    const textarea$ = NativeTextarea({ build, elm });
     elm.$elm = textarea$;
     return textarea$;
   }
   if (elm.t === "for") {
-    const for$ = NativeFor({ build });
+    const for$ = NativeFor({ build, elm });
     elm.$elm = for$;
     return for$;
   }
   if (elm.t === "show") {
-    const show$ = NativeShow({ build });
+    const show$ = NativeShow({ build, elm });
     elm.$elm = show$;
     return show$;
   }
   if (elm.t === "match") {
-    const match$ = NativeMatch({ build });
+    const match$ = NativeMatch({ build, elm });
     elm.$elm = match$;
     return match$;
   }
   if (elm.t === "fragment") {
-    const fragment$ = NativeFragment({ build });
+    const fragment$ = NativeFragment({ build, elm });
     elm.$elm = fragment$;
     return fragment$;
   }
   if (elm.t === "portal") {
-    const portal$ = NativePortal({ build });
+    const portal$ = NativePortal({ build, elm });
     elm.$elm = portal$;
     return portal$;
   }
   if (elm.t === "lazy-view") {
-    const lazyView$ = NativeLazyView({ build });
+    const lazyView$ = NativeLazyView({ build, elm });
     elm.$elm = lazyView$;
     return lazyView$;
   }
   if (elm.t === "grid") {
-    const grid$ = NativeGrid({ build });
+    const grid$ = NativeGrid({ build, elm });
     elm.$elm = grid$;
     return grid$;
   }
   if (elm.t === "label") {
-    const label$ = NativeLabel({ build });
+    const label$ = NativeLabel({ build, elm });
     elm.$elm = label$;
     return label$;
   }
   if (elm.t === "icon") {
-    const icon$ = NativeIcon({ build });
+    const icon$ = NativeIcon({ build, elm });
     elm.$elm = icon$;
     return icon$;
   }
   if (elm.t === "file-picker") {
-    const filePicker$ = NativeFilePicker({ build });
+    const filePicker$ = NativeFilePicker({ build, elm });
     elm.$elm = filePicker$;
     return filePicker$;
   }
   if (elm.t === "number-input") {
-    const numberInput$ = NativeNumberInput({ build });
+    const numberInput$ = NativeNumberInput({ build, elm });
     elm.$elm = numberInput$;
     return numberInput$;
   }
   if (elm.t === "select") {
-    const select$ = NativeSelect({ build });
+    const select$ = NativeSelect({ build, elm });
     elm.$elm = select$;
     return select$;
   }
   if (elm.t === "split-view") {
-    const splitView$ = NativeSplitView({ build });
+    const splitView$ = NativeSplitView({ build, elm });
     elm.$elm = splitView$;
     return splitView$;
   }
   if (elm.t === "split-pane") {
-    const splitPane$ = NativeSplitPane({ build });
+    const splitPane$ = NativeSplitPane({ build, elm });
     elm.$elm = splitPane$;
     return splitPane$;
   }
   if (elm.t === "scroll-view") {
-    const scrollView$ = NativeScrollView({ build });
+    const scrollView$ = NativeScrollView({ build, elm });
     elm.$elm = scrollView$;
     return scrollView$;
   }
   if (elm.t === "tab-view") {
-    const tabView$ = NativeTabView({ build });
+    const tabView$ = NativeTabView({ build, elm });
     elm.$elm = tabView$;
     return tabView$;
   }
   if (elm.t === "tab-pane") {
-    const tabPane$ = NativeTabPane({ build });
+    const tabPane$ = NativeTabPane({ build, elm });
     elm.$elm = tabPane$;
     return tabPane$;
   }
-  return NativeView({ build });
+  return NativeView({ build, elm });
 }
 
 // ─── buildAndRender ───────────────────────────────────────────────────────────
 
 export function buildAndRender(elm: TimelessElement) {
   const vnode = build(elm);
-  const dom = vnode.render(elm);
+  const dom = vnode.render();
   return { vnode, dom };
 }
 
@@ -294,7 +294,7 @@ export function render(elm: TimelessElement) {
     }
     const isViewLike = isNativeView(host$) || host$.getType() === "view";
     console.log("[Native Render] isViewLike:", isViewLike);
-    const $root = host$.render(elm);
+    const $root = host$.render();
     __nativeBridge_render($root);
     console.log("[Native Render] pushing view to root children, $elm:");
 

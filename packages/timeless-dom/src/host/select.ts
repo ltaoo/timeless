@@ -4,12 +4,13 @@ import { HostElement } from "./box";
 
 export type DOMSelect = VNodeView<HTMLDivElement> & {
   t: "select";
-  render(elm: TimelessElement): HTMLSelectElement;
+  render(): HTMLSelectElement;
   hydrate(elm: TimelessElement, $elm: HTMLElement): void;
 };
 
 export function DOMSelect(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMSelect {
   const t = "select";
   const common$ = HostElement({ $elm: null, t, build: props.build });
@@ -24,22 +25,22 @@ export function DOMSelect(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("select");
 
-      common$.methods.applyState(elm.state, { initial: true });
-      const r = common$.methods.buildChildren(elm.children);
+      common$.methods.applyState(props.elm.state, { initial: true });
+      const r = common$.methods.buildChildren(props.elm.children);
       const $placeholder = document.createElement("option");
       $placeholder.value = "";
-      $placeholder.innerText = elm.state.placeholder;
+      $placeholder.innerText = props.elm.state.placeholder;
       r.$fragment.insertBefore($placeholder, r.$fragment.children[0]);
       $elm.appendChild(r.$fragment);
-      common$.methods.setupEventListener(elm.events);
+      common$.methods.setupEventListener(props.elm.events);
 
       $elm.addEventListener("change", function (event) {
         // console.log(event.target.value);
-        if (elm.events?.onChange) {
-          elm.events?.onChange(event);
+        if (props.elm.events?.onChange) {
+          props.elm.events?.onChange(event);
         }
       });
 
@@ -82,12 +83,13 @@ export function isDOMSelect(value: any): value is DOMSelect {
 
 export type DOMSelectOption = VNodeView<HTMLDivElement> & {
   t: "select-option";
-  render(elm: TimelessElement): HTMLSelectElement;
+  render(): HTMLSelectElement;
   hydrate(elm: TimelessElement, $elm: HTMLElement): void;
 };
 
 export function DOMSelectOption(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLSelectElement>;
+  elm: TimelessElement;
 }) {
   let $elm: any = null;
   const t = "select-option";
@@ -117,28 +119,28 @@ export function DOMSelectOption(props: {
       $elm.selected = false;
       $elm.removeAttribute("selected");
     },
-    render(elm: TimelessElement) {
+    render() {
       $elm = document.createElement("option");
 
-      if (elm.state) {
-        if (elm.state.value) {
-          $elm.value = elm.state.value;
+      if (props.elm.state) {
+        if (props.elm.state.value) {
+          $elm.value = props.elm.state.value;
         }
-        if (elm.state.label) {
-          $elm.innerText = elm.state.label;
+        if (props.elm.state.label) {
+          $elm.innerText = props.elm.state.label;
         }
-        if (elm.state.selected) {
+        if (props.elm.state.selected) {
           $elm.selected = true;
           $elm.setAttribute("selected", "");
         }
-        if (elm.state.disabled) {
+        if (props.elm.state.disabled) {
           $elm.disabled = true;
           $elm.setAttribute("disabled", "");
         }
       }
 
-      common$.methods.applyState(elm.state, { initial: true });
-      common$.methods.setupEventListener(elm.events);
+      common$.methods.applyState(props.elm.state, { initial: true });
+      common$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement) {
@@ -151,12 +153,13 @@ export function DOMSelectOption(props: {
 
 export type DOMSelectOptionGroup = VNodeView<HTMLDivElement> & {
   t: "select-option-group";
-  render(elm: TimelessElement): HTMLSelectElement;
+  render(): HTMLSelectElement;
   hydrate(elm: TimelessElement, $elm: HTMLElement): void;
 };
 
 export function DOMSelectOptionGroup(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLSelectElement>;
+  elm: TimelessElement;
 }) {
   const t = "select-option-group";
   const common$ = HostElement({ $elm: null, t, build: props.build });
@@ -171,20 +174,20 @@ export function DOMSelectOptionGroup(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("optgroup");
 
-      if (elm.state) {
-        if (elm.state.label) {
-          $elm.label = elm.state.label;
+      if (props.elm.state) {
+        if (props.elm.state.label) {
+          $elm.label = props.elm.state.label;
         }
       }
 
-      const r = common$.methods.buildChildren(elm.children);
+      const r = common$.methods.buildChildren(props.elm.children);
       $elm.appendChild(r.$fragment);
 
-      common$.methods.applyState(elm.state, { initial: true });
-      common$.methods.setupEventListener(elm.events);
+      common$.methods.applyState(props.elm.state, { initial: true });
+      common$.methods.setupEventListener(props.elm.events);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement) {

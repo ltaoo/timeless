@@ -8,13 +8,14 @@ export type DOMTextarea = VNodeView<HTMLTextAreaElement> & {
   setValue(value: string): void;
   focus(): void;
   blur(): void;
-  render(elm: TimelessElement): HTMLTextAreaElement;
+  render(): HTMLTextAreaElement;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function DOMTextarea(props: {
   // canvas: Document;
   build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
 }): DOMTextarea {
   const t = "textarea";
   const $elm = document.createElement("textarea");
@@ -33,26 +34,26 @@ export function DOMTextarea(props: {
     setValue(value: string) {
       $elm.value = value;
     },
-    render(elm: TimelessElement) {
+    render() {
       // $elm.style.backgroundColor = "transparent";
       // $elm.style.outline = "none";
       // $elm.style.border = "none";
-      common$.methods.applyState(elm.state, { initial: true });
-      $elm.value = elm.state.value;
-      if (elm.state.id) {
-        $elm.id = elm.state.id;
+      common$.methods.applyState(props.elm.state, { initial: true });
+      $elm.value = props.elm.state.value;
+      if (props.elm.state.id) {
+        $elm.id = props.elm.state.id;
       }
-      if (elm.state.name) {
-        $elm.name = elm.state.name;
+      if (props.elm.state.name) {
+        $elm.name = props.elm.state.name;
       }
-      if (elm.state.placeholder) {
-        $elm.placeholder = elm.state.placeholder;
+      if (props.elm.state.placeholder) {
+        $elm.placeholder = props.elm.state.placeholder;
       }
-      if (elm.state.disabled) {
-        $elm.disabled = elm.state.disabled;
+      if (props.elm.state.disabled) {
+        $elm.disabled = props.elm.state.disabled;
       }
-      common$.methods.setupEventListener(elm.events);
-      const events = elm.events;
+      common$.methods.setupEventListener(props.elm.events);
+      const events = props.elm.events;
       if (events) {
         if (events.onInput) {
           $elm.addEventListener("input", events.onInput);

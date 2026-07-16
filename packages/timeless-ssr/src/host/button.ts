@@ -3,12 +3,13 @@ import { SSRBox } from "./box";
 
 export type SSRButton = VNodeView<string> & {
   t: "view";
-  render(elm: TimelessElement): string;
+  render(): string;
   hydrate(elm: TimelessElement, $dom: any): void;
 };
 
 export function SSRButton(props: {
   build: (elm: TimelessElement) => VNodeView<string>;
+  elm: TimelessElement;
 }): SSRButton {
   const t = "view";
   const box$ = SSRBox();
@@ -18,9 +19,9 @@ export function SSRButton(props: {
     getType() {
       return "button";
     },
-    render(elm: TimelessElement) {
-      const attrs = box$.buildAttributes(elm.state);
-      const children = box$.buildChildren(elm.children, props.build);
+    render() {
+      const attrs = box$.buildAttributes(props.elm.state);
+      const children = box$.buildChildren(props.elm.children, props.build);
       return `<button${box$.stringifyAttrs(attrs)}>${children}</button>`;
     },
     hydrate(elm: TimelessElement, $dom: any) {

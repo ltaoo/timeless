@@ -76,12 +76,13 @@ function buildRowBpCSS(cls: string, state: any): string {
 
 export type DOMRow = VNodeView<HTMLDivElement> & {
   t: "row";
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   hydrate(elm: TimelessElement, $dom: HTMLDivElement): void;
 };
 
 export function DOMRow(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLDivElement>;
+  elm: TimelessElement;
 }): DOMRow {
   const box$ = HostElement({ $elm: null, t: "row", build: props.build });
 
@@ -94,12 +95,12 @@ export function DOMRow(props: {
     isDocumentFragment() {
       return false;
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state, { initial: true });
+      box$.methods.applyState(props.elm.state, { initial: true });
 
-      const s = elm.state ?? {};
+      const s = props.elm.state ?? {};
       const hasBreakpoints = s.breakpoints && Object.keys(s.breakpoints).length > 0;
 
       if (hasBreakpoints) {
@@ -117,8 +118,8 @@ export function DOMRow(props: {
         if (s.justify) $elm.style.justifyContent = normalizeJustify(s.justify);
       }
 
-      const $fragment = box$.methods.render(elm.children);
-      box$.methods.setupEventListener(elm.events);
+      const $fragment = box$.methods.render(props.elm.children);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);
       return $elm;
     },

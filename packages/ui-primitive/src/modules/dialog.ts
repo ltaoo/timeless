@@ -32,24 +32,25 @@ export function Root(
 }
 
 export function Overlay(
-  props: ViewProps & { store: DialogCore },
+  props: ViewProps & { store: DialogCore; zIndex?: number },
   children?: ViewChildren,
 ) {
-  const { store, ...rest } = props;
+  const { store, zIndex, ...rest } = props;
 
   return View(
     {
       ...rest,
+      style: zIndex != null ? { "z-index": zIndex } : undefined,
     },
     children,
   );
 }
 
 export function Content(
-  props: ViewProps & { store: DialogCore },
+  props: ViewProps & { store: DialogCore; zIndex?: number },
   children?: ViewChildren,
 ) {
-  const { store, ...rest } = props;
+  const { store, zIndex, ...rest } = props;
   const listener$ = ListenerManager();
   const dismissableLayer$ = new DismissableLayerCore();
 
@@ -58,6 +59,7 @@ export function Content(
   return View(
     {
       ...rest,
+      style: zIndex != null ? { "z-index": zIndex } : undefined,
       onMounted(event) {
         const $elm = event.target.get$elm();
         dismissableLayer$.setRect(() => $elm.getBoundingClientRect());

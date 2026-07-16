@@ -303,7 +303,7 @@ export function DateRangePicker(
         },
         store,
         class:
-          "cn-menu-target cn-menu-translucent z-50 w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
+          "cn-menu-target cn-menu-translucent w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       () => [
         DateRangePickerPrimitive.Calendars({ store, class: "w-full" }, [

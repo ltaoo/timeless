@@ -7,7 +7,11 @@ import pkg from "./package.json";
 import { isProd } from "../../vite.config.base";
 
 const name = "timeless.weui";
-const externals = ["@timeless/timeless"] as const;
+const externals = [
+  "@timeless/timeless",
+  "@timeless/ui-vm",
+  "@timeless/ui-primitive",
+] as const;
 
 function isExternal(id: string) {
   return externals.some(
@@ -91,11 +95,13 @@ export default defineConfig({
     cssMinify: true,
     sourcemap: isProd ? false : true,
     rollupOptions: {
-      external: ["@timeless/timeless"],
+      external: externals,
       output: {
         extend: true,
         globals: {
           "@timeless/timeless": "Timeless",
+          "@timeless/ui-vm": "Timeless.ui",
+          "@timeless/ui-primitive": "Timeless",
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith(".css")) {

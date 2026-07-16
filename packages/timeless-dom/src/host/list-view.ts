@@ -29,12 +29,13 @@ export type DOMListView = VNodeView<HTMLDivElement> & {
   }): void;
   move(from: number, to: number): void;
   swap(from: number, to: number): void;
-  render(elm: TimelessElement): HTMLDivElement;
+  render(): HTMLDivElement;
   reorderSlots(elements: Element[]): void;
 };
 
 export function DOMListView(props: {
   build: (elm: TimelessElement) => VNodeView<Text>;
+  elm: TimelessElement;
 }): DOMListView {
   // const $fragment = document.createDocumentFragment();
   const t = "list-view";
@@ -97,17 +98,17 @@ export function DOMListView(props: {
         }
       }
     },
-    render(elm: TimelessElement) {
+    render() {
       const $elm = document.createElement("div");
       $content = document.createElement("div");
       $viewport = document.createElement("div");
       box$.methods.set$elm($elm);
-      box$.methods.applyState(elm.state);
-      box$.methods.setupEventListener(elm.events);
+      box$.methods.applyState(props.elm.state);
+      box$.methods.setupEventListener(props.elm.events);
       $elm.style.position = "relative";
       $elm.style.overflowY = "auto";
-      if (elm.state.height) {
-        $content.style.height = `${elm.state.height}px`;
+      if (props.elm.state.height) {
+        $content.style.height = `${props.elm.state.height}px`;
       }
       $content.style.position = "relative";
       $viewport.style.position = "absolute";
@@ -119,11 +120,11 @@ export function DOMListView(props: {
       $viewport.setAttribute("data-list-view-viewport", "");
       $elm.addEventListener("scroll", function (event) {
         const top = (event.target as any).scrollTop;
-        (elm.events as any)?.onScroll?.({
+        (props.elm.events as any)?.onScroll?.({
           scrollTop: top,
         });
       });
-      const $fragment = box$.methods.render(elm.children);
+      const $fragment = box$.methods.render(props.elm.children);
       $viewport.appendChild($fragment);
       $content.appendChild($viewport);
       $elm.appendChild($content);
