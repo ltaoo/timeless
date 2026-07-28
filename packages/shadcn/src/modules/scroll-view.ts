@@ -1,7 +1,7 @@
 import { ViewChildren, type ViewProps } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
 import { ScrollViewPrimitive } from "@timeless/ui-primitive";
-import { ScrollViewCore } from "@timeless/ui-vm";
+import { ScrollViewCore } from "@timeless/inner-vm";
 
 export function ScrollView(
   props: ViewProps & { store: ScrollViewCore },

@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  ScrollViewCore  } from "@timeless/kit";
+import {  ScrollViewCore  } from "@timeless/inner-kit";
 export declare const Root: (props: {
     store: ScrollViewCore;
 } & JSX.HTMLAttributes<HTMLDivElement>) => JSX.Element;

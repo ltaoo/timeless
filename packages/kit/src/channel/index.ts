@@ -1,7 +1,7 @@
 /**
  * @file Bidirectional channel core.
  */
-import { BaseDomain, BizError, Handler, Result } from "@timeless/base";
+import { BaseDomain, BizError, Handler, Result } from "@timeless/inner-base";
 
 type MaybePromise<T> = T | Promise<T>;
 

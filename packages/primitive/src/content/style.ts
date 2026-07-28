@@ -11,7 +11,7 @@
  * </Style>
  * ```
  */
-import { DerivedRef, isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import { MountedEvent } from "@/event";
 

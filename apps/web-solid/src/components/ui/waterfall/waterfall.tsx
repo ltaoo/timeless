@@ -5,7 +5,7 @@ import { For, JSX, Show } from "solid-js";
 
 import { useViewModelStore } from "~/hooks";
 
-import {  WaterfallModel  } from "@timeless/kit";, state().uid, width, height);
+import {  WaterfallModel  } from "@timeless/inner-kit";, state().uid, width, height);
         // @todo 为什么会是 0？
         if (height === 0) {
           return;

@@ -1,7 +1,7 @@
 /**
  * @file 弹窗核心类
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 import { PresenceCore } from "@/presence/index";
 import { ButtonCore } from "@/button/index";

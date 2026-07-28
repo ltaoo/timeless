@@ -1,4 +1,4 @@
-import { base, Handler, BizError } from "@timeless/base";
+import { base, Handler, BizError } from "@timeless/inner-base";
 
 export function OSSManager() {
   const methods = {

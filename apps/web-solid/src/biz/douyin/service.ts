@@ -1,4 +1,4 @@
-import { RequestPayload } from "@timeless/kit";
+import { RequestPayload } from "@timeless/inner-kit";
 
 export function downloadDouyinVideo(params?: any): RequestPayload<any> {
   return {

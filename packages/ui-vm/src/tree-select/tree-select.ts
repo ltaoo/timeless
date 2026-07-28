@@ -1,4 +1,4 @@
-import { base, Handler, BizError } from "@timeless/base";
+import { base, Handler, BizError } from "@timeless/inner-base";
 
 import { PopoverCore } from "@/popover/index";
 import { InputCore } from "@/input/index";

@@ -9,7 +9,7 @@ import {
   ListenerManager,
 } from "@timeless/timeless";
 import { ButtonPrimitive } from "@timeless/ui-primitive";
-import { ButtonCore } from "@timeless/ui-vm";
+import { ButtonCore } from "@timeless/inner-vm";
 
 const VARIANTS = {
   default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",

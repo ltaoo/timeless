@@ -13,12 +13,12 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/base": "workspace:^",
+    "@timeless/inner-base": "workspace:^",
     "@timeless/timeless": "workspace:^",
-    "@timeless/icons": "workspace:^",
-    "@timeless/kit": "workspace:^",
-    "@timeless/reactive": "workspace:^",
-    "@timeless/utils": "workspace:^",
-    "@timeless/ui-vm": "workspace:^"
+    "@timeless/inner-icons": "workspace:^",
+    "@timeless/inner-kit": "workspace:^",
+    "@timeless/inner-reactive": "workspace:^",
+    "@timeless/inner-utils": "workspace:^",
+    "@timeless/inner-vm": "workspace:^"
   }
 }

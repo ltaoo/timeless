@@ -1,4 +1,4 @@
-import { ObjectFieldCore, SingleFieldCore } from "@timeless/ui-vm";
+import { ObjectFieldCore, SingleFieldCore } from "@timeless/inner-vm";
 
 import { UINode, StreamOp, ResolvedNode } from "./types";
 import { resolveNode } from "./schema-resolver";

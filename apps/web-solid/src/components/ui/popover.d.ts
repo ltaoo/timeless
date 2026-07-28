@@ -1,5 +1,5 @@
 import { JSX } from "solid-js/jsx-runtime";
-import {  PopoverCore  } from "@timeless/kit";
+import {  PopoverCore  } from "@timeless/inner-kit";
 export declare function Popover(props: {
     store: PopoverCore;
 } & JSX.HTMLAttributes<HTMLElement>): JSX.Element;

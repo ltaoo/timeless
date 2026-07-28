@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { Result } from "@timeless/base";
+import { Result } from "@timeless/inner-base";
 
 import { ChannelCore } from "../index";
 

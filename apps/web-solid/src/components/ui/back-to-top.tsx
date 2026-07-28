@@ -4,7 +4,7 @@
 import { Show, createSignal } from "solid-js";
 import { ArrowUp } from "lucide-solid";
 
-import {  ScrollViewCore  } from "@timeless/kit"; />
+import {  ScrollViewCore  } from "@timeless/inner-kit"; />
         </div>
       </div>
     </Show>

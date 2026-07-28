@@ -21,10 +21,10 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/ui-vm": "workspace:*",
+    "@timeless/inner-vm": "workspace:*",
     "@timeless/ui-primitive": "workspace:*",
-    "@timeless/kit": "workspace:*",
-    "@timeless/icons": "workspace:*",
+    "@timeless/inner-kit": "workspace:*",
+    "@timeless/inner-icons": "workspace:*",
     "@timeless/timeless": "workspace:*"
   },
   "peerDependencies": {

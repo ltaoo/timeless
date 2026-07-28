@@ -7,7 +7,7 @@ import {
   computed,
   DerivedRef,
   isWriteableRef,
-} from "@timeless/reactive";
+} from "@timeless/inner-reactive";
 
 import {
   TimelessElement,

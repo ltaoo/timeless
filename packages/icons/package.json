@@ -1,5 +1,5 @@
 {
-  "name": "@timeless/icons",
+  "name": "@timeless/inner-icons",
   "version": "0.29.0",
   "type": "module",
   "main": "./dist/index.js",

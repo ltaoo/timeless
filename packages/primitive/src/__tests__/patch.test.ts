@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { refarr } from "@timeless/reactive";
+import { refarr } from "@timeless/inner-reactive";
 
 import { isElement } from "@/content/type";
 import { View } from "@/content/view";

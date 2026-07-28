@@ -1,4 +1,4 @@
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 import { RovingFocusCore } from "@/roving-focus/index";
 import { Direction, Orientation } from "@/direction/index";

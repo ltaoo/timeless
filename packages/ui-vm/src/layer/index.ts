@@ -14,7 +14,7 @@
  * - Kotlin: layer.containsPoint 用 Rect.contains(x, y)
  */
 
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 export type LayerType = 'sheet' | 'dialog' | 'popover' | 'tooltip';
 

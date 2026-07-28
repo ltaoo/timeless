@@ -11,7 +11,7 @@ import {
   classNames,
   TimelessElement,
 } from "@timeless/timeless";
-import { DatePickerCore } from "@timeless/ui-vm";
+import { DatePickerCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";

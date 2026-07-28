@@ -9,7 +9,7 @@ import {
 } from "@timeless/timeless";
 import { For, Show, View, ViewProps } from "@timeless/timeless";
 import { CascaderPrimitive } from "@timeless/ui-primitive";
-import { CascaderCore, CascaderOption } from "@timeless/ui-vm";
+import { CascaderCore, CascaderOption } from "@timeless/inner-vm";
 
 export function Cascader(
   props: ViewProps & { store: CascaderCore<any>; id?: string },

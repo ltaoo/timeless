@@ -523,7 +523,7 @@ export * from "./modules/flow";
 ## 11. 使用示例
 
 ```typescript
-import { FlowCore } from "@timeless/ui-vm";
+import { FlowCore } from "@timeless/inner-vm";
 import { FlowView } from "@timeless/shadcn";
 
 // 1. 创建 FlowCore

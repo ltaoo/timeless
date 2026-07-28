@@ -15,7 +15,7 @@
  * <Text>{messageRef}</Text>
  * ```
  */
-import { DerivedRef, isRef, Ref, generateTrackId } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref, generateTrackId } from "@timeless/inner-reactive";
 
 import { ListenerManager } from "@/util/listener";
 

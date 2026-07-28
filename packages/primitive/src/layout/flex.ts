@@ -1,4 +1,4 @@
-import { Ref, isRef } from "@timeless/reactive";
+import { Ref, isRef } from "@timeless/inner-reactive";
 
 import { View, ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";

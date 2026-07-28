@@ -1,5 +1,5 @@
-import { Brand, JSONObject } from "@timeless/types";
-import { qs_stringify } from "@timeless/utils";
+import { Brand, JSONObject } from "@timeless/inner-types";
+import { qs_stringify } from "@timeless/inner-utils";
 
 export function buildUrl(
   key: string,

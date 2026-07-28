@@ -1,4 +1,4 @@
-import { base, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/inner-base";
 
 import { PopperCore } from "@/popper/index";
 import { PresenceCore } from "@/presence/index";

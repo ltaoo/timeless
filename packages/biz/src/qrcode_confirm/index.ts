@@ -1,4 +1,4 @@
-import { BaseDomain, BizError, Result } from "@timeless/base";
+import { BaseDomain, BizError, Result } from "@timeless/inner-base";
 
 export enum AuthCodeStep {
   Loading = "loading",

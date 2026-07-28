@@ -1,1 +1,1 @@
-import {  TabHeaderCore  } from "@timeless/kit";).JSX.Element;
+import {  TabHeaderCore  } from "@timeless/inner-kit";).JSX.Element;

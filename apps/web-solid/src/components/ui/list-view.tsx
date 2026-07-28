@@ -5,7 +5,7 @@ import { Show, createSignal } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 import { AlertCircle, ArrowDown, Bird, Loader } from "lucide-solid";
 
-import {  ListCore  } from "@timeless/kit";>{state().error?.message}</div>
+import {  ListCore  } from "@timeless/inner-kit";>{state().error?.message}</div>
                   </div>
                 </div>
               </div>

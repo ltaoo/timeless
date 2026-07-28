@@ -5,7 +5,7 @@ import {
   Subscriber,
   Signal,
   DerivedRef,
-} from "@timeless/reactive";
+} from "@timeless/inner-reactive";
 
 type ViewStylePropValue =
   | DerivedRef<string | number | boolean | null | undefined>

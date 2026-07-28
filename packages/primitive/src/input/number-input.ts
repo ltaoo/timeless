@@ -1,4 +1,4 @@
-import { DerivedRef, Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/inner-reactive";
 
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";

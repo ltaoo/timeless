@@ -9,7 +9,7 @@ import { ListCore } from "@/domains/list/index";
 import { DeviceSizeTypes } from "@/domains/app/index";
 import { getPageSizeByDeviceSize } from "@/domains/list/utils";
 import { RequestCore } from "@/domains/request/index";
-import { ImageInListCore } from "@timeless/kit";
+import { ImageInListCore } from "@timeless/inner-kit";
 import {
   MediaTypes,
   MediaOriginCountry,

@@ -3,7 +3,7 @@ import { JSX } from "solid-js/jsx-runtime";
 
 import { useViewModelStore } from "~/hooks";
 
-import {  AffixCore  } from "@timeless/kit";]: true,
+import {  AffixCore  } from "@timeless/inner-kit";]: true,
         }}
         style={styles()}
         onAnimationEnd={(event) => {

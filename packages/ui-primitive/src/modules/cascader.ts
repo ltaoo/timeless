@@ -11,7 +11,7 @@ import {
   Show,
   ListenerManager,
 } from "@timeless/timeless";
-import { CascaderCore, CascaderOption } from "@timeless/ui-vm";
+import { CascaderCore, CascaderOption } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";
 

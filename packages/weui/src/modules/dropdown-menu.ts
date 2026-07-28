@@ -24,7 +24,7 @@ import {
   MenuCheckboxMenu,
   MenuRadioItem,
   MenuRadioGroupItem,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 export function DropdownMenu(
   props: ViewProps & { store: DropdownMenuCore },

@@ -21,7 +21,7 @@
  * </Popper>
  * ```
  */
-import { DerivedRef, isRef, Ref, refobj } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref, refobj } from "@timeless/inner-reactive";
 
 import { styleNames } from "@/style";
 import { MountedEvent } from "@/event";

@@ -16,7 +16,7 @@ import {
   SVG,
 } from "@timeless/timeless";
 import { FlowPrimitive } from "@timeless/ui-primitive";
-import { FlowCanvasModel, FlowNodeModel, FlowEdgeModel } from "@timeless/ui-vm";
+import { FlowCanvasModel, FlowNodeModel, FlowEdgeModel } from "@timeless/inner-vm";
 
 type FlowNodeViewRender = Record<
   string,

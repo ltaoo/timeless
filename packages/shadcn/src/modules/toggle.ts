@@ -1,7 +1,7 @@
 import { computed, refobj } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
 import { TogglePrimitive } from "@timeless/ui-primitive";
-import { SwitchCore } from "@timeless/ui-vm";
+import { SwitchCore } from "@timeless/inner-vm";
 
 export function Toggle(props: ViewProps & { store: SwitchCore; id?: string }) {
   const { store, id, ...rest } = props;

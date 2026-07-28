@@ -9,11 +9,11 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@timeless/base": "workspace:*",
-    "@timeless/kit": "workspace:*",
-    "@timeless/ui-vm": "workspace:*",
-    "@timeless/types": "workspace:*",
-    "@timeless/utils": "workspace:*",
+    "@timeless/inner-base": "workspace:*",
+    "@timeless/inner-kit": "workspace:*",
+    "@timeless/inner-vm": "workspace:*",
+    "@timeless/inner-types": "workspace:*",
+    "@timeless/inner-utils": "workspace:*",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19"
   },

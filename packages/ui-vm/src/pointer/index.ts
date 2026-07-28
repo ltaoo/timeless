@@ -2,7 +2,7 @@
  * 画布上鼠标相关逻辑
  * 是否按下、移动距离等等
  */
-import { base, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/inner-base";
 
 export function CanvasPointer(props: {}) {
   const {} = props;

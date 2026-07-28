@@ -1,5 +1,5 @@
 {
-  "name": "@timeless/chart",
+  "name": "@timeless/inner-chart",
   "version": "0.29.0",
   "description": "Host-neutral chart state for Timeless",
   "main": "dist/index.js",

@@ -17,7 +17,7 @@
  * </SVG>
  * ```
  */
-import { DerivedRef, isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import { isElement } from "@/content/type";
 import { ViewStyle, ClassNameRef } from "@/style/index";

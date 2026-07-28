@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import { timelessHMR } from "@timeless/vite-plugin";
+import { timelessHMR } from "@timeless/inner-vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
@@ -11,19 +11,19 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: [
-      "@timeless/kit",
+      "@timeless/inner-kit",
       "@timeless/provider-web",
       "@timeless/shadcn",
       "@timeless/timeless",
       "@timeless/timeless-dom",
-      "@timeless/ui-vm",
+      "@timeless/inner-vm",
       "@timeless/ui-primitive",
-      "@timeless/reactive",
-      "@timeless/base",
-      "@timeless/types",
-      "@timeless/utils",
-      "@timeless/primitive",
-      "@timeless/icons",
+      "@timeless/inner-reactive",
+      "@timeless/inner-base",
+      "@timeless/inner-types",
+      "@timeless/inner-utils",
+      "@timeless/inner-primitive",
+      "@timeless/inner-icons",
     ],
   },
 });

@@ -1,5 +1,5 @@
-import { Result } from "@timeless/base";
-import { TmpRequestResp } from "@timeless/kit";
+import { Result } from "@timeless/inner-base";
+import { TmpRequestResp } from "@timeless/inner-kit";
 
 import { request } from "@/requests";
 // import { SubscriptionStatus, SubscriptionStatusTextMap } from "@/subscription/constants";

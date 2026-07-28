@@ -4,7 +4,7 @@ import { Check } from "lucide-solid";
 
 import * as CheckboxPrimitive from "@/packages/ui/checkbox";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 export function Checkbox(props: { store: ui.CheckboxCore } & JSX.HTMLAttributes<HTMLDivElement>) {
   return (

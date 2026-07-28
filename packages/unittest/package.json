@@ -1,0 +1,17 @@
+{
+  "name": "@timeless/unittest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cross-component integration tests for Timeless headless UI — asserts VM state without DOM",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@timeless/inner-vm": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.0"
+  }
+}

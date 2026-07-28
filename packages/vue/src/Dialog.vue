@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-import { DialogCore } from "@timeless/kit";
+import { DialogCore } from "@timeless/inner-kit";
 import Presence from "./Presence.vue";
 
 const props = defineProps<{

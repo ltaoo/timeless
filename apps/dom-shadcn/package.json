@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@timeless/kit": "workspace:^",
+    "@timeless/inner-kit": "workspace:^",
     "@timeless/provider-web": "workspace:^",
     "@timeless/shadcn": "workspace:^",
     "@timeless/timeless": "workspace:^",
@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
-    "@timeless/vite-plugin": "workspace:^",
+    "@timeless/inner-vite-plugin": "workspace:^",
     "tailwindcss": "^4.2.2",
     "vite": "^8.0.0-beta.16"
   }

@@ -1,7 +1,7 @@
 import { computed, refobj, Show } from "@timeless/timeless";
 import { For, ViewChildren, ViewProps } from "@timeless/timeless";
 import { AccordionPrimitive } from "@timeless/ui-primitive";
-import { AccordionCore } from "@timeless/ui-vm";
+import { AccordionCore } from "@timeless/inner-vm";
 
 type AccordionItem = {
   title: ViewChildren;

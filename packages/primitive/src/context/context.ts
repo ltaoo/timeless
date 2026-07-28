@@ -21,7 +21,7 @@ import {
 import {
   start_tracking,
   stop_tracking,
-} from "@timeless/reactive";
+} from "@timeless/inner-reactive";
 
 // === Owner ===
 

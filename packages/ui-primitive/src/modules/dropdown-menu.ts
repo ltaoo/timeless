@@ -10,7 +10,7 @@ import {
   MenuCore,
   MenuItemCore,
   MenuGroupCore,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 import * as MenuPrimitive from "./menu";
 

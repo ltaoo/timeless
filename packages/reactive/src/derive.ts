@@ -1,4 +1,4 @@
-import { debounce, throttle } from "@timeless/base";
+import { debounce, throttle } from "@timeless/inner-base";
 
 import { Subscriber, Ref, DerivedRef, isRef } from "./types";
 import { _current_disposables } from "./disposal";

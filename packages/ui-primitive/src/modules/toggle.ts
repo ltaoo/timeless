@@ -7,7 +7,7 @@ import {
   ButtonProps,
   Fragment,
 } from "@timeless/timeless";
-import { SwitchCore } from "@timeless/ui-vm";
+import { SwitchCore } from "@timeless/inner-vm";
 
 export function Root(
   props: ButtonProps & {

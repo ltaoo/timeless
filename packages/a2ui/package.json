@@ -13,7 +13,7 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/ui-vm": "workspace:*",
+    "@timeless/inner-vm": "workspace:*",
     "@timeless/timeless": "workspace:*"
   }
 }

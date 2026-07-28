@@ -13,7 +13,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/kit/*": ["../../packages/kit/src/*"],
-      "@timeless/kit": ["../../packages/kit/src/index.ts"],
+      "@timeless/inner-kit": ["../../packages/kit/src/index.ts"],
       "@/biz/*": ["../../packages/biz/src/*"]
     }
   },

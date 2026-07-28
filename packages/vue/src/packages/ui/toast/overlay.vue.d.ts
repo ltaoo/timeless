@@ -1,2 +1,2 @@
-import {  ToastCore  } from "@timeless/kit";).ComponentProvideOptions, false, {}, any>;
+import {  ToastCore  } from "@timeless/inner-kit";).ComponentProvideOptions, false, {}, any>;
 export default _default;

@@ -6,7 +6,7 @@ import {
 } from "@timeless/timeless";
 import { For, ViewProps, Show, View, Icon } from "@timeless/timeless";
 import { SelectPrimitive } from "@timeless/ui-primitive";
-import { SelectCore, SelectItemCore, SelectGroupCore } from "@timeless/ui-vm";
+import { SelectCore, SelectItemCore, SelectGroupCore } from "@timeless/inner-vm";
 
 export function Select(
   props: ViewProps & { store: SelectCore<any>; id?: string },

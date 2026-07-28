@@ -7,7 +7,7 @@ import {
   Icon,
 } from "@timeless/timeless";
 import { View, ViewProps, For, Show } from "@timeless/timeless";
-import { HistoryCore } from "@timeless/kit";
+import { HistoryCore } from "@timeless/inner-kit";
 
 export function HistoryPanel(
   props: ViewProps & { store: HistoryCore<string, any> },

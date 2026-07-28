@@ -1,4 +1,4 @@
-import { isRef } from "@timeless/reactive";
+import { isRef } from "@timeless/inner-reactive";
 
 import {
   TimelessElement,

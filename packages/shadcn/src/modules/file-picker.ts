@@ -12,7 +12,7 @@ import {
   ViewChildren,
 } from "@timeless/timeless";
 import { FilePickerPrimitive } from "@timeless/ui-primitive";
-import { FilePickerCore } from "@timeless/ui-vm";
+import { FilePickerCore } from "@timeless/inner-vm";
 
 export function FileDropZone(
   props: ViewProps & {

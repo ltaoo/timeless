@@ -11,7 +11,7 @@ import {
   styleNames,
   ListenerManager,
 } from "@timeless/timeless";
-import { SelectCore, SelectItemCore } from "@timeless/ui-vm";
+import { SelectCore, SelectItemCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";
 

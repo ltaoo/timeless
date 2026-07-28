@@ -1,7 +1,7 @@
 import { combine, computed, Icon, refobj } from "@timeless/timeless";
 import { Show, View, ViewProps } from "@timeless/timeless";
 import { NumberInputPrimitive } from "@timeless/ui-primitive";
-import { NumberInputCore } from "@timeless/ui-vm";
+import { NumberInputCore } from "@timeless/inner-vm";
 
 export function NumberInput(
   props: ViewProps & {

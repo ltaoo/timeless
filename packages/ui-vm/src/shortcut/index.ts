@@ -1,4 +1,4 @@
-import { base, Handler, BizError } from "@timeless/base";
+import { base, Handler, BizError } from "@timeless/inner-base";
 
 type KeyboardEvent = {
   code: string;

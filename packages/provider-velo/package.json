@@ -8,8 +8,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@timeless/base": "workspace:*",
-    "@timeless/kit": "workspace:*"
+    "@timeless/inner-base": "workspace:*",
+    "@timeless/inner-kit": "workspace:*"
   },
   "peerDependencies": {}
 }

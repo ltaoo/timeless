@@ -1,6 +1,6 @@
 import { computed } from "@timeless/timeless";
 import { View, ViewProps, ViewChildren  } from "@timeless/timeless";
-import { AccordionCore } from "@timeless/ui-vm";
+import { AccordionCore } from "@timeless/inner-vm";
 
 
 export function Root(

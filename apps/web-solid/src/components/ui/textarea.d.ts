@@ -1,5 +1,5 @@
 import { JSX } from "solid-js/jsx-runtime";
-import {  InputCore  } from "@timeless/kit";
+import {  InputCore  } from "@timeless/inner-kit";
 export interface TextareaProps extends HTMLTextAreaElement {
 }
 declare const Textarea: {

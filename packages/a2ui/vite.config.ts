@@ -12,16 +12,16 @@ const externals = ["@timeless/timeless"] as const;
 function rewriteDtsImports() {
   const distDir = resolve(__dirname, "dist");
   const replacements: Array<[string, string]> = [
-    ['"@timeless/reactive"', '"@timeless/timeless"'],
-    ["'@timeless/reactive'", "'@timeless/timeless'"],
-    ['"@timeless/base"', '"@timeless/timeless"'],
-    ["'@timeless/base'", "'@timeless/timeless'"],
-    ['"@timeless/kit"', '"@timeless/timeless"'],
-    ["'@timeless/kit'", "'@timeless/timeless'"],
-    ['"@timeless/ui-vm"', '"@timeless/timeless"'],
-    ["'@timeless/ui-vm'", "'@timeless/timeless'"],
-    ['"@timeless/utils"', '"@timeless/timeless"'],
-    ["'@timeless/utils'", "'@timeless/timeless'"],
+    ['"@timeless/inner-reactive"', '"@timeless/timeless"'],
+    ["'@timeless/inner-reactive'", "'@timeless/timeless'"],
+    ['"@timeless/inner-base"', '"@timeless/timeless"'],
+    ["'@timeless/inner-base'", "'@timeless/timeless'"],
+    ['"@timeless/inner-kit"', '"@timeless/timeless"'],
+    ["'@timeless/inner-kit'", "'@timeless/timeless'"],
+    ['"@timeless/inner-vm"', '"@timeless/timeless"'],
+    ["'@timeless/inner-vm'", "'@timeless/timeless'"],
+    ['"@timeless/inner-utils"', '"@timeless/timeless"'],
+    ["'@timeless/inner-utils'", "'@timeless/timeless'"],
   ];
 
   function walk(dir: string) {

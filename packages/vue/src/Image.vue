@@ -2,7 +2,7 @@
 import { onMounted, watchEffect, ref } from "vue";
 import { ImageOff, Image } from "lucide-vue-next";
 
-import { ImageCore, ImageStep } from "@timeless/kit";
+import { ImageCore, ImageStep } from "@timeless/inner-kit";
 import { provide_ui_image } from "@timeless/provider-web";
 import { cn } from "@/utils";
 

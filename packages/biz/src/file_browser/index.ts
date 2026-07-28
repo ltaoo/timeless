@@ -6,14 +6,14 @@
 // import { RequestCore } from "@/request";
 // import { RequestPayload } from "@/request/utils";
 // import { ScrollViewCore } from "@/ui";
-import { base, BaseDomain, Handler, BizError } from "@timeless/base";
+import { base, BaseDomain, Handler, BizError } from "@timeless/inner-base";
 import {
   ListCore,
   HttpClientCore,
   RequestPayload,
   RequestCore,
-} from "@timeless/kit";
-import { ScrollViewCore } from "@timeless/ui-vm";
+} from "@timeless/inner-kit";
+import { ScrollViewCore } from "@timeless/inner-vm";
 
 export type BizFile = {
   id: string;

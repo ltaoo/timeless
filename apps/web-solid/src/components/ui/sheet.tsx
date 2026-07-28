@@ -3,7 +3,7 @@ import { JSX } from "solid-js/jsx-runtime";
 
 import { useViewModelStore } from "~/hooks";
 import { ViewComponentProps } from "~/store/types";
-import {  DialogCore  } from "@timeless/kit";></div>
+import {  DialogCore  } from "@timeless/inner-kit";></div>
           </Show>
         </DialogPrimitive.Content>
       </div>

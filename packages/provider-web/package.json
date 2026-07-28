@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@timeless/timeless": "workspace:*",
-    "@timeless/kit": "workspace:*",
-    "@timeless/ui-vm": "workspace:*",
+    "@timeless/inner-kit": "workspace:*",
+    "@timeless/inner-vm": "workspace:*",
     "axios": "^1.13.2"
   },
   "peerDependencies": {}

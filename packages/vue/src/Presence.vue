@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-import { PresenceCore } from "@timeless/kit";
+import { PresenceCore } from "@timeless/inner-kit";
 import { cn } from "@/utils";
 
 const { store, enterClassName, exitClassName, className } = defineProps<{

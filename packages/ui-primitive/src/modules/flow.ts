@@ -1,5 +1,5 @@
 import { View, ViewProps, ViewChildren } from "@timeless/timeless";
-import { FlowCanvasModel } from "@timeless/ui-vm";
+import { FlowCanvasModel } from "@timeless/inner-vm";
 
 export function Root(
   props: ViewProps & { store: FlowCanvasModel },

@@ -11,7 +11,7 @@ import {
   TimePickerPrimitive,
   ScrollViewPrimitive,
 } from "@timeless/ui-primitive";
-import { ScrollViewCore, TimePickerCore } from "@timeless/ui-vm";
+import { ScrollViewCore, TimePickerCore } from "@timeless/inner-vm";
 
 export function TimePicker(
   props: ViewProps & {

@@ -1,6 +1,6 @@
 import { ViewChildren, View } from "@timeless/timeless";
 
-import { SonnerCore } from "@timeless/ui-vm";
+import { SonnerCore } from "@timeless/inner-vm";
 
 export function Toast(props: { store: SonnerCore }, children?: ViewChildren) {
   return View({}, children);

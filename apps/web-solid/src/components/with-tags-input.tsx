@@ -9,7 +9,7 @@ import { useViewModelStore } from "~/hooks";
 import { Input as InputPrimitive } from "~/packages/ui/input";
 import { Input } from "~/components/ui/input";
 
-import {  base, Handler  } from "@timeless/kit";: opt.selected,
+import {  base, Handler  } from "@timeless/inner-kit";: opt.selected,
                   }}
                   onPointerEnter={() => {
                     vm.methods.handleEnterMenuOption(idx());

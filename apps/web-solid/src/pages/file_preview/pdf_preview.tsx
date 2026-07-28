@@ -9,7 +9,7 @@ import { ViewComponentProps } from "~/store/types";
 import { LazyImage, Video } from "~/components/ui";
 import { useViewModel } from "~/hooks";
 
-import {  base, Handler  } from "@timeless/kit";, _url);
+import {  base, Handler  } from "@timeless/inner-kit";, _url);
       ui.$player.setURL(_url);
     },
     destroy() {

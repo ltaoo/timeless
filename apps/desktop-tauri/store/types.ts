@@ -1,6 +1,6 @@
 import { JSX } from "solid-js/jsx-runtime";
 
-import {  Application  } from "@timeless/kit";>;
+import {  Application  } from "@timeless/inner-kit";>;
   parent?: {
     view: RouteViewCore;
     scrollView?: ScrollViewCore;

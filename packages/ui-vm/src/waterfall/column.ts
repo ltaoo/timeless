@@ -1,5 +1,5 @@
-import { base, Handler } from "@timeless/base";
-import { throttle, remove_arr_item } from "@timeless/utils";
+import { base, Handler } from "@timeless/inner-base";
+import { throttle, remove_arr_item } from "@timeless/inner-utils";
 
 import { WaterfallCellModel } from "./cell";
 

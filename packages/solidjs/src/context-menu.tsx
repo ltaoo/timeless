@@ -4,7 +4,7 @@
 import { For, createSignal, onMount, JSX } from "solid-js";
 import { ChevronRight } from "lucide-solid";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 import * as Menu from "@/packages/ui/menu";
 
 export const ContextMenu = (props: { store: ui.ContextMenuCore } & JSX.HTMLAttributes<HTMLElement>) => {

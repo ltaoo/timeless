@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import * as ui from "@timeless/ui-vm";
+import * as ui from "@timeless/inner-vm";
 
 export interface TextareaProps extends HTMLTextAreaElement {}
 

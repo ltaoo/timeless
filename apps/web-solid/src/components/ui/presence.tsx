@@ -5,7 +5,7 @@ import { JSX, Show, createSignal } from "solid-js";
 
 import { useViewModelStore } from "~/hooks";
 
-import {  PresenceCore  } from "@timeless/kit";}
+import {  PresenceCore  } from "@timeless/inner-kit";}
         onClick={props.onClick}
       >
         {props.children}

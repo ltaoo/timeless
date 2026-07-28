@@ -1,4 +1,4 @@
-import {  StorageCore  } from "@timeless/kit";);
+import {  StorageCore  } from "@timeless/inner-kit";);
     return {
       ...prev,
     };

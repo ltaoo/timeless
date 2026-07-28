@@ -13,7 +13,7 @@ import {
   Align,
   Side,
   getGlobalLayerManager,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";

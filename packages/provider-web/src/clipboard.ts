@@ -1,6 +1,6 @@
 import { Result } from "@timeless/timeless";
 
-import { ClipboardModel } from "@timeless/kit";
+import { ClipboardModel } from "@timeless/inner-kit";
 
 export function connect(vm: ClipboardModel) {
   const supported =

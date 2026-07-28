@@ -15,9 +15,9 @@ import {
   StorageCore,
   HttpClientCore,
   ApplicationModel,
-} from "@timeless/kit";
+} from "@timeless/inner-kit";
 
-import { ErrorFallbackFn, withErrorBoundary } from "./error-boundary";
+import { ErrorFallbackFn } from "./error-boundary";
 
 type SubView = { id?: unknown; name: string; pathname?: string } & Record<
   string,
@@ -57,16 +57,20 @@ export function KeepAliveSubViews(props: {
         props.view.onCurViewChange((view: SubView) => {
           cur_subview.as(view);
         }),
-        props.view.onSubViewAppended((v: SubView) => {
-          // console.log(
-          //   "[KeepAliveSubViews] onSubViewAppended",
-          //   v,
-          //   subviews.length,
-          // );
-          subviews.push(v);
-        }),
-        props.view.onSubViewRemoved((v: SubView) => {
-          subviews.remove(v);
+        // props.view.onSubViewAppended((v: SubView) => {
+        //   // console.log(
+        //   //   "[KeepAliveSubViews] onSubViewAppended",
+        //   //   v,
+        //   //   subviews.length,
+        //   // );
+        //   subviews.push(v);
+        // }),
+        // props.view.onSubViewRemoved((v: SubView) => {
+        //   subviews.remove(v);
+        // }),
+        props.view.onSubViewsChange((views: SubView[]) => {
+          console.log("[KeepAliveSubViews]onSubViewAppended", views.length);
+          subviews.as(views);
         }),
       ]);
       if (props.onMounted) {

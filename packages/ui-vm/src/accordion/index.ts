@@ -1,5 +1,5 @@
-import { base, Handler } from "@timeless/base";
-import { refarr, RefArray } from "@timeless/reactive";
+import { base, Handler } from "@timeless/inner-base";
+import { refarr, RefArray } from "@timeless/inner-reactive";
 
 type AccordionCoreProps = {
   type?: "single" | "multiple";

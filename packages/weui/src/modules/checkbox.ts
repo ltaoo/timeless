@@ -1,7 +1,7 @@
 import { View, ViewProps, Icon } from "@timeless/timeless";
 import { ref, computed, ListenerManager } from "@timeless/timeless";
 import { CheckboxPrimitive } from "@timeless/ui-primitive";
-import { CheckboxCore } from "@timeless/ui-vm";
+import { CheckboxCore } from "@timeless/inner-vm";
 
 export function Checkbox(
   props: ViewProps & { store: CheckboxCore; id?: string },

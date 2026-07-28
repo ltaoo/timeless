@@ -16,7 +16,7 @@ import {
 
 import { render } from "@timeless/timeless-dom";
 
-export * from "@timeless/reactive";
+export * from "@timeless/inner-reactive";
 
 export {
   For,

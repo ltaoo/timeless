@@ -1,7 +1,7 @@
 import { computed, Fragment, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps, Show } from "@timeless/timeless";
 import { DialogPrimitive } from "@timeless/ui-primitive";
-import { DialogCore, getGlobalLayerManager } from "@timeless/ui-vm";
+import { DialogCore, getGlobalLayerManager } from "@timeless/inner-vm";
 
 const DIALOG_BASE_Z = 200;
 const Z_INDEX_NEST_GAP = 50;

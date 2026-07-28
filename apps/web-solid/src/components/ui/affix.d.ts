@@ -1,5 +1,5 @@
 import { JSX } from "solid-js/jsx-runtime";
-import {  AffixCore  } from "@timeless/kit";
+import {  AffixCore  } from "@timeless/inner-kit";
 export declare function Affix(props: {
     store: AffixCore;
 } & JSX.HTMLAttributes<HTMLDivElement>): JSX.Element;

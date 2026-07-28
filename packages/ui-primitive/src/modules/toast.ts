@@ -4,7 +4,7 @@ import {
   ViewChildren,
   // Icon as NativeIcon,
 } from "@timeless/timeless";
-import { ToastCore } from "@timeless/ui-vm";
+import { ToastCore } from "@timeless/inner-vm";
 
 // import { Presence } from "./presence";
 

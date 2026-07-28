@@ -78,8 +78,8 @@ export default defineConfig({
       ],
       output: {
         globals: {
-          "@timeless/primitive": "Timeless.primitive",
-          "@timeless/ui-vm": "Timeless.ui",
+          "@timeless/inner-primitive": "Timeless.primitive",
+          "@timeless/inner-vm": "Timeless.ui",
         },
       },
     },

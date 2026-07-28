@@ -3,7 +3,7 @@
  */
 import { For, JSX, createSignal } from "solid-js";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 export const CheckboxOption = (props: { label: string; store: ui.CheckboxCore } & JSX.HTMLAttributes<HTMLDivElement>) => {
   const { label, store } = props;

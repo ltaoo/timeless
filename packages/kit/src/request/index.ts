@@ -7,8 +7,8 @@ import {
   Result,
   UnpackedResult,
   BizError,
-} from "@timeless/base";
-import { sleep } from "@timeless/utils";
+} from "@timeless/inner-base";
+import { sleep } from "@timeless/inner-utils";
 
 import { HttpClientCore } from "@/http_client/index";
 
@@ -198,10 +198,10 @@ export class RequestCore<
     }
     if (this.pending !== null) {
       const r = await this.pending;
-      this.loading = false;
-      const data = r.data as P;
-      this.pending = null;
-      return Result.Ok(data);
+      if (r.error) {
+        return Result.Err(r.error);
+      }
+      return Result.Ok(r.data as P);
     }
     // this.args = args;
     this.loading = true;

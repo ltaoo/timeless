@@ -9,7 +9,7 @@ import {
   WaterfallModel,
   WaterfallColumnModel,
   WaterfallCellModel,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 export function Root(
   props: ViewProps & { store: WaterfallModel<any> },

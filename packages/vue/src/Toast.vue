@@ -4,7 +4,7 @@ import ToastPrimitiveRoot from "~/packages/ui/toast/root.vue";
 import ToastPrimitiveOverlay from "~/packages/ui/toast/overlay.vue";
 import ToastPrimitivePortal from "~/packages/ui/toast/portal.vue";
 import ToastPrimitiveContent from "~/packages/ui/toast/content.vue";
-import { ToastCore } from "@timeless/kit";
+import { ToastCore } from "@timeless/inner-kit";
 import { cn } from "@/utils";
 
 const props = defineProps<{ store: ToastCore }>();

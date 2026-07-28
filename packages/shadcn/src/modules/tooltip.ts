@@ -1,6 +1,6 @@
 import { computed, refobj } from "@timeless/timeless";
 import { Fragment, View, ViewChildren, ViewProps } from "@timeless/timeless";
-import { TooltipCore, Align, Side } from "@timeless/ui-vm";
+import { TooltipCore, Align, Side } from "@timeless/inner-vm";
 import { TooltipPrimitive } from "@timeless/ui-primitive";
 
 // 全局单例 store

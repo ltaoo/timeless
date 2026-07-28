@@ -1,5 +1,5 @@
-import { dayjs } from "@timeless/utils";
-import { base, Handler } from "@timeless/base";
+import { dayjs } from "@timeless/inner-utils";
+import { base, Handler } from "@timeless/inner-base";
 
 import { RangeCalendarCore } from "@/range-calendar/index";
 import { PopperCore } from "@/popper/index";

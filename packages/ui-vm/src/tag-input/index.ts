@@ -1,4 +1,4 @@
-import { base, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/inner-base";
 
 type TagInputCoreProps = {
   defaultValue?: string[];

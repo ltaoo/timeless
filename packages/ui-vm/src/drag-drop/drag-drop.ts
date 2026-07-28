@@ -1,4 +1,4 @@
-import { base, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/inner-base";
 
 import type { DragContainerModel, DragDropNodeModel } from "./container";
 import type { DragDropContainerState, DragDropPlacement } from "./types";

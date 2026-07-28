@@ -5,7 +5,7 @@ Host-neutral chart state for Timeless.
 This package computes chart layout, scales, paths, paints, and render primitives in plain JavaScript. It does not depend on SVG, Canvas, DOM, React, or any other rendering host. A host renderer can consume `state.primitives` and map each `PathCommand` to its own drawing API.
 
 ```ts
-import { createChartState } from "@timeless/chart";
+import { createChartState } from "@timeless/inner-chart";
 
 const state = createChartState({
   type: "area",

@@ -1,4 +1,4 @@
-import { base, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/inner-base";
 
 import {
   WindowBodyModel,
@@ -297,6 +297,21 @@ export function WindowModel(props: WindowModelProps = {}) {
       _resizeStartRect = null;
       bus.emit(Events.ResizeEnd, { edge, rect: currentRect() });
       methods.refresh();
+    },
+    /** 获取 body 内元素的绝对坐标（相对屏幕） */
+    getAbsoluteRect(el: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }): WindowRect {
+      const b = bodyLocalRect();
+      return {
+        x: _position.x + b.x + el.x,
+        y: _position.y + b.y + el.y,
+        width: el.width,
+        height: el.height,
+      };
     },
   };
 

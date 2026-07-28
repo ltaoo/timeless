@@ -1,4 +1,4 @@
-import { CollectionCore } from "@timeless/kit";
+import { CollectionCore } from "@timeless/inner-kit";
 declare const Provider: (props: {
     store: CollectionCore;
     children: JSX.Element;

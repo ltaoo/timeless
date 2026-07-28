@@ -17,7 +17,7 @@ import { DynamicContent } from "~/components/dynamic-content";
 import { DynamicContentWithClick } from "~/components/dynamic-content/with-click";
 import { CodeCard } from "~/components/code-card";
 
-import {  RequestCore, TheResponseOfRequestCore  } from "@timeless/kit"; />
+import {  RequestCore, TheResponseOfRequestCore  } from "@timeless/inner-kit"; />
           </div>
         </div>
       </Show>

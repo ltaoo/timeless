@@ -1,7 +1,7 @@
 /**
  * @file 支持动画的 Popup
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 enum Events {
   StateChange,

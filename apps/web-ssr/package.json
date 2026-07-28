@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@timeless/timeless": "workspace:^",
-    "@timeless/reactive": "workspace:^",
-    "@timeless/ui-vm": "workspace:^"
+    "@timeless/inner-reactive": "workspace:^",
+    "@timeless/inner-vm": "workspace:^"
   }
 }

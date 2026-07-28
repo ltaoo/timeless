@@ -30,19 +30,19 @@ declare interface Window {
 type RouteConfigureWithRoot =
   typeof import("../src/store/index.js").routes_configure_with_root;
 
-type ConfigureForPageKeys<T> = import("@timeless/kit").ConfigureForPageKeys<T>;
-type PageKey = import("@timeless/kit").PageKeysType<
+type ConfigureForPageKeys<T> = import("@timeless/inner-kit").ConfigureForPageKeys<T>;
+type PageKey = import("@timeless/inner-kit").PageKeysType<
   ConfigureForPageKeys<RouteConfigureWithRoot>
 >;
-type RouteConfig<T> = import("@timeless/kit").RouteConfig<T>;
-type RouteViewCore = import("@timeless/kit").RouteViewCore;
-type HistoryCore = import("@timeless/kit").HistoryCore<
+type RouteConfig<T> = import("@timeless/inner-kit").RouteConfig<T>;
+type RouteViewCore = import("@timeless/inner-kit").RouteViewCore;
+type HistoryCore = import("@timeless/inner-kit").HistoryCore<
   PageKey,
   RouteConfig<PageKey>
 >;
-type ApplicationModel = import("@timeless/kit").ApplicationModel<any>;
-type HttpClient = import("@timeless/kit").HttpClientCore;
-type StorageCore = import("@timeless/kit").StorageCore<any>;
+type ApplicationModel = import("@timeless/inner-kit").ApplicationModel<any>;
+type HttpClient = import("@timeless/inner-kit").HttpClientCore;
+type StorageCore = import("@timeless/inner-kit").StorageCore<any>;
 
 type ViewComponentProps = {
   view: RouteViewCore;

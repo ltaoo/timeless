@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  FormCore  } from "@timeless/kit";
+import {  FormCore  } from "@timeless/inner-kit";
 declare function Root<T extends Record<string, unknown>>(props: {
     store: FormCore;
 } & JSX.HTMLAttributes<HTMLElement>): JSX.Element;

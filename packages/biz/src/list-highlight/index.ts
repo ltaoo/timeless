@@ -1,5 +1,5 @@
-import { base, Handler, BizError } from "@timeless/base";
-import { ScrollViewCore } from "@timeless/ui-vm";
+import { base, Handler, BizError } from "@timeless/inner-base";
+import { ScrollViewCore } from "@timeless/inner-vm";
 
 export type OptionWithTopInList = {
   id: string;

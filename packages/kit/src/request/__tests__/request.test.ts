@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { RequestCore } from "../index";
 import { HttpClientCore } from "@/http_client/index";
 import { request } from "../utils";
-import { Result } from "@timeless/base";
+import { Result } from "@timeless/inner-base";
 
 describe("RequestCore", () => {
   let mockClient: HttpClientCore;

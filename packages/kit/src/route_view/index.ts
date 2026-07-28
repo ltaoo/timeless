@@ -1,10 +1,10 @@
 /**
  * @file 根据路由判断是否可见的视图块
  */
-import { refobj } from "@timeless/reactive";
-import { base, BaseDomain, Handler, BizError } from "@timeless/base";
-import { PresenceCore } from "@timeless/ui-vm";
-import { qs_parse, qs_stringify } from "@timeless/utils";
+import { refobj } from "@timeless/inner-reactive";
+import { base, BaseDomain, Handler, BizError } from "@timeless/inner-base";
+import { PresenceCore } from "@timeless/inner-vm";
+import { qs_parse, qs_stringify } from "@timeless/inner-utils";
 
 import { NavigatorCore } from "@/navigator/index";
 import { HistoryCore } from "@/history";

@@ -1,7 +1,7 @@
 /**
  * @file 纯粹的坐标点
  */
-import { base, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/inner-base";
 
 enum Events {
   Change,

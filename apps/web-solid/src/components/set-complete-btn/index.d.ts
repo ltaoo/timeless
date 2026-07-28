@@ -1,1 +1,1 @@
-import {  InputCore  } from "@timeless/kit";).JSX.Element;
+import {  InputCore  } from "@timeless/inner-kit";).JSX.Element;

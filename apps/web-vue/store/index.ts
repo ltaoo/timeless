@@ -1,4 +1,4 @@
-import {  Application  } from "@timeless/kit";);
+import {  Application  } from "@timeless/inner-kit";);
 });
 user.onTip((msg) => {
   app.tip(msg);

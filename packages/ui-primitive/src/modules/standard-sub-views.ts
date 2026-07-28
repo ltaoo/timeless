@@ -16,7 +16,7 @@ import {
   StorageCore,
   HttpClientCore,
   ApplicationModel,
-} from "@timeless/kit";
+} from "@timeless/inner-kit";
 
 import { ErrorFallbackFn, withErrorBoundary } from "./error-boundary";
 

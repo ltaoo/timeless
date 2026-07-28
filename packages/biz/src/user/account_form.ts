@@ -1,4 +1,4 @@
-import { ObjectFieldCore, SingleFieldCore, InputCore } from "@timeless/ui-vm";
+import { ObjectFieldCore, SingleFieldCore, InputCore } from "@timeless/inner-vm";
 
 export function UserAccountForm() {
   const ui = {

@@ -1,4 +1,4 @@
-import { ApplicationModel, StorageCore } from "@timeless/kit";
+import { ApplicationModel, StorageCore } from "@timeless/inner-kit";
 
 export function connect<T extends { storage: StorageCore<any>; user: any }>(
   app: ApplicationModel<T>,

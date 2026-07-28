@@ -10,7 +10,7 @@ import {
   ButtonProps,
   classNames,
 } from "@timeless/timeless";
-import { TimePickerCore } from "@timeless/ui-vm";
+import { TimePickerCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";

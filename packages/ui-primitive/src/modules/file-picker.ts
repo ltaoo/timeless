@@ -7,7 +7,7 @@ import {
   styleNames,
   ListenerManager,
 } from "@timeless/timeless";
-import { FilePickerCore } from "@timeless/ui-vm";
+import { FilePickerCore } from "@timeless/inner-vm";
 
 export function Root(
   props: ViewProps & { store?: FilePickerCore },

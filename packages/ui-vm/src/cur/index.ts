@@ -2,7 +2,7 @@
  * @file 一个缓存/当前值
  * 类似 useRef
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 enum Events {
   StateChange,

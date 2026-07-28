@@ -6,7 +6,7 @@ import {
   ViewChildren,
 } from "@/content/type";
 import { Show } from "@/reactive/show";
-import { computed, DerivedRef, isRef, ref, Ref } from "@timeless/reactive";
+import { computed, DerivedRef, isRef, ref, Ref } from "@timeless/inner-reactive";
 import { Text } from "@/content/text";
 
 export type TabPosition = "top" | "bottom" | "left" | "right";

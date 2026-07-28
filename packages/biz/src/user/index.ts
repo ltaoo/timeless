@@ -1,4 +1,4 @@
-import { BaseDomain, Result } from "@timeless/base";
+import { BaseDomain, Result } from "@timeless/inner-base";
 
 export type UserEvents<Profile> = {
   login: Profile;

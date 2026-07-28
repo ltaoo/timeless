@@ -1,5 +1,5 @@
-import { base, Handler } from "@timeless/base";
-import { toFixed } from "@timeless/utils";
+import { base, Handler } from "@timeless/inner-base";
+import { toFixed } from "@timeless/inner-utils";
 
 export function WaterfallCellModel<T extends Record<string, unknown>>(props: {
   uid: number;

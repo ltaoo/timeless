@@ -5,7 +5,7 @@ import { ViewComponentProps } from "../../store/types";
 import { Input, Button } from "@timeless/vue";
 import { QRCodeWithState } from "@/biz/qrcode_confirm/index";
 import { createQRCode } from "@/domains/qrcode/index";
-import { ButtonCore, InputCore } from "@timeless/kit";
+import { ButtonCore, InputCore } from "@timeless/inner-kit";
 import { AuthCodeStep } from "@/constants/index";
 
 const props = defineProps<ViewComponentProps>();

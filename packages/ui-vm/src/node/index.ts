@@ -1,7 +1,7 @@
 /**
  * @deprecated
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 enum Events {
   Click,

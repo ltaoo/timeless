@@ -1,6 +1,6 @@
 import { For, Show, createSignal, onMount } from "solid-js";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 export const Tab = (props: { store: ui.TabHeaderCore<any> }) => {
   const { store } = props;

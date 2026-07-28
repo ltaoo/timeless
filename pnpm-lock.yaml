@@ -67,7 +67,7 @@ importers:
       '@timeless/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@timeless/types':
+      '@timeless/inner-types':
         specifier: workspace:*
         version: link:../../packages/types
       eslint:
@@ -82,18 +82,18 @@ importers:
       '@timeless/biz':
         specifier: workspace:*
         version: link:../../packages/biz
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../../packages/kit
+      '@timeless/inner-utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@timeless/provider-tauri':
         specifier: workspace:*
         version: link:../../packages/provider-tauri
       '@timeless/provider-web':
         specifier: workspace:*
         version: link:../../packages/provider-web
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1
@@ -144,7 +144,7 @@ importers:
         specifier: workspace:^
         version: link:../../packages/timeless-dom
     devDependencies:
-      '@timeless/vite-plugin':
+      '@timeless/inner-vite-plugin':
         specifier: workspace:^
         version: link:../../packages/vite-plugin
       vite:
@@ -153,7 +153,7 @@ importers:
 
   apps/dom-shadcn:
     dependencies:
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:^
         version: link:../../packages/kit
       '@timeless/provider-web':
@@ -172,7 +172,7 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.2.2(vite@8.0.0-beta.16(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(less@4.6.7)(terser@5.46.0)(yaml@2.8.3))
-      '@timeless/vite-plugin':
+      '@timeless/inner-vite-plugin':
         specifier: workspace:^
         version: link:../../packages/vite-plugin
       tailwindcss:
@@ -193,7 +193,7 @@ importers:
         specifier: workspace:^
         version: link:../../packages/timeless-native
     devDependencies:
-      '@timeless/vite-plugin':
+      '@timeless/inner-vite-plugin':
         specifier: workspace:^
         version: link:../../packages/vite-plugin
       vite:
@@ -205,7 +205,7 @@ importers:
       '@timeless/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@timeless/types':
+      '@timeless/inner-types':
         specifier: workspace:*
         version: link:../../packages/types
       eslint:
@@ -217,6 +217,9 @@ importers:
       '@timeless/cli':
         specifier: workspace:^
         version: link:../../packages/cli
+      '@timeless/inner-vm':
+        specifier: workspace:^
+        version: link:../../packages/ui-vm
       '@timeless/shadcn':
         specifier: workspace:^
         version: link:../../packages/shadcn
@@ -226,9 +229,6 @@ importers:
       '@timeless/timeless-dom':
         specifier: workspace:^
         version: link:../../packages/timeless-dom
-      '@timeless/ui-vm':
-        specifier: workspace:^
-        version: link:../../packages/ui-vm
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.0
@@ -254,7 +254,7 @@ importers:
 
   apps/ssr-shadcn:
     dependencies:
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:^
         version: link:../../packages/kit
       '@timeless/shadcn':
@@ -289,6 +289,22 @@ importers:
         specifier: workspace:^
         version: link:../../packages/timeless-tui
 
+  apps/web-primitive:
+    dependencies:
+      better-sqlite3:
+        specifier: ^12.10.0
+        version: 12.10.0
+    devDependencies:
+      '@timeless/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      '@timeless/inner-types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+
   apps/web-shadcn:
     dependencies:
       better-sqlite3:
@@ -298,7 +314,7 @@ importers:
       '@timeless/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@timeless/types':
+      '@timeless/inner-types':
         specifier: workspace:*
         version: link:../../packages/types
       eslint:
@@ -310,21 +326,21 @@ importers:
       '@timeless/biz':
         specifier: workspace:*
         version: link:../../packages/biz
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../../packages/kit
+      '@timeless/inner-utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../../packages/ui-vm
       '@timeless/provider-wails3':
         specifier: workspace:*
         version: link:../../packages/provider-wails3
       '@timeless/provider-web':
         specifier: workspace:*
         version: link:../../packages/provider-web
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../../packages/ui-vm
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@wailsio/runtime':
         specifier: 3.0.0-alpha.79
         version: 3.0.0-alpha.79
@@ -377,30 +393,30 @@ importers:
 
   apps/web-ssr:
     dependencies:
-      '@timeless/reactive':
+      '@timeless/inner-reactive':
         specifier: workspace:^
         version: link:../../packages/reactive
+      '@timeless/inner-vm':
+        specifier: workspace:^
+        version: link:../../packages/ui-vm
       '@timeless/timeless':
         specifier: workspace:^
         version: link:../../packages/timeless
-      '@timeless/ui-vm':
-        specifier: workspace:^
-        version: link:../../packages/ui-vm
 
   apps/web-vue:
     dependencies:
       '@timeless/biz':
         specifier: workspace:*
         version: link:../../packages/biz
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../../packages/kit
+      '@timeless/inner-utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@timeless/provider-web':
         specifier: workspace:*
         version: link:../../packages/provider-web
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@timeless/vue':
         specifier: workspace:*
         version: link:../../packages/vue
@@ -453,18 +469,18 @@ importers:
       '@timeless/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@timeless/types':
+      '@timeless/inner-types':
         specifier: workspace:*
         version: link:../../packages/types
 
   packages/a2ui:
     dependencies:
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../ui-vm
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
 
   packages/base:
     dependencies:
@@ -474,21 +490,21 @@ importers:
 
   packages/biz:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
-      '@timeless/types':
+      '@timeless/inner-types':
         specifier: workspace:*
         version: link:../types
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
-      '@timeless/utils':
+      '@timeless/inner-utils':
         specifier: workspace:*
         version: link:../utils
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../ui-vm
       axios:
         specifier: ^1.13.2
         version: 1.13.2
@@ -540,28 +556,28 @@ importers:
 
   packages/kit:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/reactive':
+      '@timeless/inner-reactive':
         specifier: workspace:*
         version: link:../reactive
-      '@timeless/types':
+      '@timeless/inner-types':
         specifier: workspace:*
         version: link:../types
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
-      '@timeless/utils':
+      '@timeless/inner-utils':
         specifier: workspace:*
         version: link:../utils
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../ui-vm
 
   packages/primitive:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:^
         version: link:../base
-      '@timeless/reactive':
+      '@timeless/inner-reactive':
         specifier: workspace:^
         version: link:../reactive
       tailwindcss:
@@ -574,13 +590,13 @@ importers:
 
   packages/provider-memory:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
-      '@timeless/utils':
+      '@timeless/inner-utils':
         specifier: workspace:*
         version: link:../utils
 
@@ -589,96 +605,96 @@ importers:
       '@tauri-apps/api':
         specifier: 2.10.1
         version: 2.10.1
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
+      '@timeless/inner-utils':
+        specifier: workspace:*
+        version: link:../utils
       '@timeless/provider-web':
         specifier: workspace:*
         version: link:../provider-web
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../utils
 
   packages/provider-velo:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
 
   packages/provider-wails3:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
+      '@timeless/inner-utils':
+        specifier: workspace:*
+        version: link:../utils
       '@timeless/provider-web':
         specifier: workspace:*
         version: link:../provider-web
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../utils
 
   packages/provider-weapp:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
-      '@timeless/utils':
+      '@timeless/inner-utils':
         specifier: workspace:*
         version: link:../utils
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../ui-vm
 
   packages/provider-web:
     dependencies:
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../ui-vm
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
       axios:
         specifier: ^1.13.2
         version: 1.13.2
 
   packages/reactive:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
 
   packages/shadcn:
     dependencies:
-      '@timeless/icons':
+      '@timeless/inner-icons':
         specifier: workspace:*
         version: link:../icons
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../ui-vm
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
       '@timeless/ui-primitive':
         specifier: workspace:*
         version: link:../ui-primitive
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.2.1
@@ -701,10 +717,10 @@ importers:
 
   packages/solidjs:
     dependencies:
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
-      '@timeless/ui-vm':
+      '@timeless/inner-vm':
         specifier: workspace:*
         version: link:../ui-vm
       class-variance-authority:
@@ -725,25 +741,25 @@ importers:
 
   packages/timeless:
     dependencies:
-      '@timeless/primitive':
+      '@timeless/inner-primitive':
         specifier: workspace:^
         version: link:../primitive
-      '@timeless/reactive':
+      '@timeless/inner-reactive':
         specifier: workspace:^
         version: link:../reactive
+      '@timeless/inner-vm':
+        specifier: workspace:^
+        version: link:../ui-vm
       '@timeless/ui-primitive':
         specifier: workspace:^
         version: link:../ui-primitive
-      '@timeless/ui-vm':
-        specifier: workspace:^
-        version: link:../ui-vm
       tailwindcss:
         specifier: ^3.0.0 || ^4.0.0
         version: 4.2.1
 
   packages/timeless-canvas:
     dependencies:
-      '@timeless/icons':
+      '@timeless/inner-icons':
         specifier: workspace:*
         version: link:../icons
       '@timeless/timeless':
@@ -764,7 +780,7 @@ importers:
 
   packages/timeless-ssr:
     dependencies:
-      '@timeless/icons':
+      '@timeless/inner-icons':
         specifier: workspace:*
         version: link:../icons
       '@timeless/timeless':
@@ -785,37 +801,47 @@ importers:
 
   packages/ui-primitive:
     dependencies:
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:^
         version: link:../kit
+      '@timeless/inner-vm':
+        specifier: workspace:^
+        version: link:../ui-vm
       '@timeless/timeless':
         specifier: workspace:^
         version: link:../timeless
-      '@timeless/ui-vm':
-        specifier: workspace:^
-        version: link:../ui-vm
       tailwindcss:
         specifier: ^3.0.0 || ^4.0.0
         version: 4.2.1
 
   packages/ui-vm:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/reactive':
+      '@timeless/inner-reactive':
         specifier: workspace:*
         version: link:../reactive
-      '@timeless/utils':
+      '@timeless/inner-utils':
         specifier: workspace:*
         version: link:../utils
 
+  packages/unittest:
+    dependencies:
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../ui-vm
+    devDependencies:
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.0(@types/node@25.0.9)(msw@2.12.14(@types/node@25.0.9)(typescript@5.9.3))(vite@8.0.0-beta.16(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(less@4.6.7)(terser@5.46.0)(yaml@2.8.3))
+
   packages/utils:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:*
         version: link:../base
-      '@timeless/types':
+      '@timeless/inner-types':
         specifier: workspace:*
         version: link:../types
       dayjs:
@@ -827,31 +853,31 @@ importers:
 
   packages/vanillakit:
     dependencies:
-      '@timeless/base':
+      '@timeless/inner-base':
         specifier: workspace:^
         version: link:../base
-      '@timeless/icons':
+      '@timeless/inner-icons':
         specifier: workspace:^
         version: link:../icons
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:^
         version: link:../kit
-      '@timeless/reactive':
+      '@timeless/inner-reactive':
         specifier: workspace:^
         version: link:../reactive
+      '@timeless/inner-utils':
+        specifier: workspace:^
+        version: link:../utils
+      '@timeless/inner-vm':
+        specifier: workspace:^
+        version: link:../ui-vm
       '@timeless/timeless':
         specifier: workspace:^
         version: link:../timeless
-      '@timeless/ui-vm':
-        specifier: workspace:^
-        version: link:../ui-vm
-      '@timeless/utils':
-        specifier: workspace:^
-        version: link:../utils
 
   packages/vanillalite:
     dependencies:
-      '@timeless/reactive':
+      '@timeless/inner-reactive':
         specifier: workspace:^
         version: link:../reactive
       '@timeless/timeless':
@@ -869,15 +895,15 @@ importers:
 
   packages/vue:
     dependencies:
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
+      '@timeless/inner-utils':
+        specifier: workspace:*
+        version: link:../utils
       '@timeless/provider-web':
         specifier: workspace:*
         version: link:../provider-web
-      '@timeless/utils':
-        specifier: workspace:*
-        version: link:../utils
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1
@@ -912,21 +938,21 @@ importers:
 
   packages/weui:
     dependencies:
-      '@timeless/icons':
+      '@timeless/inner-icons':
         specifier: workspace:*
         version: link:../icons
-      '@timeless/kit':
+      '@timeless/inner-kit':
         specifier: workspace:*
         version: link:../kit
+      '@timeless/inner-vm':
+        specifier: workspace:*
+        version: link:../ui-vm
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
       '@timeless/ui-primitive':
         specifier: workspace:*
         version: link:../ui-primitive
-      '@timeless/ui-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
     devDependencies:
       less:
         specifier: ^4.6.7

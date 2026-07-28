@@ -9,7 +9,7 @@
  *
  * These types form the foundation of the Timeless component system.
  */
-import { DerivedRef, Ref } from "@timeless/reactive";
+import { DerivedRef, Ref } from "@timeless/inner-reactive";
 
 import { VNodeView } from "@/vnode/view";
 import { MountedEvent } from "@/event";

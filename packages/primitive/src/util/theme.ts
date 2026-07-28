@@ -1,4 +1,4 @@
-import { Ref, isRef } from "@timeless/reactive";
+import { Ref, isRef } from "@timeless/inner-reactive";
 
 let _theme: any = null;
 export function setTheme(t: any) {

@@ -4,7 +4,7 @@ import {
   ViewChildren,
   TimelessElement,
 } from "@timeless/timeless";
-import { VideoPlayerCore } from "@timeless/ui-vm";
+import { VideoPlayerCore } from "@timeless/inner-vm";
 
 type Provider = Partial<{
   provide_ui_video_player: (

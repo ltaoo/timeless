@@ -1,4 +1,4 @@
-import type { Platform } from "@timeless/base";
+import type { Platform } from "@timeless/inner-base";
 
 const noop = () => {};
 

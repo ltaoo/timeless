@@ -1,5 +1,5 @@
 {
-  "name": "@timeless/reactive",
+  "name": "@timeless/inner-reactive",
   "version": "0.29.0",
   "main": "dist/index.js",
   "module": "dist/timeless.reactive.esm.js",
@@ -15,7 +15,7 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/base": "workspace:*"
+    "@timeless/inner-base": "workspace:*"
   },
   "exports": {
     ".": {

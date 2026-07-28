@@ -6,7 +6,7 @@ import {
   SelectCore,
   CheckboxCore,
   ButtonCore,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 /** Component types mapping to Timeless components */
 export type UINodeType =

@@ -1,7 +1,7 @@
 /**
  * @file 一个用于表单中的动态列表组件
  */
-import { base, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/inner-base";
 
 // import { ValueInputInterface } from "./types";
 

@@ -1,5 +1,5 @@
-import { Result } from "@timeless/base";
-import { ChannelCore, onChannelCreated } from "@timeless/kit";
+import { Result } from "@timeless/inner-base";
+import { ChannelCore, onChannelCreated } from "@timeless/inner-kit";
 
 export type VeloInvoke = (
   url: string,

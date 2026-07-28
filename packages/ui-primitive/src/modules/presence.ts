@@ -1,6 +1,6 @@
 import { ref, refobj, computed } from "@timeless/timeless";
 import { View, ViewProps, ViewChildren, Show } from "@timeless/timeless";
-import { PresenceCore } from "@timeless/ui-vm";
+import { PresenceCore } from "@timeless/inner-vm";
 
 export function Presence(
   props: ViewProps & {

@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  DynamicContentCore  } from "@timeless/kit";
+import {  DynamicContentCore  } from "@timeless/inner-kit";
 export declare const DynamicContent: (props: {
     store: DynamicContentCore;
     options: {

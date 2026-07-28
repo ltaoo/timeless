@@ -1,4 +1,4 @@
-import {  MenuCore  } from "@timeless/kit";).ComponentProvideOptions, false, {}, any>;
+import {  MenuCore  } from "@timeless/inner-kit";).ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithSlots<typeof __VLS_component, __VLS_Slots>;
 export default _default;
 type __VLS_WithSlots<T, S> = T & {

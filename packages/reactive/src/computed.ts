@@ -1,4 +1,4 @@
-import { debounce, throttle } from "@timeless/base";
+import { debounce, throttle } from "@timeless/inner-base";
 import { get, release, set } from "./registry";
 import { ref } from "./ref";
 import { refArray } from "./reactive-array";

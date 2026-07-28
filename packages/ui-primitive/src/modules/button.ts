@@ -7,7 +7,7 @@ import {
   Button,
   ButtonProps,
 } from "@timeless/timeless";
-import { ButtonCore } from "@timeless/ui-vm";
+import { ButtonCore } from "@timeless/inner-vm";
 
 export function Root(
   props: ButtonProps & { store: ButtonCore },

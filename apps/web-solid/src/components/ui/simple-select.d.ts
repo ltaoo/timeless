@@ -1,1 +1,1 @@
-import {  SimpleSelectCore  } from "@timeless/kit";).JSX.Element;
+import {  SimpleSelectCore  } from "@timeless/inner-kit";).JSX.Element;

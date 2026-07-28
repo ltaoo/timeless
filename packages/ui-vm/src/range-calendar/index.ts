@@ -1,5 +1,5 @@
-import { base, Handler } from "@timeless/base";
-import { dayjs, padding_zero } from "@timeless/utils";
+import { base, Handler } from "@timeless/inner-base";
+import { dayjs, padding_zero } from "@timeless/inner-utils";
 
 type CalendarWeek = {
   id: number;

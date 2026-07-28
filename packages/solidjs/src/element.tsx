@@ -3,7 +3,7 @@
  */
 import { JSX } from "solid-js";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 function Element<T = unknown>(
   props: {

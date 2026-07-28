@@ -1,7 +1,7 @@
 /**
  * @file 菜单 组件
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 import { PopperCore, Side, Align } from "@/popper/index";
 import { DismissableLayerCore } from "@/dismissable-layer/index";

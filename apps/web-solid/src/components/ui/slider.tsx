@@ -1,1 +1,1 @@
-import {  cn  } from "@timeless/utils";
+import {  cn  } from "@timeless/inner-utils";

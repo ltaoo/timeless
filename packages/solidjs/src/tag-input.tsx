@@ -8,7 +8,7 @@ import * as PortalPrimitive from "@/packages/ui/portal";
 
 import { base, Handler } from "@/domains/base";
 import { BizError } from "@/domains/error";
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 import type { TagInputCore } from "@timeless/ui/form/tag-input";
 import type { DialogCore } from "@timeless/ui/dialog";
 

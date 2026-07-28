@@ -9,7 +9,7 @@ import { isProd } from "../../vite.config.base";
 const name = "timeless.weui";
 const externals = [
   "@timeless/timeless",
-  "@timeless/ui-vm",
+  "@timeless/inner-vm",
   "@timeless/ui-primitive",
 ] as const;
 
@@ -22,12 +22,12 @@ function isExternal(id: string) {
 function rewriteDtsImports() {
   const distDir = resolve(__dirname, "dist");
   const replacements: Array<[string, string]> = [
-    ['"@timeless/reactive"', '"@timeless/timeless"'],
-    ["'@timeless/reactive'", "'@timeless/timeless'"],
-    ['"@timeless/base"', '"@timeless/timeless"'],
-    ["'@timeless/base'", "'@timeless/timeless'"],
-    ['"@timeless/kit"', '"@timeless/timeless"'],
-    ["'@timeless/kit'", "'@timeless/timeless'"],
+    ['"@timeless/inner-reactive"', '"@timeless/timeless"'],
+    ["'@timeless/inner-reactive'", "'@timeless/timeless'"],
+    ['"@timeless/inner-base"', '"@timeless/timeless"'],
+    ["'@timeless/inner-base'", "'@timeless/timeless'"],
+    ['"@timeless/inner-kit"', '"@timeless/timeless"'],
+    ["'@timeless/inner-kit'", "'@timeless/timeless'"],
   ];
 
   function walk(dir: string) {
@@ -100,7 +100,7 @@ export default defineConfig({
         extend: true,
         globals: {
           "@timeless/timeless": "Timeless",
-          "@timeless/ui-vm": "Timeless.ui",
+          "@timeless/inner-vm": "Timeless.ui",
           "@timeless/ui-primitive": "Timeless",
         },
         assetFileNames: (assetInfo) => {

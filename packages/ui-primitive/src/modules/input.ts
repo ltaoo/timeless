@@ -9,7 +9,7 @@ import {
   styleNames,
   ListenerManager,
 } from "@timeless/timeless";
-import { InputCore } from "@timeless/ui-vm";
+import { InputCore } from "@timeless/inner-vm";
 
 type Provider = {
   provide_ui_input: (store: InputCore<any>, $input: any) => void;

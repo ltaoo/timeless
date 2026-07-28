@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  FocusScopeCore  } from "@timeless/kit";
+import {  FocusScopeCore  } from "@timeless/inner-kit";
 declare const Root: (props: {
     store: FocusScopeCore;
     children: JSX.Element;

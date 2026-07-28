@@ -1,6 +1,6 @@
 import { ref, computed, Ref, isRef } from "@timeless/timeless";
 import { View, ViewProps, ViewChildren, isStyleRef } from "@timeless/timeless";
-import { ProgressCore } from "@timeless/ui-vm";
+import { ProgressCore } from "@timeless/inner-vm";
 
 export function Root(
   props: ViewProps & {

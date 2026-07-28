@@ -7,7 +7,7 @@ import {
   ListenerManager,
   VNodeEvent,
 } from "@timeless/timeless";
-import { NumberInputCore } from "@timeless/ui-vm";
+import { NumberInputCore } from "@timeless/inner-vm";
 
 export function Root(
   props: ViewProps & { store?: NumberInputCore },

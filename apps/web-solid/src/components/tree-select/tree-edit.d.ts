@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  TreeSelectModel, TreeSelectNodeModel  } from "@timeless/kit";
+import {  TreeSelectModel, TreeSelectNodeModel  } from "@timeless/inner-kit";
 export declare function TreeEdit<T extends {
     id: number | string;
     label: string;

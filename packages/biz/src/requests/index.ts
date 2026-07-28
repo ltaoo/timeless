@@ -1,5 +1,5 @@
-import { BizError, Result } from "@timeless/base";
-import { ListCore, request_factory } from "@timeless/kit";
+import { BizError, Result } from "@timeless/inner-base";
+import { ListCore, request_factory } from "@timeless/inner-kit";
 
 export const request = request_factory({
   hostnames: {},

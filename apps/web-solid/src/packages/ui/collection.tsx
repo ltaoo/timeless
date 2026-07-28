@@ -1,7 +1,7 @@
 import { onCleanup } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import {  CollectionCore  } from "@timeless/kit";
+import {  CollectionCore  } from "@timeless/inner-kit";
 
 const CollectionProvider = (props: { store: CollectionCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;

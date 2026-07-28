@@ -3,7 +3,7 @@ import { createSignal, Show } from "solid-js";
 
 import { useViewModelStore } from "~/hooks";
 
-import {  SingleFieldCore  } from "@timeless/kit";>{props.children}</div>
+import {  SingleFieldCore  } from "@timeless/inner-kit";>{props.children}</div>
           </div>
         </div>
       </div>

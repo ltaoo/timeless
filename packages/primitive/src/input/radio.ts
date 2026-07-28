@@ -1,4 +1,4 @@
-import { DerivedRef, Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/inner-reactive";
 
 import { ViewProps } from "@/content/view";
 import { Box, BoxProps } from "@/content/box";

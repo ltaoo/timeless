@@ -5,14 +5,14 @@ import {
   // @ts-ignore
 } from "qiniu-js";
 // import { HttpProtocol, LogLevel } from "qiniu-js/output/@internal";
-import { Result, base, Handler, BizError } from "@timeless/base";
+import { Result, base, Handler, BizError } from "@timeless/inner-base";
 import {
   HttpClientCore,
   StorageCore,
   RequestCore,
   request_factory,
-} from "@timeless/kit";
-import { random_key } from "@timeless/utils";
+} from "@timeless/inner-kit";
+import { random_key } from "@timeless/inner-utils";
 
 import { noop, checkFile } from "./utils";
 

@@ -9,7 +9,7 @@ import {
   ListenerManager,
   createContext,
 } from "@timeless/timeless";
-import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/ui-vm";
+import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/inner-vm";
 
 import { Arrow as NativeArrow } from "./arrow";
 import * as PopperPrimitive from "./popper";

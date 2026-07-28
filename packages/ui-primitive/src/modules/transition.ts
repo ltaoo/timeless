@@ -1,6 +1,6 @@
 import { refobj, computed } from "@timeless/timeless";
 import { Show, View, ViewProps, ViewChildren } from "@timeless/timeless";
-import { PresenceCore } from "@timeless/ui-vm";
+import { PresenceCore } from "@timeless/inner-vm";
 
 export function Transition(
   props: ViewProps & {

@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  SelectCore  } from "@timeless/kit";
+import {  SelectCore  } from "@timeless/inner-kit";
 declare const Root: (props: {
     store: SelectCore<any>;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

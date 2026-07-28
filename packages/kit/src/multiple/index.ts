@@ -1,7 +1,7 @@
 /**
  * @file 列表中多选
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 enum Events {
   Change,

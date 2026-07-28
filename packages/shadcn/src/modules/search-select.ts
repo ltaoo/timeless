@@ -7,7 +7,7 @@ import {
   refobj,
 } from "@timeless/timeless";
 import { SelectPrimitive } from "@timeless/ui-primitive";
-import { SelectCore } from "@timeless/ui-vm";
+import { SelectCore } from "@timeless/inner-vm";
 
 export function SearchSelect<T>(
   props: ViewProps & {

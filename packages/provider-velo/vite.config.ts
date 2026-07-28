@@ -13,8 +13,8 @@ export default createLibConfig({
     ...Object.keys(pkg.peerDependencies || {}),
   ],
   globals: {
-    "@timeless/base": "Timeless",
-    "@timeless/kit": "Timeless",
+    "@timeless/inner-base": "Timeless",
+    "@timeless/inner-kit": "Timeless",
   },
   formats: ["es", "cjs", "umd"],
   minify: true,

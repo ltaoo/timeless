@@ -7,7 +7,7 @@ import {
   Show,
   Text,
 } from "@timeless/timeless";
-import { StepCore } from "@timeless/ui-vm";
+import { StepCore } from "@timeless/inner-vm";
 
 export type StepItem = {
   title: string;

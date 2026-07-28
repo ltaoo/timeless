@@ -9,7 +9,7 @@ import PageFooter from "@/components/footer/index.vue";
 import { ListCore } from "@/domains/list";
 import { getPageSizeByDeviceSize } from "@/domains/list/utils";
 import { RequestCore } from "@/domains/request";
-import { ScrollViewCore, ImageInListCore } from "@timeless/kit";
+import { ScrollViewCore, ImageInListCore } from "@timeless/inner-kit";
 import { MediaTypes, MediaOriginCountry } from "@/constants/index";
 
 const { app, storage } = defineProps<ViewComponentProps>();

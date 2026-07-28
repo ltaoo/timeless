@@ -4,7 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "@timeless/reactive": resolve(__dirname, "../reactive/src/index.ts"),
+      "@timeless/inner-reactive": resolve(__dirname, "../reactive/src/index.ts"),
       "@": resolve(__dirname, "src"),
     },
   },

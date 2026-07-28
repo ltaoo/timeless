@@ -9,7 +9,7 @@ import {
   Label as NativeLabel,
   ListenerManager,
 } from "@timeless/timeless";
-import { SingleFieldCore } from "@timeless/ui-vm";
+import { SingleFieldCore } from "@timeless/inner-vm";
 
 import { Separator as BaseSeparator } from "./separator";
 

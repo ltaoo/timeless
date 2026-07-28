@@ -1,7 +1,7 @@
 import { For, type ViewProps, type TimelessElement } from "@timeless/timeless";
 import { classNames, refarr } from "@timeless/timeless";
 import { WaterfallPrimitive } from "@timeless/ui-primitive";
-import type { WaterfallCellModel, WaterfallModel } from "@timeless/ui-vm";
+import type { WaterfallCellModel, WaterfallModel } from "@timeless/inner-vm";
 
 export function Waterfall<T extends Record<string, unknown>>(
   props: ViewProps & {

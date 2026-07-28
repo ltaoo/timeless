@@ -5,7 +5,7 @@ import {
   Button,
   ButtonProps,
 } from "@timeless/timeless";
-import { TabHeaderCore } from "@timeless/ui-vm";
+import { TabHeaderCore } from "@timeless/inner-vm";
 
 export function Root(
   props: ViewProps & { store: TabHeaderCore<any> },

@@ -1,5 +1,5 @@
 import { Result } from "@timeless/timeless";
-import { ChannelCore, onChannelCreated } from "@timeless/kit";
+import { ChannelCore, onChannelCreated } from "@timeless/inner-kit";
 
 export type WebChannelProviderOptions = {
   autoConnect?: boolean;

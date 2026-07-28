@@ -1,5 +1,5 @@
 import { JSX } from "solid-js";
-import {  InputCore  } from "@timeless/kit";
+import {  InputCore  } from "@timeless/inner-kit";
 export declare function TagInput(props: {
     store: InputCore<any>;
     prefix?: JSX.Element;

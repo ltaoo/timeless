@@ -7,15 +7,15 @@ export default defineConfig({
   resolve: {
     alias: {
       // Use built packages for SSR
-      "@timeless/reactive": path.resolve(
+      "@timeless/inner-reactive": path.resolve(
         __dirname,
         "../../packages/reactive/dist/timeless.reactive.esm.js",
       ),
-      "@timeless/ui-vm": path.resolve(
+      "@timeless/inner-vm": path.resolve(
         __dirname,
         "../../packages/ui-vm/dist/index.esm.js",
       ),
-      "@timeless/icons": path.resolve(
+      "@timeless/inner-icons": path.resolve(
         __dirname,
         "../../packages/icons/dist/index.js",
       ),
@@ -98,9 +98,9 @@ export default defineConfig({
   ssr: {
     noExternal: [
       "@timeless/shadcn",
-      "@timeless/reactive",
-      "@timeless/ui-vm",
-      "@timeless/icons",
+      "@timeless/inner-reactive",
+      "@timeless/inner-vm",
+      "@timeless/inner-icons",
       "@timeless/timeless",
       "@timeless/timeless-dom",
     ],

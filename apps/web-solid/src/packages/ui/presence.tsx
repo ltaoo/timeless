@@ -3,7 +3,7 @@
  */
 import { JSX, createSignal } from "solid-js";
 
-import {  PresenceCore  } from "@timeless/kit";}
+import {  PresenceCore  } from "@timeless/inner-kit";}
         onAnimationEnd={() => {
           props.store.unmount();
         }}

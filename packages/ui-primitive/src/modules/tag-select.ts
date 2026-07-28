@@ -11,7 +11,7 @@ import {
   isStyleRef,
   classNames,
 } from "@timeless/timeless";
-import { TagSelectCore } from "@timeless/ui-vm";
+import { TagSelectCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";
 

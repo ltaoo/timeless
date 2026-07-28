@@ -12,7 +12,7 @@ import { Show } from "~/packages/ui/show";
 import { RouteChildren } from "~/components/route-children";
 import { KeepAliveRouteView } from "~/components/ui";
 
-import {  base, Handler  } from "@timeless/kit";]: true,
+import {  base, Handler  } from "@timeless/inner-kit";]: true,
         }}
         onClick={() => {
           if (!props.url) {

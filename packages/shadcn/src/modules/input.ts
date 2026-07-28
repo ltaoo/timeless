@@ -7,7 +7,7 @@ import {
 } from "@timeless/timeless";
 import { Icon, Show, ViewProps } from "@timeless/timeless";
 import { InputPrimitive } from "@timeless/ui-primitive";
-import { InputCore } from "@timeless/ui-vm";
+import { InputCore } from "@timeless/inner-vm";
 
 export function Input(
   props: ViewProps & {

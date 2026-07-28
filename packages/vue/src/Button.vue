@@ -5,7 +5,7 @@
 import { ref, toRefs } from "vue";
 import { VariantProps, cva } from "class-variance-authority";
 
-import { ButtonCore } from "@timeless/kit";
+import { ButtonCore } from "@timeless/inner-kit";
 import { cn } from "@/utils";
 
 const props = defineProps<{

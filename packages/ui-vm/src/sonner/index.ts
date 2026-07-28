@@ -2,9 +2,9 @@
  * @file SonnerCore - Toast 通知系统核心类
  * 基于 sonner 的设计，抽象 toast 管理逻辑
  */
-// import { BaseDomain, Handler } from "@timeless/base";
+// import { BaseDomain, Handler } from "@timeless/inner-base";
 
-import { base, Handler } from "@timeless/base";
+import { base, Handler } from "@timeless/inner-base";
 
 export type ToastTypes =
   | "normal"

@@ -13,7 +13,7 @@
     "@timeless/timeless-dom": "workspace:^",
     "@timeless/cli": "workspace:^",
     "@timeless/shadcn": "workspace:^",
-    "@timeless/ui-vm": "workspace:^"
+    "@timeless/inner-vm": "workspace:^"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",

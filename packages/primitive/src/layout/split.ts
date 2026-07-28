@@ -2,7 +2,7 @@ import { ViewProps } from "@/content/view";
 import { ViewChildren, isElement, resolve_children } from "@/content/type";
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
-import { isRef, type Ref } from "@timeless/reactive";
+import { isRef, type Ref } from "@timeless/inner-reactive";
 import { Text } from "@/content/text";
 import { getPlatform } from "@/platform";
 

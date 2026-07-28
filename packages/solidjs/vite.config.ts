@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@/kit': '@timeless/kit',
+      '@/kit': '@timeless/inner-kit',
       '@/biz': '@timeless/biz',
       '@': resolve(__dirname, 'src')
     }

@@ -1,4 +1,4 @@
-import { BaseDomain, Handler, Platform } from "@timeless/base";
+import { BaseDomain, Handler, Platform } from "@timeless/inner-base";
 
 import { ScrollViewCore } from "@/scroll-view/index";
 import { Logger } from "@/util";

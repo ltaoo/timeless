@@ -1,8 +1,8 @@
 /**
  * @file 分页领域
  */
-import { Result, BaseDomain, Handler } from "@timeless/base";
-import { debounce } from "@timeless/utils";
+import { Result, BaseDomain, Handler } from "@timeless/inner-base";
+import { debounce } from "@timeless/inner-utils";
 
 import { RequestCore } from "@/request/index";
 import { RequestPayload } from "@/request/utils";

@@ -1,5 +1,5 @@
 {
-  "name": "@timeless/utils",
+  "name": "@timeless/inner-utils",
   "version": "0.29.0",
   "description": "Utils for Timeless",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
   "dependencies": {
     "dayjs": "^1.11.19",
     "tailwind-merge": "^3.4.0",
-    "@timeless/base": "workspace:*",
-    "@timeless/types": "workspace:*"
+    "@timeless/inner-base": "workspace:*",
+    "@timeless/inner-types": "workspace:*"
   }
 }

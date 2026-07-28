@@ -5,7 +5,7 @@ import { useViewModelStore } from "~/hooks";
 import { Flex } from "~/components/flex/flex";
 
 import { MultipleImageUploadModel } from "~/biz/multiple_image_upload";
-import {  ImageUploadCore  } from "@timeless/kit";>
+import {  ImageUploadCore  } from "@timeless/inner-kit";>
       <For each={state().fields}>
         {(v) => {
           const field = vm.getFieldWithId(v.id);

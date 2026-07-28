@@ -3,7 +3,7 @@
  */
 import { createSignal, JSX } from "solid-js";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 import { Presence } from "./presence";
 
 import { Portal as PortalPrimitive } from "./portal";

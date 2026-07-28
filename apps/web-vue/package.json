@@ -15,8 +15,8 @@
     "class-variance-authority": "^0.7.0",
     "hotkeys-js": "^3.13.7",
     "@timeless/biz": "workspace:*",
-    "@timeless/kit": "workspace:*",
-    "@timeless/utils": "workspace:*",
+    "@timeless/inner-kit": "workspace:*",
+    "@timeless/inner-utils": "workspace:*",
     "@timeless/provider-web": "workspace:*",
     "@timeless/vue": "workspace:*"
   },

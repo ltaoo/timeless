@@ -14,7 +14,7 @@
     "@timeless/timeless-native": "workspace:^"
   },
   "devDependencies": {
-    "@timeless/vite-plugin": "workspace:^",
+    "@timeless/inner-vite-plugin": "workspace:^",
     "vite": "^8.0.0-beta.16"
   }
 }

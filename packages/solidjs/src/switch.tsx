@@ -1,6 +1,6 @@
 import { JSX } from "solid-js/jsx-runtime";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 import { useViewModelStore } from "@/hooks";
 
 export function Switcher(props: { store: ui.CheckboxCore; texts: string[] } & JSX.HTMLAttributes<HTMLDivElement>) {

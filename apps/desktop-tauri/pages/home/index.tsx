@@ -9,7 +9,7 @@ import { ViewComponent, ViewComponentProps } from "~/store/types";
 import { Button } from "~/components/ui/button";
 import { DropArea } from "~/components/ui/drag-zone";
 
-import {  base, Handler  } from "@timeless/kit";>
+import {  base, Handler  } from "@timeless/inner-kit";>
                   <For each={msg.paths}>
                     {(path) => {
                       return <div>{path}</div>;

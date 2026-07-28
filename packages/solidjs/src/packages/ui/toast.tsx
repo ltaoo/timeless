@@ -5,7 +5,7 @@ import { createSignal, JSX } from "solid-js";
 
 import { Portal as PortalPrimitive } from "@/packages/ui/portal";
 import { Presence } from "./presence";
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 const Root = (props: { store: ui.ToastCore } & JSX.HTMLAttributes<HTMLElement>) => {
   return props.children;

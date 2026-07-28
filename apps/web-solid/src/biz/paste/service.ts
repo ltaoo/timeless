@@ -1,4 +1,4 @@
-import { RequestPayload, Result } from "@timeless/kit";
+import { RequestPayload, Result } from "@timeless/inner-kit";
 
 export function fetchPasteEventList(params?: any): RequestPayload<any> {
   return {

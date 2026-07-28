@@ -9,7 +9,7 @@ import { Sheet } from "~/components/ui/sheet";
 import { Flex } from "~/components/flex/flex";
 import { Empty } from "~/components/empty";
 
-import {  base, Handler  } from "@timeless/kit";></ScrollView>
+import {  base, Handler  } from "@timeless/inner-kit";></ScrollView>
       <DropdownMenu store={vm.ui.$menu} />
     </>
   );

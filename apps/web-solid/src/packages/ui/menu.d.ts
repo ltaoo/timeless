@@ -2,7 +2,7 @@
  * @file 菜单 组件
  */
 import { JSX } from "solid-js";
-import {  MenuCore  } from "@timeless/kit";
+import {  MenuCore  } from "@timeless/inner-kit";
 declare const Root: (props: {
     store: MenuCore;
 } & JSX.HTMLAttributes<HTMLElement>) => JSX.Element;

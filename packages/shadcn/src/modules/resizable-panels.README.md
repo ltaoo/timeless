@@ -31,7 +31,7 @@ npm install @timeless/shadcn @timeless/ui
 ### 水平布局
 
 ```typescript
-import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui-vm";
+import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/inner-vm";
 import {
   ResizablePanels,
   ResizablePanel,

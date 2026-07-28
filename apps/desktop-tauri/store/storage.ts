@@ -1,4 +1,4 @@
-import {  StorageCore  } from "@timeless/kit";
+import {  StorageCore  } from "@timeless/inner-kit";
 const e = globalThis.localStorage.getItem(key);
 export const storage = new StorageCore<typeof DEFAULT_CACHE_VALUES>({
   key,

@@ -1,4 +1,4 @@
-import { Result } from "@timeless/base";
+import { Result } from "@timeless/inner-base";
 
 /** 解析一段 json 字符串 */
 export function parseJSONStr<T extends any>(json: string) {

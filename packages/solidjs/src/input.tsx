@@ -4,7 +4,7 @@ import { Loader } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 import { Input as InputPrimitive } from "@/packages/ui/input";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 const Input = (props: { store: ui.InputCore<any>; prefix?: JSX.Element; class?: string }) => {
   // const { store, prefix } = props;

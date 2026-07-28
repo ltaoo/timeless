@@ -11,7 +11,7 @@ import {
 } from "@/biz/media/services";
 import { ListCore } from "@/domains/list/index";
 import { RequestCore } from "@/domains/request/index";
-import { DialogCore, ImageInListCore, NodeInListCore, PopoverCore, ScrollViewCore, RefCore } from "@timeless/kit";
+import { DialogCore, ImageInListCore, NodeInListCore, PopoverCore, ScrollViewCore, RefCore } from "@timeless/inner-kit";
 import { MediaTypes } from "@/constants/index";
 
 const { app, client, history, store } = defineProps<

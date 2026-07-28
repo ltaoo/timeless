@@ -18,6 +18,12 @@ fi
 
 COUNT=0
 
+# Update root package.json
+ROOT_OLD=$(grep -o '"version": *"[^"]*"' "package.json" | head -1 | sed 's/"version": *"//;s/"//')
+sed -i '' "s/\"version\": *\"[^\"]*\"/\"version\": \"$VERSION\"/" "package.json"
+echo "  root: $ROOT_OLD -> $VERSION"
+COUNT=$((COUNT + 1))
+
 for pkg in packages/*/package.json; do
   NAME=$(grep -o '"name": *"[^"]*"' "$pkg" | head -1 | sed 's/"name": *"//;s/"//')
   OLD=$(grep -o '"version": *"[^"]*"' "$pkg" | head -1 | sed 's/"version": *"//;s/"//')

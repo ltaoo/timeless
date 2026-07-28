@@ -8,6 +8,6 @@
   },
   "devDependencies": {
     "@timeless/cli": "workspace:*",
-    "@timeless/types": "workspace:*"
+    "@timeless/inner-types": "workspace:*"
   }
 }

@@ -4,7 +4,7 @@ import {
   isStyleRef,
   RawViewStyleProperties,
 } from "@/style/index";
-import { isRef } from "@timeless/reactive";
+import { isRef } from "@timeless/inner-reactive";
 import { ListenerManager } from "@/util/listener";
 import { MountedEvent } from "@/event";
 

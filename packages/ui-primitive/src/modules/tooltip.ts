@@ -12,7 +12,7 @@ import {
   Fragment,
   Portal as NativePortal,
 } from "@timeless/timeless";
-import { TooltipCore, Align, Side } from "@timeless/ui-vm";
+import { TooltipCore, Align, Side } from "@timeless/inner-vm";
 
 // import { getHost } from "@/host";
 

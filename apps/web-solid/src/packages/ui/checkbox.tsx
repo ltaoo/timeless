@@ -2,7 +2,7 @@
  * Checkbox
  * -----------------------------------------------------------------------------------------------*/
 
-import {  CheckboxCore  } from "@timeless/kit";
+import {  CheckboxCore  } from "@timeless/inner-kit";
 }
 
 export { Root, Indicator };

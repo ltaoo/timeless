@@ -1,7 +1,7 @@
 /**
  * @file 轮询器
  */
-import { base, Handler, BizError } from "@timeless/base";
+import { base, Handler, BizError } from "@timeless/inner-base";
 
 import { RequestCore } from "./index";
 

@@ -1,4 +1,4 @@
-import { NodeCore } from "@timeless/ui-vm";
+import { NodeCore } from "@timeless/inner-vm";
 
 export function connect(store: NodeCore, $node: HTMLElement) {
   const io = new IntersectionObserver(

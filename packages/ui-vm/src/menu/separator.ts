@@ -1,7 +1,7 @@
 /**
  * @file 菜单分割线
  */
-import { BaseDomain } from "@timeless/base";
+import { BaseDomain } from "@timeless/inner-base";
 
 type TheTypesOfEvents = {};
 

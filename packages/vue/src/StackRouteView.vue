@@ -4,7 +4,7 @@
  */
 import { ref, onMounted } from "vue";
 
-import { RouteViewCore } from "@timeless/kit";
+import { RouteViewCore } from "@timeless/inner-kit";
 import { cn } from "@/utils";
 
 const { store, className, index } = defineProps<{

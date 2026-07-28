@@ -1,7 +1,7 @@
 /**
  * @file 多字段 Input
  */
-import { base, Handler, Result } from "@timeless/base";
+import { base, Handler, Result } from "@timeless/inner-base";
 
 import { FormFieldCore } from "./field";
 import { ValueInputInterface } from "./types";

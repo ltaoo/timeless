@@ -1,7 +1,7 @@
 // @ts-ignore
 import { invoke } from "@tauri-apps/api/tauri";
 
-import { HttpClientCore } from "@timeless/kit";
+import { HttpClientCore } from "@timeless/inner-kit";
 
 export function connect(store: HttpClientCore) {
   store.fetch = async (options) => {

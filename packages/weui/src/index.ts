@@ -1,5 +1,5 @@
 import { registerIcons } from "@timeless/timeless";
-import { iconRegistry } from "@timeless/icons";
+import { iconRegistry } from "@timeless/inner-icons";
 
 import { Button } from "./modules/button";
 import { Input } from "./modules/input";
@@ -35,7 +35,7 @@ registerIcons(iconRegistry);
 export const TimelessWeUIVersion = __Version;
 
 export * from "@timeless/ui-primitive";
-export * as ui from "@timeless/ui-vm";
+export * as ui from "@timeless/inner-vm";
 
 export {
   Button,

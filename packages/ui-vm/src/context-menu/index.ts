@@ -1,4 +1,4 @@
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 import { MenuCore } from "@/menu/index";
 import { MenuItemCore } from "@/menu/item";

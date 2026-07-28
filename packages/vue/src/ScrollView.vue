@@ -4,7 +4,7 @@
  */
 import { ref, onMounted } from "vue";
 
-import { ScrollViewCore } from "@timeless/kit";
+import { ScrollViewCore } from "@timeless/inner-kit";
 import { cn } from "@/utils";
 import { provide_ui_scroll_view_scroll } from "@timeless/provider-web";
 

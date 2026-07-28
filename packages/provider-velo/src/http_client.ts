@@ -1,5 +1,5 @@
-import { Result } from "@timeless/base";
-import { HttpClientCore } from "@timeless/kit";
+import { Result } from "@timeless/inner-base";
+import { HttpClientCore } from "@timeless/inner-kit";
 
 import type { VeloInvoke, VeloRuntime } from "./channel";
 

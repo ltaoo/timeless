@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { refarr } from "@timeless/reactive";
+import { refarr } from "@timeless/inner-reactive";
 
 import { ListView } from "@/content/list-view";
 import { View } from "@/content/view";

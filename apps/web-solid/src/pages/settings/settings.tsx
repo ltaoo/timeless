@@ -10,7 +10,7 @@ import { Button, Input, Textarea } from "~/components/ui";
 import { FieldObjV2 } from "~/components/fieldv2/obj";
 import { FieldV2 } from "~/components/fieldv2/field";
 
-import {  base, Handler  } from "@timeless/kit";>
+import {  base, Handler  } from "@timeless/inner-kit";>
           <Button store={vm.ui.$btn_submit}>提交</Button>
         </div>
       </div>

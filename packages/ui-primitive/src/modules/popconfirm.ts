@@ -8,7 +8,7 @@ import {
   ButtonProps,
   Portal as NativePortal,
 } from "@timeless/timeless";
-import { PopconfirmCore } from "@timeless/ui-vm";
+import { PopconfirmCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";

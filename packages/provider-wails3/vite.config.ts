@@ -13,10 +13,10 @@ export default createLibConfig({
     ...Object.keys(pkg.peerDependencies || {}),
   ],
   globals: {
-    "@timeless/reactive": "Timeless.reactive",
+    "@timeless/inner-reactive": "Timeless.reactive",
     "@timeless/timeless": "Timeless",
-    "@timeless/kit": "Timeless",
-    "@timeless/ui-vm": "Timeless.ui",
+    "@timeless/inner-kit": "Timeless",
+    "@timeless/inner-vm": "Timeless.ui",
   },
   formats: ["es", "cjs", "umd"],
   minify: true,

@@ -1,7 +1,7 @@
 /**
  * @file 确认气泡
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 import { PresenceCore } from "@/presence/index";
 import { PopperCore, Align, Side } from "@/popper/index";

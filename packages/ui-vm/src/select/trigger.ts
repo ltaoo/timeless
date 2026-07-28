@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 enum Events {}
 type TheTypesOfEvents = {};

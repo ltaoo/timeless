@@ -9,7 +9,7 @@
  * <Icon name="home" size={24} color="blue" />
  * ```
  */
-import { isRef } from "@timeless/reactive";
+import { isRef } from "@timeless/inner-reactive";
 
 import { MountedEvent } from "@/event";
 import { ListenerManager } from "@/util/listener";

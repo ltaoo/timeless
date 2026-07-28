@@ -3,7 +3,7 @@ import {
   BizError as _BizError,
   base as _base,
   BaseDomain as _BaseDomain,
-} from "@timeless/base";
+} from "@timeless/inner-base";
 
 console.log("ui.version" + __Version);
 

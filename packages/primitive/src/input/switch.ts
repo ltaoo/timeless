@@ -1,4 +1,4 @@
-import { DerivedRef, Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/inner-reactive";
 
 import { MountedEvent } from "@/event";
 import { ViewProps } from "@/content/view";

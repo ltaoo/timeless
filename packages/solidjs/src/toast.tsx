@@ -5,7 +5,7 @@ import { For, createSignal, JSX, Show } from "solid-js";
 import { Loader } from "lucide-solid";
 
 import * as ToastPrimitive from "@/packages/ui/toast";
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 export const Toast = (props: { store: ui.ToastCore }) => {
   const [state, setState] = createSignal(props.store.state);

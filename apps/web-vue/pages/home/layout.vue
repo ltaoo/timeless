@@ -11,7 +11,7 @@ import PageFooter from "@/components/footer/index.vue";
 import HistoryPanel from "@/components/history-panel/index.vue";
 import { ListCore } from "@/domains/list/index";
 import { RequestCore } from "@/domains/request/index";
-import { ButtonCore, InputCore, PopoverCore, ScrollViewCore, ImageInListCore } from "@timeless/kit";
+import { ButtonCore, InputCore, PopoverCore, ScrollViewCore, ImageInListCore } from "@timeless/inner-kit";
 import { MovieGenresOptions, MovieOriginCountryOptions, RecentlyYearOptions, MediaTypes } from "@/constants/index";
 
 const { app, view, client, pages, history } = defineProps<ViewComponentProps>();

@@ -1,1 +1,1 @@
-import {  TreeSelectModel, TreeSelectNodeModel  } from "@timeless/kit";).JSX.Element;
+import {  TreeSelectModel, TreeSelectNodeModel  } from "@timeless/inner-kit";).JSX.Element;

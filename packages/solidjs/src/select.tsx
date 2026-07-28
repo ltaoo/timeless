@@ -9,7 +9,7 @@ import { Check, ChevronDown } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 import * as SelectPrimitive from "@/packages/ui/select";
 import * as PopperPrimitive from "@/packages/ui/popper";
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 import { Presence } from "./presence";
 

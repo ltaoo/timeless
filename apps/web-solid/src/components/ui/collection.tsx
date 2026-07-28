@@ -1,4 +1,4 @@
-import {  CollectionCore  } from "@timeless/kit";
+import {  CollectionCore  } from "@timeless/inner-kit";
 
 const CollectionContext = createContext<CollectionCore>();
 const CollectionProvider = (props: { store: CollectionCore; children: JSX.Element }) => {

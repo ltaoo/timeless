@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-import { ToastCore } from "@timeless/kit";
+import { ToastCore } from "@timeless/inner-kit";
 import { cn } from "@timeless/vue";
 
 import { PageKeys } from "./store/routes";

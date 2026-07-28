@@ -1,4 +1,4 @@
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 import type { FlowNodeModel } from "./node";
 import type { FlowEdgeModel } from "./edge";

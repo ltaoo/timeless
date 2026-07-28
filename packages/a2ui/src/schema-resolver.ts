@@ -5,7 +5,7 @@ import {
   CheckboxCore,
   ButtonCore,
   SingleFieldCore,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 import { UINode, FieldProps, ResolvedNode } from "./types";
 

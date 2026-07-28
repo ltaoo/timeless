@@ -9,7 +9,7 @@ import { useViewModelStore } from "@/hooks";
 import * as DialogPrimitive from "@/packages/ui/dialog";
 import { Show } from "@/packages/ui/show";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 export function Dialog(props: { store: ui.DialogCore; app: ViewComponentProps["app"] } & JSX.HTMLAttributes<HTMLElement>) {
   const [state, vm] = useViewModelStore(props.store);

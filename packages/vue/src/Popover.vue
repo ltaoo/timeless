@@ -7,7 +7,7 @@ import PopoverPrimitiveTrigger from "~/packages/ui/popover/trigger.vue";
 import PopoverPrimitivePortal from "~/packages/ui/popover/portal.vue";
 import PopoverPrimitiveContent from "~/packages/ui/popover/content.vue";
 import PopoverPrimitiveClose from "~/packages/ui/popover/close.vue";
-import { PopoverCore } from "@timeless/kit";
+import { PopoverCore } from "@timeless/inner-kit";
 import { cn } from "@/utils";
 
 const { store, className } = defineProps<{ store: PopoverCore; className: string }>();

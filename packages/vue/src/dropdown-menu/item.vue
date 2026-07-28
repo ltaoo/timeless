@@ -3,9 +3,9 @@ import {  ref } from "vue";
 
 import { ChevronRight } from "lucide-vue-next";
 
-import { DropdownMenuCore } from "@timeless/kit";
-import { MenuItemCore } from "@timeless/kit";
-import { MenuCore } from "@timeless/kit";
+import { DropdownMenuCore } from "@timeless/inner-kit";
+import { MenuItemCore } from "@timeless/inner-kit";
+import { MenuCore } from "@timeless/inner-kit";
 import DropdownMenuPrimitiveItem from "@/packages/ui/dropdown-menu/item.vue";
 import DropdownMenuPrimitiveSub from "@/packages/ui/dropdown-menu/sub.vue";
 import DropdownMenuPrimitiveSubTrigger from "@/packages/ui/dropdown-menu/sub-trigger.vue";

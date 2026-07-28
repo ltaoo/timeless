@@ -4,7 +4,7 @@ import { PageView } from "~/components/page-view";
 import { Sheet } from "~/components/ui/sheet";
 import { Button, Input } from "~/components/ui";
 
-import {  base, Handler  } from "@timeless/kit";,
+import {  base, Handler  } from "@timeless/inner-kit";,
         age: 30,
         gender: 1,
       });

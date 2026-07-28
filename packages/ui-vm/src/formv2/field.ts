@@ -1,5 +1,5 @@
-import { base, Handler, Result, BizError } from "@timeless/base";
-import { remove_arr_item } from "@timeless/utils";
+import { base, Handler, Result, BizError } from "@timeless/inner-base";
+import { remove_arr_item } from "@timeless/inner-utils";
 
 import { FormInputInterface } from "./types";
 

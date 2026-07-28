@@ -5,7 +5,7 @@ import { JSX, Show, createSignal } from "solid-js";
 
 import { useViewModelStore } from "@/hooks";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 export const Presence = (
   props: { store: ui.PresenceCore; animation?: { in: string; out: string } } & JSX.HTMLAttributes<HTMLElement>

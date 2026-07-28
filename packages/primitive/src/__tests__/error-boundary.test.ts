@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ref } from "@timeless/reactive";
+import { ref } from "@timeless/inner-reactive";
 
 import { ErrorBoundary } from "@/reactive/error-boundary";
 import { Show } from "@/reactive/show";

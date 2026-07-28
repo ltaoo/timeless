@@ -1,5 +1,5 @@
-import { base, Handler } from "@timeless/base";
-import { dayjs } from "@timeless/utils";
+import { base, Handler } from "@timeless/inner-base";
+import { dayjs } from "@timeless/inner-utils";
 
 import { CalendarCore } from "@/calendar/index";
 import { ButtonCore } from "@/button/index";

@@ -11,7 +11,7 @@ import {
   TimelessElement,
   View,
 } from "@timeless/timeless";
-import { ToasterModel, ToastModel } from "@timeless/ui-vm";
+import { ToasterModel, ToastModel } from "@timeless/inner-vm";
 
 type OffsetValue = number | string;
 type Offset =

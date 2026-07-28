@@ -2,7 +2,7 @@
  * @file 支持多列的瀑布流组件
  */
 import { JSX } from "solid-js";
-import {  WaterfallModel  } from "@timeless/kit";
+import {  WaterfallModel  } from "@timeless/inner-kit";
 export declare function WaterfallView<T extends Record<string, unknown>>(props: {
     store: WaterfallModel<T>;
     fallback?: JSX.Element;

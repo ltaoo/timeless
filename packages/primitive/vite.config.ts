@@ -79,11 +79,11 @@ export default defineConfig({
       ],
       output: {
         globals: {
-          "@timeless/base": "Timeless.base",
-          "@timeless/reactive": "Timeless.reactive",
-          "@timeless/utils": "Timeless.utils",
-          "@timeless/ui-vm": "Timeless.ui",
-          "@timeless/kit": "Timeless.kit",
+          "@timeless/inner-base": "Timeless.base",
+          "@timeless/inner-reactive": "Timeless.reactive",
+          "@timeless/inner-utils": "Timeless.utils",
+          "@timeless/inner-vm": "Timeless.ui",
+          "@timeless/inner-kit": "Timeless.kit",
         },
       },
     },

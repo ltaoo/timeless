@@ -9,7 +9,7 @@ import {
   DialogCore,
   DismissableLayerCore,
   initGlobalPointerListener,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 import { Presence } from "./presence";
 

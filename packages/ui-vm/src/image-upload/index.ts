@@ -1,5 +1,5 @@
-import { base, Handler, BizError } from "@timeless/base";
-import { readFileAsURL } from "@timeless/utils";
+import { base, Handler, BizError } from "@timeless/inner-base";
+import { readFileAsURL } from "@timeless/inner-utils";
 
 import { ImageCore } from "@/image/index";
 import { DragZoneCore } from "@/drag-zone/index";

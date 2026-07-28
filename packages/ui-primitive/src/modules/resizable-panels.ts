@@ -6,7 +6,7 @@ import {
   styleNames,
   getPlatform,
 } from "@timeless/timeless";
-import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/ui-vm";
+import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/inner-vm";
 
 // ResizablePanels Group - 容器组件
 export function Group(

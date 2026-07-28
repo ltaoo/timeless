@@ -1,6 +1,6 @@
 import { ViewChildren, ViewProps, View } from "@timeless/timeless";
 import { ToastPrimitive } from "@timeless/ui-primitive";
-import { ToastCore } from "@timeless/ui-vm";
+import { ToastCore } from "@timeless/inner-vm";
 
 export function Toast(
   props: ViewProps & { store: ToastCore },

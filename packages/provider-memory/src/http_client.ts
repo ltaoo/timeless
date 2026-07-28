@@ -1,6 +1,6 @@
-import { Result } from "@timeless/base";
-import { HttpClientCore } from "@timeless/kit";
-import { sleep } from "@timeless/utils";
+import { Result } from "@timeless/inner-base";
+import { HttpClientCore } from "@timeless/inner-kit";
+import { sleep } from "@timeless/inner-utils";
 
 export type MemoryFetchResponse<T = unknown> = {
   data: T;

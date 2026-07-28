@@ -20,8 +20,8 @@
     "solid-js": "^1.8.0"
   },
   "dependencies": {
-    "@timeless/kit": "workspace:*",
-    "@timeless/ui-vm": "workspace:*",
+    "@timeless/inner-kit": "workspace:*",
+    "@timeless/inner-vm": "workspace:*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-solid": "^0.300.0",

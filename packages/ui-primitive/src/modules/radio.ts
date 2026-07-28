@@ -10,7 +10,7 @@ import {
   ButtonProps,
   ListenerManager,
 } from "@timeless/timeless";
-import { RadioCore, RadioGroupCore } from "@timeless/ui-vm";
+import { RadioCore, RadioGroupCore } from "@timeless/inner-vm";
 
 export function Root(
   props: ViewProps & { store: RadioCore },

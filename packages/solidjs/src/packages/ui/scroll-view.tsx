@@ -1,6 +1,6 @@
 import { onMount, JSX } from "solid-js";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 // import { connect } from "@/domains/ui/scroll-view/connect.web";
 
 export const Root = (props: { store: ui.ScrollViewCore } & JSX.HTMLAttributes<HTMLDivElement>) => {

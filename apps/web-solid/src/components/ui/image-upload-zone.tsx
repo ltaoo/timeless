@@ -1,7 +1,7 @@
 import { createSignal, Show } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
-import {  DragZoneCore  } from "@timeless/kit"; store={store.ui.img} />
+import {  DragZoneCore  } from "@timeless/inner-kit"; store={store.ui.img} />
         </div>
       </Show>
       <DragZone store={store.ui.zone}></DragZone> */}

@@ -8,7 +8,7 @@ import DropdownMenuPrimitiveTrigger from "@/packages/ui/dropdown-menu/trigger.vu
 import DropdownMenuPrimitivePortal from "@/packages/ui/dropdown-menu/portal.vue";
 import DropdownMenuPrimitiveContent from "@/packages/ui/dropdown-menu/content.vue";
 import DropdownMenuPrimitiveItem from "@/packages/ui/dropdown-menu/item.vue";
-import { DropdownMenuCore } from "@timeless/kit";
+import { DropdownMenuCore } from "@timeless/inner-kit";
 
 import ItemWithSubMenu from "./item.vue";
 

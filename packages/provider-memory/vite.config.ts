@@ -8,9 +8,9 @@ export default createLibConfig({
   define: {
     __Version: JSON.stringify(pkg.version),
   },
-  external: ["@timeless/kit"],
+  external: ["@timeless/inner-kit"],
   globals: {
-    "@timeless/kit": "Timeless",
+    "@timeless/inner-kit": "Timeless",
   },
   formats: ["es", "cjs", "umd"],
   minify: true,

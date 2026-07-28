@@ -1,4 +1,4 @@
-import { Ref } from "@timeless/reactive";
+import { Ref } from "@timeless/inner-reactive";
 
 import { Input, InputProps } from "./input";
 import { MountedEvent } from "@/event";

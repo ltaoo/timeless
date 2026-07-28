@@ -1,5 +1,5 @@
-import { RequestPayload } from "@timeless/kit";
-import { Result } from "@timeless/kit";
+import { RequestPayload } from "@timeless/inner-kit";
+import { Result } from "@timeless/inner-kit";
 
 export function createAccount(params?: any): RequestPayload<any> {
   return {

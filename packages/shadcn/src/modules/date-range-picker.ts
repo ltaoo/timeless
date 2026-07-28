@@ -1,7 +1,7 @@
 import { computed, Icon, refobj } from "@timeless/timeless";
 import { For, View, ViewProps, Show } from "@timeless/timeless";
 import { DateRangePickerPrimitive } from "@timeless/ui-primitive";
-import { DateRangePickerCore, TooltipCore } from "@timeless/ui-vm";
+import { DateRangePickerCore, TooltipCore } from "@timeless/inner-vm";
 
 import { Tooltip } from "./tooltip";
 

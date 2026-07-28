@@ -1,8 +1,8 @@
 /**
  * @file 固钉
  */
-import { BaseDomain, Handler } from "@timeless/base";
-import { debounce } from "@timeless/utils";
+import { BaseDomain, Handler } from "@timeless/inner-base";
+import { debounce } from "@timeless/inner-utils";
 
 enum Events {
   /** 变成固定 */

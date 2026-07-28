@@ -1,6 +1,6 @@
 import { FileService } from "~/biz/file_service";
 
-import {  request_factory  } from "@timeless/kit";
+import {  request_factory  } from "@timeless/inner-kit";
 
 export const request = request_factory({
   hostnames: {},

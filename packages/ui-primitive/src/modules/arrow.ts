@@ -1,6 +1,6 @@
 import { refobj, computed, isRef } from "@timeless/timeless";
 import { View, ViewProps, ViewChildren, isStyleRef } from "@timeless/timeless";
-import { PopperCore } from "@timeless/ui-vm";
+import { PopperCore } from "@timeless/inner-vm";
 
 // import { getHost } from "@/host";
 

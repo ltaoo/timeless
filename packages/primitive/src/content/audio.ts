@@ -16,7 +16,7 @@
  * />
  * ```
  */
-import { DerivedRef, isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import { RawViewStyleProperties } from "@/style";
 import { MountedEvent } from "@/event/index";

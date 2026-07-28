@@ -6,7 +6,7 @@ import {
   Show,
   TimelessElement,
 } from "@timeless/timeless";
-import { ScrollViewCore } from "@timeless/ui-vm";
+import { ScrollViewCore } from "@timeless/inner-vm";
 
 type Provider = Partial<{
   provide_ui_scroll_view_indicator: (

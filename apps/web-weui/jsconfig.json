@@ -4,7 +4,7 @@
     "module": "ESNext",
     "checkJs": true,
     "allowJs": true,
-    "types": ["@timeless/types"],
+    "types": ["@timeless/inner-types"],
     "paths": {
       "@/*": ["./src/*"]
     }

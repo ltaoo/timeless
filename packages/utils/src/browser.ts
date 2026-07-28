@@ -1,4 +1,4 @@
-import { Result } from "@timeless/base";
+import { Result } from "@timeless/inner-base";
 
 export function loadImage(data: any): Promise<Result<HTMLImageElement>> {
   return new Promise((resolve) => {

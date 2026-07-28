@@ -4,7 +4,7 @@ import {
   ViewChildren,
   Portal as NativePortal,
 } from "@timeless/timeless";
-import { DialogCore } from "@timeless/ui-vm";
+import { DialogCore } from "@timeless/inner-vm";
 
 import { Presence } from "./presence";
 

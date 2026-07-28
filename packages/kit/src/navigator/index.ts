@@ -2,9 +2,9 @@
  * @file 仅负责「地址」的核心类
  * 包括 URL 解析、应用等
  */
-import { BaseDomain, Handler } from "@timeless/base";
-import { qs_parse } from "@timeless/utils";
-import { JSONObject } from "@timeless/types";
+import { BaseDomain, Handler } from "@timeless/inner-base";
+import { qs_parse } from "@timeless/inner-utils";
+import { JSONObject } from "@timeless/inner-types";
 
 function baseOrigin(origin: string) {
   if (origin) {

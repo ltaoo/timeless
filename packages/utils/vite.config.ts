@@ -9,9 +9,9 @@ export default createLibConfig({
     __Version: JSON.stringify(pkg.version),
   },
   formats: ["es", "cjs", "umd"],
-  external: ["@timeless/base", "@timeless/types"],
+  external: ["@timeless/inner-base", "@timeless/inner-types"],
   globals: {
-    "@timeless/base": "Timeless.base",
+    "@timeless/inner-base": "Timeless.base",
   },
   alias: {
     "@": resolve(__dirname, "src"),

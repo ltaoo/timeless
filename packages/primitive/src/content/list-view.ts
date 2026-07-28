@@ -10,7 +10,7 @@
  *
  * This is the main scrollable container used in Timeless apps.
  */
-import { throttle } from "@timeless/base";
+import { throttle } from "@timeless/inner-base";
 import {
   computed,
   DerivedRef,
@@ -19,7 +19,7 @@ import {
   registryGet,
   registrySet,
   registryDelete,
-} from "@timeless/reactive";
+} from "@timeless/inner-reactive";
 
 import { MountedEvent, ScrollEvent } from "@/event/index";
 import { For, ForProps } from "@/reactive/for";

@@ -9,16 +9,16 @@ export default createLibConfig({
     __Version: JSON.stringify(pkg.version),
   },
   external: [
-    "@timeless/base",
-    "@timeless/kit",
-    "@timeless/ui-vm",
-    "@timeless/utils",
+    "@timeless/inner-base",
+    "@timeless/inner-kit",
+    "@timeless/inner-vm",
+    "@timeless/inner-utils",
   ],
    globals: {
-    "@timeless/base": "Timeless.base",
-    "@timeless/kit": "Timeless.kit",
-    "@timeless/ui-vm": "Timeless.ui",
-    "@timeless/utils": "Timeless.utils",
+    "@timeless/inner-base": "Timeless.base",
+    "@timeless/inner-kit": "Timeless.kit",
+    "@timeless/inner-vm": "Timeless.ui",
+    "@timeless/inner-utils": "Timeless.utils",
   },
   alias: {
     '@': resolve(__dirname, 'src')

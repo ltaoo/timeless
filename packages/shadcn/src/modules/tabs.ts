@@ -1,7 +1,7 @@
 import { computed, refobj } from "@timeless/timeless";
 import { For, Show, ViewChildren, ViewProps } from "@timeless/timeless";
 import { TabsPrimitive } from "@timeless/ui-primitive";
-import { TabHeaderCore } from "@timeless/ui-vm";
+import { TabHeaderCore } from "@timeless/inner-vm";
 
 type TabItem = {
   value: string;

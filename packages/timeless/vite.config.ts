@@ -15,10 +15,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
-      "@timeless/primitive": resolve(__dirname, "../primitive"),
-      "@timeless/reactive": resolve(__dirname, "../reactive"),
+      "@timeless/inner-primitive": resolve(__dirname, "../primitive"),
+      "@timeless/inner-reactive": resolve(__dirname, "../reactive"),
+      "@timeless/inner-vm": resolve(__dirname, "../ui-vm"),
       "@timeless/ui-primitive": resolve(__dirname, "../ui-primitive"),
-      "@timeless/ui-vm": resolve(__dirname, "../ui-vm"),
     },
   },
   build: {

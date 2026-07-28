@@ -1,4 +1,4 @@
-import type { PageKey, RouteConfig, RouteViewCore, HistoryCore, ApplicationModel, HttpClient, StorageCore } from "@timeless/kit";
+import type { PageKey, RouteConfig, RouteViewCore, HistoryCore, ApplicationModel, HttpClient, StorageCore } from "@timeless/inner-kit";
 
 declare global {
   const __Version: string;

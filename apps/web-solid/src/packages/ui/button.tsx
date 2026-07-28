@@ -3,7 +3,7 @@
  */
 import { JSX, createSignal } from "solid-js";
 
-import {  ButtonCore  } from "@timeless/kit";
+import {  ButtonCore  } from "@timeless/inner-kit";
       disabled={disabled()}
       onClick={(event) => {
         event.preventDefault();

@@ -4,15 +4,15 @@ import path from "node:path";
 export default defineConfig({
   resolve: {
     // alias: {
-    //   "@timeless/reactive": path.resolve(
+    //   "@timeless/inner-reactive": path.resolve(
     //     __dirname,
     //     "../../packages/reactive/dist/timeless.reactive.esm.js",
     //   ),
-    //   "@timeless/ui-vm": path.resolve(
+    //   "@timeless/inner-vm": path.resolve(
     //     __dirname,
     //     "../../packages/ui-vm/dist/index.esm.js",
     //   ),
-    //   "@timeless/icons": path.resolve(
+    //   "@timeless/inner-icons": path.resolve(
     //     __dirname,
     //     "../../packages/icons/dist/index.js",
     //   ),
@@ -24,7 +24,7 @@ export default defineConfig({
     //     __dirname,
     //     "../../packages/timeless-dom/dist/timeless.dom.esm.js",
     //   ),
-    //   "@timeless/kit": path.resolve(
+    //   "@timeless/inner-kit": path.resolve(
     //     __dirname,
     //     "../../packages/kit/dist/timeless.kit.esm.js",
     //   ),
@@ -36,10 +36,10 @@ export default defineConfig({
   ssr: {
     noExternal: [
       "@timeless/shadcn",
-      "@timeless/reactive",
-      "@timeless/ui-vm",
-      "@timeless/icons",
-      "@timeless/kit",
+      "@timeless/inner-reactive",
+      "@timeless/inner-vm",
+      "@timeless/inner-icons",
+      "@timeless/inner-kit",
       "@timeless/timeless",
       "@timeless/timeless-dom",
     ],

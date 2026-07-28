@@ -1,4 +1,4 @@
-import { isRef } from "@timeless/reactive";
+import { isRef } from "@timeless/inner-reactive";
 
 import { Text } from "@/content/text";
 import { isElement, ViewChildren, resolve_children } from "@/content/type";

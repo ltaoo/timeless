@@ -21,11 +21,11 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/icons": "workspace:*",
-    "@timeless/kit": "workspace:*",
+    "@timeless/inner-icons": "workspace:*",
+    "@timeless/inner-kit": "workspace:*",
     "@timeless/timeless": "workspace:*",
     "@timeless/ui-primitive": "workspace:*",
-    "@timeless/ui-vm": "workspace:*"
+    "@timeless/inner-vm": "workspace:*"
   },
   "devDependencies": {
     "less": "^4.6.7",

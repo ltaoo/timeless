@@ -4,7 +4,7 @@ import {
   ViewChildren,
   TimelessElement,
 } from "@timeless/timeless";
-import { ImageCore } from "@timeless/ui-vm";
+import { ImageCore } from "@timeless/inner-vm";
 
 type Provider = Partial<{
   provide_ui_image: (store: ImageCore, $img: HTMLDivElement) => void;

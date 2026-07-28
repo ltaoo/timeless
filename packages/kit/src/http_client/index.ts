@@ -1,6 +1,6 @@
-import { Result, BaseDomain, Handler } from "@timeless/base";
-import { qs_stringify } from "@timeless/utils";
-import { JSONObject } from "@timeless/types";
+import { Result, BaseDomain, Handler } from "@timeless/inner-base";
+import { qs_stringify } from "@timeless/inner-utils";
+import { JSONObject } from "@timeless/inner-types";
 
 enum Events {
   StateChange,

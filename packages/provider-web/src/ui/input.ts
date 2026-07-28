@@ -1,4 +1,4 @@
-import { InputCore } from "@timeless/ui-vm";
+import { InputCore } from "@timeless/inner-vm";
 
 export function connect(store: InputCore<string>, $input: HTMLInputElement) {
   store.focus = () => {

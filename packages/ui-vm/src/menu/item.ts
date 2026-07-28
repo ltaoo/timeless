@@ -1,7 +1,7 @@
 /**
  * @file 菜单项
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 import type { MenuCore } from "./index";
 

@@ -1,4 +1,4 @@
-import { BaseDomain } from "@timeless/base";
+import { BaseDomain } from "@timeless/inner-base";
 
 export class ToggleCore extends BaseDomain<any> {
   state = {

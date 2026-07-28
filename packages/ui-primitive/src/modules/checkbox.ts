@@ -13,7 +13,7 @@ import {
   Label as NativeLabel,
   ListenerManager,
 } from "@timeless/timeless";
-import { CheckboxCore, CheckboxGroupCore } from "@timeless/ui-vm";
+import { CheckboxCore, CheckboxGroupCore } from "@timeless/inner-vm";
 
 const logger = Logger({ prefix: "primitive", scope: "modules.checkbox" });
 

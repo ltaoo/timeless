@@ -3,7 +3,7 @@
  */
 import { JSX, createSignal } from "solid-js";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 const Progress = (props: { store: ui.ProgressCore } & JSX.HTMLAttributes<HTMLElement>) => {
   const { store } = props;

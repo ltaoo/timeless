@@ -1,4 +1,4 @@
-import {  BaseDomain  } from "@timeless/kit";, handler);
+import {  BaseDomain  } from "@timeless/inner-kit";, handler);
   }
   methods = {
     handleClickInput: () => {},

@@ -1,4 +1,4 @@
-import { BaseDomain, Handler, Platform } from "@timeless/base";
+import { BaseDomain, Handler, Platform } from "@timeless/inner-base";
 
 import { InputCore } from "@/input/index";
 import { PopperCore } from "@/popper/index";

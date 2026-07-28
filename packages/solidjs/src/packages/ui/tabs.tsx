@@ -1,6 +1,6 @@
 import { JSX, Show, createSignal } from "solid-js";
 
-import { TabsCore, PresenceCore } from "@timeless/ui-vm";
+import { TabsCore, PresenceCore } from "@timeless/inner-vm";
 
 import { Presence } from "./presence";
 

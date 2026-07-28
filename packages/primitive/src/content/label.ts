@@ -10,7 +10,7 @@
  * <Input id="username" />
  * ```
  */
-import { DerivedRef, isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import { ViewProps } from "@/content/view";
 import {

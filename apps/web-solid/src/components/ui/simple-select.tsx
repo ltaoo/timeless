@@ -1,4 +1,4 @@
-import {  SimpleSelectCore  } from "@timeless/kit";
+import {  SimpleSelectCore  } from "@timeless/inner-kit";
 
 export const SimpleSelect = (props: { store: SimpleSelectCore }) => {
   const { store } = props;

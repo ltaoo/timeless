@@ -1,7 +1,7 @@
 /**
  * @file Select 选项
  */
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 enum Events {
   StateChange,

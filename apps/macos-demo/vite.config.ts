@@ -1,7 +1,7 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import { createLibConfig } from "../../vite.config.base";
-import { timelessNativeHMR } from "@timeless/vite-plugin";
+import { timelessNativeHMR } from "@timeless/inner-vite-plugin";
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === "development";

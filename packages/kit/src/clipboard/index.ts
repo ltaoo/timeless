@@ -1,4 +1,4 @@
-import { base, Handler, BizError, Result } from "@timeless/base";
+import { base, Handler, BizError, Result } from "@timeless/inner-base";
 
 export function ClipboardModel() {
   const methods = {

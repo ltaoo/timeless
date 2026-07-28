@@ -10,7 +10,7 @@ import {
   ButtonProps,
   classNames,
 } from "@timeless/timeless";
-import { DateRangePickerCore } from "@timeless/ui-vm";
+import { DateRangePickerCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";
 import { Presence } from "./presence";

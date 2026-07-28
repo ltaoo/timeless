@@ -6,7 +6,7 @@ import { useViewModelStore } from "~/hooks";
 import { Flex } from "~/components/flex/flex";
 import { IconButton } from "~/components/icon-btn/icon-btn";
 
-import {  ArrayFieldCore, SingleFieldCore  } from "@timeless/kit";: true,
+import {  ArrayFieldCore, SingleFieldCore  } from "@timeless/inner-kit";: true,
                   }}
                 >
                   {props.render(store.field)}

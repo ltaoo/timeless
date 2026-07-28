@@ -1,7 +1,7 @@
 import { computed, Icon, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps } from "@timeless/timeless";
 import { SheetPrimitive } from "@timeless/ui-primitive";
-import { DialogCore, getGlobalLayerManager } from "@timeless/ui-vm";
+import { DialogCore, getGlobalLayerManager } from "@timeless/inner-vm";
 
 const SHEET_BASE_Z = 100;
 const Z_INDEX_NEST_GAP = 50;

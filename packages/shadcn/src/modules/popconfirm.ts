@@ -1,7 +1,7 @@
 import { computed, ref, refobj, ViewStyleProperties } from "@timeless/timeless";
 import { View, Show, ViewChildren, ViewProps } from "@timeless/timeless";
 import { PopconfirmPrimitive } from "@timeless/ui-primitive";
-import { PopconfirmCore } from "@timeless/ui-vm";
+import { PopconfirmCore } from "@timeless/inner-vm";
 
 export function Popconfirm(
   props: ViewProps & {

@@ -1,7 +1,7 @@
 import { ViewProps } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
 import { SwitchPrimitive } from "@timeless/ui-primitive";
-import { SwitchCore } from "@timeless/ui-vm";
+import { SwitchCore } from "@timeless/inner-vm";
 
 export function Switch(props: ViewProps & { store: SwitchCore; id?: string }) {
   const { store, id, class: cls, ...rest } = props;

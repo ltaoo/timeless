@@ -23,8 +23,8 @@
 ### 实现要点
 
 ```typescript
-import { base, Handler } from "@timeless/base";
-import { refarr } from "@timeless/reactive";
+import { base, Handler } from "@timeless/inner-base";
+import { refarr } from "@timeless/inner-reactive";
 
 type AccordionCoreProps = {
   type?: "single" | "multiple";
@@ -295,7 +295,7 @@ export function Accordion(p: any) {
 
 **新架构（组件组装）：**
 ```typescript
-import { computed, refobj } from "@timeless/reactive";
+import { computed, refobj } from "@timeless/inner-reactive";
 import {
   AccordionPrimitive,
   For,

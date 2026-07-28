@@ -1,6 +1,6 @@
 import { computed, refobj } from "@timeless/timeless";
 import { View, ViewProps, ViewChildren, Show } from "@timeless/timeless";
-import { SingleFieldCore } from "@timeless/ui-vm";
+import { SingleFieldCore } from "@timeless/inner-vm";
 
 // export function Field(
 //   props: ViewProps & { store: SingleFieldCore<any> },

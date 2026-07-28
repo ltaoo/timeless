@@ -2,8 +2,8 @@
  * @file 应用，包含一些全局相关的事件、状态
  */
 
-import { BaseDomain, Handler, Result } from "@timeless/base";
-import { JSONObject } from "@timeless/types";
+import { BaseDomain, Handler, Result } from "@timeless/inner-base";
+import { JSONObject } from "@timeless/inner-types";
 
 import { StorageCore } from "@/storage";
 import { ClipboardModel } from "@/clipboard";

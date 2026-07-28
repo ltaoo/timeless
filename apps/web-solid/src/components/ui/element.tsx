@@ -3,7 +3,7 @@
  */
 import { JSX } from "solid-js";
 
-import {  ButtonCore  } from "@timeless/kit";
+import {  ButtonCore  } from "@timeless/inner-kit";
 
 function Element<T = unknown>(
   props: {

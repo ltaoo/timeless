@@ -1,7 +1,7 @@
 import { Ref } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
 import { ProgressPrimitive } from "@timeless/ui-primitive";
-import { ProgressCore } from "@timeless/ui-vm";
+import { ProgressCore } from "@timeless/inner-vm";
 
 export function Progress(
   props: ViewProps & {

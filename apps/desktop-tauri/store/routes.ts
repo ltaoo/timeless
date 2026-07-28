@@ -1,4 +1,4 @@
-import {  PageKeysType, build  } from "@timeless/kit";,
+import {  PageKeysType, build  } from "@timeless/inner-kit";,
       },
     },
   },

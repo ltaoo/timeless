@@ -4,7 +4,7 @@ import { defineComponent, ref } from "vue";
 import { ViewComponentProps } from "../../store/types";
 import { ListView, ScrollView, Image as LazyImage, AspectRatio, Image } from "@timeless/vue";
 import { fetchPlayingHistories, fetchPlayingHistoriesProcess, PlayHistoryItem } from "@/biz/media/services";
-import { ScrollViewCore, ImageInListCore } from "@timeless/kit";
+import { ScrollViewCore, ImageInListCore } from "@timeless/inner-kit";
 import { MediaTypes } from "@/constants";
 import { ListCore } from "@/domains/list/index";
 import { RequestCore } from "@/domains/request/index";

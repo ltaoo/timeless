@@ -4,7 +4,7 @@ import { Plus, XCircle } from "lucide-solid";
 import { useViewModelStore } from "@/hooks";
 
 import { MultipleImageUploadModel } from "@/biz/multiple_image_upload";
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 import { LazyImage } from "./image";
 import { AspectRatio } from "./aspect-ratio";

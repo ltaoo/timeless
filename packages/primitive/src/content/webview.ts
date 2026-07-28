@@ -14,7 +14,7 @@
  * <Webview href="https://example.com" />
  * ```
  */
-import { DerivedRef, Ref, isRef } from "@timeless/reactive";
+import { DerivedRef, Ref, isRef } from "@timeless/inner-reactive";
 
 import { MountedEvent } from "@/event/index";
 import { ListenerManager } from "@/util/listener";

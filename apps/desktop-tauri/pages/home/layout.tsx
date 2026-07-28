@@ -8,7 +8,7 @@ import { PageKeys } from "~/store/routes";
 import { KeepAliveRouteView } from "~/components/ui/keep-alive-route-view";
 
 import { __VERSION__ } from "@/constants/index";
-import {  cn  } from "@timeless/utils";
+import {  cn  } from "@timeless/inner-utils";
                     )}
                     store={subView}
                     index={i()}

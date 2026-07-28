@@ -3,7 +3,7 @@ import { JSX } from "solid-js/jsx-runtime";
 
 import { useViewModelStore } from "@/hooks";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 
 export function Affix(props: { store: typeof ui.AffixCore } & JSX.HTMLAttributes<HTMLDivElement>) {
   const [state, vm] = useViewModelStore(props.store);

@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import type { Platform } from "@timeless/base";
+import type { Platform } from "@timeless/inner-base";
 
 import { PopperCore, getPopperPlatform, setPopperPlatform } from "@/popper";
 import { SelectCore } from "@/select";

@@ -1,2 +1,2 @@
 import { ViewComponentProps } from "~/store/types";
-import {  Handler  } from "@timeless/kit";).JSX.Element;
+import {  Handler  } from "@timeless/inner-kit";).JSX.Element;

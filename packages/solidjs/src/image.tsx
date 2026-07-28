@@ -4,7 +4,7 @@ import { JSX } from "solid-js/jsx-runtime";
 import { effect } from "solid-js/web";
 import { Image, ImageOff } from "lucide-solid";
 
-import * as ui from '@timeless/ui';
+import * as ui from '@timeless/inner-vm';
 // @ts-ignore
 // import { connect } from "@timeless/kit/ui/image/connect.web";
 

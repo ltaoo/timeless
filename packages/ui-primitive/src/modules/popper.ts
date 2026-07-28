@@ -14,7 +14,7 @@ import {
   DismissableLayerCore,
   initGlobalPointerListener,
   getGlobalLayerManager,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 const POPOVER_BASE_Z = 300;
 const Z_INDEX_NEST_GAP = 50;

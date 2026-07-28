@@ -17,7 +17,7 @@ import {
   DatePickerCore,
   ScrollViewCore,
   TimePickerCore,
-} from "@timeless/ui-vm";
+} from "@timeless/inner-vm";
 
 export function DateTimePicker(
   props: ViewProps & {

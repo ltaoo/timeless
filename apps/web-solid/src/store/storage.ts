@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 
 import { SetValueUnit } from "~/biz/input_set_value";
-import {  StorageCore  } from "@timeless/kit";
+import {  StorageCore  } from "@timeless/inner-kit";
     const existing = globalThis.localStorage.getItem(key);
     return {
       key,

@@ -1,4 +1,4 @@
-import { BaseDomain, Handler } from "@timeless/base";
+import { BaseDomain, Handler } from "@timeless/inner-base";
 
 import { getPoint, damping, preventDefault, getAngleByPoints } from "./utils";
 export * from "./utils";

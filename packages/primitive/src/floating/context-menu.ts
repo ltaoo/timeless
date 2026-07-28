@@ -27,7 +27,7 @@
  * </ContextMenu>
  * ```
  */
-import { DerivedRef, isRef, Ref } from "@timeless/reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 import { Logger } from "@/util/logger";
 
 import { destroyElement, isElement, TimelessElement, ViewChildren } from "../content/type";
