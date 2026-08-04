@@ -17,7 +17,7 @@
  * </SVG>
  * ```
  */
-import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
+import { DerivedRef, Ref } from "@timeless/inner-reactive";
 
 import { isElement } from "@/content/type";
 import { ViewStyle, ClassNameRef } from "@/style/index";
@@ -82,6 +82,36 @@ interface SVGPresentationAttrs {
   cursor?: AttrValue;
 }
 
+const SVG_NON_ATTRIBUTE_PROPS = new Set([
+  "style",
+  "class",
+  "dataset",
+  "onMounted",
+  "beforeUnmounted",
+  "onUnmounted",
+]);
+
+/**
+ * SVG props are DOM attributes by default. Keep component-only props out of the
+ * attribute bag and let Box handle class, style, dataset, events and reactive
+ * subscriptions in the same way as other primitives.
+ */
+function createSVGBox<T>(props: SVGBaseProps, extraState: T) {
+  const attributes: Record<string, AttrValue> = {};
+
+  for (const [key, value] of Object.entries(props)) {
+    if (
+      SVG_NON_ATTRIBUTE_PROPS.has(key) ||
+      (key.startsWith("on") && typeof value === "function")
+    ) {
+      continue;
+    }
+    attributes[key] = value as AttrValue;
+  }
+
+  return Box({ ...props, attributes }, extraState);
+}
+
 export interface SVGProps extends SVGBaseProps, SVGPresentationAttrs {
   viewBox?: AttrValue;
   xmlns?: string;
@@ -96,7 +126,7 @@ export interface SVGProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function SVG(props: SVGProps = {}, children?: any) {
   let $elm: any | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -154,7 +184,7 @@ export interface GProps extends SVGBaseProps, SVGPresentationAttrs {}
 
 export function G(props: GProps = {}, children?: any) {
   let $elm: SVGGElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -216,7 +246,7 @@ export interface CircleProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Circle(props: CircleProps = {}, children?: any) {
   let $elm: SVGCircleElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -281,7 +311,7 @@ export interface RectProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Rect(props: RectProps = {}, children?: any) {
   let $elm: SVGRectElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -342,33 +372,11 @@ export interface PathProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Path(props: PathProps = {}, children?: any) {
   let $elm: any = null;
-  const box$ = Box(props, {
-    d: "",
-  });
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
-  const methods = {
-    subscribe_props() {
-      box$.methods.subscribe_props();
-      const d = props.d;
-      if (d !== undefined) {
-        if (isRef(d)) {
-          state.d = d.value;
-          d.subscribe({
-            onChange(v) {
-              state.d = v;
-              $elm.setAttribute("d", v);
-            },
-          });
-        } else {
-          state.d = d;
-        }
-      }
-    },
-  };
-
-  methods.subscribe_props();
+  box$.methods.subscribe_props();
   box$.methods.add_event();
   box$.methods.build_children(children);
 
@@ -427,7 +435,7 @@ export interface LineProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Line(props: LineProps = {}, children?: any) {
   let $elm: SVGLineElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -487,7 +495,7 @@ export interface PolylineProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Polyline(props: PolylineProps = {}, children?: any) {
   let $elm: SVGPolylineElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -547,7 +555,7 @@ export interface PolygonProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Polygon(props: PolygonProps = {}, children?: any) {
   let $elm: SVGPolygonElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -622,7 +630,7 @@ export interface TextProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Text(props: TextProps = {}, children?: any) {
   let $elm: SVGTextElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -680,7 +688,7 @@ export interface DefsProps extends SVGBaseProps {}
 
 export function Defs(props: DefsProps = {}, children?: any) {
   let $elm: SVGDefsElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -740,7 +748,7 @@ export interface SymbolProps extends SVGBaseProps {
 
 export function Symbol(props: SymbolProps = {}, children?: any) {
   let $elm: SVGSymbolElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -804,7 +812,7 @@ export interface UseProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Use(props: UseProps = {}, children?: any) {
   let $elm: SVGUseElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -873,7 +881,7 @@ export function LinearGradient(
   children?: any,
 ) {
   let $elm: SVGLinearGradientElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -943,7 +951,7 @@ export function RadialGradient(
   children?: any,
 ) {
   let $elm: SVGRadialGradientElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -1005,7 +1013,7 @@ export interface StopProps extends SVGBaseProps {
 
 export function Stop(props: StopProps = {}, children?: any) {
   let $elm: SVGStopElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -1070,7 +1078,7 @@ export interface MaskProps extends SVGBaseProps {
 
 export function Mask(props: MaskProps = {}, children?: any) {
   let $elm: SVGMaskElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -1130,7 +1138,7 @@ export interface ClipPathProps extends SVGBaseProps {
 
 export function ClipPath(props: ClipPathProps = {}, children?: any) {
   let $elm: SVGClipPathElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 
@@ -1193,7 +1201,7 @@ export interface EllipseProps extends SVGBaseProps, SVGPresentationAttrs {
 
 export function Ellipse(props: EllipseProps = {}, children?: any) {
   let $elm: SVGEllipseElement | null = null;
-  const box$ = Box(props, {});
+  const box$ = createSVGBox(props, {});
   const state = box$.state;
   const events = box$.events;
 

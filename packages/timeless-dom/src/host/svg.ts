@@ -192,9 +192,6 @@ export function DOMPath(props: {
       box$.methods.set$elm($elm as any);
       box$.methods.applyState(props.elm.state, { initial: true });
       box$.methods.setupEventListener(props.elm.events);
-      if (props.elm.state.d) {
-        $elm.setAttribute("d", props.elm.state.d);
-      }
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: SVGPathElement) {
