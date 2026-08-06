@@ -401,12 +401,10 @@ export function LeftCalendarGridBody(
   return View(rest, [
     For({
       each: computed(state, (s) => s.left.weeks),
-      // @ts-ignore
       render(week) {
         return View({}, [
           For({
-            each: computed(week, (t) => t.dates),
-            // @ts-ignore
+            each: week.dates,
             render(day) {
               return CalendarCell(
                 {
@@ -447,12 +445,10 @@ export function RightCalendarGridBody(
   return View(rest, [
     For({
       each: computed(state, (s) => s.right.weeks),
-      // @ts-ignore
       render(week) {
         return View({}, [
           For({
-            each: computed(week, (t) => t.dates),
-            // @ts-ignore
+            each: week.dates,
             render(day) {
               return CalendarCell(
                 {

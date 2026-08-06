@@ -38,6 +38,7 @@ interface SVGBaseProps {
   style?: ViewStyle;
   class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
   dataset?: Record<string, AttrValue>;
+  attributes?: Record<string, AttrValue>;
   id?: AttrValue;
   tabindex?: AttrValue;
   role?: string;
@@ -86,6 +87,7 @@ const SVG_NON_ATTRIBUTE_PROPS = new Set([
   "style",
   "class",
   "dataset",
+  "attributes",
   "onMounted",
   "beforeUnmounted",
   "onUnmounted",
@@ -98,6 +100,13 @@ const SVG_NON_ATTRIBUTE_PROPS = new Set([
  */
 function createSVGBox<T>(props: SVGBaseProps, extraState: T) {
   const attributes: Record<string, AttrValue> = {};
+  const explicitAttrs = props.attributes;
+
+  if (explicitAttrs) {
+    Object.keys(explicitAttrs).forEach((k) => {
+      attributes[k] = explicitAttrs[k];
+    });
+  }
 
   for (const [key, value] of Object.entries(props)) {
     if (
@@ -1376,6 +1385,7 @@ interface SVGBaseProps {
   style?: ViewStyle;
   class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
   dataset?: Record<string, AttrValue>;
+  attributes?: Record<string, AttrValue>;
   id?: AttrValue;
   tabindex?: AttrValue;
   role?: string;

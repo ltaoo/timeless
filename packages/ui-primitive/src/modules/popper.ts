@@ -1,4 +1,4 @@
-import { refobj, computed, getPlatform, Logger } from "@timeless/timeless";
+import { refobj, computed, Logger } from "@timeless/timeless";
 import {
   styleNames,
   classNames,
@@ -39,7 +39,6 @@ export function Anchor(
     {
       ...rest,
       onMounted(event) {
-        store.platform = getPlatform();
         const $anchor = event.target.get$children()[0];
         console.log("[primitive]popper Anchor mounted - ", $anchor);
         store.setReference({
@@ -155,7 +154,6 @@ export function Content(
       ]),
       onMounted(event) {
         console.log("[DEBUG] PopperPrimitive.Content onMounted", store.mode);
-        store.platform = getPlatform();
         const $elm = event.target;
         const dismissableLayer$ = new DismissableLayerCore();
         // logger.log("the floating mounted", $elm.getBoundingClientRect());

@@ -1,4 +1,4 @@
-import { computed, Fragment, refobj } from "@timeless/timeless";
+import { computed, Fragment, refobj, styleNames } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps, Show } from "@timeless/timeless";
 import { DialogPrimitive } from "@timeless/ui-primitive";
 import { DialogCore, getGlobalLayerManager } from "@timeless/inner-vm";
@@ -10,7 +10,7 @@ export function Dialog(
   props: ViewProps & { store: DialogCore; zIndex?: number },
   children?: ViewChildren | (() => ViewChildren),
 ) {
-  const { store, zIndex: manualZIndex, ...rest } = props;
+  const { store, style, zIndex: manualZIndex, ...rest } = props;
   const state_ = refobj(store.state);
   const presence_state_ = refobj(store.presence.state);
 
@@ -68,21 +68,24 @@ export function Dialog(
             {
               ...rest,
               store,
-              style: computed(presence_state_, (d) => {
-                const result: Record<string, string> = {
-                  background: "var(--weui-BG-2)",
-                  "border-radius": "12px",
-                  overflow: "hidden",
-                  "text-align": "center",
-                };
-                if (d.enter) {
-                  result.animation = "weui-slide-up .3s";
-                }
-                if (d.exit) {
-                  result.animation = "weui-slide-down .3s";
-                }
-                return result;
-              }),
+              style: styleNames([
+                computed(presence_state_, (d) => {
+                  const result: Record<string, string> = {
+                    background: "var(--weui-BG-2)",
+                    "border-radius": "12px",
+                    overflow: "hidden",
+                    "text-align": "center",
+                  };
+                  if (d.enter) {
+                    result.animation = "weui-slide-up .3s";
+                  }
+                  if (d.exit) {
+                    result.animation = "weui-slide-down .3s";
+                  }
+                  return result;
+                }),
+                style,
+              ]),
             },
             [
               Show({

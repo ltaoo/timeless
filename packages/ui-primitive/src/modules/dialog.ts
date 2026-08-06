@@ -4,6 +4,7 @@ import {
   ViewChildren,
   Portal as NativePortal,
   ListenerManager,
+  styleNames,
 } from "@timeless/timeless";
 import {
   DialogCore,
@@ -40,7 +41,10 @@ export function Overlay(
   return View(
     {
       ...rest,
-      style: zIndex != null ? { "z-index": zIndex } : undefined,
+      style:
+        zIndex != null
+          ? styleNames([rest.style, { "z-index": zIndex }])
+          : rest.style,
     },
     children,
   );
@@ -59,7 +63,10 @@ export function Content(
   return View(
     {
       ...rest,
-      style: zIndex != null ? { "z-index": zIndex } : undefined,
+      style:
+        zIndex != null
+          ? styleNames([rest.style, { "z-index": zIndex }])
+          : rest.style,
       onMounted(event) {
         const $elm = event.target.get$elm();
         dismissableLayer$.setRect(() => $elm.getBoundingClientRect());

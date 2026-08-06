@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { ref } from "@timeless/inner-reactive";
 
-import { Line, Path, SVG } from "@/content/svg";
+import { Circle, Line, Path, SVG } from "@/content/svg";
 
 describe("SVG attributes", () => {
   it("stores SVG-specific props as DOM attributes", () => {
@@ -69,5 +69,37 @@ describe("SVG attributes", () => {
 
     expect(path.state.attributes.d).toBe("M0,80 L600,12");
     expect(setAttribute).toHaveBeenCalledWith("d", "M0,80 L600,12");
+  });
+
+  it("merges `attributes` into actual element attributes for SVG root and shapes", () => {
+    const chart = SVG({
+      attributes: { width: "50", height: "50", viewBox: "0 0 50 50" },
+      preserveAspectRatio: "none",
+    });
+    const circle = Circle({
+      cx: 25,
+      attributes: {
+        cy: 25,
+        r: 25,
+        fill: "black",
+      },
+      stroke: "red",
+    });
+
+    expect(chart.state.attributes).toEqual({
+      width: "50",
+      height: "50",
+      viewBox: "0 0 50 50",
+      preserveAspectRatio: "none",
+    });
+    expect(circle.state.attributes).toEqual({
+      cx: 25,
+      cy: 25,
+      r: 25,
+      fill: "black",
+      stroke: "red",
+    });
+    expect(chart.state.attributes).not.toHaveProperty("attributes");
+    expect(circle.state.attributes).not.toHaveProperty("attributes");
   });
 });

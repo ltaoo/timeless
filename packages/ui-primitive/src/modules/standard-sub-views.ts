@@ -1,4 +1,10 @@
-import { ref, refobj, refarr, computed } from "@timeless/timeless";
+import {
+  ref,
+  refobj,
+  refarr,
+  computed,
+  type DerivedRef,
+} from "@timeless/timeless";
 import {
   View,
   ViewProps,
@@ -72,7 +78,7 @@ export function StandardSubViews(
       }
       return listener$.clean;
     },
-    render(subview: SubView, idx: any) {
+    render(subview: SubView, idx: DerivedRef<number>) {
       const PageView = props.views[subview.name];
       if (!PageView) {
         return NotFoundPageView;

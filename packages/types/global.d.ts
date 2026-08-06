@@ -1263,6 +1263,7 @@ declare module "packages/primitive/src/content/svg" {
         style?: ViewStyle;
         class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
         dataset?: Record<string, AttrValue>;
+        attributes?: Record<string, AttrValue>;
         id?: AttrValue;
         tabindex?: AttrValue;
         role?: string;
@@ -2246,6 +2247,7 @@ declare module "packages/primitive/src/content/svg" {
         style?: ViewStyle;
         class?: string | DerivedRef<string> | Ref<string> | ClassNameRef;
         dataset?: Record<string, AttrValue>;
+        attributes?: Record<string, AttrValue>;
         id?: AttrValue;
         tabindex?: AttrValue;
         role?: string;

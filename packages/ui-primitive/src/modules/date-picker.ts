@@ -358,7 +358,7 @@ export function CalendarGridBody(
       render(week) {
         return View({}, [
           For({
-            each: computed(week, (t) => t.dates),
+            each: week.dates,
             render(day) {
               if (renderCell) {
                 return renderCell(day);
