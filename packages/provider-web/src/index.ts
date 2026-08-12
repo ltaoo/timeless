@@ -1,5 +1,9 @@
 export { connect as provide_app } from "./app";
-export { connect as provide_channel } from "./channel";
+export {
+  connect as provide_channel,
+  connect as provide_channel_client,
+} from "./channel";
+export type { WebChannelProviderOptions } from "./channel";
 export { connect as provide_clipboard } from "./clipboard";
 export { connect as provide_http_client } from "./http_client";
 export { connect as provide_history } from "./history";

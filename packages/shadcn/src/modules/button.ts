@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   Show,
   View,
@@ -8,8 +9,6 @@ import {
   Icon,
   ListenerManager,
 } from "@timeless/timeless";
-import { ButtonPrimitive } from "@timeless/ui-primitive";
-import { ButtonCore } from "@timeless/inner-vm";
 
 const VARIANTS = {
   default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
@@ -42,7 +41,7 @@ type ButtonSize = keyof typeof SIZES;
 
 export function Button(
   props: ViewProps & {
-    store: ButtonCore;
+    store: vm.ButtonCore;
     prefix?: ViewChildren;
   },
   children: ViewChildren = [],
@@ -68,7 +67,7 @@ export function Button(
       .join(" ");
   });
 
-  return ButtonPrimitive.Root(
+  return ui.ButtonPrimitive.Root(
     {
       ...rest,
       store,
@@ -87,7 +86,7 @@ export function Button(
       },
     },
     [
-      ButtonPrimitive.Loading({ store }, [
+      ui.ButtonPrimitive.Loading({ store }, [
         View(
           {
             class: "inline-block animate-spin",
@@ -99,10 +98,10 @@ export function Button(
       Show({
         when: !!prefix,
         ok() {
-          return [ButtonPrimitive.Prefix({}, prefix)];
+          return [ui.ButtonPrimitive.Prefix({}, prefix)];
         },
       }),
-      ButtonPrimitive.Content({}, children),
+      ui.ButtonPrimitive.Content({}, children),
     ],
   );
 }

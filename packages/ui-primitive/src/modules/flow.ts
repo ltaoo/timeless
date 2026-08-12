@@ -1,4 +1,4 @@
-import { View, ViewProps, ViewChildren } from "@timeless/timeless";
+import { View, ViewProps, ViewChildren } from "../core";
 import { FlowCanvasModel } from "@timeless/inner-vm";
 
 export function Root(

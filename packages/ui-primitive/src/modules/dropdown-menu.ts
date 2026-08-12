@@ -1,10 +1,10 @@
-import { Fragment, refobj } from "@timeless/timeless";
+import { Fragment, refobj } from "../core";
 import {
   ViewProps,
   ViewChildren,
   ListenerManager,
   VNodeEvent,
-} from "@timeless/timeless";
+} from "../core";
 import {
   DropdownMenuCore,
   MenuCore,

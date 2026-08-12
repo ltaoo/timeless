@@ -1,4 +1,4 @@
-import { isRef, Ref } from "@timeless/inner-reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import {
   TimelessElement,
@@ -12,9 +12,12 @@ import { MountedEvent } from "@/event";
 import { Text } from "@/content/text";
 import { ListenerManager } from "@/util/listener";
 
-type MatchProps = {
-  when: Ref<any> | any;
-  cases: Record<string | number, () => ViewChildren>;
+type MatchCase = () => ViewChildren;
+type MatchElseCase<T> = (value: T) => ViewChildren;
+
+type MatchProps<T> = {
+  when: DerivedRef<T> | Ref<T> | T;
+  cases: Record<string | number, MatchCase | MatchElseCase<T>>;
   fallback?: () => ViewChildren;
   onMounted?: (event: MountedEvent) => void;
   beforeUnmounted?: () => void;
@@ -28,7 +31,7 @@ type MatchState = {
   // props: MatchProps;
 };
 
-export function Match(props: MatchProps) {
+export function Match<T = any>(props: MatchProps<T>) {
   const { when, cases, fallback, onMounted, beforeUnmounted, onUnmounted } =
     props;
   let $elm: any = null;
@@ -53,11 +56,32 @@ export function Match(props: MatchProps) {
     build_children_with_value(value: any) {
       const result: TimelessElement[] = [];
       state.value = value;
-      // 查找匹配的 case
-      if (cases && cases[value]) {
-        const children = cases[value]();
+      // else 是保留键，只在没有其他 case 匹配时使用
+      const has_matched_case =
+        value !== "else" && Object.prototype.hasOwnProperty.call(cases, value);
+      if (has_matched_case) {
+        const render_case = cases[value] as MatchCase;
+        const children = render_case();
         const next = methods.normalize(children);
         for (const child of next) {
+          if (isElement(child)) {
+            result.push(child);
+          } else if (isRef(child)) {
+            result.push(Text(child));
+          } else if (child) {
+            result.push(Text(String(child)));
+          }
+        }
+        state.children = result;
+        return result;
+      }
+
+      const render_else = Object.prototype.hasOwnProperty.call(cases, "else")
+        ? (cases.else as MatchElseCase<T>)
+        : undefined;
+      if (render_else) {
+        const children = methods.normalize(render_else(value));
+        for (const child of children) {
           if (isElement(child)) {
             result.push(child);
           } else if (isRef(child)) {

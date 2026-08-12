@@ -1,11 +1,11 @@
-import { refobj, computed, ref, isRef } from "@timeless/timeless";
+import { refobj, computed, ref, isRef } from "../core";
 import {
   View,
   ViewProps,
   ViewChildren,
   styleNames,
   getPlatform,
-} from "@timeless/timeless";
+} from "../core";
 import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/inner-vm";
 
 // ResizablePanels Group - 容器组件

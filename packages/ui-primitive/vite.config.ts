@@ -60,7 +60,7 @@ export default defineConfig({
         }
         return `${entryName}/index.${format}.js`;
       },
-      name: "Timeless.ui_primitive",
+      name: "Timeless.ui",
     },
     minify: isProd ? "terser" : true,
     ...(isProd && {
@@ -79,7 +79,8 @@ export default defineConfig({
       output: {
         globals: {
           "@timeless/inner-primitive": "Timeless.primitive",
-          "@timeless/inner-vm": "Timeless.ui",
+          "@timeless/inner-reactive": "Timeless.reactive",
+          "@timeless/inner-vm": "Timeless.vm",
         },
       },
     },

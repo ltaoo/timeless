@@ -1,5 +1,5 @@
-import { refobj, computed } from "@timeless/timeless";
-import { Logger } from "@timeless/timeless";
+import { refobj, computed } from "../core";
+import { Logger } from "../core";
 import {
   View,
   ViewProps,
@@ -8,7 +8,7 @@ import {
   Show,
   ListenerManager,
   createContext,
-} from "@timeless/timeless";
+} from "../core";
 import { MenuCore, MenuItemCore, MenuGroupCore } from "@timeless/inner-vm";
 
 import { Arrow as NativeArrow } from "./arrow";

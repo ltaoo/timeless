@@ -23,7 +23,7 @@ function ApplicationRootView() {
   const { View, Text, Fragment, For, Show, computed, ref, refobj, Portal, Icon } = Timeless;
   const { ErrorBoundary } = Timeless;
 
-  const { ToasterModel } = Timeless.ui;
+  const { ToasterModel } = Timeless.vm;
   const toaster$ = ToasterModel({ position: "top-center" });
 
   app.onTip((msg) => {

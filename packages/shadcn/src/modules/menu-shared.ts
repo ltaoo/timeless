@@ -1,11 +1,10 @@
-import { MenuCore } from "@timeless/inner-vm";
-
+import { vm } from "@timeless/timeless";
 const MENU_CONTENT_CLASS =
   "min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-700 shadow-md dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50";
 
-// Patch: fix item.menu.onEnter listener leak in MenuCore.listen_item
+// Patch: fix item.menu.onEnter listener leak in vm.MenuCore.listen_item
 {
-  const proto = MenuCore.prototype;
+  const proto = vm.MenuCore.prototype;
   const orig = proto.listen_item;
   proto.listen_item = function (this: any, e: any) {
     if (e.menu) {

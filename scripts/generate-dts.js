@@ -32,7 +32,7 @@ try {
   console.warn('Failed to clean up temp directory:', err.message);
 }
 
-const jsFile = 'dist/timeless.core.umd.min.js';
+const jsFile = 'dist/timeless.lite.umd.min.js';
 let jsContent = fs.readFileSync(jsFile, 'utf8');
 
 jsContent = jsContent.replace(
@@ -41,5 +41,4 @@ jsContent = jsContent.replace(
 );
 
 fs.writeFileSync(jsFile, jsContent);
-
 

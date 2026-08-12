@@ -1,5 +1,5 @@
-import { View, Column, Icon } from "@timeless/timeless";
-import { Button, Badge, Separator, ScrollView, ui } from "@timeless/shadcn";
+import { View, Column, Icon, ui } from "@timeless/timeless";
+import { Button, Badge, Separator, ScrollView } from "@timeless/shadcn";
 
 import { Section, Item } from "@/components/index";
 

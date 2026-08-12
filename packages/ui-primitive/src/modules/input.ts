@@ -1,4 +1,4 @@
-import { ref, refobj, isRef, computed, ShowProps } from "@timeless/timeless";
+import { ref, refobj, isRef, computed, ShowProps } from "../core";
 import {
   View,
   ViewProps,
@@ -8,7 +8,7 @@ import {
   InputProps,
   styleNames,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import { InputCore } from "@timeless/inner-vm";
 
 type Provider = {

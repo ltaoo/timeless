@@ -1,5 +1,4 @@
-import { registerIcons } from "@timeless/timeless";
-import { iconRegistry } from "@timeless/inner-icons";
+import { icons, registerIcons } from "@timeless/timeless";
 
 import { Button } from "./modules/button";
 import { Input } from "./modules/input";
@@ -30,12 +29,9 @@ try {
     import("./index.less");
   }
 } catch {}
-registerIcons(iconRegistry);
+registerIcons(icons.iconRegistry);
 
 export const TimelessWeUIVersion = __Version;
-
-export * from "@timeless/ui-primitive";
-export * as ui from "@timeless/inner-vm";
 
 export {
   Button,

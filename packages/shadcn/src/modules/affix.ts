@@ -1,3 +1,4 @@
+import { vm } from "@timeless/timeless";
 import {
   View,
   ViewChildren,
@@ -8,11 +9,10 @@ import {
   ViewStyleProperties,
   styleNames,
 } from "@timeless/timeless";
-import { AffixCore } from "@timeless/inner-vm";
 
 export function Affix(
   props: ViewProps & {
-    store: AffixCore;
+    store: vm.AffixCore;
     offsetTop?: number;
     target?: () => HTMLElement | Window;
   },

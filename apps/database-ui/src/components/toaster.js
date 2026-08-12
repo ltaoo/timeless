@@ -86,7 +86,7 @@ function recalcPositions(container) {
 }
 
 export function initToaster() {
-  const sonner = Timeless.ui.SonnerCore.getInstance();
+  const sonner = Timeless.vm.SonnerCore.getInstance();
   const timers = new Map();
   const heights = new Map();
 

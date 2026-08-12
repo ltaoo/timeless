@@ -82,7 +82,7 @@ export default defineConfig({
           "@timeless/inner-base": "Timeless.base",
           "@timeless/inner-reactive": "Timeless.reactive",
           "@timeless/inner-utils": "Timeless.utils",
-          "@timeless/inner-vm": "Timeless.ui",
+          "@timeless/inner-vm": "Timeless.vm",
           "@timeless/inner-kit": "Timeless.kit",
         },
       },

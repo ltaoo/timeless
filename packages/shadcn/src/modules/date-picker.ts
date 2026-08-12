@@ -1,11 +1,10 @@
+import { ui, vm } from "@timeless/timeless";
 import { combine, computed, Icon, ref, refobj } from "@timeless/timeless";
 import { For, Show, View, ViewProps } from "@timeless/timeless";
-import { DatePickerPrimitive } from "@timeless/ui-primitive";
-import { DatePickerCore } from "@timeless/inner-vm";
 
 export function DatePicker(
   props: ViewProps & {
-    store: DatePickerCore;
+    store: vm.DatePickerCore;
     id?: string;
     placeholder?: string;
   },
@@ -33,8 +32,8 @@ export function DatePicker(
     (t) => t.hovering && t.allowClear && t.hasValue,
   );
 
-  return DatePickerPrimitive.Root({ store }, [
-    DatePickerPrimitive.Trigger(
+  return ui.DatePickerPrimitive.Root({ store }, [
+    ui.DatePickerPrimitive.Trigger(
       {
         store,
         id,
@@ -54,7 +53,7 @@ export function DatePicker(
         },
       },
       [
-        DatePickerPrimitive.Value({
+        ui.DatePickerPrimitive.Value({
           store,
           placeholder,
           class: computed(state_, (d) => {
@@ -67,7 +66,7 @@ export function DatePicker(
           when: showClear,
           ok() {
             return [
-              DatePickerPrimitive.Clear(
+              ui.DatePickerPrimitive.Clear(
                 {
                   store,
                   class:
@@ -79,7 +78,7 @@ export function DatePicker(
           },
           else() {
             return [
-              DatePickerPrimitive.Icon(
+              ui.DatePickerPrimitive.Icon(
                 { class: "size-4 text-muted-foreground" },
                 [Icon({ name: "calendar", size: 16 })],
               ),
@@ -88,7 +87,7 @@ export function DatePicker(
         }),
       ],
     ),
-    DatePickerPrimitive.Content(
+    ui.DatePickerPrimitive.Content(
       {
         ...rest,
         animation: {
@@ -101,14 +100,14 @@ export function DatePicker(
       },
       () => [
         View({ class: "w-[280px] p-3" }, [
-          DatePickerPrimitive.Calendar({ store, class: "w-full" }, [
+          ui.DatePickerPrimitive.Calendar({ store, class: "w-full" }, [
             // Calendar Header
             View(
               {
                 class: "flex items-center justify-between mb-2",
               },
               [
-                DatePickerPrimitive.CalendarPrevButton(
+                ui.DatePickerPrimitive.CalendarPrevButton(
                   {
                     store,
                     class:
@@ -116,11 +115,11 @@ export function DatePicker(
                   },
                   [Icon({ name: "chevron-left", size: 16 })],
                 ),
-                DatePickerPrimitive.CalendarHeader({
+                ui.DatePickerPrimitive.CalendarHeader({
                   store,
                   class: "text-sm font-medium",
                 }),
-                DatePickerPrimitive.CalendarNextButton(
+                ui.DatePickerPrimitive.CalendarNextButton(
                   {
                     store,
                     class:
@@ -131,7 +130,7 @@ export function DatePicker(
               ],
             ),
             // Calendar Grid
-            DatePickerPrimitive.CalendarGrid({ store, class: "w-full" }, [
+            ui.DatePickerPrimitive.CalendarGrid({ store, class: "w-full" }, [
               // Weekday Headers
               View({ class: "grid grid-cols-7 mb-1" }, [
                 ...["一", "二", "三", "四", "五", "六", "日"].map((day) =>
@@ -153,7 +152,7 @@ export function DatePicker(
                     For({
                       each: computed(week, (t: any) => t.dates) as any,
                       render(day: any) {
-                        return DatePickerPrimitive.CalendarCell(
+                        return ui.DatePickerPrimitive.CalendarCell(
                           {
                             store,
                             value: day.value,

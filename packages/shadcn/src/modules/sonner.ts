@@ -1,3 +1,4 @@
+import { vm } from "@timeless/timeless";
 import {
   computed,
   derive,
@@ -11,7 +12,6 @@ import {
   TimelessElement,
   View,
 } from "@timeless/timeless";
-import { ToasterModel, ToastModel } from "@timeless/inner-vm";
 
 type OffsetValue = number | string;
 type Offset =
@@ -195,7 +195,7 @@ function getToastPositionStyles(
 type HeightEntry = { toastId: number; height: number; position: string };
 
 type ToasterProps = {
-  store: ToasterModel;
+  store: vm.ToasterModel;
   position?: string;
   theme?: "light" | "dark";
   gap?: number;
@@ -313,11 +313,11 @@ export function Toaster(props: ToasterProps) {
  * 每个 position 对应一个独立的 fixed 容器 — 对应原版的 <ol data-sonner-toaster>
  */
 function ToasterGroup(props: {
-  store: ToasterModel;
+  store: vm.ToasterModel;
   position: string;
   gap: number;
   sharedVars: Record<string, string>;
-  toasts: DerivedRef<ToastModel[]>;
+  toasts: DerivedRef<vm.ToastModel[]>;
   heights: Ref<HeightEntry[]>;
   expanded: Ref<boolean>;
   expandByDefault: boolean;
@@ -403,7 +403,7 @@ function ToasterGroup(props: {
 }
 
 export function Toast(props: {
-  store: ToastModel;
+  store: vm.ToastModel;
   position: string;
   gap: number;
   heights: Ref<HeightEntry[]>;
@@ -591,7 +591,7 @@ export function Toast(props: {
             ...heights.value,
           ]);
         }
-        // 订阅 ToastModel 自身的状态变化（removed 等）
+        // 订阅 vm.ToastModel 自身的状态变化（removed 等）
         store.onStateChange((v) => {
           state_.as(v);
         });

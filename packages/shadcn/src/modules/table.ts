@@ -1,10 +1,10 @@
+import { ui } from "@timeless/timeless";
 import { ViewProps, ViewChildren } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
-import { TablePrimitive } from "@timeless/ui-primitive";
 
 export function Table(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return TablePrimitive.Table(
+  return ui.TablePrimitive.Table(
     {
       ...rest,
       class: classNames(["w-full caption-bottom text-sm", cls]),
@@ -15,7 +15,7 @@ export function Table(props: ViewProps, children?: ViewChildren) {
 
 export function TableHeader(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return TablePrimitive.TableHeader(
+  return ui.TablePrimitive.TableHeader(
     {
       ...rest,
       class: classNames(["[&_tr]:border-b", cls]),
@@ -26,7 +26,7 @@ export function TableHeader(props: ViewProps, children?: ViewChildren) {
 
 export function TableBody(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return TablePrimitive.TableBody(
+  return ui.TablePrimitive.TableBody(
     {
       ...rest,
       class: classNames(["[&_tr:last-child]:border-0", cls]),
@@ -37,7 +37,7 @@ export function TableBody(props: ViewProps, children?: ViewChildren) {
 
 export function TableRow(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return TablePrimitive.TableRow(
+  return ui.TablePrimitive.TableRow(
     {
       ...rest,
       class: classNames([
@@ -51,7 +51,7 @@ export function TableRow(props: ViewProps, children?: ViewChildren) {
 
 export function TableHead(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return TablePrimitive.TableHead(
+  return ui.TablePrimitive.TableHead(
     {
       ...rest,
       class: classNames([
@@ -65,7 +65,7 @@ export function TableHead(props: ViewProps, children?: ViewChildren) {
 
 export function TableCell(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return TablePrimitive.TableCell(
+  return ui.TablePrimitive.TableCell(
     {
       ...rest,
       class: classNames(["p-4 align-middle", cls]),

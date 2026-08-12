@@ -32,10 +32,6 @@
   <script src="public/timeless/0.28.0/timeless.utils.umd.min.js"></script>
   <script>
     console.log("[weui-setup] Timeless.weui exports:", Object.keys(Timeless.weui || {}).length);
-    if (Timeless.weui && Timeless.weui.kit) {
-      Object.assign(Timeless, Timeless.weui.kit);
-    }
-    Timeless.ui = Timeless.weui.ui;
     Object.assign(window, Timeless);
     Object.assign(window, Timeless.weui);
   </script>

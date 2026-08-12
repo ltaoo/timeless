@@ -162,7 +162,7 @@ function LifecyclePageE(props) {
 }
 
 export default function LifecycleView(props) {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   const logs = refarr([]);
 
   const addLog = (message) => {
@@ -243,12 +243,12 @@ export default function LifecycleView(props) {
   //   addLog("LifecycleView: mounted");
   const curRoute = ref("pagea");
 
-  const backButtonStore = new Timeless.ui.ButtonCore({
+  const backButtonStore = new Timeless.vm.ButtonCore({
     onClick() {
       subhistory$.back();
     },
   });
-  const forwardButtonStore = new Timeless.ui.ButtonCore({
+  const forwardButtonStore = new Timeless.vm.ButtonCore({
     onClick() {
       subhistory$.forward();
     },

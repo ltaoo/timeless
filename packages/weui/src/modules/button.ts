@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   View,
   ViewChildren,
@@ -6,8 +7,6 @@ import {
   computed,
   ListenerManager,
 } from "@timeless/timeless";
-import { ButtonPrimitive } from "@timeless/ui-primitive";
-import { ButtonCore } from "@timeless/inner-vm";
 
 const VARIANT_STYLES = {
   primary: { background: "var(--weui-BRAND)", color: "#fff" },
@@ -50,7 +49,7 @@ const BASE_STYLE = {
 
 export function Button(
   props: ViewProps & {
-    store: ButtonCore;
+    store: vm.ButtonCore;
   },
   children: ViewChildren = [],
 ) {
@@ -81,7 +80,7 @@ export function Button(
     return result;
   });
 
-  return ButtonPrimitive.Root(
+  return ui.ButtonPrimitive.Root(
     {
       ...rest,
       store,
@@ -94,7 +93,7 @@ export function Button(
       },
     },
     [
-      ButtonPrimitive.Loading({ store }, [
+      ui.ButtonPrimitive.Loading({ store }, [
         View(
           {
             style: {
@@ -110,7 +109,7 @@ export function Button(
           [],
         ),
       ]),
-      ButtonPrimitive.Content({}, children),
+      ui.ButtonPrimitive.Content({}, children),
     ],
   );
 }

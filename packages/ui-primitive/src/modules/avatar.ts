@@ -1,11 +1,11 @@
-import { computed, ref, isRef, Ref } from "@timeless/timeless";
+import { computed, ref, isRef, Ref } from "../core";
 import {
   View,
   ViewProps,
   ViewChildren,
   Img,
   ImgProps,
-} from "@timeless/timeless";
+} from "../core";
 
 export function Root(
   props: ViewProps & { size?: "default" | "large" },

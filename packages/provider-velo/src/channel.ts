@@ -1,5 +1,8 @@
 import { Result } from "@timeless/inner-base";
-import { ChannelCore, onChannelCreated } from "@timeless/inner-kit";
+import {
+  ChannelClientCore,
+  type ChannelOpenOptions,
+} from "@timeless/inner-kit";
 
 export type VeloInvoke = (
   url: string,
@@ -13,22 +16,15 @@ export type VeloInvoke = (
 export type VeloRuntime = {
   invoke?: VeloInvoke;
   goCall?: VeloInvoke;
-  onGoMessage?: (handler: (payload: unknown) => void) => void;
+  onGoMessage?: (handler: (payload: unknown) => void) => void | (() => void);
   __goMessageHandlers?: Array<(payload: unknown) => void>;
 };
 
 export type VeloChannelProviderOptions = {
-  autoConnect?: boolean;
   debug?: boolean;
   runtime?: VeloRuntime;
   invoke?: VeloInvoke;
 };
-
-type Binding = {
-  unlisten: () => void;
-};
-
-const bindings = new WeakMap<ChannelCore<any, any>, Binding>();
 
 function getRuntime(options: VeloChannelProviderOptions) {
   if (options.runtime) {
@@ -45,12 +41,12 @@ function normalizeHeaders(headers: Record<string, string | number>) {
   return result;
 }
 
-function buildEndpoint(channel: ChannelCore<any, any>) {
-  if (typeof channel.endpoint !== "string") {
-    return Result.Err("ChannelCore.endpoint 必须是字符串");
+function buildEndpoint(options: ChannelOpenOptions) {
+  if (typeof options.endpoint !== "string") {
+    return Result.Err("ChannelOpenOptions.endpoint 必须是字符串");
   }
-  const endpoint = [channel.hostname || "", channel.endpoint].join("");
-  const query = channel.query;
+  const endpoint = [options.hostname || "", options.endpoint].join("");
+  const query = options.query;
   if (!query) {
     return Result.Ok(endpoint);
   }
@@ -89,8 +85,12 @@ function addMessageHandler(
   handler: (payload: unknown) => void,
 ) {
   if (typeof runtime.onGoMessage === "function") {
-    runtime.onGoMessage(handler);
-    return Result.Ok(() => removeMessageHandler(runtime, handler));
+    const unlisten = runtime.onGoMessage(handler);
+    return Result.Ok(
+      typeof unlisten === "function"
+        ? unlisten
+        : () => removeMessageHandler(runtime, handler),
+    );
   }
   if (Array.isArray(runtime.__goMessageHandlers)) {
     runtime.__goMessageHandlers.push(handler);
@@ -107,104 +107,78 @@ function isBoxError(resp: unknown) {
   return typeof target.code === "number" && target.code !== 0;
 }
 
-function installChannel<TMessage, TSend>(
-  channel: ChannelCore<TMessage, TSend>,
-  options: VeloChannelProviderOptions,
+export function connect(
+  client: ChannelClientCore,
+  options: VeloChannelProviderOptions = {},
 ) {
-  channel.openConnection = () => {
-    if (bindings.has(channel)) {
-      return Result.Ok(null);
+  client.open = (channelOptions) => {
+    if (channelOptions.signal.aborted) {
+      return Result.Err("连接已取消");
     }
+
     const runtime = getRuntime(options);
     const messageHandler = (payload: unknown) => {
       if (options.debug) {
         console.log("[provider-velo]receive", payload);
       }
-      channel.receiveMessage(payload);
+      channelOptions.onMessage(payload);
     };
     const added = addMessageHandler(runtime, messageHandler);
     if (added.error) {
       return Result.Err(added.error);
     }
-    bindings.set(channel, {
-      unlisten: added.data,
-    });
-    return Result.Ok(null);
-  };
 
-  channel.postMessage = async (data) => {
-    const endpoint = buildEndpoint(channel);
-    if (endpoint.error) {
-      return Result.Err(endpoint.error);
-    }
-    const runtime = getRuntime(options);
-    const invoke = options.invoke || runtime.invoke || runtime.goCall;
-    if (typeof invoke !== "function") {
-      return Result.Err("缺少 Velo invoke");
-    }
-    try {
-      if (options.debug) {
-        console.log("[provider-velo]send", endpoint.data, data);
+    let closed = false;
+    const close = () => {
+      if (closed) {
+        return Result.Ok(null);
       }
-      const resp = await invoke(endpoint.data, {
-        method: "POST",
-        headers: normalizeHeaders(channel.headers),
-        args: data,
-      });
-      if (isBoxError(resp)) {
-        const boxResp = resp as { code: number; msg?: string; data?: unknown };
-        return Result.Err(
-          boxResp.msg || "Velo bridge 调用失败",
-          boxResp.code,
-          boxResp.data,
-        );
-      }
+      closed = true;
+      added.data();
+      channelOptions.signal.removeEventListener("abort", close);
       return Result.Ok(null);
-    } catch (err) {
-      return Result.Err(err as Error);
-    }
-  };
+    };
+    channelOptions.signal.addEventListener("abort", close, { once: true });
 
-  channel.closeConnection = () => {
-    const binding = bindings.get(channel);
-    if (binding) {
-      binding.unlisten();
-      bindings.delete(channel);
-    }
-    return Result.Ok(null);
-  };
-
-  return channel;
-}
-
-function scheduleConnect(channel: ChannelCore<any, any>) {
-  const run = () => {
-    channel.connect();
-  };
-  if (typeof queueMicrotask === "function") {
-    queueMicrotask(run);
-    return;
-  }
-  setTimeout(run, 0);
-}
-
-export function connect<TMessage = unknown, TSend = unknown>(
-  channel?: ChannelCore<TMessage, TSend>,
-  options: VeloChannelProviderOptions = {},
-) {
-  const autoConnect = options.autoConnect !== false;
-  if (!channel) {
-    onChannelCreated((ins) => {
-      installChannel(ins, options);
-      if (autoConnect) {
-        scheduleConnect(ins);
-      }
+    return Result.Ok({
+      async send(data: unknown) {
+        const endpoint = buildEndpoint(channelOptions);
+        if (endpoint.error) {
+          return Result.Err(endpoint.error);
+        }
+        const invoke = options.invoke || runtime.invoke || runtime.goCall;
+        if (typeof invoke !== "function") {
+          return Result.Err("缺少 Velo invoke");
+        }
+        try {
+          if (options.debug) {
+            console.log("[provider-velo]send", endpoint.data, data);
+          }
+          const resp = await invoke(endpoint.data, {
+            method: "POST",
+            headers: normalizeHeaders(channelOptions.headers),
+            args: data,
+          });
+          if (isBoxError(resp)) {
+            const boxResp = resp as {
+              code: number;
+              msg?: string;
+              data?: unknown;
+            };
+            return Result.Err(
+              boxResp.msg || "Velo bridge 调用失败",
+              boxResp.code,
+              boxResp.data,
+            );
+          }
+          return Result.Ok(null);
+        } catch (err) {
+          return Result.Err(err as Error);
+        }
+      },
+      close,
     });
-    return null;
-  }
-  installChannel(channel, options);
-  if (autoConnect) {
-    scheduleConnect(channel);
-  }
-  return channel;
+  };
+
+  return client;
 }

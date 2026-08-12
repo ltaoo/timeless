@@ -2,7 +2,7 @@ import { TestDialog } from "@/components/dialogtest.js";
 import { Section, Item } from "@/components/index.js";
 
 export default function FeedbackView() {
-  const dialog$ = new Timeless.ui.DialogCore({
+  const dialog$ = new Timeless.vm.DialogCore({
     title: "Dialog Title",
     onOk() {
       dialog$.okBtn.setLoading(true);
@@ -11,20 +11,20 @@ export default function FeedbackView() {
       }, 3000);
     },
   });
-  const viewportDialog$ = new Timeless.ui.DialogCore({
+  const viewportDialog$ = new Timeless.vm.DialogCore({
     title: "Dialog With Viewport",
   });
   // const viewportBoxEl = ref(null);
 
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
       Section("Menu", [
         Item("Default", [
           // Menu({
-          //   store: new Timeless.ui.MenuCore({
+          //   store: new Timeless.vm.MenuCore({
           //     items: [
-          //       new Timeless.ui.MenuItemCore({
+          //       new Timeless.vm.MenuItemCore({
           //         label: "Edit",
           //         icon: View(
           //           {
@@ -36,13 +36,13 @@ export default function FeedbackView() {
           //           console.log("edit");
           //         },
           //       }),
-          //       new Timeless.ui.MenuItemCore({
+          //       new Timeless.vm.MenuItemCore({
           //         label: "Duplicate",
           //         onClick() {
           //           console.log("duplicate");
           //         },
           //       }),
-          //       new Timeless.ui.MenuItemCore({
+          //       new Timeless.vm.MenuItemCore({
           //         label: "Delete",
           //         onClick() {
           //           console.log("delete");
@@ -54,31 +54,31 @@ export default function FeedbackView() {
         ]),
         Item("With Submenu", [
           Menu({
-            store: new Timeless.ui.MenuCore({
+            store: new Timeless.vm.MenuCore({
               items: [
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "Cut",
                   onClick() {
                     console.log("cut");
                   },
                 }),
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "Copy",
                   onClick() {
                     console.log("copy");
                   },
                 }),
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "Share",
-                  menu: new Timeless.ui.MenuCore({
+                  menu: new Timeless.vm.MenuCore({
                     items: [
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Email",
                         onClick() {
                           console.log("email");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Message",
                         onClick() {
                           console.log("message");
@@ -96,7 +96,7 @@ export default function FeedbackView() {
         Item("Default", [
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 onClick() {
                   dialog$.show();
                 },
@@ -108,30 +108,30 @@ export default function FeedbackView() {
         ]),
         Item("With Select", [
           (() => {
-            const selectInDialog$ = new Timeless.ui.DialogCore({
+            const selectInDialog$ = new Timeless.vm.DialogCore({
               title: "Dialog With Select",
             });
-            const select$ = new Timeless.ui.SelectCore({
+            const select$ = new Timeless.vm.SelectCore({
               defaultValue: null,
               placeholder: "请选择水果",
               options: [
-                new Timeless.ui.SelectItemCore({
+                new Timeless.vm.SelectItemCore({
                   value: "apple",
                   label: "苹果",
                 }),
-                new Timeless.ui.SelectItemCore({
+                new Timeless.vm.SelectItemCore({
                   value: "banana",
                   label: "香蕉",
                 }),
-                new Timeless.ui.SelectItemCore({
+                new Timeless.vm.SelectItemCore({
                   value: "orange",
                   label: "橙子",
                 }),
-                new Timeless.ui.SelectItemCore({
+                new Timeless.vm.SelectItemCore({
                   value: "grape",
                   label: "葡萄",
                 }),
-                new Timeless.ui.SelectItemCore({
+                new Timeless.vm.SelectItemCore({
                   value: "watermelon",
                   label: "西瓜",
                 }),
@@ -140,7 +140,7 @@ export default function FeedbackView() {
             return View({}, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     onClick() {
                       selectInDialog$.show();
                     },
@@ -178,7 +178,7 @@ export default function FeedbackView() {
               ]),
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     onClick() {
                       viewportDialog$.show();
                     },
@@ -198,19 +198,19 @@ export default function FeedbackView() {
       Section("Sheet", [
         Item("Sides", [
           (() => {
-            const sheetR$ = new Timeless.ui.DialogCore({
+            const sheetR$ = new Timeless.vm.DialogCore({
               title: "Sheet Right",
             });
-            const sheetL$ = new Timeless.ui.DialogCore({
+            const sheetL$ = new Timeless.vm.DialogCore({
               title: "Sheet Left",
             });
-            const sheetB$ = new Timeless.ui.DialogCore({
+            const sheetB$ = new Timeless.vm.DialogCore({
               title: "Sheet Bottom",
             });
             return View({ class: classNames(["flex gap-2"]) }, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     size: "sm",
                     onClick() {
                       sheetR$.show();
@@ -221,7 +221,7 @@ export default function FeedbackView() {
               ),
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     size: "sm",
                     variant: "outline",
                     onClick() {
@@ -233,7 +233,7 @@ export default function FeedbackView() {
               ),
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     size: "sm",
                     variant: "outline",
                     onClick() {
@@ -265,11 +265,11 @@ export default function FeedbackView() {
       Section("transition", [
         Item("Toggle visibility", [
           (() => {
-            const p$ = new Timeless.ui.PresenceCore({});
+            const p$ = new Timeless.vm.PresenceCore({});
             return View({ class: "space-y-2" }, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     size: "sm",
                     variant: "outline",
                     onClick() {
@@ -281,7 +281,7 @@ export default function FeedbackView() {
               ),
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     size: "sm",
                     variant: "outline",
                     onClick() {
@@ -303,12 +303,12 @@ export default function FeedbackView() {
         ]),
         Item("Fade animation", [
           (() => {
-            const p$ = new Timeless.ui.PresenceCore({});
+            const p$ = new Timeless.vm.PresenceCore({});
             return View({ class: "space-y-2" }, [
               View({ class: "flex gap-2" }, [
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -320,7 +320,7 @@ export default function FeedbackView() {
                 ),
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -348,12 +348,12 @@ export default function FeedbackView() {
         ]),
         Item("Slide from bottom", [
           (() => {
-            const p$ = new Timeless.ui.PresenceCore({});
+            const p$ = new Timeless.vm.PresenceCore({});
             return View({ class: "space-y-2" }, [
               View({ class: "flex gap-2" }, [
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -365,7 +365,7 @@ export default function FeedbackView() {
                 ),
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -393,12 +393,12 @@ export default function FeedbackView() {
         ]),
         Item("Zoom with fade", [
           (() => {
-            const p$ = new Timeless.ui.PresenceCore({});
+            const p$ = new Timeless.vm.PresenceCore({});
             return View({ class: "space-y-2" }, [
               View({ class: "flex gap-2" }, [
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -410,7 +410,7 @@ export default function FeedbackView() {
                 ),
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -438,12 +438,12 @@ export default function FeedbackView() {
         ]),
         Item("Slide from right", [
           (() => {
-            const p$ = new Timeless.ui.PresenceCore({});
+            const p$ = new Timeless.vm.PresenceCore({});
             return View({ class: "space-y-2" }, [
               View({ class: "flex gap-2" }, [
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -455,7 +455,7 @@ export default function FeedbackView() {
                 ),
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -483,12 +483,12 @@ export default function FeedbackView() {
         ]),
         Item("Presence in Portal", [
           (() => {
-            const p$ = new Timeless.ui.PresenceCore({});
+            const p$ = new Timeless.vm.PresenceCore({});
             return View({ class: "space-y-2" }, [
               View({ class: "flex gap-2" }, [
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -500,7 +500,7 @@ export default function FeedbackView() {
                 ),
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                       onClick() {
@@ -539,7 +539,7 @@ export default function FeedbackView() {
                               "🎭 Presence inside Portal",
                               Button(
                                 {
-                                  store: new Timeless.ui.ButtonCore({
+                                  store: new Timeless.vm.ButtonCore({
                                     size: "sm",
                                     variant: "ghost",
                                     onClick() {
@@ -584,7 +584,7 @@ export default function FeedbackView() {
             const Cell = ({ side, align, label }) =>
               Popover(
                 {
-                  store: new Timeless.ui.PopoverCore({ side, align }),
+                  store: new Timeless.vm.PopoverCore({ side, align }),
                   content: [
                     View({ class: "p-3 space-y-1" }, [
                       View({ class: "text-xs text-gray-500" }, [
@@ -621,7 +621,7 @@ export default function FeedbackView() {
         Item("Wide Trigger", [
           Popover(
             {
-              store: new Timeless.ui.PopoverCore({
+              store: new Timeless.vm.PopoverCore({
                 side: "bottom",
                 align: "start",
               }),
@@ -649,11 +649,11 @@ export default function FeedbackView() {
       Section("Sonner", [
         // Item("Basic Types", [
         //   (() => {
-        //     const sonner = Timeless.ui.SonnerCore.getInstance();
+        //     const sonner = Timeless.vm.SonnerCore.getInstance();
         //     return View({ class: "flex flex-wrap gap-2" }, [
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             onClick() {
         //               sonner.toast("This is a default toast.");
@@ -664,7 +664,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             onClick() {
         //               sonner.success("Operation completed successfully!");
@@ -675,7 +675,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             variant: "outline",
         //             onClick() {
@@ -687,7 +687,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             variant: "outline",
         //             onClick() {
@@ -699,7 +699,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             variant: "outline",
         //             onClick() {
@@ -711,7 +711,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             variant: "outline",
         //             onClick() {
@@ -726,11 +726,11 @@ export default function FeedbackView() {
         // ]),
         // Item("With Description", [
         //   (() => {
-        //     const sonner = Timeless.ui.SonnerCore.getInstance();
+        //     const sonner = Timeless.vm.SonnerCore.getInstance();
         //     return View({ class: "flex gap-2" }, [
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             onClick() {
         //               sonner.success("Event has been created", {
@@ -743,7 +743,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             variant: "outline",
         //             onClick() {
@@ -761,11 +761,11 @@ export default function FeedbackView() {
         // ]),
         // Item("Promise", [
         //   (() => {
-        //     const sonner = Timeless.ui.SonnerCore.getInstance();
+        //     const sonner = Timeless.vm.SonnerCore.getInstance();
         //     return View({ class: "flex gap-2" }, [
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             onClick() {
         //               const fakePromise = new Promise((resolve) => {
@@ -783,7 +783,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             variant: "outline",
         //             onClick() {
@@ -808,11 +808,11 @@ export default function FeedbackView() {
         // ]),
         // Item("Dismiss", [
         //   (() => {
-        //     const sonner = Timeless.ui.SonnerCore.getInstance();
+        //     const sonner = Timeless.vm.SonnerCore.getInstance();
         //     return View({ class: "flex gap-2" }, [
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             onClick() {
         //               sonner.success("I will stay until dismissed.", {
@@ -825,7 +825,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             variant: "outline",
         //             onClick() {
@@ -840,11 +840,11 @@ export default function FeedbackView() {
         // ]),
         // Item("Custom Duration", [
         //   (() => {
-        //     const sonner = Timeless.ui.SonnerCore.getInstance();
+        //     const sonner = Timeless.vm.SonnerCore.getInstance();
         //     return View({ class: "flex gap-2" }, [
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             onClick() {
         //               sonner.toast("Quick toast (1s)", { duration: 1000 });
@@ -855,7 +855,7 @@ export default function FeedbackView() {
         //       ),
         //       Button(
         //         {
-        //           store: new Timeless.ui.ButtonCore({
+        //           store: new Timeless.vm.ButtonCore({
         //             size: "sm",
         //             variant: "outline",
         //             onClick() {

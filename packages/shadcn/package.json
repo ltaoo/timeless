@@ -1,6 +1,6 @@
 {
   "name": "@timeless/shadcn",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -21,10 +21,6 @@
     "dist"
   ],
   "dependencies": {
-    "@timeless/inner-vm": "workspace:*",
-    "@timeless/ui-primitive": "workspace:*",
-    "@timeless/inner-kit": "workspace:*",
-    "@timeless/inner-icons": "workspace:*",
     "@timeless/timeless": "workspace:*"
   },
   "peerDependencies": {

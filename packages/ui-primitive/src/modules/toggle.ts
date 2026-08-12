@@ -6,7 +6,7 @@ import {
   Button,
   ButtonProps,
   Fragment,
-} from "@timeless/timeless";
+} from "../core";
 import { SwitchCore } from "@timeless/inner-vm";
 
 export function Root(

@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   ref,
   computed,
@@ -13,16 +14,6 @@ import {
   ViewProps,
   TimelessElement,
 } from "@timeless/timeless";
-import { MenuPrimitive } from "@timeless/ui-primitive";
-import {
-  MenuCore,
-  MenuItemCore,
-  MenuSeparatorCore,
-  MenuGroupCore,
-  getGlobalLayerManager,
-  initGlobalPointerListener,
-  Layer,
-} from "@timeless/inner-vm";
 
 const MenuContentClassName =
   "cn-menu-target cn-menu-translucent min-w-36 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fill-mode-both data-open:fade-in-0 data-open:zoom-in-95";
@@ -35,12 +26,12 @@ const MenuItemClassName =
 
 let menu_id_counter = 0;
 
-export function Menu(props: ViewProps & { store: MenuCore }) {
+export function Menu(props: ViewProps & { store: vm.MenuCore }) {
   const state_ = refobj(props.store.state);
 
   const listener$ = ListenerManager([state_]);
 
-  initGlobalPointerListener();
+  vm.initGlobalPointerListener();
 
   return View(
     {
@@ -53,9 +44,9 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
         );
         const $element = event.target;
         const layer_id = `menu-${++menu_id_counter}`;
-        const layer$ = getGlobalLayerManager();
+        const layer$ = vm.getGlobalLayerManager();
 
-        const layer: Layer = {
+        const layer: vm.Layer = {
           id: layer_id,
           containsPoint(x: number, y: number) {
             if (!$element) return false;
@@ -91,14 +82,16 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
     [
       For({
         each: computed(state_, (t) => t.items),
-        render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
-          if (item instanceof MenuSeparatorCore) {
+        render(
+          item: vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore,
+        ) {
+          if (item instanceof vm.MenuSeparatorCore) {
             return MenuSeparator({});
           }
-          if (item instanceof MenuGroupCore) {
+          if (item instanceof vm.MenuGroupCore) {
             return MenuGroup({ store: item });
           }
-          return MenuItem({ store: item as MenuItemCore });
+          return MenuItem({ store: item as vm.MenuItemCore });
         },
       }),
     ],
@@ -106,12 +99,12 @@ export function Menu(props: ViewProps & { store: MenuCore }) {
 }
 
 function MenuSeparator(_props: ViewProps) {
-  return MenuPrimitive.Separator({
+  return ui.MenuPrimitive.Separator({
     class: "-mx-1 my-1 h-px bg-border",
   });
 }
 
-function MenuGroup(props: ViewProps & { store: MenuGroupCore }) {
+function MenuGroup(props: ViewProps & { store: vm.MenuGroupCore }) {
   const state_ = refobj(props.store.state);
   const has_label_ = computed(state_, (t) => !!t.label);
 
@@ -119,12 +112,12 @@ function MenuGroup(props: ViewProps & { store: MenuGroupCore }) {
     state_.as(v);
   });
 
-  return MenuPrimitive.Group({ store: props.store }, [
+  return ui.MenuPrimitive.Group({ store: props.store }, [
     Show({
       when: has_label_,
       ok() {
         return [
-          MenuPrimitive.GroupLabel(
+          ui.MenuPrimitive.GroupLabel(
             {
               class:
                 "px-1.5 py-1.5 text-xs font-medium text-muted-foreground data-inset:pl-7",
@@ -136,26 +129,26 @@ function MenuGroup(props: ViewProps & { store: MenuGroupCore }) {
     }),
     For({
       each: computed(state_, (t) => t.items),
-      render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
-        if (item instanceof MenuSeparatorCore) {
+      render(item: vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore) {
+        if (item instanceof vm.MenuSeparatorCore) {
           return MenuSeparator({});
         }
-        if (item instanceof MenuGroupCore) {
+        if (item instanceof vm.MenuGroupCore) {
           return MenuGroup({ store: item });
         }
-        return MenuItem({ store: item as MenuItemCore });
+        return MenuItem({ store: item as vm.MenuItemCore });
       },
     }),
   ]);
 }
 
-function MenuItem(props: ViewProps & { store: MenuItemCore }) {
+function MenuItem(props: ViewProps & { store: vm.MenuItemCore }) {
   const state_ = refobj(props.store.state);
   const has_submenu_ = ref(!!props.store.menu);
   const has_icon_ = computed(state_, (t) => !!t.icon);
   const has_shortcut_ = computed(state_, (t) => !!t.shortcut);
   const menu_state_ = refobj(
-    props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
+    props.store.menu ? props.store.menu.state : ({} as vm.MenuCore["state"]),
   );
 
   const listener$ = ListenerManager([
@@ -189,7 +182,7 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
       },
     },
     [
-      MenuPrimitive.Item(
+      ui.MenuPrimitive.Item(
         {
           store: props.store,
           class: classNames([
@@ -257,8 +250,8 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
           return Show({
             when: computed(menu_state_, (t) => t.open),
             ok() {
-              return MenuPrimitive.Portal({}, [
-                MenuPrimitive.SubMenuContent(
+              return ui.MenuPrimitive.Portal({}, [
+                ui.MenuPrimitive.SubMenuContent(
                   {
                     store: props.store.menu,
                     animation: {
@@ -272,17 +265,17 @@ function MenuItem(props: ViewProps & { store: MenuItemCore }) {
                         each: computed(menu_state_, (t) => t.items),
                         render(
                           item:
-                            | MenuItemCore
-                            | MenuSeparatorCore
-                            | MenuGroupCore,
+                            | vm.MenuItemCore
+                            | vm.MenuSeparatorCore
+                            | vm.MenuGroupCore,
                         ) {
-                          if (item instanceof MenuSeparatorCore) {
+                          if (item instanceof vm.MenuSeparatorCore) {
                             return MenuSeparator({});
                           }
-                          if (item instanceof MenuGroupCore) {
+                          if (item instanceof vm.MenuGroupCore) {
                             return MenuGroup({ store: item });
                           }
-                          return MenuItem({ store: item as MenuItemCore });
+                          return MenuItem({ store: item as vm.MenuItemCore });
                         },
                       }),
                     ]),

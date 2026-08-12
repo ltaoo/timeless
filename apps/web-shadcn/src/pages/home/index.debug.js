@@ -81,7 +81,7 @@ export default function OverlayView() {
   );
 
   const ui = {
-    view$: new Timeless.ui.ScrollViewCore({
+    view$: new Timeless.vm.ScrollViewCore({
       onScroll(pos) {
         ui.waterfall$.methods.handleScroll({ scrollTop: pos.scrollTop });
       },
@@ -90,18 +90,18 @@ export default function OverlayView() {
         ui.view$.finishLoadingMore();
       },
     }),
-    // view$ = new Timeless.ui.ScrollViewCore({});
-    hourview$: new Timeless.ui.ScrollViewCore({}),
-    waterfall$: Timeless.ui.WaterfallModel({
+    // view$ = new Timeless.vm.ScrollViewCore({});
+    hourview$: new Timeless.vm.ScrollViewCore({}),
+    waterfall$: Timeless.vm.WaterfallModel({
       column: 1,
       size: 10,
       buffer: 3,
       gutter: 0,
     }),
-    contextMenu$: new Timeless.ui.ContextMenuCore({
+    contextMenu$: new Timeless.vm.ContextMenuCore({
       offsetY: -6,
       items: [
-        new Timeless.ui.MenuItemCore({
+        new Timeless.vm.MenuItemCore({
           label: "Delete",
           onClick() {
             if (contextFocusedRecord_.value) {
@@ -127,13 +127,13 @@ export default function OverlayView() {
   const checked_ = ref(true);
 
   const platform = getPlatform();
-  const search_select$ = new Timeless.ui.SelectCore({
+  const search_select$ = new Timeless.vm.SelectCore({
     view$: ui.view$,
     platform,
     defaultValue: null,
     placeholder: "输入关键词搜索",
     options: [],
-    search: new Timeless.ui.InputCore({
+    search: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "输入水果名...",
     }),
@@ -158,7 +158,7 @@ export default function OverlayView() {
     console.log("index.debug.js - list$.onDataSourceChange", dataSource);
     search_select$.setOptions(
       dataSource.map((item) => {
-        return new Timeless.ui.SelectItemCore({
+        return new Timeless.vm.SelectItemCore({
           value: item.value,
           label: item.label,
         });
@@ -196,7 +196,7 @@ export default function OverlayView() {
       Button(
         {
           class: "mt-4",
-          store: new Timeless.ui.ButtonCore({
+          store: new Timeless.vm.ButtonCore({
             onClick() {
               // search_select$.focusSearchInput();
               search_select$.focus();
@@ -215,7 +215,7 @@ export default function OverlayView() {
       ),
       // Button(
       //   {
-      //     store: new Timeless.ui.ButtonCore({
+      //     store: new Timeless.vm.ButtonCore({
       //       onClick() {
       //         console.log("123");
       //         checked_.toggle();

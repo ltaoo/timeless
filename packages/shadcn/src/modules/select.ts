@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   classNames,
   combine,
@@ -8,8 +9,6 @@ import {
   refobj,
 } from "@timeless/timeless";
 import { For, ViewProps, Show, View, Icon } from "@timeless/timeless";
-import { SelectPrimitive } from "@timeless/ui-primitive";
-import { SelectCore, SelectItemCore, SelectGroupCore } from "@timeless/inner-vm";
 
 // const SelectOptionClassName =
 //   "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2";
@@ -18,7 +17,7 @@ const SelectGroupLabelClassName =
   "px-1.5 py-1.5 text-xs font-medium text-muted-foreground select-none";
 
 export function Select(
-  props: ViewProps & { store: SelectCore<any>; id?: string },
+  props: ViewProps & { store: vm.SelectCore<any>; id?: string },
 ) {
   const { store, id, class: cls, ...rest } = props;
   const state_ = refobj(store.state);
@@ -79,7 +78,7 @@ export function Select(
       }
       return result;
     },
-    render_opt(option: SelectItemCore<any>) {
+    render_opt(option: vm.SelectItemCore<any>) {
       const item_ = refobj(option.state);
       const cls_ = computed(item_, (t) => {
         const is_focused = t.focused;
@@ -99,7 +98,7 @@ export function Select(
           item_.as(v);
         }),
       );
-      return SelectPrimitive.Item(
+      return ui.SelectPrimitive.Item(
         {
           select$: store,
           item$: option,
@@ -114,7 +113,7 @@ export function Select(
           },
         },
         [
-          SelectPrimitive.ItemIndicator(
+          ui.SelectPrimitive.ItemIndicator(
             {
               store: option,
               class:
@@ -122,12 +121,12 @@ export function Select(
             },
             [Icon({ name: "check", size: 12 })],
           ),
-          SelectPrimitive.ItemText({}, [option.label]),
+          ui.SelectPrimitive.ItemText({}, [option.label]),
         ],
       );
     },
-    render_entry(entry: SelectItemCore<any> | SelectGroupCore<any>) {
-      if (entry && entry instanceof SelectGroupCore) {
+    render_entry(entry: vm.SelectItemCore<any> | vm.SelectGroupCore<any>) {
+      if (entry && entry instanceof vm.SelectGroupCore) {
         return Fragment({}, [
           Show({
             when: !!entry.label,
@@ -148,7 +147,7 @@ export function Select(
           }),
         ]);
       }
-      return methods.render_opt(entry as SelectItemCore<any>);
+      return methods.render_opt(entry as vm.SelectItemCore<any>);
     },
   };
 
@@ -158,7 +157,7 @@ export function Select(
   });
   listener$.add(filtered_entries_);
 
-  return SelectPrimitive.Root(
+  return ui.SelectPrimitive.Root(
     {
       store,
       onMounted() {
@@ -172,7 +171,7 @@ export function Select(
       },
     },
     [
-      SelectPrimitive.Trigger(
+      ui.SelectPrimitive.Trigger(
         {
           id,
           store,
@@ -232,7 +231,7 @@ export function Select(
             when: computed(state_, (t) => t.search),
             ok() {
               return [
-                SelectPrimitive.Search({
+                ui.SelectPrimitive.Search({
                   store,
                   class:
                     "w-full bg-transparent outline-none placeholder:text-muted-foreground",
@@ -240,7 +239,7 @@ export function Select(
               ];
             },
             else() {
-              return SelectPrimitive.Value({
+              return ui.SelectPrimitive.Value({
                 dataset: {
                   slot: "select-value",
                 },
@@ -262,7 +261,7 @@ export function Select(
             when: show_clear_,
             ok() {
               return [
-                SelectPrimitive.Clear(
+                ui.SelectPrimitive.Clear(
                   {
                     store,
                     class:
@@ -274,7 +273,7 @@ export function Select(
             },
             else() {
               return [
-                SelectPrimitive.Icon(
+                ui.SelectPrimitive.Icon(
                   {
                     store,
                     class: "pointer-events-none size-4 text-muted-foreground",
@@ -295,7 +294,7 @@ export function Select(
           }),
         ],
       ),
-      SelectPrimitive.Content(
+      ui.SelectPrimitive.Content(
         {
           // ...rest,
           dataset: {
@@ -329,11 +328,9 @@ export function Select(
             "pointer-events": "auto",
           },
         },
-        [
-          View({}, ["Som"]),
-        ]
+        [View({}, ["Som"])],
         // () => [
-        //   SelectPrimitive.Viewport(
+        //   ui.SelectPrimitive.Viewport(
         //     {
         //       store,
         //       class: classNames([
@@ -391,14 +388,14 @@ export function Select(
 }
 
 function hasItemWithValue(
-  entries: (SelectGroupCore<any> | SelectItemCore<any>)[],
+  entries: (vm.SelectGroupCore<any> | vm.SelectItemCore<any>)[],
   value: any,
 ): boolean {
   for (let i = 0; i < entries.length; i += 1) {
     const entry = entries[i];
-    if (entry instanceof SelectGroupCore) {
+    if (entry instanceof vm.SelectGroupCore) {
       if (hasItemWithValue(entry.options, value)) return true;
-    } else if (entry instanceof SelectItemCore && entry.value === value) {
+    } else if (entry instanceof vm.SelectItemCore && entry.value === value) {
       return true;
     }
   }

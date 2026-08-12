@@ -1,15 +1,14 @@
+import { ui, vm } from "@timeless/timeless";
 import { ViewChildren, type ViewProps } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
-import { ScrollViewPrimitive } from "@timeless/ui-primitive";
-import { ScrollViewCore } from "@timeless/inner-vm";
 
 export function ScrollView(
-  props: ViewProps & { store: ScrollViewCore },
+  props: ViewProps & { store: vm.ScrollViewCore },
   children: ViewChildren,
 ) {
   const { store, class: cls, ...rest } = props;
 
-  return ScrollViewPrimitive.Root(
+  return ui.ScrollViewPrimitive.Root(
     {
       ...rest,
       store,

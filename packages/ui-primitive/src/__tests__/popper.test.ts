@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Platform } from "@timeless/timeless";
+import type { Platform } from "../core";
 import { PopperCore } from "@timeless/inner-vm";
 
 import { Content } from "@/modules/popper";

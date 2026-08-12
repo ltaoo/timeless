@@ -12,8 +12,8 @@ import {
   ClipboardModel,
   buildRoutes,
   request_factory,
-} from "@timeless/kit";
-import { Result } from "@timeless/timeless";
+  Result,
+} from "@timeless/timeless";
 
 // ============================================================
 // Routes (SSR file-based, but 也支持 client 端 history 路由跳转)

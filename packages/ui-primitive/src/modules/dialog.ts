@@ -5,7 +5,7 @@ import {
   Portal as NativePortal,
   ListenerManager,
   styleNames,
-} from "@timeless/timeless";
+} from "../core";
 import {
   DialogCore,
   DismissableLayerCore,

@@ -1,7 +1,6 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, refobj, Show } from "@timeless/timeless";
 import { For, ViewChildren, ViewProps } from "@timeless/timeless";
-import { AccordionPrimitive } from "@timeless/ui-primitive";
-import { AccordionCore } from "@timeless/inner-vm";
 
 type AccordionItem = {
   title: ViewChildren;
@@ -10,7 +9,7 @@ type AccordionItem = {
 
 export function Accordion(
   props: ViewProps & {
-    store: AccordionCore;
+    store: vm.AccordionCore;
     items: AccordionItem[];
   },
 ) {
@@ -21,7 +20,7 @@ export function Accordion(
     state_.as(v);
   });
 
-  return AccordionPrimitive.Root(
+  return ui.AccordionPrimitive.Root(
     {
       store,
       class: "w-full",
@@ -32,14 +31,14 @@ export function Accordion(
         each: items,
         render(item: AccordionItem, index) {
           const i = index.value;
-          return AccordionPrimitive.Item(
+          return ui.AccordionPrimitive.Item(
             {
               store,
               index: i,
               class: "border-b border-zinc-200 dark:border-zinc-800",
             },
             [
-              AccordionPrimitive.Trigger(
+              ui.AccordionPrimitive.Trigger(
                 {
                   store,
                   index: i,
@@ -56,7 +55,7 @@ export function Accordion(
                       return item.title || [];
                     },
                   }),
-                  AccordionPrimitive.Chevron(
+                  ui.AccordionPrimitive.Chevron(
                     {
                       store,
                       index: i,
@@ -74,7 +73,7 @@ export function Accordion(
                   ),
                 ],
               ),
-              AccordionPrimitive.Content(
+              ui.AccordionPrimitive.Content(
                 {
                   store,
                   index: i,

@@ -1,19 +1,18 @@
+import { ui, vm } from "@timeless/timeless";
 import { ref, computed, classNames } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps } from "@timeless/timeless";
-import { ResizablePanelsPrimitive } from "@timeless/ui-primitive";
-import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/inner-vm";
 
 // ResizablePanels Group 组件
 export function ResizablePanels(
   props: ViewProps & {
-    store: ResizablePanelsCore;
+    store: vm.ResizablePanelsCore;
     direction?: "horizontal" | "vertical";
   },
   children?: ViewChildren,
 ) {
   const { store, direction = "horizontal", ...rest } = props;
 
-  return ResizablePanelsPrimitive.Group(
+  return ui.ResizablePanelsPrimitive.Group(
     {
       ...rest,
       store,
@@ -31,14 +30,14 @@ export function ResizablePanels(
 // ResizablePanel 组件
 export function ResizablePanel(
   props: ViewProps & {
-    store: ResizablePanelCore;
-    group: ResizablePanelsCore;
+    store: vm.ResizablePanelCore;
+    group: vm.ResizablePanelsCore;
   },
   children?: ViewChildren,
 ) {
   const { store, group, ...rest } = props;
 
-  return ResizablePanelsPrimitive.Panel(
+  return ui.ResizablePanelsPrimitive.Panel(
     {
       ...rest,
       store,
@@ -51,9 +50,9 @@ export function ResizablePanel(
 // ResizableHandle 组件
 export function ResizableHandle(
   props: ViewProps & {
-    store: ResizablePanelsCore;
-    panelBefore: ResizablePanelCore;
-    panelAfter: ResizablePanelCore;
+    store: vm.ResizablePanelsCore;
+    panelBefore: vm.ResizablePanelCore;
+    panelAfter: vm.ResizablePanelCore;
     withHandle?: boolean;
   },
   children?: ViewChildren,
@@ -67,7 +66,7 @@ export function ResizableHandle(
 
   const isHorizontal = computed(direction_, (d) => d === "horizontal");
 
-  return ResizablePanelsPrimitive.Handle(
+  return ui.ResizablePanelsPrimitive.Handle(
     {
       ...rest,
       store,

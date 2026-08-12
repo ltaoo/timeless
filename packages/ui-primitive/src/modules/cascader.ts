@@ -1,5 +1,5 @@
-import { refobj, computed } from "@timeless/timeless";
-import { Logger } from "@timeless/timeless";
+import { refobj, computed } from "../core";
+import { Logger } from "../core";
 import {
   classNames,
   View,
@@ -10,7 +10,7 @@ import {
   Fragment,
   Show,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import { CascaderCore, CascaderOption } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";

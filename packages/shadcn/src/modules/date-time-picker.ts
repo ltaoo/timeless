@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   Button,
   classNames,
@@ -8,21 +9,11 @@ import {
   refobj,
 } from "@timeless/timeless";
 import { For, View, ViewProps, Show } from "@timeless/timeless";
-import {
-  DatePickerPrimitive,
-  TimePickerPrimitive,
-  ScrollViewPrimitive,
-} from "@timeless/ui-primitive";
-import {
-  DatePickerCore,
-  ScrollViewCore,
-  TimePickerCore,
-} from "@timeless/inner-vm";
 
 export function DateTimePicker(
   props: ViewProps & {
-    date: DatePickerCore;
-    time: TimePickerCore;
+    date: vm.DatePickerCore;
+    time: vm.TimePickerCore;
     id?: string;
     placeholder?: string;
   },
@@ -56,10 +47,10 @@ export function DateTimePicker(
     has_time_,
   ]);
 
-  const ui = {
-    hourview$: new ScrollViewCore({}),
-    minuteview$: new ScrollViewCore({}),
-    secondview$: new ScrollViewCore({}),
+  const picker_ui = {
+    hourview$: new vm.ScrollViewCore({}),
+    minuteview$: new vm.ScrollViewCore({}),
+    secondview$: new vm.ScrollViewCore({}),
   };
   const methods = {
     pick_closest_not_greater(sorted: number[], target: number) {
@@ -135,14 +126,14 @@ export function DateTimePicker(
       }
       return `${h}:${m}`;
     },
-    scroll_to_index(view$: ScrollViewCore, index: number) {
+    scroll_to_index(view$: vm.ScrollViewCore, index: number) {
       const safeIndex = index >= 0 ? index : 0;
       const top = Math.max(0, (safeIndex - scroll_padding_items) * item_height);
       view$.setScrollTop(top);
     },
   };
 
-  return DatePickerPrimitive.Root(
+  return ui.DatePickerPrimitive.Root(
     {
       store: date$,
       onMounted() {
@@ -167,7 +158,7 @@ export function DateTimePicker(
       },
     },
     [
-      DatePickerPrimitive.Trigger(
+      ui.DatePickerPrimitive.Trigger(
         {
           store: date$,
           id,
@@ -204,12 +195,13 @@ export function DateTimePicker(
               }),
             ],
           ),
-          DatePickerPrimitive.Icon({ class: "size-4 text-muted-foreground" }, [
-            Icon({ name: "calendar", size: 16 }),
-          ]),
+          ui.DatePickerPrimitive.Icon(
+            { class: "size-4 text-muted-foreground" },
+            [Icon({ name: "calendar", size: 16 })],
+          ),
         ],
       ),
-      DatePickerPrimitive.Content(
+      ui.DatePickerPrimitive.Content(
         {
           ...rest,
           animation: {
@@ -224,7 +216,7 @@ export function DateTimePicker(
           View({ class: "" }, [
             View({ class: "grid grid-cols-[280px_auto] items-start gap-0" }, [
               View({ class: "w-[280px] p-3 border-r border-border" }, [
-                DatePickerPrimitive.Calendar(
+                ui.DatePickerPrimitive.Calendar(
                   { store: date$, class: "w-full" },
                   [
                     View(
@@ -232,7 +224,7 @@ export function DateTimePicker(
                         class: "flex items-center justify-between mb-2",
                       },
                       [
-                        DatePickerPrimitive.CalendarPrevButton(
+                        ui.DatePickerPrimitive.CalendarPrevButton(
                           {
                             store: date$,
                             class:
@@ -240,11 +232,11 @@ export function DateTimePicker(
                           },
                           [Icon({ name: "chevron-left", size: 16 })],
                         ),
-                        DatePickerPrimitive.CalendarHeader({
+                        ui.DatePickerPrimitive.CalendarHeader({
                           store: date$,
                           class: "text-sm font-medium",
                         }),
-                        DatePickerPrimitive.CalendarNextButton(
+                        ui.DatePickerPrimitive.CalendarNextButton(
                           {
                             store: date$,
                             class:
@@ -254,7 +246,7 @@ export function DateTimePicker(
                         ),
                       ],
                     ),
-                    DatePickerPrimitive.CalendarGrid(
+                    ui.DatePickerPrimitive.CalendarGrid(
                       { store: date$, class: "w-full" },
                       [
                         View({ class: "grid grid-cols-7 mb-1" }, [
@@ -273,13 +265,19 @@ export function DateTimePicker(
                           }),
                         ]),
                         For({
-                          each: computed(calendar_state_, (s) => s.weeks) as any,
+                          each: computed(
+                            calendar_state_,
+                            (s) => s.weeks,
+                          ) as any,
                           render(week: any) {
                             return View({ class: "grid grid-cols-7" }, [
                               For({
-                                each: computed(week, (t: any) => t.dates) as any,
+                                each: computed(
+                                  week,
+                                  (t: any) => t.dates,
+                                ) as any,
                                 render(day: any) {
-                                  return DatePickerPrimitive.CalendarCell(
+                                  return ui.DatePickerPrimitive.CalendarCell(
                                     {
                                       store: date$,
                                       value: day.value,
@@ -362,9 +360,9 @@ export function DateTimePicker(
                     class: classNames(["relative flex flex-1 h-0"]),
                   },
                   [
-                    ScrollViewPrimitive.Root(
+                    ui.ScrollViewPrimitive.Root(
                       {
-                        store: ui.hourview$,
+                        store: picker_ui.hourview$,
                         class:
                           "absolute top-0 left-0 w-12 h-full border-r border-border overflow-y-auto overlay-scrollbar p-2",
                         onMounted() {
@@ -377,7 +375,10 @@ export function DateTimePicker(
                               : -1;
                           setTimeout(() => {
                             if (index !== -1) {
-                              methods.scroll_to_index(ui.hourview$, index);
+                              methods.scroll_to_index(
+                                picker_ui.hourview$,
+                                index,
+                              );
                             }
                           }, 0);
                         },
@@ -386,7 +387,7 @@ export function DateTimePicker(
                         For({
                           each: time$.generateHours(),
                           render(hour) {
-                            return TimePickerPrimitive.HourItem(
+                            return ui.TimePickerPrimitive.HourItem(
                               {
                                 store: time$,
                                 value: hour,
@@ -407,9 +408,9 @@ export function DateTimePicker(
                         }),
                       ],
                     ),
-                    ScrollViewPrimitive.Root(
+                    ui.ScrollViewPrimitive.Root(
                       {
-                        store: ui.minuteview$,
+                        store: picker_ui.minuteview$,
                         class: classNames([
                           "absolute top-0 left-12 w-12 h-full overflow-y-auto overlay-scrollbar p-2",
                           time$.showSeconds ? "border-border border-r" : "",
@@ -424,7 +425,10 @@ export function DateTimePicker(
                               : -1;
                           setTimeout(() => {
                             if (index !== -1) {
-                              methods.scroll_to_index(ui.minuteview$, index);
+                              methods.scroll_to_index(
+                                picker_ui.minuteview$,
+                                index,
+                              );
                             }
                           }, 0);
                         },
@@ -433,7 +437,7 @@ export function DateTimePicker(
                         For({
                           each: time$.generateMinutes(),
                           render(minute) {
-                            return TimePickerPrimitive.MinuteItem(
+                            return ui.TimePickerPrimitive.MinuteItem(
                               {
                                 store: time$,
                                 value: minute,
@@ -458,9 +462,9 @@ export function DateTimePicker(
                       when: time$.showSeconds,
                       ok() {
                         return [
-                          ScrollViewPrimitive.Root(
+                          ui.ScrollViewPrimitive.Root(
                             {
-                              store: ui.secondview$,
+                              store: picker_ui.secondview$,
                               class:
                                 "absolute top-0 left-24 w-12 h-full overflow-y-auto overlay-scrollbar p-2",
                               onMounted() {
@@ -474,7 +478,7 @@ export function DateTimePicker(
                                 setTimeout(() => {
                                   if (index !== -1) {
                                     methods.scroll_to_index(
-                                      ui.secondview$,
+                                      picker_ui.secondview$,
                                       index,
                                     );
                                   }
@@ -485,7 +489,7 @@ export function DateTimePicker(
                               For({
                                 each: time$.generateSeconds(),
                                 render(second) {
-                                  return TimePickerPrimitive.SecondItem(
+                                  return ui.TimePickerPrimitive.SecondItem(
                                     {
                                       store: time$,
                                       value: second,

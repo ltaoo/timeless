@@ -17,7 +17,7 @@ export default createLibConfig({
    globals: {
     "@timeless/inner-base": "Timeless.base",
     "@timeless/inner-kit": "Timeless.kit",
-    "@timeless/inner-vm": "Timeless.ui",
+    "@timeless/inner-vm": "Timeless.vm",
     "@timeless/inner-utils": "Timeless.utils",
   },
   alias: {

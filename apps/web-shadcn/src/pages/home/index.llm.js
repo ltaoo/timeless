@@ -171,10 +171,10 @@ function ModelSelect(props) {
               [p.name],
             ),
           ]);
-        return new Timeless.ui.SelectGroupCore({
+        return new Timeless.vm.SelectGroupCore({
           label,
           options: (p.models || []).map((m) => {
-            return new Timeless.ui.SelectItemCore({
+            return new Timeless.vm.SelectItemCore({
               value: `${p.id}/${m.id}`,
               label: m.name,
               disabled: !p.enabled || !m.enabled,
@@ -186,11 +186,11 @@ function ModelSelect(props) {
     },
   };
 
-  const select$ = new Timeless.ui.SelectCore({
+  const select$ = new Timeless.vm.SelectCore({
     defaultValue: null,
     placeholder: "选择模型",
     options: methods.buildSelectOptions(props.store.state.providers),
-    search: new Timeless.ui.InputCore({
+    search: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "搜索模型...",
     }),
@@ -205,7 +205,7 @@ function ModelSelect(props) {
 }
 
 export default function LLMPageView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
 
   const llm_provider_store$ = LLMStoreModel();
 

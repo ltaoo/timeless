@@ -1,6 +1,6 @@
+import { ui } from "@timeless/timeless";
 import { computed, ref } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
-import { SliderPrimitive } from "@timeless/ui-primitive";
 
 export function Slider(
   props: ViewProps & {
@@ -22,7 +22,7 @@ export function Slider(
     return _max - _min === 0 ? 0 : ((v - _min) / (_max - _min)) * 100;
   });
 
-  return SliderPrimitive.Root(
+  return ui.SliderPrimitive.Root(
     {
       value,
       min,
@@ -42,19 +42,19 @@ export function Slider(
       ...rest,
     },
     [
-      SliderPrimitive.Track(
+      ui.SliderPrimitive.Track(
         {
           class:
             "relative h-2 w-full grow overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800",
         },
         [
-          SliderPrimitive.Range({
+          ui.SliderPrimitive.Range({
             percentage: pct,
             class: "h-full bg-zinc-900 transition-all dark:bg-zinc-50",
           }),
         ],
       ),
-      SliderPrimitive.Thumb({
+      ui.SliderPrimitive.Thumb({
         percentage: pct,
         class:
           "absolute block h-5 w-5 rounded-full border-2 border-zinc-900 bg-white shadow ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-zinc-50 dark:bg-zinc-950",

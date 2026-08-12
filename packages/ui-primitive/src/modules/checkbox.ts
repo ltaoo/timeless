@@ -1,5 +1,5 @@
-import { ref, computed, refobj } from "@timeless/timeless";
-import { Logger } from "@timeless/timeless";
+import { ref, computed, refobj } from "../core";
+import { Logger } from "../core";
 import {
   Show,
   Fragment,
@@ -12,7 +12,7 @@ import {
   ButtonProps,
   Label as NativeLabel,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import { CheckboxCore, CheckboxGroupCore } from "@timeless/inner-vm";
 
 const logger = Logger({ prefix: "primitive", scope: "modules.checkbox" });

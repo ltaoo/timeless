@@ -3,7 +3,7 @@ import {
   ViewProps,
   ViewChildren,
   Portal as NativePortal,
-} from "@timeless/timeless";
+} from "../core";
 import { DialogCore } from "@timeless/inner-vm";
 
 import { Presence } from "./presence";

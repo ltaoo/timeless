@@ -1,8 +1,9 @@
+import { ui, vm } from "@timeless/timeless";
 import { ViewProps, computed, refobj } from "@timeless/timeless";
-import { SwitchPrimitive } from "@timeless/ui-primitive";
-import { SwitchCore } from "@timeless/inner-vm";
 
-export function Switch(props: ViewProps & { store: SwitchCore; id?: string }) {
+export function Switch(
+  props: ViewProps & { store: vm.SwitchCore; id?: string },
+) {
   const { store, id, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -10,7 +11,7 @@ export function Switch(props: ViewProps & { store: SwitchCore; id?: string }) {
     state_.as(v);
   });
 
-  return SwitchPrimitive.Root(
+  return ui.SwitchPrimitive.Root(
     {
       ...rest,
       store,
@@ -39,7 +40,7 @@ export function Switch(props: ViewProps & { store: SwitchCore; id?: string }) {
       }),
     },
     [
-      SwitchPrimitive.Thumb({
+      ui.SwitchPrimitive.Thumb({
         store,
         style: computed(state_, (s) => {
           const result: Record<string, string> = {
@@ -51,9 +52,7 @@ export function Switch(props: ViewProps & { store: SwitchCore; id?: string }) {
             "box-shadow": "0 1px 3px rgba(0,0,0,.4)",
             transition: "transform .3s",
           };
-          result.transform = s.checked
-            ? "translateX(20px)"
-            : "translateX(0)";
+          result.transform = s.checked ? "translateX(20px)" : "translateX(0)";
           return result;
         }),
       }),

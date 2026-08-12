@@ -1,5 +1,3 @@
-export * as kit from "@timeless/inner-kit";
-
 export * as PresencePrimitive from "./modules/presence";
 export * from "./modules/transition";
 export * as PopperPrimitive from "./modules/popper";

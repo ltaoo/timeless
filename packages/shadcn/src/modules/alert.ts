@@ -1,6 +1,6 @@
+import { ui } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
 import { ViewProps, ViewChildren } from "@timeless/timeless";
-import { AlertPrimitive } from "@timeless/ui-primitive";
 
 const VARIANTS = {
   default:
@@ -14,7 +14,7 @@ export function Alert(
   children?: ViewChildren,
 ) {
   const { variant = "default", class: cls, ...rest } = props;
-  return AlertPrimitive.Alert(
+  return ui.AlertPrimitive.Alert(
     {
       ...rest,
       variant,
@@ -30,7 +30,7 @@ export function Alert(
 
 export function AlertTitle(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return AlertPrimitive.AlertTitle(
+  return ui.AlertPrimitive.AlertTitle(
     {
       ...rest,
       class: classNames(["mb-1 font-medium leading-none tracking-tight", cls]),
@@ -41,7 +41,7 @@ export function AlertTitle(props: ViewProps, children?: ViewChildren) {
 
 export function AlertDescription(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return AlertPrimitive.AlertDescription(
+  return ui.AlertPrimitive.AlertDescription(
     {
       ...rest,
       class: classNames(["text-sm [&_p]:leading-relaxed", cls]),

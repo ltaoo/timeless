@@ -33,16 +33,16 @@ export default function LoginPage(props) {
   }
 
   const ui = {
-    input_username: new Timeless.ui.InputCore({
+    input_username: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "Enter your username",
     }),
-    input_pwd: new Timeless.ui.InputCore({
+    input_pwd: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "Enter your password",
       type: "password",
     }),
-    btn_login: new Timeless.ui.ButtonCore({
+    btn_login: new Timeless.vm.ButtonCore({
       onClick: handleLogin,
     }),
   };

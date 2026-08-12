@@ -1,3 +1,4 @@
+import { kit } from "@timeless/timeless";
 import {
   computed,
   combine,
@@ -7,10 +8,9 @@ import {
   Icon,
 } from "@timeless/timeless";
 import { View, ViewProps, For, Show } from "@timeless/timeless";
-import { HistoryCore } from "@timeless/inner-kit";
 
 export function HistoryPanel(
-  props: ViewProps & { store: HistoryCore<string, any> },
+  props: ViewProps & { store: kit.HistoryCore<string, any> },
 ) {
   const { store, class: cn, ...rest } = props;
 

@@ -31,7 +31,7 @@ npm install @timeless/shadcn @timeless/ui
 ### 水平布局
 
 ```typescript
-import { ResizablePanelsCore, ResizablePanelCore } from "@timeless/inner-vm";
+import { vm } from "@timeless/timeless";
 import {
   ResizablePanels,
   ResizablePanel,
@@ -40,18 +40,18 @@ import {
 } from "@timeless/shadcn";
 
 // 创建面板组
-const panelsGroup = new ResizablePanelsCore({
+const panelsGroup = new vm.ResizablePanelsCore({
   direction: "horizontal",
 });
 
 // 创建面板
-const leftPanel = new ResizablePanelCore({
+const leftPanel = new vm.ResizablePanelCore({
   defaultSize: 30,
   minSize: 20,
   maxSize: 50,
 });
 
-const rightPanel = new ResizablePanelCore({
+const rightPanel = new vm.ResizablePanelCore({
   defaultSize: 70,
   minSize: 50,
   maxSize: 80,
@@ -81,12 +81,12 @@ const App = View({ class: "h-screen" }, [
 ### 垂直布局
 
 ```typescript
-const verticalGroup = new ResizablePanelsCore({
+const verticalGroup = new vm.ResizablePanelsCore({
   direction: "vertical",
 });
 
-const topPanel = new ResizablePanelCore({ defaultSize: 40 });
-const bottomPanel = new ResizablePanelCore({ defaultSize: 60 });
+const topPanel = new vm.ResizablePanelCore({ defaultSize: 40 });
+const bottomPanel = new vm.ResizablePanelCore({ defaultSize: 60 });
 
 const App = View({ class: "h-screen" }, [
   ResizablePanels({ store: verticalGroup, direction: "vertical" }, [
@@ -104,10 +104,10 @@ const App = View({ class: "h-screen" }, [
 ### 三栏布局
 
 ```typescript
-const mainGroup = new ResizablePanelsCore({ direction: "horizontal" });
-const leftPanel = new ResizablePanelCore({ defaultSize: 25, minSize: 15 });
-const middlePanel = new ResizablePanelCore({ defaultSize: 50, minSize: 30 });
-const rightPanel = new ResizablePanelCore({ defaultSize: 25, minSize: 15 });
+const mainGroup = new vm.ResizablePanelsCore({ direction: "horizontal" });
+const leftPanel = new vm.ResizablePanelCore({ defaultSize: 25, minSize: 15 });
+const middlePanel = new vm.ResizablePanelCore({ defaultSize: 50, minSize: 30 });
+const rightPanel = new vm.ResizablePanelCore({ defaultSize: 25, minSize: 15 });
 
 const App = View({ class: "h-screen" }, [
   ResizablePanels({ store: mainGroup }, [
@@ -192,7 +192,7 @@ new ResizablePanelCore({
 ### 可折叠面板
 
 ```typescript
-const collapsiblePanel = new ResizablePanelCore({
+const collapsiblePanel = new vm.ResizablePanelCore({
   defaultSize: 30,
   minSize: 0,
   collapsible: true,
@@ -207,7 +207,7 @@ collapsiblePanel.expand(); // 展开
 ### 监听大小变化
 
 ```typescript
-const panelsGroup = new ResizablePanelsCore({
+const panelsGroup = new vm.ResizablePanelsCore({
   onResize: (sizes) => {
     console.log("Panel sizes:", sizes);
   },

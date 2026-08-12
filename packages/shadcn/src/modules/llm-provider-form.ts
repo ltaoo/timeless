@@ -1,6 +1,6 @@
+import { vm } from "@timeless/timeless";
 import { computed, refobj, classNames } from "@timeless/timeless";
 import { For, Img, Show, View, ViewProps } from "@timeless/timeless";
-import { ButtonCore, CheckboxCore, InputCore } from "@timeless/inner-vm";
 
 import { Button } from "./button";
 import { Card, CardContent } from "./card";
@@ -87,7 +87,7 @@ export function LLMProviderForm(
             const p = (s.providers || []).find((x) => x.id === provider.id);
             return p?.enabled ?? false;
           });
-          const enabled_checkbox$ = new CheckboxCore({
+          const enabled_checkbox$ = new vm.CheckboxCore({
             checked: provider.enabled,
             onChange: (checked) => {
               store.toggleProviderEnabled?.({
@@ -96,7 +96,7 @@ export function LLMProviderForm(
               });
             },
           });
-          const api_proxy_input$ = new InputCore({
+          const api_proxy_input$ = new vm.InputCore({
             defaultValue: provider.apiProxyAddress || "",
             placeholder: provider.placeholder || "",
             onChange: (v) => {
@@ -106,7 +106,7 @@ export function LLMProviderForm(
               });
             },
           });
-          const api_key_input$ = new InputCore({
+          const api_key_input$ = new vm.InputCore({
             defaultValue: provider.apiKey || "",
             placeholder: "请输入 API Key",
             type: "password",
@@ -117,7 +117,7 @@ export function LLMProviderForm(
               });
             },
           });
-          const pending_model_input$ = new InputCore({
+          const pending_model_input$ = new vm.InputCore({
             defaultValue: "",
             placeholder: "输入模型名称",
             onEnter: (value) => {
@@ -129,7 +129,7 @@ export function LLMProviderForm(
               pending_model_input$.setValue("");
             },
           });
-          const add_model_btn$ = new ButtonCore({
+          const add_model_btn$ = new vm.ButtonCore({
             size: "lg",
             onClick: () => {
               const v = String(pending_model_input$.value || "").trim();
@@ -247,7 +247,7 @@ export function LLMProviderForm(
                             }),
                             key: "id",
                             render(model) {
-                              const model_checkbox$ = new CheckboxCore({
+                              const model_checkbox$ = new vm.CheckboxCore({
                                 checked: model.enabled,
                                 onChange: (checked) => {
                                   store.toggleModelEnabled?.({
@@ -257,7 +257,7 @@ export function LLMProviderForm(
                                   });
                                 },
                               });
-                              const delete_btn$ = new ButtonCore({
+                              const delete_btn$ = new vm.ButtonCore({
                                 variant: "link",
                                 size: "xs",
                                 onClick: () => {

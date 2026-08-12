@@ -8,7 +8,7 @@ import { buildLibName } from "../../vite.config.base";
 import pkg from "./package.json";
 
 const isProd = false;
-const name = "timeless.ui";
+const name = "timeless.vm";
 const isWhole = process.argv.includes("--whole");
 const isUmdOnly = process.argv.includes("--umd");
 

@@ -4,7 +4,7 @@ import {
   ViewChildren,
   Button,
   ButtonProps,
-} from "@timeless/timeless";
+} from "../core";
 import { TabHeaderCore } from "@timeless/inner-vm";
 
 export function Root(

@@ -15,8 +15,8 @@ export default createLibConfig({
   ],
   globals: {
     '@timeless/inner-reactive': 'Timeless.reactive',
-    '@timeless/inner-kit': 'Timeless',
-    '@timeless/inner-vm': 'Timeless.ui'
+    '@timeless/inner-kit': 'Timeless.kit',
+    '@timeless/inner-vm': 'Timeless.vm'
   },
   formats: ['es', 'cjs', 'umd'],
   minify: true,

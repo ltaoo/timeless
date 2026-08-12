@@ -1,12 +1,12 @@
-import { ref, computed } from "@timeless/timeless";
-import { FilePicker as NativeFilePicker } from "@timeless/timeless";
+import { ref, computed } from "../core";
+import { FilePicker as NativeFilePicker } from "../core";
 import {
   View,
   ViewProps,
   ViewChildren,
   styleNames,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import { FilePickerCore } from "@timeless/inner-vm";
 
 export function Root(

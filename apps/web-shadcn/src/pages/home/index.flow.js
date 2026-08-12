@@ -176,76 +176,76 @@ function generateMockExecution(nodeId) {
 }
 
 export default function FlowExamplePage() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   const selectedNodeId = ref(null);
   const selectedNodeData = ref(null);
 
-  const flow$ = new Timeless.ui.FlowCanvasModel({
+  const flow$ = new Timeless.vm.FlowCanvasModel({
     nodes: [
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "trigger",
         position: { x: 0, y: 200 },
         data: { label: "手动触发" },
         type: "default",
         execution: generateMockExecution("trigger"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "input",
         position: { x: 200, y: 200 },
         data: { label: "输入 URL" },
         type: "default",
         execution: generateMockExecution("input"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "request",
         position: { x: 400, y: 200 },
         data: { label: "页面请求", desc: "HTTP / CDP" },
         type: "default",
         execution: generateMockExecution("request"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "parse",
         position: { x: 620, y: 200 },
         data: { label: "响应解析" },
         type: "default",
         execution: generateMockExecution("parse"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "img-extract",
         position: { x: 840, y: 100 },
         data: { label: "img 提取" },
         type: "default",
         execution: generateMockExecution("img-extract"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "css-extract",
         position: { x: 840, y: 300 },
         data: { label: "css 提取" },
         type: "default",
         execution: generateMockExecution("css-extract"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "img-request",
         position: { x: 1060, y: 100 },
         data: { label: "img 请求" },
         type: "default",
         execution: generateMockExecution("img-request"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "css-request",
         position: { x: 1060, y: 300 },
         data: { label: "css 请求" },
         type: "default",
         execution: generateMockExecution("css-request"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "merge",
         position: { x: 1280, y: 200 },
         data: { label: "合并替换", desc: "img→base64, css→inline" },
         type: "default",
         execution: generateMockExecution("merge"),
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "save",
         position: { x: 1500, y: 200 },
         data: { label: "保存" },

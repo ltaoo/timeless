@@ -1,5 +1,5 @@
-import { Button, Dialog, DropdownMenu, ui } from "@timeless/shadcn";
-import { View } from "@timeless/timeless";
+import { Button, Dialog, DropdownMenu } from "@timeless/shadcn";
+import { View, ui } from "@timeless/timeless";
 
 const viewportDialog$ = new ui.DialogCore({
   title: "Dialog With Viewport",

@@ -98,8 +98,8 @@ export function DownloadTaskViewModel(props) {
     pageSize: PAGE_SIZE,
   });
 
-  const view_page$ = new Timeless.ui.ScrollViewCore({});
-  const view_downloadtask$ = new Timeless.ui.ScrollViewCore({
+  const view_page$ = new Timeless.vm.ScrollViewCore({});
+  const view_downloadtask$ = new Timeless.vm.ScrollViewCore({
     onScroll(pos) {
       // console.log(pos);
       waterfall$.methods.handleScroll({ scrollTop: pos.scrollTop });
@@ -113,7 +113,7 @@ export function DownloadTaskViewModel(props) {
     },
   });
 
-  const waterfall$ = Timeless.ui.WaterfallModel({
+  const waterfall$ = Timeless.vm.WaterfallModel({
     column: 1,
     size: PAGE_SIZE,
     buffer: 10,

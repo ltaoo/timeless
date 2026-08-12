@@ -1,11 +1,10 @@
+import { ui, vm } from "@timeless/timeless";
 import { combine, computed, Icon, refobj } from "@timeless/timeless";
 import { Show, View, ViewProps } from "@timeless/timeless";
-import { NumberInputPrimitive } from "@timeless/ui-primitive";
-import { NumberInputCore } from "@timeless/inner-vm";
 
 export function NumberInput(
   props: ViewProps & {
-    store: NumberInputCore;
+    store: vm.NumberInputCore;
     id?: string;
     showControls?: boolean;
   },
@@ -21,7 +20,7 @@ export function NumberInput(
   const canDecrease = computed(state_, (d) => d.canDecrease);
   const isDisabled = computed(state_, (d) => d.disabled);
 
-  return NumberInputPrimitive.Root(
+  return ui.NumberInputPrimitive.Root(
     {
       store,
       class: combine({ isDisabled }, (t) =>
@@ -32,7 +31,7 @@ export function NumberInput(
       ),
     },
     [
-      NumberInputPrimitive.Input({
+      ui.NumberInputPrimitive.Input({
         ...rest,
         store,
         id,
@@ -55,7 +54,7 @@ export function NumberInput(
                   "absolute right-0 top-0 bottom-0 flex flex-col border-l border-input",
               },
               [
-                NumberInputPrimitive.IncreaseButton(
+                ui.NumberInputPrimitive.IncreaseButton(
                   {
                     store,
                     class: combine({ canIncrease, isDisabled }, (t) => {
@@ -71,7 +70,7 @@ export function NumberInput(
                   },
                   [Icon({ name: "chevron-up", size: 12 })],
                 ),
-                NumberInputPrimitive.DecreaseButton(
+                ui.NumberInputPrimitive.DecreaseButton(
                   {
                     store,
                     class: combine({ canDecrease, isDisabled }, (t) => {

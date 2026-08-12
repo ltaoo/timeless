@@ -23,7 +23,7 @@ export default function NotFoundPageView(props) {
                 "px-6 py-3 rounded-lg font-medium transition-opacity",
                 "bg-[var(--foreground)] text-[var(--background)] hover:opacity-90",
               ]),
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 onClick() {
                   props.history.push("root.home_layout.index");
                 },

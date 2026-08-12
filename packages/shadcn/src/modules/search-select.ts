@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   Icon,
   View,
@@ -6,12 +7,10 @@ import {
   computed,
   refobj,
 } from "@timeless/timeless";
-import { SelectPrimitive } from "@timeless/ui-primitive";
-import { SelectCore } from "@timeless/inner-vm";
 
 export function SearchSelect<T>(
   props: ViewProps & {
-    store: SelectCore<T>;
+    store: vm.SelectCore<T>;
     // debounce?: number;
     // minLength?: number;
     // emptyText?: string;
@@ -68,7 +67,7 @@ export function SearchSelect<T>(
     // }
   }
 
-  return SelectPrimitive.Root({ store }, [
+  return ui.SelectPrimitive.Root({ store }, [
     View(
       {
         class: classNames([
@@ -111,17 +110,18 @@ export function SearchSelect<T>(
         },
       },
       [
-        SelectPrimitive.Search({
+        ui.SelectPrimitive.Search({
           store,
           class:
             "w-full bg-transparent outline-none placeholder:text-muted-foreground",
         }),
-        SelectPrimitive.Icon({ store, class: "size-4 text-muted-foreground" }, [
-          Icon({ name: "chevron-down", size: 16 }),
-        ]),
+        ui.SelectPrimitive.Icon(
+          { store, class: "size-4 text-muted-foreground" },
+          [Icon({ name: "chevron-down", size: 16 })],
+        ),
       ],
     ),
-    SelectPrimitive.Content(
+    ui.SelectPrimitive.Content(
       {
         ...rest,
         store,

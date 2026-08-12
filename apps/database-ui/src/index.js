@@ -75,7 +75,7 @@ function ErrorFallbackView(error, viewName) {
 
 function ApplicationRootView() {
   const root_view$ = history$.$view;
-  const toaster$ = Timeless.ui.ToasterModel({ position: "top-center" });
+  const toaster$ = Timeless.vm.ToasterModel({ position: "top-center" });
   const icon_name_ = ref("info");
 
   app.onTip((msg) => {
@@ -127,20 +127,20 @@ function ApplicationRootView() {
   //   [
   //     DropdownMenu(
   //       {
-  //         store: new Timeless.ui.DropdownMenuCore({
+  //         store: new Timeless.vm.DropdownMenuCore({
   //           trigger: "click",
   //           items: [
-  //             new Timeless.ui.MenuItemCore({
+  //             new Timeless.vm.MenuItemCore({
   //               label: "Cut",
   //               onClick() {
   //                 console.log("cut");
   //               },
   //             }),
-  //             new Timeless.ui.MenuItemCore({
+  //             new Timeless.vm.MenuItemCore({
   //               label: "Copy",
-  //               menu: new Timeless.ui.MenuCore({
+  //               menu: new Timeless.vm.MenuCore({
   //                 items: [
-  //                   new Timeless.ui.MenuItemCore({
+  //                   new Timeless.vm.MenuItemCore({
   //                     label: "CopySubMenu",
   //                     onClick() {
   //                       console.log("CopySubMenu");
@@ -152,35 +152,35 @@ function ApplicationRootView() {
   //                 console.log("copy");
   //               },
   //             }),
-  //             new Timeless.ui.MenuItemCore({
+  //             new Timeless.vm.MenuItemCore({
   //               label: "Share",
-  //               menu: new Timeless.ui.MenuCore({
+  //               menu: new Timeless.vm.MenuCore({
   //                 _name: "3",
   //                 items: [
-  //                   new Timeless.ui.MenuItemCore({
+  //                   new Timeless.vm.MenuItemCore({
   //                     label: "Email",
   //                     onClick() {
   //                       console.log("email");
   //                     },
   //                   }),
-  //                   new Timeless.ui.MenuItemCore({
+  //                   new Timeless.vm.MenuItemCore({
   //                     label: "Message",
-  //                     menu: new Timeless.ui.MenuCore({
+  //                     menu: new Timeless.vm.MenuCore({
   //                       _name: "3-2",
   //                       items: [
-  //                         new Timeless.ui.MenuItemCore({
+  //                         new Timeless.vm.MenuItemCore({
   //                           label: "Wechat",
   //                           onClick() {
   //                             console.log("wechat message");
   //                           },
   //                         }),
-  //                         new Timeless.ui.MenuItemCore({
+  //                         new Timeless.vm.MenuItemCore({
   //                           label: "QQ",
   //                           onClick() {
   //                             console.log("QQ message");
   //                           },
   //                         }),
-  //                         new Timeless.ui.MenuItemCore({
+  //                         new Timeless.vm.MenuItemCore({
   //                           label: "Telegram",
   //                           onClick() {
   //                             console.log("Telegram message");
@@ -201,7 +201,7 @@ function ApplicationRootView() {
   //       [
   //         Button(
   //           {
-  //             store: new Timeless.ui.ButtonCore({}),
+  //             store: new Timeless.vm.ButtonCore({}),
   //           },
   //           ["Click it"],
   //         ),

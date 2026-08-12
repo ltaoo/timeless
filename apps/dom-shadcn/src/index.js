@@ -7,9 +7,11 @@ import {
   Icon,
   ref,
   computed,
+  StandardSubViews,
+  ui,
 } from "@timeless/timeless";
 import { render } from "@timeless/timeless-dom";
-import { StandardSubViews, Toaster, ui } from "@timeless/shadcn";
+import { Toaster } from "@timeless/shadcn";
 
 import { history$, client$, storage$, app, views } from "./store/index.js";
 
@@ -60,7 +62,7 @@ function ApplicationRootView() {
 
   // const elm = Select({
   //   class: "w-[120px]",
-  //   store: new Timeless.ui.SelectCore({
+  //   store: new Timeless.vm.SelectCore({
   //     defaultValue: "apple",
   //     options: [
   //       { value: "apple", label: "苹果" },

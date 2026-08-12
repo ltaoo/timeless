@@ -1,10 +1,10 @@
-import { ref, computed } from "@timeless/timeless";
+import { ref, computed } from "../core";
 import {
   View,
   ViewProps,
   ViewChildren,
   TimelessElement,
-} from "@timeless/timeless";
+} from "../core";
 import {
   WaterfallModel,
   WaterfallColumnModel,

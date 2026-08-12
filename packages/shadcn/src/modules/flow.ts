@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   combine,
   computed,
@@ -15,16 +16,14 @@ import {
   Show,
   SVG,
 } from "@timeless/timeless";
-import { FlowPrimitive } from "@timeless/ui-primitive";
-import { FlowCanvasModel, FlowNodeModel, FlowEdgeModel } from "@timeless/inner-vm";
 
 type FlowNodeViewRender = Record<
   string,
-  (props: { node: FlowNodeModel }) => ViewChildren
+  (props: { node: vm.FlowNodeModel }) => ViewChildren
 >;
 
 export interface FlowViewProps extends ViewProps {
-  store: FlowCanvasModel;
+  store: vm.FlowCanvasModel;
   nodeTypes?: FlowNodeViewRender;
   showBackground?: boolean;
   backgroundVariant?: "dots" | "lines" | "cross";
@@ -45,7 +44,7 @@ const handlePositions: Record<string, { left: string; top: string }> = {
 };
 
 export interface FlowHandleViewProps extends ViewProps {
-  store: FlowCanvasModel;
+  store: vm.FlowCanvasModel;
   nodeId: string;
   handleId: string;
   type: "source" | "target";
@@ -129,7 +128,7 @@ export function FlowHandle(props: FlowHandleViewProps) {
   );
 }
 
-function getDefaultNodeContent(node: FlowNodeModel): ViewChildren {
+function getDefaultNodeContent(node: vm.FlowNodeModel): ViewChildren {
   return [
     View(
       { class: "flow-node-content flex-1 flex items-center justify-center" },
@@ -139,7 +138,7 @@ function getDefaultNodeContent(node: FlowNodeModel): ViewChildren {
 }
 
 export interface FlowNodeViewProps extends ViewProps {
-  store: FlowNodeModel;
+  store: vm.FlowNodeModel;
   nodeTypes: FlowNodeViewRender;
 }
 
@@ -430,7 +429,9 @@ export function FlowNodeView(props: FlowNodeViewProps) {
   );
 }
 
-export function FlowEdgeView(props: ViewProps & { store: FlowEdgeModel }) {
+export function FlowEdgeView(
+  props: ViewProps & { store: vm.FlowEdgeModel },
+): ReturnType<typeof SVG.G> {
   const { store, class: cls, ...rest } = props;
 
   const state_ = refobj(store.state);
@@ -481,7 +482,7 @@ export function FlowEdgeView(props: ViewProps & { store: FlowEdgeModel }) {
   ]);
 }
 
-function FlowConnectingLine(props: ViewProps & { store: FlowCanvasModel }) {
+function FlowConnectingLine(props: ViewProps & { store: vm.FlowCanvasModel }) {
   const { store, ...rest } = props;
 
   let visible_ = ref(false);
@@ -555,7 +556,7 @@ export function FlowBackground(
   );
 }
 
-export function FlowMinimap(props: ViewProps & { store: FlowCanvasModel }) {
+export function FlowMinimap(props: ViewProps & { store: vm.FlowCanvasModel }) {
   const { store, class: cls, ...rest } = props;
 
   const minimapWidth = 200;
@@ -646,7 +647,7 @@ export function FlowMinimap(props: ViewProps & { store: FlowCanvasModel }) {
   );
 }
 
-export function FlowControls(props: ViewProps & { store: FlowCanvasModel }) {
+export function FlowControls(props: ViewProps & { store: vm.FlowCanvasModel }) {
   const { store, class: cls, ...rest } = props;
 
   return View(
@@ -756,7 +757,7 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
     updateCanvasTransform();
   });
 
-  return FlowPrimitive.Root(
+  return ui.FlowPrimitive.Root(
     {
       store,
       ...rest,
@@ -857,7 +858,6 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
             $canvas = event.target.get$elm();
           },
           onMouseMove(e: MouseEvent) {
-
             if (window.flowConnecting) {
               const canvas = e.currentTarget as HTMLElement;
               const rect = canvas.getBoundingClientRect();
@@ -885,7 +885,7 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
         [
           For({
             each: edges_,
-            render(edge: FlowEdgeModel) {
+            render(edge: vm.FlowEdgeModel) {
               return SVG.SVG(
                 {
                   class: "absolute inset-0 w-full h-full pointer-events-none",

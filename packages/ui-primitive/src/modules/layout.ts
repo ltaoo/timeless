@@ -1,4 +1,4 @@
-// import { View, ViewProps, ViewChildren } from "@timeless/timeless";
+// import { View, ViewProps, ViewChildren } from "../core";
 
 // export { SplitView, SplitPane } from "@timeless/primitive/layout/split";
 // export { ScrollView } from "@timeless/primitive/layout/scroll";

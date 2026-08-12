@@ -1,5 +1,5 @@
-import { computed, isRef, ref } from "@timeless/timeless";
-import { isStyleRef, View, ViewProps, ViewChildren } from "@timeless/timeless";
+import { computed, isRef, ref } from "../core";
+import { isStyleRef, View, ViewProps, ViewChildren } from "../core";
 
 export function Root(
   props: ViewProps & {

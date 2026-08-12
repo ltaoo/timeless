@@ -11,17 +11,17 @@ export function SplitLayout(options) {
   const isVertical = direction === "vertical";
   const panelSizeClass = isVertical ? "min-h-0" : "min-w-0";
 
-  const group$ = new Timeless.ui.ResizablePanelsCore({ direction });
+  const group$ = new Timeless.vm.ResizablePanelsCore({ direction });
 
   const panels = items.map((item) => {
     const useScroll = item.scroll !== false;
     return {
-      panel$: new Timeless.ui.ResizablePanelCore({
+      panel$: new Timeless.vm.ResizablePanelCore({
         defaultSize: item.defaultSize,
         minSize: item.minSize,
         maxSize: item.maxSize,
       }),
-      scroll$: useScroll ? new Timeless.ui.ScrollViewCore({}) : null,
+      scroll$: useScroll ? new Timeless.vm.ScrollViewCore({}) : null,
       useScroll,
       class: item.class,
       children: item.children,
@@ -132,7 +132,7 @@ export function PageContent(props, children) {
   return ScrollView(
     {
       class: classNames(["h-full", props.class]),
-      store: new Timeless.ui.ScrollViewCore({}),
+      store: new Timeless.vm.ScrollViewCore({}),
     },
     children,
   );

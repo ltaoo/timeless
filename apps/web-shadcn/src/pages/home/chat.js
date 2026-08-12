@@ -87,18 +87,18 @@ export default function HomeChatPage(props) {
   }
 
   // ── Scroll ───────────────────────────────────────────────────────────────
-  const scroll$ = new Timeless.ui.ScrollViewCore({});
+  const scroll$ = new Timeless.vm.ScrollViewCore({});
 
   function scrollToBottom() {
     setTimeout(() => scroll$.setScrollTop(scroll$.getScrollHeight()), 30);
   }
 
   // ── Input ────────────────────────────────────────────────────────────────
-  const textarea$ = new Timeless.ui.InputCore({
+  const textarea$ = new Timeless.vm.InputCore({
     defaultValue: "",
     placeholder: "发消息给 AI 助手… (Enter 发送，Shift+Enter 换行)",
   });
-  const send$ = new Timeless.ui.ButtonCore({
+  const send$ = new Timeless.vm.ButtonCore({
     size: "icon",
     onClick() {
       sendMessage();
@@ -383,7 +383,7 @@ export default function HomeChatPage(props) {
           [
             Button(
               {
-                store: new Timeless.ui.ButtonCore({
+                store: new Timeless.vm.ButtonCore({
                   variant: "outline",
                   onClick: newConv,
                 }),
@@ -454,7 +454,7 @@ export default function HomeChatPage(props) {
             Flex({ items: "center", class: "gap-1" }, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     variant: "ghost",
                     size: "icon-sm",
                   }),
@@ -533,7 +533,7 @@ export default function HomeChatPage(props) {
                       View({ class: "relative" }, [
                         Button(
                           {
-                            store: new Timeless.ui.ButtonCore({
+                            store: new Timeless.vm.ButtonCore({
                               variant: "outline",
                               size: "sm",
                             }),

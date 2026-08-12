@@ -1,4 +1,7 @@
-export { connect as provide_channel } from "./channel";
+export {
+  connect as provide_channel,
+  connect as provide_channel_client,
+} from "./channel";
 export { connect as provide_http_client } from "./http_client";
 export type {
   VeloChannelProviderOptions,

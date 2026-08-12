@@ -1,4 +1,4 @@
-import { refobj, computed, Button, Style, Logger } from "@timeless/timeless";
+import { refobj, computed, Button, Style, Logger } from "../core";
 import {
   View,
   ViewProps,
@@ -10,7 +10,7 @@ import {
   classNames,
   styleNames,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import { SelectCore, SelectItemCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";

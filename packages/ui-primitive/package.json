@@ -1,6 +1,6 @@
 {
   "name": "@timeless/ui-primitive",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -18,8 +18,9 @@
     "tailwindcss": "^3.0.0 || ^4.0.0"
   },
   "dependencies": {
-    "@timeless/timeless": "workspace:^",
     "@timeless/inner-kit": "workspace:^",
+    "@timeless/inner-primitive": "workspace:^",
+    "@timeless/inner-reactive": "workspace:^",
     "@timeless/inner-vm": "workspace:^"
   },
   "exports": {

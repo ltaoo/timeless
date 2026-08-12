@@ -1,11 +1,10 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, Fragment, ref, refobj } from "@timeless/timeless";
 import { View, Show, ViewChildren, ViewProps } from "@timeless/timeless";
-import { PopoverPrimitive } from "@timeless/ui-primitive";
-import { PopoverCore } from "@timeless/inner-vm";
 
 export function Popover(
   props: ViewProps & {
-    store: PopoverCore;
+    store: vm.PopoverCore;
     title?: ViewChildren;
     content?: ViewChildren;
   },
@@ -26,16 +25,16 @@ export function Popover(
     }),
   ];
 
-  return PopoverPrimitive.Root(
+  return ui.PopoverPrimitive.Root(
     {
       onUnmounted() {
         unlistens.forEach((fn) => fn());
       },
     },
     [
-      PopoverPrimitive.Trigger({ store: props.store }, children),
-      PopoverPrimitive.Portal({ store: props.store }, [
-        PopoverPrimitive.Content(
+      ui.PopoverPrimitive.Trigger({ store: props.store }, children),
+      ui.PopoverPrimitive.Portal({ store: props.store }, [
+        ui.PopoverPrimitive.Content(
           {
             ...props,
             class: computed(presence_state_, (t) => {

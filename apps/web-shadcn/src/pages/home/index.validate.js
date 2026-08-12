@@ -205,11 +205,11 @@ function PaymentFormView(props) {
 
 export default function FormValidateView() {
   const providers_configure = {
-    qiniu: new Timeless.ui.ObjectFieldCore({
+    qiniu: new Timeless.vm.ObjectFieldCore({
       fields: {
-        access_key: new Timeless.ui.SingleFieldCore({
+        access_key: new Timeless.vm.SingleFieldCore({
           label: "Access Key",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入 Access Key",
           }),
@@ -219,114 +219,114 @@ export default function FormValidateView() {
             },
           ],
         }),
-        secret_key: new Timeless.ui.SingleFieldCore({
+        secret_key: new Timeless.vm.SingleFieldCore({
           label: "Secret Key",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入 Secret Key",
           }),
         }),
-        bucket: new Timeless.ui.SingleFieldCore({
+        bucket: new Timeless.vm.SingleFieldCore({
           label: "Bucket",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入 Bucket 名称",
           }),
         }),
-        domain: new Timeless.ui.SingleFieldCore({
+        domain: new Timeless.vm.SingleFieldCore({
           label: "Domain",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入外链域名",
           }),
         }),
-        zone: new Timeless.ui.SingleFieldCore({
+        zone: new Timeless.vm.SingleFieldCore({
           label: "Zone",
-          input: new Timeless.ui.SelectCore({
+          input: new Timeless.vm.SelectCore({
             defaultValue: "z0",
             placeholder: "请选择存储区域，如 z0, z1",
             options: [
-              new Timeless.ui.SelectItemCore({
+              new Timeless.vm.SelectItemCore({
                 label: "z0",
                 value: "z0",
               }),
-              new Timeless.ui.SelectItemCore({
+              new Timeless.vm.SelectItemCore({
                 label: "z1",
                 value: "z1",
               }),
             ],
           }),
         }),
-        use_https: new Timeless.ui.SingleFieldCore({
+        use_https: new Timeless.vm.SingleFieldCore({
           label: "使用 HTTPS",
-          input: new Timeless.ui.CheckboxCore({}),
+          input: new Timeless.vm.CheckboxCore({}),
         }),
       },
     }),
-    s3: new Timeless.ui.ObjectFieldCore({
+    s3: new Timeless.vm.ObjectFieldCore({
       fields: {
-        endpoint: new Timeless.ui.SingleFieldCore({
+        endpoint: new Timeless.vm.SingleFieldCore({
           label: "Endpoint",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入 Endpoint",
           }),
         }),
-        region: new Timeless.ui.SingleFieldCore({
+        region: new Timeless.vm.SingleFieldCore({
           label: "Region",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入 Region",
           }),
         }),
-        bucket: new Timeless.ui.SingleFieldCore({
+        bucket: new Timeless.vm.SingleFieldCore({
           label: "Bucket",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入 Bucket 名称",
           }),
         }),
-        access_key_id: new Timeless.ui.SingleFieldCore({
+        access_key_id: new Timeless.vm.SingleFieldCore({
           label: "Access Key ID",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入 Access Key ID",
           }),
         }),
-        secret_access_key: new Timeless.ui.SingleFieldCore({
+        secret_access_key: new Timeless.vm.SingleFieldCore({
           label: "Secret Access Key",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: "",
             placeholder: "请输入 Secret Access Key",
           }),
         }),
-        force_path_style: new Timeless.ui.SingleFieldCore({
+        force_path_style: new Timeless.vm.SingleFieldCore({
           label: "强制路径样式",
-          input: new Timeless.ui.CheckboxCore({
+          input: new Timeless.vm.CheckboxCore({
             // defaultValue: false,
           }),
         }),
       },
     }),
-    webdav: new Timeless.ui.ObjectFieldCore({
+    webdav: new Timeless.vm.ObjectFieldCore({
       fields: {
-        url: new Timeless.ui.SingleFieldCore({
+        url: new Timeless.vm.SingleFieldCore({
           label: "URL",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             placeholder: "请输入 WebDAV URL",
             defaultValue: "",
           }),
         }),
-        username: new Timeless.ui.SingleFieldCore({
+        username: new Timeless.vm.SingleFieldCore({
           label: "Username",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             placeholder: "请输入用户名",
             defaultValue: "",
           }),
         }),
-        password: new Timeless.ui.SingleFieldCore({
+        password: new Timeless.vm.SingleFieldCore({
           label: "Password",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             placeholder: "请输入密码",
             defaultValue: "",
           }),
@@ -337,21 +337,21 @@ export default function FormValidateView() {
 
   const configure$_ = ref(providers_configure["qiniu"]);
 
-  const field_provider$ = new Timeless.ui.SingleFieldCore({
+  const field_provider$ = new Timeless.vm.SingleFieldCore({
     label: "存储源",
     name: "provider",
-    input: new Timeless.ui.SelectCore({
+    input: new Timeless.vm.SelectCore({
       defaultValue: "qiniu",
       options: [
-        new Timeless.ui.SelectItemCore({
+        new Timeless.vm.SelectItemCore({
           value: "qiniu",
           label: "七牛云",
         }),
-        new Timeless.ui.SelectItemCore({
+        new Timeless.vm.SelectItemCore({
           value: "s3",
           label: "S3",
         }),
-        new Timeless.ui.SelectItemCore({
+        new Timeless.vm.SelectItemCore({
           value: "webdav",
           label: "WebDAV",
         }),
@@ -366,7 +366,7 @@ export default function FormValidateView() {
     }),
   });
 
-  const submit_configure_btn$ = new Timeless.ui.ButtonCore({
+  const submit_configure_btn$ = new Timeless.vm.ButtonCore({
     async onClick() {
       const r = await configure$_.value.validate();
       if (r.error) {
@@ -416,7 +416,7 @@ export default function FormValidateView() {
             return View({ class: "flex items-center gap-2 p-6" }, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     onClick() {
                       payment$.ui.form$.fields.card_name.input.focus();
                     },
@@ -426,7 +426,7 @@ export default function FormValidateView() {
               ),
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     onClick() {
                       payment$.ui.form$.fields.exp_month.input.show();
                     },
@@ -436,7 +436,7 @@ export default function FormValidateView() {
               ),
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     variant: "outline",
                     async onClick() {
                       payment$.ui.submit_payment_btn$.setLoading(true);

@@ -1,11 +1,10 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, refobj, Icon, Show } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
-import { InputPrimitive } from "@timeless/ui-primitive";
-import { InputCore } from "@timeless/inner-vm";
 
 export function Input(
   props: ViewProps & {
-    store: InputCore<any>;
+    store: vm.InputCore<any>;
     id?: string;
   },
 ) {
@@ -19,13 +18,13 @@ export function Input(
   const allowClear = computed(state_, (d) => d.allowClear);
   const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
 
-  return InputPrimitive.Root(
+  return ui.InputPrimitive.Root(
     {
       store,
       style: { position: "relative", flex: "1", width: "100%" },
     },
     [
-      InputPrimitive.Input({
+      ui.InputPrimitive.Input({
         ...rest,
         id,
         store,
@@ -57,7 +56,7 @@ export function Input(
               when: hasValue,
               ok() {
                 return [
-                  InputPrimitive.Clear(
+                  ui.InputPrimitive.Clear(
                     {
                       store,
                       style: {

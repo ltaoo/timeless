@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, "../..");
 
 const PACKAGES: { name: string; entry: string; namespace: string }[] = [
   {
-    name: "@timeless/reactive",
+    name: "@timeless/inner-reactive",
     entry: "packages/reactive/src/index.ts",
     namespace: "reactive",
   },
@@ -18,7 +18,7 @@ const PACKAGES: { name: string; entry: string; namespace: string }[] = [
     namespace: "timeless",
   },
   {
-    name: "@timeless/kit",
+    name: "@timeless/inner-kit",
     entry: "packages/kit/src/index.ts",
     namespace: "kit",
   },
@@ -28,14 +28,19 @@ const PACKAGES: { name: string; entry: string; namespace: string }[] = [
     namespace: "shadcn",
   },
   {
-    name: "@timeless/icons",
+    name: "@timeless/inner-icons",
     entry: "packages/icons/src/index.ts",
     namespace: "icons",
   },
   {
-    name: "@timeless/ui-vm",
-    entry: "packages/ui-vm/src/index.ts",
+    name: "@timeless/ui-primitive",
+    entry: "packages/ui-primitive/src/index.ts",
     namespace: "ui",
+  },
+  {
+    name: "@timeless/inner-vm",
+    entry: "packages/ui-vm/src/index.ts",
+    namespace: "vm",
   },
 ];
 
@@ -46,7 +51,17 @@ const BASE_COMPILER_OPTIONS: ts.CompilerOptions = {
   skipLibCheck: true,
   baseUrl: ROOT,
   paths: {
-    "@timeless/*": ["packages/*/src/index.ts"],
+    "@timeless/inner-base": ["packages/base/src/index.ts"],
+    "@timeless/inner-icons": ["packages/icons/src/index.ts"],
+    "@timeless/inner-kit": ["packages/kit/src/index.ts"],
+    "@timeless/inner-primitive": ["packages/primitive/src/index.ts"],
+    "@timeless/inner-reactive": ["packages/reactive/src/index.ts"],
+    "@timeless/inner-types": ["packages/types/src/index.ts"],
+    "@timeless/inner-utils": ["packages/utils/src/index.ts"],
+    "@timeless/inner-vm": ["packages/ui-vm/src/index.ts"],
+    "@timeless/shadcn": ["packages/shadcn/src/index.ts"],
+    "@timeless/timeless": ["packages/timeless/src/index.ts"],
+    "@timeless/ui-primitive": ["packages/ui-primitive/src/index.ts"],
   },
 };
 

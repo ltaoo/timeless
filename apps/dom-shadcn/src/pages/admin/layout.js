@@ -14,9 +14,9 @@ import {
   computed,
   classNames,
   styleNames,
+  ui,
 } from "@timeless/timeless";
 import { render, platform } from "@timeless/timeless-dom";
-import { ui } from "@timeless/shadcn";
 
 export default function AdminLayoutView(props) {
   return View(

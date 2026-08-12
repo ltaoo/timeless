@@ -1,12 +1,11 @@
+import { ui, vm } from "@timeless/timeless";
 import { ViewChildren, ViewProps, View } from "@timeless/timeless";
-import { ToastPrimitive } from "@timeless/ui-primitive";
-import { ToastCore } from "@timeless/inner-vm";
 
 export function Toast(
-  props: ViewProps & { store: ToastCore },
+  props: ViewProps & { store: vm.ToastCore },
   children: ViewChildren = [],
 ) {
   const { store } = props;
 
-  return ToastPrimitive.Root({ store }, [View({}, children)]);
+  return ui.ToastPrimitive.Root({ store }, [View({}, children)]);
 }

@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   classNames,
   combine,
@@ -8,11 +9,11 @@ import {
   refobj,
 } from "@timeless/timeless";
 import { For, Show, View, ViewProps } from "@timeless/timeless";
-import { CascaderPrimitive } from "@timeless/ui-primitive";
-import { CascaderCore, CascaderOption } from "@timeless/inner-vm";
+
+import { CascaderOption } from "@timeless/timeless";
 
 export function Cascader(
-  props: ViewProps & { store: CascaderCore<any>; id?: string },
+  props: ViewProps & { store: vm.CascaderCore<any>; id?: string },
 ) {
   const { store, id, ...rest } = props;
 
@@ -36,7 +37,7 @@ export function Cascader(
     show_clear_,
   ]);
 
-  return CascaderPrimitive.Root(
+  return ui.CascaderPrimitive.Root(
     {
       store,
       onMounted() {
@@ -48,7 +49,7 @@ export function Cascader(
       },
     },
     [
-      CascaderPrimitive.Trigger(
+      ui.CascaderPrimitive.Trigger(
         {
           store,
           id,
@@ -74,7 +75,7 @@ export function Cascader(
           },
         },
         [
-          CascaderPrimitive.Value({
+          ui.CascaderPrimitive.Value({
             store,
             class: computed(state_, (d) => {
               return d.value != null && d.value.length > 0
@@ -86,7 +87,7 @@ export function Cascader(
             when: show_clear_,
             ok() {
               return [
-                CascaderPrimitive.Clear(
+                ui.CascaderPrimitive.Clear(
                   {
                     store,
                     class:
@@ -98,7 +99,7 @@ export function Cascader(
             },
             else() {
               return [
-                CascaderPrimitive.Icon(
+                ui.CascaderPrimitive.Icon(
                   { class: "size-4 text-muted-foreground" },
                   [Icon({ name: "chevron-down" })],
                 ),
@@ -107,7 +108,7 @@ export function Cascader(
           }),
         ],
       ),
-      CascaderPrimitive.Content(
+      ui.CascaderPrimitive.Content(
         {
           ...rest,
           animation: {
@@ -128,13 +129,13 @@ export function Cascader(
         },
         () => [
           // 搜索框
-          CascaderPrimitive.Search({
+          ui.CascaderPrimitive.Search({
             store,
             class:
               "w-full border-b border-border px-3 py-2 text-sm outline-none placeholder:text-muted-foreground",
           }),
           // 搜索结果
-          CascaderPrimitive.SearchResults(
+          ui.CascaderPrimitive.SearchResults(
             {
               store,
               class: "max-h-72 overflow-auto p-1",
@@ -143,7 +144,7 @@ export function Cascader(
               For({
                 each: computed(state_, (d) => d.searchResults),
                 render(result: { path: CascaderOption<any>[]; value: any[] }) {
-                  return CascaderPrimitive.SearchResultItem(
+                  return ui.CascaderPrimitive.SearchResultItem(
                     {
                       store,
                       result,
@@ -201,7 +202,7 @@ export function Cascader(
                                 )
                               : null;
                           });
-                          return CascaderPrimitive.Item(
+                          return ui.CascaderPrimitive.Item(
                             {
                               store,
                               panelIndex: idx.value,
@@ -234,8 +235,8 @@ export function Cascader(
                               ]),
                             },
                             [
-                              CascaderPrimitive.ItemText({}, [option.label]),
-                              CascaderPrimitive.ItemIndicator(
+                              ui.CascaderPrimitive.ItemText({}, [option.label]),
+                              ui.CascaderPrimitive.ItemIndicator(
                                 {
                                   store,
                                   hasChildren: Boolean(

@@ -1,7 +1,6 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, Fragment, Icon, ref, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps, Show } from "@timeless/timeless";
-import { DialogPrimitive } from "@timeless/ui-primitive";
-import { DialogCore, getGlobalLayerManager } from "@timeless/inner-vm";
 
 const DIALOG_BASE_Z = 200;
 const Z_INDEX_NEST_GAP = 50;
@@ -9,15 +8,23 @@ const Z_INDEX_NEST_GAP = 50;
 import { Button } from "./button";
 
 export function Dialog(
-  props: ViewProps & { store: DialogCore; zIndex?: number },
+  props: ViewProps & { store: vm.DialogCore; zIndex?: number },
   children?: ViewChildren | (() => ViewChildren),
 ) {
-  const { store, class: cls, style: sty, zIndex: manualZIndex, ...rest } = props;
+  const {
+    store,
+    class: cls,
+    style: sty,
+    zIndex: manualZIndex,
+    ...rest
+  } = props;
   const state_ = refobj(store.state);
   const presence_state_ = refobj(store.presence.state);
   const was_exiting_ = ref(false);
 
-  const zIndex = manualZIndex ?? DIALOG_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
+  const zIndex =
+    manualZIndex ??
+    DIALOG_BASE_Z + vm.getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   const unlistens = [
     store.onStateChange((v) => {
@@ -34,7 +41,7 @@ export function Dialog(
     }),
   ];
 
-  return DialogPrimitive.Root(
+  return ui.DialogPrimitive.Root(
     {
       store,
       onUnmounted() {
@@ -42,7 +49,7 @@ export function Dialog(
       },
     },
     () => [
-      DialogPrimitive.Overlay({
+      ui.DialogPrimitive.Overlay({
         store,
         zIndex,
         class: computed(presence_state_, (d) => {
@@ -63,8 +70,7 @@ export function Dialog(
       }),
       View(
         {
-          class:
-            "fixed inset-0 flex items-start justify-center p-4 pt-[10vh]",
+          class: "fixed inset-0 flex items-start justify-center p-4 pt-[10vh]",
           style: { ...(sty as any), "z-index": zIndex },
         },
         [
@@ -84,7 +90,7 @@ export function Dialog(
               }),
             },
             [
-              DialogPrimitive.Content(
+              ui.DialogPrimitive.Content(
                 {
                   ...rest,
                   store,
@@ -116,13 +122,13 @@ export function Dialog(
                     when: computed(state_, (d) => !!d.title),
                     ok() {
                       return [
-                        DialogPrimitive.Header(
+                        ui.DialogPrimitive.Header(
                           {
                             store,
                             class: "flex flex-col gap-2 px-4 pt-4",
                           },
                           [
-                            DialogPrimitive.Title(
+                            ui.DialogPrimitive.Title(
                               {
                                 store,
                                 class: "text-base leading-none font-medium",
@@ -134,7 +140,7 @@ export function Dialog(
                       ];
                     },
                   }),
-                  // DialogPrimitive.Body(
+                  // ui.DialogPrimitive.Body(
                   //   { store },
                   // ),
                   Fragment(
@@ -143,7 +149,7 @@ export function Dialog(
                       ? children()
                       : children || [],
                   ),
-                  DialogPrimitive.Close(
+                  ui.DialogPrimitive.Close(
                     {
                       store,
                       class:
@@ -155,7 +161,7 @@ export function Dialog(
                     when: computed(state_, (d) => !!d.footer),
                     ok() {
                       return [
-                        DialogPrimitive.Footer(
+                        ui.DialogPrimitive.Footer(
                           {
                             store,
                             class:

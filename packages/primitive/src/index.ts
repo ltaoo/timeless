@@ -89,7 +89,14 @@ export { patch } from "./hmr/patch";
 export type { PatchOptions } from "./hmr/patch";
 export { hmrState, hmrRestore } from "./hmr/state";
 
-export { Logger, Result, base, debounce, throttle } from "@timeless/inner-base";
+export {
+  Logger,
+  Result,
+  base,
+  debounce,
+  mitt,
+  throttle,
+} from "@timeless/inner-base";
 export type {
   Handler,
   Platform,

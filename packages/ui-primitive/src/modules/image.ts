@@ -3,7 +3,7 @@ import {
   ViewProps,
   ViewChildren,
   TimelessElement,
-} from "@timeless/timeless";
+} from "../core";
 import { ImageCore } from "@timeless/inner-vm";
 
 type Provider = Partial<{

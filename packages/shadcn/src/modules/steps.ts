@@ -1,7 +1,6 @@
+import { ui, vm } from "@timeless/timeless";
 import { refobj, computed, classNames } from "@timeless/timeless";
 import { For, Show, ViewProps } from "@timeless/timeless";
-import { StepsPrimitive } from "@timeless/ui-primitive";
-import { StepCore } from "@timeless/inner-vm";
 
 export type StepItem = {
   title: string;
@@ -9,7 +8,7 @@ export type StepItem = {
 };
 
 export function Steps(
-  props: ViewProps & { store: StepCore; items: StepItem[] },
+  props: ViewProps & { store: vm.StepCore; items: StepItem[] },
 ) {
   const { store, items, class: cn, ...rest } = props;
 
@@ -19,7 +18,7 @@ export function Steps(
     state_.as(v);
   });
 
-  return StepsPrimitive.Root(
+  return ui.StepsPrimitive.Root(
     {
       store,
       items,
@@ -27,7 +26,7 @@ export function Steps(
       ...rest,
     },
     [
-      StepsPrimitive.List(
+      ui.StepsPrimitive.List(
         {
           store,
           items,
@@ -38,7 +37,7 @@ export function Steps(
             each: items,
             render: (item, index) => {
               const i = index.value;
-              return StepsPrimitive.Item(
+              return ui.StepsPrimitive.Item(
                 {
                   store,
                   index: i,
@@ -46,7 +45,7 @@ export function Steps(
                   class: "flex flex-1 items-center",
                 },
                 [
-                  StepsPrimitive.Indicator(
+                  ui.StepsPrimitive.Indicator(
                     {
                       store,
                       index: i,
@@ -56,7 +55,7 @@ export function Steps(
                     },
                     [
                       StepIndicatorCircle({ store, index: i }),
-                      StepsPrimitive.Title(
+                      ui.StepsPrimitive.Title(
                         {
                           class:
                             "mt-2 text-xs font-medium text-zinc-500 dark:text-zinc-400",
@@ -69,7 +68,7 @@ export function Steps(
                     when: i < items.length - 1,
                     ok() {
                       return [
-                        StepsPrimitive.Connector(
+                        ui.StepsPrimitive.Connector(
                           {
                             store,
                             index: i,
@@ -97,7 +96,7 @@ export function Steps(
   );
 }
 
-function StepIndicatorCircle(props: { store: StepCore; index: number }) {
+function StepIndicatorCircle(props: { store: vm.StepCore; index: number }) {
   const { store, index } = props;
 
   const state_ = refobj(store.state);
@@ -106,7 +105,7 @@ function StepIndicatorCircle(props: { store: StepCore; index: number }) {
     state_.as(v);
   });
 
-  return StepsPrimitive.Indicator(
+  return ui.StepsPrimitive.Indicator(
     {
       store,
       index,

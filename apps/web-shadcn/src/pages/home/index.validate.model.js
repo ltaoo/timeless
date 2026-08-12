@@ -1,29 +1,29 @@
 const platform = getPlatform();
 
 export function PaymentViewModel() {
-  const field_card_name$ = new Timeless.ui.SingleFieldCore({
+  const field_card_name$ = new Timeless.vm.SingleFieldCore({
     label: "Name on Card",
     name: "card_name",
-    input: new Timeless.ui.InputCore({
+    input: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "John Doe",
     }),
     rules: [{ required: true }],
   });
-  const field_card_number$ = new Timeless.ui.SingleFieldCore({
+  const field_card_number$ = new Timeless.vm.SingleFieldCore({
     label: "Card Number",
     name: "card_number",
     help: "Enter your 16-digit number.",
-    input: new Timeless.ui.InputCore({
+    input: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "1234 5678 9012 3456",
     }),
     rules: [{ required: true }],
   });
-  const field_cvv$ = new Timeless.ui.SingleFieldCore({
+  const field_cvv$ = new Timeless.vm.SingleFieldCore({
     label: "CVV",
     name: "cvv",
-    input: new Timeless.ui.InputCore({
+    input: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "123",
     }),
@@ -31,12 +31,12 @@ export function PaymentViewModel() {
   });
   const month_options = Array.from({ length: 12 }, (_, i) => {
     const v = String(i + 1).padStart(2, "0");
-    return new Timeless.ui.SelectItemCore({ label: v, value: v });
+    return new Timeless.vm.SelectItemCore({ label: v, value: v });
   });
-  const field_exp_month$ = new Timeless.ui.SingleFieldCore({
+  const field_exp_month$ = new Timeless.vm.SingleFieldCore({
     label: "Month",
     name: "exp_month",
-    input: new Timeless.ui.SelectCore({
+    input: new Timeless.vm.SelectCore({
       defaultValue: "",
       placeholder: "MM",
       platform,
@@ -44,36 +44,36 @@ export function PaymentViewModel() {
     }),
   });
   const year_options = [2024, 2025, 2026, 2027, 2028, 2029].map((y) => {
-    return new Timeless.ui.SelectItemCore({
+    return new Timeless.vm.SelectItemCore({
       label: String(y),
       value: String(y),
     });
   });
-  const field_exp_year$ = new Timeless.ui.SingleFieldCore({
+  const field_exp_year$ = new Timeless.vm.SingleFieldCore({
     label: "Year",
     name: "exp_year",
-    input: new Timeless.ui.SelectCore({
+    input: new Timeless.vm.SelectCore({
       platform,
       defaultValue: null,
       placeholder: "YYYY",
       options: year_options,
     }),
   });
-  const same_as_shipping$ = new Timeless.ui.CheckboxCore({});
-  const field_same_as_shipping$ = new Timeless.ui.SingleFieldCore({
+  const same_as_shipping$ = new Timeless.vm.CheckboxCore({});
+  const field_same_as_shipping$ = new Timeless.vm.SingleFieldCore({
     label: "Same as shipping address",
     name: "same_as_shipping",
     input: same_as_shipping$,
   });
-  const field_comments$ = new Timeless.ui.SingleFieldCore({
+  const field_comments$ = new Timeless.vm.SingleFieldCore({
     label: "Comments",
     name: "comments",
-    input: new Timeless.ui.InputCore({
+    input: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "Add any additional comments",
     }),
   });
-  const form$ = new Timeless.ui.ObjectFieldCore({
+  const form$ = new Timeless.vm.ObjectFieldCore({
     fields: {
       card_name: field_card_name$,
       card_number: field_card_number$,
@@ -85,7 +85,7 @@ export function PaymentViewModel() {
     },
   });
 
-  const submit_payment_btn$ = new Timeless.ui.ButtonCore({
+  const submit_payment_btn$ = new Timeless.vm.ButtonCore({
     async onClick() {
       const r = await form$.validate();
       if (r.error) {
@@ -125,7 +125,7 @@ export function PaymentViewModel() {
       console.log(values);
     },
   });
-  const cancel_btn$ = new Timeless.ui.ButtonCore({
+  const cancel_btn$ = new Timeless.vm.ButtonCore({
     variant: "outline",
     async onClick() {
       form$.reset();

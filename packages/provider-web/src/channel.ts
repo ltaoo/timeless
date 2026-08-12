@@ -1,43 +1,40 @@
 import { Result } from "@timeless/timeless";
-import { ChannelCore, onChannelCreated } from "@timeless/inner-kit";
+import {
+  ChannelClientCore,
+  type ChannelConnection,
+  type ChannelOpenOptions,
+} from "@timeless/inner-kit";
 
 export type WebChannelProviderOptions = {
-  autoConnect?: boolean;
   debug?: boolean;
   protocols?:
     | string
     | string[]
-    | ((channel: ChannelCore<any, any>) => string | string[] | undefined);
+    | ((options: ChannelOpenOptions) => string | string[] | undefined);
   WebSocket?: typeof WebSocket;
 };
-
-type Binding = {
-  socket: WebSocket;
-};
-
-const bindings = new WeakMap<ChannelCore<any, any>, Binding>();
 
 function getWebSocketCtor(options: WebChannelProviderOptions) {
   return options.WebSocket || globalThis.WebSocket;
 }
 
 function getProtocols(
-  channel: ChannelCore<any, any>,
+  channelOptions: ChannelOpenOptions,
   options: WebChannelProviderOptions,
 ) {
   if (typeof options.protocols === "function") {
-    return options.protocols(channel);
+    return options.protocols(channelOptions);
   }
   return options.protocols;
 }
 
-function normalizeUrl(channel: ChannelCore<any, any>) {
-  if (typeof channel.endpoint !== "string") {
-    return Result.Err("ChannelCore.endpoint 必须是字符串");
+function normalizeUrl(options: ChannelOpenOptions) {
+  if (typeof options.endpoint !== "string") {
+    return Result.Err("ChannelOpenOptions.endpoint 必须是字符串");
   }
 
-  const endpoint = channel.endpoint;
-  const hostname = channel.hostname || "";
+  const endpoint = options.endpoint;
+  const hostname = options.hostname || "";
   const location = globalThis.location;
   const hasLocation = !!location?.protocol && !!location?.host;
   const websocketProtocol =
@@ -62,7 +59,7 @@ function normalizeUrl(channel: ChannelCore<any, any>) {
     return endpoint;
   })();
 
-  const query = channel.query;
+  const query = options.query;
   if (!query) {
     return Result.Ok(raw);
   }
@@ -123,40 +120,32 @@ function decodeMessage(data: unknown) {
   }
 }
 
-function installChannel<TMessage, TSend>(
-  channel: ChannelCore<TMessage, TSend>,
-  options: WebChannelProviderOptions,
+export function connect(
+  client: ChannelClientCore,
+  options: WebChannelProviderOptions = {},
 ) {
-  channel.openConnection = () => {
-    const binding = bindings.get(channel);
-    if (binding) {
-      if (binding.socket.readyState === binding.socket.OPEN) {
-        return Result.Ok(null);
-      }
-      binding.socket.close();
-      bindings.delete(channel);
-    }
-
+  client.open = (channelOptions) => {
     const WebSocketCtor = getWebSocketCtor(options);
     if (typeof WebSocketCtor !== "function") {
       return Result.Err("当前环境缺少 WebSocket");
     }
 
-    const url = normalizeUrl(channel);
+    const url = normalizeUrl(channelOptions);
     if (url.error) {
       return Result.Err(url.error);
     }
 
     return new Promise((resolve) => {
-      const protocols = getProtocols(channel, options);
+      const protocols = getProtocols(channelOptions, options);
       const socket =
         protocols !== undefined
           ? new WebSocketCtor(url.data, protocols)
           : new WebSocketCtor(url.data);
-      bindings.set(channel, { socket });
 
       let settled = false;
-      const settle = (result: ReturnType<typeof Result.Ok<null>>) => {
+      const settle = (
+        result: ReturnType<typeof Result.Ok<ChannelConnection>>,
+      ) => {
         if (settled) {
           return;
         }
@@ -164,11 +153,42 @@ function installChannel<TMessage, TSend>(
         resolve(result);
       };
 
+      const connection: ChannelConnection = {
+        send(data) {
+          if (socket.readyState !== socket.OPEN) {
+            return Result.Err("WebSocket 未连接");
+          }
+          const payload = encodeMessage(data);
+          socket.send(payload);
+          if (options.debug) {
+            console.log("[provider-web]websocket send", payload);
+          }
+          return Result.Ok(null);
+        },
+        close(code?: number, reason?: string) {
+          if (
+            socket.readyState === socket.CLOSING ||
+            socket.readyState === socket.CLOSED
+          ) {
+            return Result.Ok(null);
+          }
+          socket.close(code, reason);
+          return Result.Ok(null);
+        },
+      };
+
+      const handleAbort = () => {
+        connection.close(1000, "connect canceled");
+      };
+      channelOptions.signal.addEventListener("abort", handleAbort, {
+        once: true,
+      });
+
       socket.onopen = () => {
         if (options.debug) {
           console.log("[provider-web]websocket open", url.data);
         }
-        settle(Result.Ok(null));
+        settle(Result.Ok(connection));
       };
 
       socket.onmessage = (event) => {
@@ -176,29 +196,28 @@ function installChannel<TMessage, TSend>(
         if (options.debug) {
           console.log("[provider-web]websocket message", data);
         }
-        channel.receiveMessage(data, { event });
+        channelOptions.onMessage(data, { event });
       };
 
       socket.onerror = (event) => {
         const error = new Error("WebSocket error");
         if (!settled) {
-          bindings.delete(channel);
           settle(Result.Err(error));
           return;
         }
-        channel.handleError(error);
+        channelOptions.onError(error);
         if (options.debug) {
           console.log("[provider-web]websocket error", event);
         }
       };
 
       socket.onclose = (event) => {
-        bindings.delete(channel);
+        channelOptions.signal.removeEventListener("abort", handleAbort);
         if (!settled) {
           settle(Result.Err(event.reason || "WebSocket closed before open"));
           return;
         }
-        channel.handleClose({
+        channelOptions.onClose({
           code: event.code,
           reason: event.reason,
           clean: event.wasClean,
@@ -207,68 +226,5 @@ function installChannel<TMessage, TSend>(
       };
     });
   };
-
-  channel.postMessage = (data) => {
-    const binding = bindings.get(channel);
-    if (!binding || binding.socket.readyState !== binding.socket.OPEN) {
-      return Result.Err("WebSocket 未连接");
-    }
-    const payload = encodeMessage(data);
-    binding.socket.send(payload);
-    if (options.debug) {
-      console.log("[provider-web]websocket send", payload);
-    }
-    return Result.Ok(null);
-  };
-
-  channel.closeConnection = (code?: number, reason?: string) => {
-    const binding = bindings.get(channel);
-    if (!binding) {
-      return Result.Ok(null);
-    }
-    const socket = binding.socket;
-    bindings.delete(channel);
-    if (
-      socket.readyState === socket.CLOSING ||
-      socket.readyState === socket.CLOSED
-    ) {
-      return Result.Ok(null);
-    }
-    socket.close(code, reason);
-    return Result.Ok(null);
-  };
-
-  return channel;
-}
-
-function scheduleConnect(channel: ChannelCore<any, any>) {
-  const run = () => {
-    channel.connect();
-  };
-  if (typeof queueMicrotask === "function") {
-    queueMicrotask(run);
-    return;
-  }
-  setTimeout(run, 0);
-}
-
-export function connect<TMessage = unknown, TSend = unknown>(
-  channel?: ChannelCore<TMessage, TSend>,
-  options: WebChannelProviderOptions = {},
-) {
-  const autoConnect = options.autoConnect !== false;
-  if (!channel) {
-    onChannelCreated((ins) => {
-      installChannel(ins, options);
-      if (autoConnect) {
-        scheduleConnect(ins);
-      }
-    });
-    return null;
-  }
-  installChannel(channel, options);
-  if (autoConnect) {
-    scheduleConnect(channel);
-  }
-  return channel;
+  return client;
 }

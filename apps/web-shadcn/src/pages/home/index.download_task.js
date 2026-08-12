@@ -163,7 +163,7 @@ function DownloadTaskCard(props) {
             return [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     size: "sm",
                     variant: "ghost",
                     onClick() {
@@ -182,7 +182,7 @@ function DownloadTaskCard(props) {
             return [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     size: "sm",
                     variant: "ghost",
                     onClick() {
@@ -208,7 +208,7 @@ function DownloadTaskCard(props) {
         Button(
           {
             class: "text-zinc-400 hover:text-red-500",
-            store: new Timeless.ui.ButtonCore({
+            store: new Timeless.vm.ButtonCore({
               size: "sm",
               variant: "ghost",
               onClick() {
@@ -263,7 +263,7 @@ export default function DownloadTaskPageView(props) {
               View({ class: "flex items-center gap-1" }, [
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "outline",
                     }),
@@ -272,7 +272,7 @@ export default function DownloadTaskPageView(props) {
                 ),
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "ghost",
                       onClick() {

@@ -4,7 +4,7 @@ import {
   refarr,
   computed,
   type DerivedRef,
-} from "@timeless/timeless";
+} from "../core";
 import {
   View,
   ViewProps,
@@ -15,7 +15,7 @@ import {
   ViewChildren,
   TimelessComponent,
   TimelessElement,
-} from "@timeless/timeless";
+} from "../core";
 import {
   RouteViewCore,
   HistoryCore,

@@ -2,15 +2,15 @@ import { Section, Item } from "@/components/index.js";
 
 export default function FormView() {
   const platform = getPlatform();
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
 
-  const search_select$ = new Timeless.ui.SelectCore({
+  const search_select$ = new Timeless.vm.SelectCore({
     view$,
     defaultValue: null,
     placeholder: "输入关键词搜索",
     options: [],
     platform,
-    search: new Timeless.ui.InputCore({
+    search: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "输入水果名...",
     }),
@@ -21,19 +21,19 @@ export default function FormView() {
       Section("Input", [
         View({ class: "w-full" }, [
           Select({
-            store: new Timeless.ui.SelectCore({
+            store: new Timeless.vm.SelectCore({
               defaultValue: "apple",
               platform,
               options: [
-                new Timeless.ui.SelectItemCore({
+                new Timeless.vm.SelectItemCore({
                   value: "apple",
                   label: "苹果",
                 }),
-                new Timeless.ui.SelectItemCore({
+                new Timeless.vm.SelectItemCore({
                   value: "banana",
                   label: "香蕉",
                 }),
-                new Timeless.ui.SelectItemCore({
+                new Timeless.vm.SelectItemCore({
                   value: "orange",
                   label: "橙子",
                 }),
@@ -46,7 +46,7 @@ export default function FormView() {
           Flex({ direction: "col", gap: "4px" }, [
             Input({
               id: "input_default_1",
-              store: new Timeless.ui.InputCore({
+              store: new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "Type something...",
                 allowClear: false,
@@ -54,7 +54,7 @@ export default function FormView() {
             }),
             Input({
               id: "input_default_2",
-              store: new Timeless.ui.InputCore({
+              store: new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "Type something...",
                 // allowClear: false,
@@ -66,7 +66,7 @@ export default function FormView() {
       Section("FileInput", [
         Item("Default", [
           FileInput({
-            store: new Timeless.ui.FilePickerCore({
+            store: new Timeless.vm.FilePickerCore({
               accept: "image/*",
               defaultValue: null,
               onChange(e) {
@@ -77,7 +77,7 @@ export default function FormView() {
         ]),
         Item("Multiple", [
           FileInput({
-            store: new Timeless.ui.FilePickerCore({
+            store: new Timeless.vm.FilePickerCore({
               accept: "*/*",
               multiple: true,
               onChange(e) {
@@ -90,7 +90,7 @@ export default function FormView() {
       Section("FileDropZone", [
         Item("Default", [
           FileDropZone({
-            store: new Timeless.ui.FilePickerCore({
+            store: new Timeless.vm.FilePickerCore({
               accept: "image/*",
               onChange(e) {
                 console.log("File dropped:", e);
@@ -100,7 +100,7 @@ export default function FormView() {
         ]),
         Item("Multiple", [
           FileDropZone({
-            store: new Timeless.ui.FilePickerCore({
+            store: new Timeless.vm.FilePickerCore({
               accept: ".pdf,.doc,.docx",
               multiple: true,
               onChange(e) {
@@ -112,7 +112,7 @@ export default function FormView() {
         ]),
         Item("Custom Content", [
           FileDropZone({
-            store: new Timeless.ui.FilePickerCore({
+            store: new Timeless.vm.FilePickerCore({
               multiple: true,
               onChange(e) {
                 console.log("Files dropped:", e);
@@ -126,14 +126,14 @@ export default function FormView() {
       Section("NumberInput", [
         Item("Default", [
           NumberInput({
-            store: new Timeless.ui.NumberInputCore({
+            store: new Timeless.vm.NumberInputCore({
               placeholder: "请输入数字",
             }),
           }),
         ]),
         Item("With Min/Max", [
           NumberInput({
-            store: new Timeless.ui.NumberInputCore({
+            store: new Timeless.vm.NumberInputCore({
               placeholder: "0-100",
               min: 0,
               max: 100,
@@ -142,7 +142,7 @@ export default function FormView() {
         ]),
         Item("With Step", [
           NumberInput({
-            store: new Timeless.ui.NumberInputCore({
+            store: new Timeless.vm.NumberInputCore({
               placeholder: "步长为5",
               step: 5,
               defaultValue: 10,
@@ -151,7 +151,7 @@ export default function FormView() {
         ]),
         Item("With Precision", [
           NumberInput({
-            store: new Timeless.ui.NumberInputCore({
+            store: new Timeless.vm.NumberInputCore({
               placeholder: "保留2位小数",
               precision: 2,
               step: 0.01,
@@ -161,7 +161,7 @@ export default function FormView() {
         ]),
         Item("Without Controls", [
           NumberInput({
-            store: new Timeless.ui.NumberInputCore({
+            store: new Timeless.vm.NumberInputCore({
               placeholder: "无控制按钮",
             }),
             showControls: false,
@@ -171,7 +171,7 @@ export default function FormView() {
       Section("Textarea", [
         Item("Default", [
           Textarea({
-            store: new Timeless.ui.InputCore({
+            store: new Timeless.vm.InputCore({
               defaultValue: "",
               placeholder: "Enter your message...",
               onChange(e) {
@@ -186,7 +186,7 @@ export default function FormView() {
           View({ class: "space-y-2 w-full" }, [
             Label({}, ["Email"]),
             Input({
-              store: new Timeless.ui.InputCore({
+              store: new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "email@example.com",
               }),
@@ -197,13 +197,13 @@ export default function FormView() {
       Section("Select", [
         Item("Scrollable (100 options)", [
           Select({
-            store: new Timeless.ui.SelectCore({
+            store: new Timeless.vm.SelectCore({
               // defaultValue: null,
               defaultValue: "option_88",
               platform,
               placeholder: "从 100 个选项中选择",
               options: Array.from({ length: 100 }, (_, i) => {
-                return new Timeless.ui.SelectItemCore({
+                return new Timeless.vm.SelectItemCore({
                   value: `option_${i + 1}`,
                   label: `选项 ${i + 1}`,
                 });
@@ -222,7 +222,7 @@ export default function FormView() {
       Section("Cascader", [
         Item("Default", [
           Cascader({
-            store: new Timeless.ui.CascaderCore({
+            store: new Timeless.vm.CascaderCore({
               placeholder: "请选择地区",
               options: [
                 {
@@ -275,7 +275,7 @@ export default function FormView() {
         ]),
         Item("With Search", [
           Cascader({
-            store: new Timeless.ui.CascaderCore({
+            store: new Timeless.vm.CascaderCore({
               placeholder: "搜索地区",
               search: true,
               searchPlaceholder: "输入关键词搜索...",
@@ -330,7 +330,7 @@ export default function FormView() {
         ]),
         Item("With Default Value", [
           Cascader({
-            store: new Timeless.ui.CascaderCore({
+            store: new Timeless.vm.CascaderCore({
               placeholder: "请选择地区",
               defaultValue: ["zhejiang", "hangzhou", "xihu"],
               options: [
@@ -386,7 +386,7 @@ export default function FormView() {
       Section("DatePicker", [
         Item("Default", [
           DatePicker({
-            store: Timeless.ui.DatePickerCore({ today: new Date() }),
+            store: Timeless.vm.DatePickerCore({ today: new Date() }),
             placeholder: "选择日期",
           }),
         ]),
@@ -394,7 +394,7 @@ export default function FormView() {
       Section("DateRangePicker", [
         Item("Default", [
           DateRangePicker({
-            store: Timeless.ui.DateRangePickerCore({ today: new Date() }),
+            store: Timeless.vm.DateRangePickerCore({ today: new Date() }),
             placeholder: "选择日期范围",
           }),
         ]),
@@ -402,19 +402,19 @@ export default function FormView() {
       Section("TimePicker", [
         Item("Default", [
           TimePicker({
-            store: Timeless.ui.TimePickerCore({}),
+            store: Timeless.vm.TimePickerCore({}),
             placeholder: "选择时间",
           }),
         ]),
         Item("With Seconds", [
           TimePicker({
-            store: Timeless.ui.TimePickerCore({ showSeconds: true }),
+            store: Timeless.vm.TimePickerCore({ showSeconds: true }),
             placeholder: "选择时间（含秒）",
           }),
         ]),
         Item("With Default Value", [
           TimePicker({
-            store: Timeless.ui.TimePickerCore({
+            store: Timeless.vm.TimePickerCore({
               defaultValue: { hour: 9, minute: 30 },
             }),
             placeholder: "选择时间",
@@ -424,28 +424,28 @@ export default function FormView() {
       Section("DateTimePicker", [
         Item("Default", [
           DateTimePicker({
-            date: Timeless.ui.DatePickerCore({ today: new Date() }),
-            time: Timeless.ui.TimePickerCore({}),
+            date: Timeless.vm.DatePickerCore({ today: new Date() }),
+            time: Timeless.vm.TimePickerCore({}),
             placeholder: "选择日期时间",
           }),
         ]),
         Item("With Seconds", [
           DateTimePicker({
-            date: Timeless.ui.DatePickerCore({ today: new Date() }),
-            time: Timeless.ui.TimePickerCore({ showSeconds: true }),
+            date: Timeless.vm.DatePickerCore({ today: new Date() }),
+            time: Timeless.vm.TimePickerCore({ showSeconds: true }),
             placeholder: "选择日期时间（含秒）",
           }),
         ]),
       ]),
       Section("Checkbox", [
         Item("Default", [
-          Checkbox({ store: new Timeless.ui.CheckboxCore({}) }),
+          Checkbox({ store: new Timeless.vm.CheckboxCore({}) }),
         ]),
         Item("With Label", [
           View({ class: "flex items-center gap-2" }, [
             Checkbox({
               id: "checkbox_with_label1",
-              store: new Timeless.ui.CheckboxCore({ checked: true }),
+              store: new Timeless.vm.CheckboxCore({ checked: true }),
             }),
             Label({ for: "checkbox_with_label1", class: "text-sm" }, [
               "Accept terms and conditions",
@@ -456,7 +456,7 @@ export default function FormView() {
       Section("CheckboxGroup", [
         Item("Vertical (Default)", [
           CheckboxGroup({
-            store: new Timeless.ui.CheckboxGroupCore({
+            store: new Timeless.vm.CheckboxGroupCore({
               options: [
                 { value: "apple", label: "苹果" },
                 { value: "banana", label: "香蕉" },
@@ -468,7 +468,7 @@ export default function FormView() {
         ]),
         Item("Horizontal", [
           CheckboxGroup({
-            store: new Timeless.ui.CheckboxGroupCore({
+            store: new Timeless.vm.CheckboxGroupCore({
               options: [
                 { value: "react", label: "React" },
                 { value: "vue", label: "Vue" },
@@ -483,7 +483,7 @@ export default function FormView() {
       Section("RadioGroup", [
         Item("Vertical (Default)", [
           RadioGroup({
-            store: new Timeless.ui.RadioGroupCore({
+            store: new Timeless.vm.RadioGroupCore({
               options: [
                 { value: "apple", label: "苹果" },
                 { value: "banana", label: "香蕉" },
@@ -495,7 +495,7 @@ export default function FormView() {
         ]),
         Item("Horizontal", [
           RadioGroup({
-            store: new Timeless.ui.RadioGroupCore({
+            store: new Timeless.vm.RadioGroupCore({
               options: [
                 { value: "react", label: "React" },
                 { value: "vue", label: "Vue" },
@@ -508,7 +508,7 @@ export default function FormView() {
         ]),
         Item("With Default Value", [
           RadioGroup({
-            store: new Timeless.ui.RadioGroupCore({
+            store: new Timeless.vm.RadioGroupCore({
               value: "vue",
               options: [
                 { value: "react", label: "React" },
@@ -521,7 +521,7 @@ export default function FormView() {
       ]),
       // Section("Switch", [
       //   Item("Default", [
-      //     Switch({ store: new Timeless.ui.CheckboxCore({}) }),
+      //     Switch({ store: new Timeless.vm.CheckboxCore({}) }),
       //   ]),
       // ]),
       // Section("Slider", [
@@ -532,20 +532,20 @@ export default function FormView() {
           (() => {
             const platform = getPlatform();
 
-            const nameField$ = new Timeless.ui.SingleFieldCore({
+            const nameField$ = new Timeless.vm.SingleFieldCore({
               label: "Name",
               name: "name",
-              input: new Timeless.ui.InputCore({
+              input: new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "Enter your name",
               }),
               rules: [{ required: true, message: "Name is required" }],
             });
 
-            const emailField$ = new Timeless.ui.SingleFieldCore({
+            const emailField$ = new Timeless.vm.SingleFieldCore({
               label: "Email",
               name: "email",
-              input: new Timeless.ui.InputCore({
+              input: new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "Enter your email",
               }),
@@ -555,23 +555,23 @@ export default function FormView() {
               ],
             });
 
-            const roleField$ = new Timeless.ui.SingleFieldCore({
+            const roleField$ = new Timeless.vm.SingleFieldCore({
               label: "Role",
               name: "role",
-              input: new Timeless.ui.SelectCore({
+              input: new Timeless.vm.SelectCore({
                 defaultValue: "admin",
                 placeholder: "Select a role",
                 platform,
                 options: [
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "admin",
                     label: "Admin",
                   }),
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "editor",
                     label: "Editor",
                   }),
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "viewer",
                     label: "Viewer",
                   }),
@@ -580,16 +580,16 @@ export default function FormView() {
               rules: [{ required: true, message: "Role is required" }],
             });
 
-            const bioField$ = new Timeless.ui.SingleFieldCore({
+            const bioField$ = new Timeless.vm.SingleFieldCore({
               label: "Bio",
               name: "bio",
-              input: new Timeless.ui.InputCore({
+              input: new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "Tell us about yourself",
               }),
             });
 
-            const form$ = new Timeless.ui.ObjectFieldCore({
+            const form$ = new Timeless.vm.ObjectFieldCore({
               fields: {
                 name: nameField$,
                 email: emailField$,
@@ -598,7 +598,7 @@ export default function FormView() {
               },
             });
 
-            const dialog$ = new Timeless.ui.DialogCore({
+            const dialog$ = new Timeless.vm.DialogCore({
               title: "User Form",
               footer: true,
               async onOk() {
@@ -615,7 +615,7 @@ export default function FormView() {
 
             return View({}, [
               Button({
-                store: new Timeless.ui.ButtonCore({
+                store: new Timeless.vm.ButtonCore({
                   onClick() {
                     dialog$.show();
                   },

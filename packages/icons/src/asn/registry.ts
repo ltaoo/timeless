@@ -2,6 +2,7 @@ import activity from "./activity";
 import arrowDownToLine from "./arrow-down-to-line";
 import arrowLeft from "./arrow-left";
 import bolt from "./bolt";
+import braces from "./braces";
 import calendar from "./calendar";
 import check from "./check";
 import chevronDown from "./chevron-down";
@@ -12,13 +13,16 @@ import circleAlert from "./circle-alert";
 import circleArrowDown from "./circle-arrow-down";
 import circleEllipsis from "./circle-ellipsis";
 import circleX from "./circle-x";
+import clock3 from "./clock-3";
 import clockArrowDown from "./clock-arrow-down";
 import clock from "./clock";
 import cloudDownload from "./cloud-download";
 import copy from "./copy";
+import cornerDownRight from "./corner-down-right";
 import download from "./download";
 import ellipsisVertical from "./ellipsis-vertical";
 import ellipsis from "./ellipsis";
+import externalLink from "./external-link";
 import fileBox from "./file-box";
 import fileImage from "./file-image";
 import fileLock from "./file-lock";
@@ -31,6 +35,7 @@ import fileVolume from "./file-volume";
 import file from "./file";
 import film from "./film";
 import folderClosed from "./folder-closed";
+import folderOpen from "./folder-open";
 import folder from "./folder";
 import funnel from "./funnel";
 import gauge from "./gauge";
@@ -40,7 +45,9 @@ import hardDriveDownload from "./hard-drive-download";
 import hardDrive from "./hard-drive";
 import history from "./history";
 import house from "./house";
+import image from "./image";
 import inbox from "./inbox";
+import library from "./library";
 import listFilter from "./list-filter";
 import loaderCircle from "./loader-circle";
 import loader from "./loader";
@@ -62,6 +69,7 @@ import search from "./search";
 import server from "./server";
 import settings from "./settings";
 import squareArrowDown from "./square-arrow-down";
+import square from "./square";
 import sun from "./sun";
 import table from "./table";
 import trash2 from "./trash-2";
@@ -70,6 +78,7 @@ import undo2 from "./undo-2";
 import upload from "./upload";
 import user from "./user";
 import users from "./users";
+import video from "./video";
 import wrench from "./wrench";
 import x from "./x";
 
@@ -78,6 +87,7 @@ export const iconRegistry = {
   "arrow-down-to-line": arrowDownToLine,
   "arrow-left": arrowLeft,
   "bolt": bolt,
+  "braces": braces,
   "calendar": calendar,
   "check": check,
   "chevron-down": chevronDown,
@@ -88,13 +98,16 @@ export const iconRegistry = {
   "circle-arrow-down": circleArrowDown,
   "circle-ellipsis": circleEllipsis,
   "circle-x": circleX,
+  "clock3": clock3,
   "clock-arrow-down": clockArrowDown,
   "clock": clock,
   "cloud-download": cloudDownload,
   "copy": copy,
+  "corner-down-right": cornerDownRight,
   "download": download,
   "ellipsis-vertical": ellipsisVertical,
   "ellipsis": ellipsis,
+  "external-link": externalLink,
   "file-box": fileBox,
   "file-image": fileImage,
   "file-lock": fileLock,
@@ -107,6 +120,7 @@ export const iconRegistry = {
   "file": file,
   "film": film,
   "folder-closed": folderClosed,
+  "folder-open": folderOpen,
   "folder": folder,
   "funnel": funnel,
   "gauge": gauge,
@@ -116,7 +130,9 @@ export const iconRegistry = {
   "hard-drive": hardDrive,
   "history": history,
   "house": house,
+  "image": image,
   "inbox": inbox,
+  "library": library,
   "list-filter": listFilter,
   "loader-circle": loaderCircle,
   "loader": loader,
@@ -138,6 +154,7 @@ export const iconRegistry = {
   "server": server,
   "settings": settings,
   "square-arrow-down": squareArrowDown,
+  "square": square,
   "sun": sun,
   "table": table,
   "trash2": trash2,
@@ -146,6 +163,7 @@ export const iconRegistry = {
   "upload": upload,
   "user": user,
   "users": users,
+  "video": video,
   "wrench": wrench,
   "x": x,
 };

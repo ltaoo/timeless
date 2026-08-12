@@ -1,5 +1,6 @@
 console.log("base.version" + __Version);
 
+export { default as mitt } from "mitt";
 export * from "./base";
 export * from "./result";
 export * from "./error";

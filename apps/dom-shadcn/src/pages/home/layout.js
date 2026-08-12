@@ -1,15 +1,17 @@
 /**
  * 首页布局
  */
-import { View, Show, Icon, Img, computed } from "@timeless/timeless";
 import {
+  View,
+  Show,
+  Icon,
+  Img,
+  computed,
   KeepAliveSubViews,
-  Separator,
-  DropdownMenu,
-  Button,
+  RouteMenusModel,
   ui,
-} from "@timeless/shadcn";
-import { RouteMenusModel } from "@timeless/kit";
+} from "@timeless/timeless";
+import { Separator, DropdownMenu, Button } from "@timeless/shadcn";
 
 export default function HomeLayoutView(props) {
   const sidemenu$ = RouteMenusModel({

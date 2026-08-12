@@ -2,6 +2,8 @@ import { defineConfig, UserConfig } from "vite";
 import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
+import { bundle_analysis_plugin } from "./scripts/vite-plugin-bundle-analysis";
+
 export const isProd = process.env.TIMELESS_PROD === "1";
 
 export interface BuildOptions {
@@ -19,6 +21,7 @@ export interface BuildOptions {
   alias?: Record<string, string>;
   footer?: string;
   rollupConfig?: {};
+  bundle_analysis?: Parameters<typeof bundle_analysis_plugin>[0];
 }
 export function buildLibName(name?: string, globalName?: string) {
   return (
@@ -41,6 +44,7 @@ export function createLibConfig(options: BuildOptions): UserConfig {
     dts: need_generate_dts = true,
     alias = {},
     footer,
+    bundle_analysis,
   } = options;
 
   // 如果没有指定 globalName，则将 name 首字母大写作为全局变量名
@@ -52,6 +56,9 @@ export function createLibConfig(options: BuildOptions): UserConfig {
         rollupTypes: true,
       }),
     );
+  }
+  if (bundle_analysis) {
+    plugins.push(bundle_analysis_plugin(bundle_analysis));
   }
 
   return defineConfig({

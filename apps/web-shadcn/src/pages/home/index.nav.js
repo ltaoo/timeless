@@ -1,13 +1,13 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function NavigationView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: classNames(["space-y-8"]) }, [
       Section("Tabs", [
         Item("Default", [
           Tabs({
-            store: new Timeless.ui.TabHeaderCore({
+            store: new Timeless.vm.TabHeaderCore({
               key: "value",
               selected: "tab2",
               options: [
@@ -34,7 +34,7 @@ export default function NavigationView() {
       Section("Accordion", [
         Item("Default", [
           Accordion({
-            store: Timeless.ui.AccordionCore({ type: "single" }),
+            store: Timeless.vm.AccordionCore({ type: "single" }),
             items: [
               {
                 title: "Is it accessible?",

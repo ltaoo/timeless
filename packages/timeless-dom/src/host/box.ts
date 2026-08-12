@@ -417,6 +417,7 @@ export function HostElement(props: {
       opt?: { $parent: any; logger?: any },
     ) {
       const r = methods.buildChildren(children);
+      const inserted_elements = [...r.child_elements];
       const $parent = opt?.$parent || methods.getParent();
       if ($parent) {
         if ($elm && $elm.nodeType === 3) {
@@ -428,10 +429,17 @@ export function HostElement(props: {
       child_elements = r.child_elements as TimelessElement[];
       $children = r.child_host_nodes;
       child_nodes = r.child_nodes;
+      const handle_inserted_elements_mounted = () => {
+        for (const child of inserted_elements) {
+          if (child?.onMounted) {
+            child.onMounted({ target: child.$elm });
+          }
+        }
+      };
       if (_batch_mode) {
-        _pending_mounted.push(() => methods.handleElementsMounted());
+        _pending_mounted.push(handle_inserted_elements_mounted);
       } else {
-        setTimeout(() => methods.handleElementsMounted(), 0);
+        setTimeout(handle_inserted_elements_mounted, 0);
       }
     },
     /**
@@ -443,6 +451,7 @@ export function HostElement(props: {
       if ($children.length === 0 && child_nodes.length === 0) {
         return;
       }
+      const removed_elements = [...child_elements];
 
       for (let i = 0; i < child_nodes.length; i += 1) {
         const child_node = child_nodes[i];
@@ -461,16 +470,16 @@ export function HostElement(props: {
       }
       $children.length = 0;
       child_nodes.length = 0;
+      child_elements.length = 0;
       // $elm = null;
       methods.teardownEventListener(_events);
       setTimeout(() => {
         // Call onUnmounted for all child elements
-        for (const child of child_elements) {
+        for (const child of removed_elements) {
           if (child && child.onUnmounted) {
             child.onUnmounted();
           }
         }
-        child_elements.length = 0;
       }, 0);
     },
     insert(

@@ -3,7 +3,7 @@
  */
 import { BaseDomain, BizError, Handler, Result } from "@timeless/inner-base";
 
-type MaybePromise<T> = T | Promise<T>;
+export type MaybePromise<T> = T | Promise<T>;
 
 export type ChannelStatus =
   | "idle"
@@ -32,8 +32,40 @@ export type ChannelSentMessage<T> = {
   sentAt: number;
 };
 
+export type ChannelConnection = {
+  send: (data: unknown) => MaybePromise<Result<null> | void>;
+  close: (code?: number, reason?: string) => MaybePromise<Result<null> | void>;
+};
+
+export type ChannelOpenOptions = {
+  endpoint: unknown;
+  hostname: string;
+  headers: Record<string, string | number>;
+  query?: Record<string, string | number | boolean | null | undefined>;
+  params?: any;
+  signal: AbortSignal;
+  onMessage: (data: unknown, meta?: Partial<ChannelMessageMeta>) => void;
+  onClose: (reason: ChannelCloseReason) => void;
+  onError: (error: unknown) => void;
+};
+
+/**
+ * Platform transport for channels. A provider installs `open`, while each
+ * ChannelCore owns the lifecycle and state of one logical connection.
+ */
+export class ChannelClientCore {
+  open(options: ChannelOpenOptions): MaybePromise<Result<ChannelConnection>> {
+    void options;
+    const tip = "请通过 provider 实现 ChannelClientCore.open 方法";
+    console.log(tip);
+    return Result.Err(tip);
+  }
+}
+
 export type ChannelCoreProps<TMessage = unknown, TSend = unknown> = {
   _name?: string;
+  endpoint?: unknown;
+  client?: ChannelClientCore;
   hostname?: string;
   headers?: Record<string, string | number>;
   query?: Record<string, string | number | boolean | null | undefined>;
@@ -87,12 +119,6 @@ type TheTypesOfEvents<TMessage, TSend> = {
   [Events.StateChange]: ChannelState<TMessage, TSend>;
 };
 
-let handler: null | ((v: ChannelCore<any, any>) => void) = null;
-
-export function onChannelCreated(h: (v: ChannelCore<any, any>) => void) {
-  handler = h;
-}
-
 export type TheMessageOfChannelCore<T extends ChannelCore<any, any>> =
   NonNullable<T["lastMessage"]>;
 
@@ -117,6 +143,14 @@ async function toVoidResult(
   }
 }
 
+async function toResult<T>(value: MaybePromise<Result<T>>): Promise<Result<T>> {
+  try {
+    return await value;
+  } catch (err) {
+    return Result.Err(err as Error);
+  }
+}
+
 function toBizError(error: unknown) {
   if (error instanceof BizError) {
     return error;
@@ -125,10 +159,22 @@ function toBizError(error: unknown) {
   return r.error!;
 }
 
-export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain<
-  TheTypesOfEvents<TMessage, TSend>
-> {
+function isChannelCoreProps(
+  value: unknown,
+): value is ChannelCoreProps<any, any> {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    ("endpoint" in value || "client" in value)
+  );
+}
+
+export class ChannelCore<
+  TMessage = unknown,
+  TSend = unknown,
+> extends BaseDomain<TheTypesOfEvents<TMessage, TSend>> {
   _name = "ChannelCore";
+  client?: ChannelClientCore;
   endpoint: unknown;
   hostname = "";
   headers: Record<string, string | number> = {};
@@ -146,6 +192,8 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
   lastSent: TSend | null = null;
   closeReason: ChannelCloseReason | null = null;
   pending: Promise<Result<null>> | null = null;
+  private connection: ChannelConnection | null = null;
+  private connectionController: AbortController | null = null;
   id = String(this.uid());
 
   get state(): ChannelState<TMessage, TSend> {
@@ -161,11 +209,19 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
     };
   }
 
-  constructor(endpoint: unknown, props: ChannelCoreProps<TMessage, TSend> = {}) {
-    super({ unique_id: props._name });
+  constructor(props: ChannelCoreProps<TMessage, TSend>);
+  constructor(endpoint: unknown, props?: ChannelCoreProps<TMessage, TSend>);
+  constructor(
+    endpointOrProps: unknown | ChannelCoreProps<TMessage, TSend>,
+    props: ChannelCoreProps<TMessage, TSend> = {},
+  ) {
+    const objectProps = isChannelCoreProps(endpointOrProps);
+    const options = objectProps ? endpointOrProps : props;
+    super({ unique_id: options._name });
 
     const {
       _name,
+      client,
       hostname = "",
       headers = {},
       query,
@@ -180,9 +236,10 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
       onFailed,
       onStatusChange,
       onConnecting,
-    } = props;
+    } = options;
 
-    this.endpoint = endpoint;
+    this.endpoint = objectProps ? options.endpoint : endpointOrProps;
+    this.client = client;
     this.hostname = hostname;
     this.headers = headers;
     this.query = query;
@@ -211,9 +268,6 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
     if (onConnecting) {
       this.onConnectingChange(onConnecting);
     }
-    if (handler) {
-      handler(this);
-    }
     if (onFailed) {
       this.onFailed(onFailed, { override: true });
     }
@@ -237,6 +291,17 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
       return Result.Ok(null);
     }
 
+    if (this.connection) {
+      const previousConnection = this.connection;
+      const previousController = this.connectionController;
+      this.connection = null;
+      this.connectionController = null;
+      previousController?.abort();
+      await toVoidResult(
+        previousConnection.close(1000, "replace failed connection"),
+      );
+    }
+
     this.initial = false;
     this.error = null;
     this.closeReason = null;
@@ -245,12 +310,59 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
     this.emit(Events.BeforeConnect);
     this.emitState();
 
-    const result = await toVoidResult(this.openConnection());
+    if (!this.client) {
+      const error = this.fail("缺少 channel client");
+      return Result.Err(error);
+    }
+
+    const controller = new AbortController();
+    this.connectionController = controller;
+    const result = await toResult(
+      this.client.open({
+        endpoint: this.endpoint,
+        hostname: this.hostname,
+        headers: this.headers,
+        query: this.query,
+        params: this.params,
+        signal: controller.signal,
+        onMessage: (data, meta) => {
+          if (this.connectionController !== controller) {
+            return;
+          }
+          this.receiveMessage(data, meta);
+        },
+        onClose: (reason) => {
+          if (this.connectionController !== controller) {
+            return;
+          }
+          this.connection = null;
+          this.connectionController = null;
+          this.handleClose(reason);
+        },
+        onError: (error) => {
+          if (this.connectionController !== controller) {
+            return;
+          }
+          this.handleError(error);
+        },
+      }),
+    );
+    if (controller.signal.aborted) {
+      if (!result.error) {
+        await toVoidResult(result.data.close(1000, "connect canceled"));
+      }
+      return Result.Err("连接已取消");
+    }
     if (result.error) {
+      if (this.connectionController === controller) {
+        this.connectionController = null;
+      }
+      controller.abort();
       const error = this.fail(result.error);
       return Result.Err(error);
     }
 
+    this.connection = result.data;
     this.handleConnected();
     if (this.initialMessage !== undefined) {
       const sent = await this.sendMessage(this.initialMessage);
@@ -262,7 +374,7 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
   }
 
   async sendMessage(data: TSend) {
-    if (!this.connected) {
+    if (!this.connected || !this.connection) {
       return Result.Err("连接未建立");
     }
     const raw = this.encode ? this.encode(data) : data;
@@ -271,7 +383,7 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
       raw,
       sentAt: Date.now(),
     };
-    const result = await toVoidResult(this.postMessage(raw));
+    const result = await toVoidResult(this.connection.send(raw));
     if (result.error) {
       const error = this.fail(result.error);
       return Result.Err(error);
@@ -291,11 +403,18 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
       this.handleClose({ code, reason, clean: true });
       return Result.Ok(null);
     }
+    const controller = this.connectionController;
+    this.connectionController = null;
+    controller?.abort();
+    const connection = this.connection;
+    this.connection = null;
     this.setConnecting(false);
     this.connected = false;
     this.setStatus("closing");
     this.emitState();
-    const result = await toVoidResult(this.closeConnection(code, reason));
+    const result = connection
+      ? await toVoidResult(connection.close(code, reason))
+      : Result.Ok(null);
     if (result.error) {
       const error = this.fail(result.error);
       return Result.Err(error);
@@ -347,6 +466,10 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
     };
   }
 
+  setClient(client: ChannelClientCore) {
+    this.client = client;
+  }
+
   setError(error: BizError) {
     this.error = error;
     this.emitState();
@@ -355,36 +478,6 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
   destroy() {
     this.close();
     super.destroy();
-  }
-
-  /**
-   * Provider hook. For WebSocket this opens the socket; for Velo it registers
-   * the Go message listener.
-   */
-  openConnection(): MaybePromise<Result<null> | void> {
-    const tip = "请在 provider 中实现 openConnection 方法";
-    console.log(tip);
-    return Result.Err(tip);
-  }
-
-  /** Provider hook for messages sent from frontend to host. */
-  postMessage(data: unknown): MaybePromise<Result<null> | void> {
-    void data;
-    const tip = "请在 provider 中实现 postMessage 方法";
-    console.log(tip);
-    return Result.Err(tip);
-  }
-
-  /** Provider hook for closing or unbinding the underlying channel. */
-  closeConnection(
-    code?: number,
-    reason?: string,
-  ): MaybePromise<Result<null> | void> {
-    void code;
-    void reason;
-    const tip = "请在 provider 中实现 closeConnection 方法";
-    console.log(tip);
-    return Result.Err(tip);
   }
 
   handleConnected() {
@@ -405,7 +498,9 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
         event: extra.event,
         receivedAt: extra.receivedAt ?? Date.now(),
       };
-      const message = this.process ? this.process(data, meta) : (data as TMessage);
+      const message = this.process
+        ? this.process(data, meta)
+        : (data as TMessage);
       this.lastMessage = message;
       this.emit(Events.Message, message);
       this.emit(Events.MessageChange, message);
@@ -419,6 +514,8 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
     const wasClosed =
       !this.connected && this.status === "closed" && !!this.closeReason;
     this.setConnecting(false);
+    this.connection = null;
+    this.connectionController = null;
     this.connected = false;
     this.closeReason = reason;
     this.setStatus("closed");
@@ -470,7 +567,9 @@ export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain
   }
 
   onConnectingChange(
-    handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.ConnectingChange]>,
+    handler: Handler<
+      TheTypesOfEvents<TMessage, TSend>[Events.ConnectingChange]
+    >,
   ) {
     return this.on(Events.ConnectingChange, handler);
   }

@@ -1,7 +1,7 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function OverlayView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
 
   return ScrollView({ class: "p-6 h-screen", store: view$ }, [
     View({ class: "space-y-8" }, [
@@ -9,22 +9,22 @@ export default function OverlayView() {
         Item("Default", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 view$,
                 items: [
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Edit",
                     onClick() {
                       console.log("edit");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Duplicate",
                     onClick() {
                       console.log("duplicate");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Delete",
                     onClick() {
                       console.log("delete");
@@ -36,7 +36,7 @@ export default function OverlayView() {
             [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     variant: "outline",
                     onClick() {
                       console.log("click Open Menu");
@@ -51,36 +51,36 @@ export default function OverlayView() {
         Item("With Separator", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 view$,
                 items: [
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Cut",
                     onClick() {
                       console.log("cut");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Copy",
                     onClick() {
                       console.log("copy");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Paste",
                     onClick() {
                       console.log("paste");
                     },
                   }),
-                  new Timeless.ui.MenuSeparatorCore(),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuSeparatorCore(),
+                  new Timeless.vm.MenuItemCore({
                     label: "Rename",
                     onClick() {
                       console.log("rename");
                     },
                   }),
-                  new Timeless.ui.MenuSeparatorCore(),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuSeparatorCore(),
+                  new Timeless.vm.MenuItemCore({
                     label: "Delete",
                     onClick() {
                       console.log("delete");
@@ -92,7 +92,7 @@ export default function OverlayView() {
             [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                  store: new Timeless.vm.ButtonCore({ variant: "outline" }),
                 },
                 ["With Separator"],
               ),
@@ -102,32 +102,32 @@ export default function OverlayView() {
         Item("With Shortcut", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 view$,
                 items: [
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Cut",
                     shortcut: "⌘X",
                     onClick() {
                       console.log("cut");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Copy",
                     shortcut: "⌘C",
                     onClick() {
                       console.log("copy");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Paste",
                     shortcut: "⌘V",
                     onClick() {
                       console.log("paste");
                     },
                   }),
-                  new Timeless.ui.MenuSeparatorCore(),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuSeparatorCore(),
+                  new Timeless.vm.MenuItemCore({
                     label: "Select All",
                     shortcut: "⌘A",
                     onClick() {
@@ -140,7 +140,7 @@ export default function OverlayView() {
             [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                  store: new Timeless.vm.ButtonCore({ variant: "outline" }),
                 },
                 ["With Shortcut"],
               ),
@@ -149,7 +149,7 @@ export default function OverlayView() {
         ]),
         Item("With ShortcutModel", [
           (() => {
-            const $shortcut = Timeless.ui.ShortcutModel({});
+            const $shortcut = Timeless.vm.ShortcutModel({});
             $shortcut.methods.register({
               "MetaLeft+KeyX"() {
                 console.log("cut via shortcut");
@@ -169,24 +169,24 @@ export default function OverlayView() {
             });
             return DropdownMenu(
               {
-                store: new Timeless.ui.DropdownMenuCore({
+                store: new Timeless.vm.DropdownMenuCore({
                   view$,
                   items: [
-                    new Timeless.ui.MenuItemCore({
+                    new Timeless.vm.MenuItemCore({
                       label: "Cut",
                       shortcut: "⌘X",
                       onClick() {
                         console.log("cut");
                       },
                     }),
-                    new Timeless.ui.MenuItemCore({
+                    new Timeless.vm.MenuItemCore({
                       label: "Copy",
                       shortcut: "⌘C",
                       onClick() {
                         console.log("copy");
                       },
                     }),
-                    new Timeless.ui.MenuItemCore({
+                    new Timeless.vm.MenuItemCore({
                       label: "Paste",
                       shortcut: "⌘V",
                       onClick() {
@@ -199,7 +199,7 @@ export default function OverlayView() {
               [
                 Button(
                   {
-                    store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                    store: new Timeless.vm.ButtonCore({ variant: "outline" }),
                   },
                   ["With ShortcutModel"],
                 ),
@@ -210,10 +210,10 @@ export default function OverlayView() {
         Item("With Icon", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 view$,
                 items: [
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Undo",
                     shortcut: "⌘Z",
                     icon: Icon({ name: "undo-2", size: 24 }),
@@ -221,7 +221,7 @@ export default function OverlayView() {
                       console.log("undo");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Redo",
                     shortcut: "⇧⌘Z",
                     icon: Icon({ name: "refresh-ccw", size: 24 }),
@@ -229,8 +229,8 @@ export default function OverlayView() {
                       console.log("redo");
                     },
                   }),
-                  new Timeless.ui.MenuSeparatorCore(),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuSeparatorCore(),
+                  new Timeless.vm.MenuItemCore({
                     label: "Cut",
                     shortcut: "⌘X",
                     icon: Icon({ name: "bolt" }),
@@ -238,7 +238,7 @@ export default function OverlayView() {
                       console.log("cut");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Copy",
                     shortcut: "⌘C",
                     icon: Icon({ name: "file-symlink", size: 24 }),
@@ -246,7 +246,7 @@ export default function OverlayView() {
                       console.log("copy");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Paste",
                     shortcut: "⌘V",
                     icon: Icon({ name: "arrow-down-to-line" }),
@@ -254,8 +254,8 @@ export default function OverlayView() {
                       console.log("paste");
                     },
                   }),
-                  new Timeless.ui.MenuSeparatorCore(),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuSeparatorCore(),
+                  new Timeless.vm.MenuItemCore({
                     label: "Delete",
                     shortcut: "⌘⌫",
                     icon: Icon({ name: "trash-2", size: 24 }),
@@ -269,7 +269,7 @@ export default function OverlayView() {
             [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                  store: new Timeless.vm.ButtonCore({ variant: "outline" }),
                 },
                 ["With Icon"],
               ),
@@ -363,18 +363,18 @@ export default function OverlayView() {
         Item("With Popover", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 view$,
                 items: [
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Edit",
                     onClick() {
                       console.log("edit");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Preview",
-                    menu: new Timeless.ui.MenuCore({
+                    menu: new Timeless.vm.MenuCore({
                       content: View({ class: "p-4 w-[200px]" }, [
                         View({ class: "text-sm font-medium mb-2" }, [
                           "Preview Panel",
@@ -398,17 +398,17 @@ export default function OverlayView() {
                       ]),
                     }),
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Share",
-                    menu: new Timeless.ui.MenuCore({
+                    menu: new Timeless.vm.MenuCore({
                       items: [
-                        new Timeless.ui.MenuItemCore({
+                        new Timeless.vm.MenuItemCore({
                           label: "Email",
                           onClick() {
                             console.log("email");
                           },
                         }),
-                        new Timeless.ui.MenuItemCore({
+                        new Timeless.vm.MenuItemCore({
                           label: "Message",
                           onClick() {
                             console.log("message");
@@ -417,7 +417,7 @@ export default function OverlayView() {
                       ],
                     }),
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Delete",
                     onClick() {
                       console.log("delete");
@@ -428,7 +428,7 @@ export default function OverlayView() {
             },
             [
               Button(
-                { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
+                { store: new Timeless.vm.ButtonCore({ variant: "outline" }) },
                 ["With Popover"],
               ),
             ],
@@ -437,38 +437,38 @@ export default function OverlayView() {
         Item("With Submenu", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 view$,
                 items: [
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Cut",
                     onClick() {
                       console.log("cut");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Copy",
                     onClick() {
                       console.log("copy");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Share",
-                    menu: new Timeless.ui.MenuCore({
+                    menu: new Timeless.vm.MenuCore({
                       items: [
-                        new Timeless.ui.MenuItemCore({
+                        new Timeless.vm.MenuItemCore({
                           label: "Email",
                           onClick() {
                             console.log("email");
                           },
                         }),
-                        new Timeless.ui.MenuItemCore({
+                        new Timeless.vm.MenuItemCore({
                           label: "Message",
                           onClick() {
                             console.log("message");
                           },
                         }),
-                        new Timeless.ui.MenuItemCore({
+                        new Timeless.vm.MenuItemCore({
                           label: "AirDrop",
                           onClick() {
                             console.log("airdrop");
@@ -477,7 +477,7 @@ export default function OverlayView() {
                       ],
                     }),
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Delete",
                     onClick() {
                       console.log("delete");
@@ -487,7 +487,7 @@ export default function OverlayView() {
               }),
             },
             [
-              Button({ store: new Timeless.ui.ButtonCore({}) }, [
+              Button({ store: new Timeless.vm.ButtonCore({}) }, [
                 "With Submenu",
               ]),
             ],
@@ -495,16 +495,16 @@ export default function OverlayView() {
         ]),
         Item("Dynamic Submenu", [
           (() => {
-            const shareMenu = new Timeless.ui.MenuCore({
+            const shareMenu = new Timeless.vm.MenuCore({
               view$,
               items: [
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "February",
                   onClick() {
                     console.log("February");
                   },
                 }),
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "March",
                   onClick() {
                     console.log("March");
@@ -512,7 +512,7 @@ export default function OverlayView() {
                 }),
               ],
             });
-            const menuItem = new Timeless.ui.MenuItemCore({
+            const menuItem = new Timeless.vm.MenuItemCore({
               label: "Month",
               menu: shareMenu,
               onClick() {
@@ -525,7 +525,7 @@ export default function OverlayView() {
                 count++;
                 const extra = Array.from({ length: 3 }, (_, i) => {
                   const label = `Extra ${(count - 1) * 3 + i + 1}`;
-                  return new Timeless.ui.MenuItemCore({
+                  return new Timeless.vm.MenuItemCore({
                     label,
                     onClick() {
                       console.log(label);
@@ -535,10 +535,10 @@ export default function OverlayView() {
                 shareMenu.setItems([...shareMenu.items, ...extra]);
               }, 1000);
             });
-            const dm$ = new Timeless.ui.DropdownMenuCore({
+            const dm$ = new Timeless.vm.DropdownMenuCore({
               view$,
               items: [
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "Year 2025",
                   onClick() {
                     console.log("Year 2025");
@@ -549,7 +549,7 @@ export default function OverlayView() {
             });
             return DropdownMenu({ store: dm$ }, [
               Button(
-                { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
+                { store: new Timeless.vm.ButtonCore({ variant: "outline" }) },
                 ["Dynamic Submenu"],
               ),
             ]);
@@ -558,23 +558,23 @@ export default function OverlayView() {
         Item("Click Trigger", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 view$,
                 trigger: "click",
                 items: [
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Profile",
                     onClick() {
                       console.log("profile");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Settings",
                     onClick() {
                       console.log("settings");
                     },
                   }),
-                  new Timeless.ui.MenuItemCore({
+                  new Timeless.vm.MenuItemCore({
                     label: "Logout",
                     onClick() {
                       console.log("logout");
@@ -585,7 +585,7 @@ export default function OverlayView() {
             },
             [
               Button(
-                { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
+                { store: new Timeless.vm.ButtonCore({ variant: "outline" }) },
                 ["Click Me"],
               ),
             ],
@@ -594,11 +594,11 @@ export default function OverlayView() {
         Item("Many Items (100+)", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 trigger: "click",
                 view$,
                 items: Array.from({ length: 100 }, (_, i) => {
-                  return new Timeless.ui.MenuItemCore({
+                  return new Timeless.vm.MenuItemCore({
                     label: `Menu Item ${i + 1}`,
                     shortcut: i % 5 === 0 ? `⌘${i}` : undefined,
                     icon:
@@ -615,7 +615,7 @@ export default function OverlayView() {
             [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                  store: new Timeless.vm.ButtonCore({ variant: "outline" }),
                 },
                 ["100 Items"],
               ),
@@ -625,13 +625,13 @@ export default function OverlayView() {
         Item("Full Featured Menu", [
           DropdownMenu(
             {
-              store: new Timeless.ui.DropdownMenuCore({
+              store: new Timeless.vm.DropdownMenuCore({
                 view$,
                 items: [
-                  new Timeless.ui.MenuGroupCore({
+                  new Timeless.vm.MenuGroupCore({
                     label: "Edit",
                     items: [
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Undo",
                         shortcut: "⌘Z",
                         icon: Icon({ name: "undo-2", size: 24 }),
@@ -639,7 +639,7 @@ export default function OverlayView() {
                           console.log("undo");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Redo",
                         shortcut: "⇧⌘Z",
                         icon: Icon({ name: "refresh-ccw", size: 24 }),
@@ -649,11 +649,11 @@ export default function OverlayView() {
                       }),
                     ],
                   }),
-                  new Timeless.ui.MenuSeparatorCore(),
-                  new Timeless.ui.MenuGroupCore({
+                  new Timeless.vm.MenuSeparatorCore(),
+                  new Timeless.vm.MenuGroupCore({
                     label: "Clipboard",
                     items: [
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Cut",
                         // shortcut: "⌘X",
                         icon: Icon({ name: "bolt", size: 16 }),
@@ -661,7 +661,7 @@ export default function OverlayView() {
                           console.log("cut");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Copy",
                         shortcut: "⌘C",
                         icon: Icon({ name: "file-symlink", size: 16 }),
@@ -669,7 +669,7 @@ export default function OverlayView() {
                           console.log("copy");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Paste",
                         shortcut: "⌘V",
                         icon: Icon({ name: "arrow-down-to-line", size: 16 }),
@@ -679,18 +679,18 @@ export default function OverlayView() {
                       }),
                     ],
                   }),
-                  new Timeless.ui.MenuSeparatorCore(),
-                  new Timeless.ui.MenuGroupCore({
+                  new Timeless.vm.MenuSeparatorCore(),
+                  new Timeless.vm.MenuGroupCore({
                     label: "Share",
                     items: [
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Email",
                         icon: Icon({ name: "search", size: 24 }),
                         onClick() {
                           console.log("email");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Home",
                         shortcut: "⌘M",
                         icon: Icon({ name: "house", size: 24 }),
@@ -698,35 +698,35 @@ export default function OverlayView() {
                           console.log("home");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "More",
                         icon: Icon({ name: "ellipsis", size: 24 }),
-                        menu: new Timeless.ui.MenuCore({
+                        menu: new Timeless.vm.MenuCore({
                           items: [
-                            new Timeless.ui.MenuItemCore({
+                            new Timeless.vm.MenuItemCore({
                               label: "Slack",
                               onClick() {
                                 console.log("slack");
                               },
                             }),
-                            new Timeless.ui.MenuItemCore({
+                            new Timeless.vm.MenuItemCore({
                               label: "Discord",
                               onClick() {
                                 console.log("discord");
                               },
                             }),
-                            new Timeless.ui.MenuSeparatorCore(),
-                            new Timeless.ui.MenuItemCore({
+                            new Timeless.vm.MenuSeparatorCore(),
+                            new Timeless.vm.MenuItemCore({
                               label: "WeChat",
-                              menu: new Timeless.ui.MenuCore({
+                              menu: new Timeless.vm.MenuCore({
                                 items: [
-                                  new Timeless.ui.MenuItemCore({
+                                  new Timeless.vm.MenuItemCore({
                                     label: "Chat",
                                     onClick() {
                                       console.log("wechat chat");
                                     },
                                   }),
-                                  new Timeless.ui.MenuItemCore({
+                                  new Timeless.vm.MenuItemCore({
                                     label: "Moments",
                                     onClick() {
                                       console.log("wechat moments");
@@ -746,10 +746,10 @@ export default function OverlayView() {
                       }),
                     ],
                   }),
-                  new Timeless.ui.MenuSeparatorCore(),
-                  new Timeless.ui.MenuGroupCore({
+                  new Timeless.vm.MenuSeparatorCore(),
+                  new Timeless.vm.MenuGroupCore({
                     items: [
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Delete",
                         shortcut: "⌘⌫",
                         icon: Icon({ name: "trash-2", size: 24 }),
@@ -765,7 +765,7 @@ export default function OverlayView() {
             [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                  store: new Timeless.vm.ButtonCore({ variant: "outline" }),
                 },
                 ["Full Featured Menu"],
               ),
@@ -774,50 +774,50 @@ export default function OverlayView() {
         ]),
         Item("Context Menu", [
           (() => {
-            const menu$ = new Timeless.ui.ContextMenuCore({
+            const menu$ = new Timeless.vm.ContextMenuCore({
               view$,
               items: [
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "Cut",
                   onClick() {
                     console.log("cut");
                   },
                 }),
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "Copy",
                   onClick() {
                     console.log("copy");
                   },
                 }),
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "Paste",
                   onClick() {
                     console.log("paste");
                   },
                 }),
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "Delete",
                   onClick() {
                     console.log("delete");
                   },
                 }),
-                new Timeless.ui.MenuItemCore({
+                new Timeless.vm.MenuItemCore({
                   label: "More",
-                  menu: new Timeless.ui.MenuCore({
+                  menu: new Timeless.vm.MenuCore({
                     items: [
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Edit",
                         onClick() {
                           console.log("edit");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Duplicate",
                         onClick() {
                           console.log("duplicate");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Delete",
                         onClick() {
                           console.log("delete");
@@ -845,32 +845,32 @@ export default function OverlayView() {
         Item("Dynamic Context Menu Items", [
           (() => {
             const createInboxItems = () => [
-              new Timeless.ui.MenuItemCore({
+              new Timeless.vm.MenuItemCore({
                 label: "Archive Thread",
                 icon: Icon({ name: "archive", size: 18 }),
                 onClick() {
                   console.log("archive thread");
                 },
               }),
-              new Timeless.ui.MenuItemCore({
+              new Timeless.vm.MenuItemCore({
                 label: "Mark Unread",
                 icon: Icon({ name: "mail", size: 18 }),
                 onClick() {
                   console.log("mark unread");
                 },
               }),
-              new Timeless.ui.MenuItemCore({
+              new Timeless.vm.MenuItemCore({
                 label: "Move to Project",
                 icon: Icon({ name: "folder-input", size: 18 }),
-                menu: new Timeless.ui.MenuCore({
+                menu: new Timeless.vm.MenuCore({
                   items: [
-                    new Timeless.ui.MenuItemCore({
+                    new Timeless.vm.MenuItemCore({
                       label: "Design Review",
                       onClick() {
                         console.log("move to design review");
                       },
                     }),
-                    new Timeless.ui.MenuItemCore({
+                    new Timeless.vm.MenuItemCore({
                       label: "Engineering",
                       onClick() {
                         console.log("move to engineering");
@@ -884,14 +884,14 @@ export default function OverlayView() {
               }),
             ];
             const createCanvasItems = () => [
-              new Timeless.ui.MenuItemCore({
+              new Timeless.vm.MenuItemCore({
                 label: "Add Frame",
                 icon: Icon({ name: "frame", size: 18 }),
                 onClick() {
                   console.log("add frame");
                 },
               }),
-              new Timeless.ui.MenuItemCore({
+              new Timeless.vm.MenuItemCore({
                 label: "Zoom to Selection",
                 shortcut: "⌘2",
                 icon: Icon({ name: "scan-search", size: 18 }),
@@ -899,7 +899,7 @@ export default function OverlayView() {
                   console.log("zoom to selection");
                 },
               }),
-              new Timeless.ui.MenuItemCore({
+              new Timeless.vm.MenuItemCore({
                 label: "Export PNG",
                 icon: Icon({ name: "image-down", size: 18 }),
                 onClick() {
@@ -907,7 +907,7 @@ export default function OverlayView() {
                 },
               }),
             ];
-            const menu$ = new Timeless.ui.ContextMenuCore({
+            const menu$ = new Timeless.vm.ContextMenuCore({
               view$,
               items: createInboxItems(),
             });
@@ -955,21 +955,21 @@ export default function OverlayView() {
             [
               DropdownMenu(
                 {
-                  store: new Timeless.ui.DropdownMenuCore({
+                  store: new Timeless.vm.DropdownMenuCore({
                     items: [
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Edit",
                         onClick() {
                           console.log("edit");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Duplicate",
                         onClick() {
                           console.log("duplicate");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Delete",
                         onClick() {
                           console.log("delete");
@@ -981,7 +981,7 @@ export default function OverlayView() {
                 [
                   Button(
                     {
-                      store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                      store: new Timeless.vm.ButtonCore({ variant: "outline" }),
                     },
                     ["Open Menu"],
                   ),
@@ -998,23 +998,23 @@ export default function OverlayView() {
             [
               DropdownMenu(
                 {
-                  store: new Timeless.ui.DropdownMenuCore({
+                  store: new Timeless.vm.DropdownMenuCore({
                     side: "right",
                     align: "start",
                     items: [
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Edit",
                         onClick() {
                           console.log("edit");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Duplicate",
                         onClick() {
                           console.log("duplicate");
                         },
                       }),
-                      new Timeless.ui.MenuItemCore({
+                      new Timeless.vm.MenuItemCore({
                         label: "Delete",
                         onClick() {
                           console.log("delete");
@@ -1026,7 +1026,7 @@ export default function OverlayView() {
                 [
                   Button(
                     {
-                      store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+                      store: new Timeless.vm.ButtonCore({ variant: "outline" }),
                     },
                     ["Open Menu"],
                   ),
@@ -1040,7 +1040,7 @@ export default function OverlayView() {
             Tooltip({ content: ["Top tooltip"] }, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     variant: "outline",
                     size: "sm",
                   }),
@@ -1051,7 +1051,7 @@ export default function OverlayView() {
             Tooltip({ side: "bottom", content: ["Bottom tooltip"] }, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     variant: "outline",
                     size: "sm",
                   }),
@@ -1062,7 +1062,7 @@ export default function OverlayView() {
             Tooltip({ side: "left", content: ["Left tooltip"] }, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     variant: "outline",
                     size: "sm",
                   }),
@@ -1073,7 +1073,7 @@ export default function OverlayView() {
             Tooltip({ side: "right", content: ["Right tooltip"] }, [
               Button(
                 {
-                  store: new Timeless.ui.ButtonCore({
+                  store: new Timeless.vm.ButtonCore({
                     variant: "outline",
                     size: "sm",
                   }),

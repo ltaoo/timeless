@@ -1,14 +1,13 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, refobj } from "@timeless/timeless";
 import { Fragment, View, ViewChildren, ViewProps } from "@timeless/timeless";
-import { TooltipCore, Align, Side } from "@timeless/inner-vm";
-import { TooltipPrimitive } from "@timeless/ui-primitive";
 
 // 全局单例 store
-let globalStore: TooltipCore | null = null;
+let globalStore: vm.TooltipCore | null = null;
 
 function getGlobalStore() {
   if (!globalStore) {
-    globalStore = new TooltipCore({
+    globalStore = new vm.TooltipCore({
       side: "top",
       align: "center",
     });
@@ -19,14 +18,14 @@ function getGlobalStore() {
 export function Tooltip(
   props: ViewProps & {
     content?: ViewChildren;
-    side?: Side;
-    align?: Align;
+    side?: vm.Side;
+    align?: vm.Align;
   },
   children?: ViewChildren,
 ) {
   const { content, side = "top", align = "center", ...rest } = props;
 
-  return TooltipPrimitive.Trigger(
+  return ui.TooltipPrimitive.Trigger(
     {
       ...rest,
       side,
@@ -59,7 +58,7 @@ export function TooltipProvider(props: ViewProps, children?: ViewChildren) {
     }),
   ];
 
-  return TooltipPrimitive.Root(
+  return ui.TooltipPrimitive.Root(
     {
       ...props,
       onUnmounted() {
@@ -71,7 +70,7 @@ export function TooltipProvider(props: ViewProps, children?: ViewChildren) {
     },
     [
       Fragment({}, children),
-      TooltipPrimitive.Portal(
+      ui.TooltipPrimitive.Portal(
         {
           store,
           class: computed(state_, (t) => {

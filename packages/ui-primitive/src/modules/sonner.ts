@@ -1,4 +1,4 @@
-import { ViewChildren, View } from "@timeless/timeless";
+import { ViewChildren, View } from "../core";
 
 import { SonnerCore } from "@timeless/inner-vm";
 

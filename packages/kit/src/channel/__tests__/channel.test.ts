@@ -1,13 +1,27 @@
 import { describe, it, expect, vi } from "vitest";
 import { Result } from "@timeless/inner-base";
 
-import { ChannelCore } from "../index";
+import { ChannelClientCore, ChannelCore } from "../index";
+
+function createClient() {
+  const client = new ChannelClientCore();
+  const send = vi.fn().mockReturnValue(Result.Ok(null));
+  const close = vi.fn().mockReturnValue(Result.Ok(null));
+  const open = vi.fn().mockReturnValue(Result.Ok({ send, close }));
+  client.open = open;
+  return { client, open, send, close };
+}
 
 describe("ChannelCore", () => {
   describe("constructor", () => {
-    it("accepts an endpoint directly", () => {
-      const channel$ = new ChannelCore("/eventnamelisten");
+    it("accepts an endpoint and client", () => {
+      const { client } = createClient();
+      const channel$ = new ChannelCore({
+        endpoint: "/eventnamelisten",
+        client,
+      });
 
+      expect(channel$.client).toBe(client);
       expect(channel$.endpoint).toBe("/eventnamelisten");
       expect(channel$.initial).toBe(true);
       expect(channel$.connecting).toBe(false);
@@ -34,9 +48,13 @@ describe("ChannelCore", () => {
   });
 
   describe("connect", () => {
-    it("uses provider openConnection and updates state", async () => {
-      const channel$ = new ChannelCore("/eventnamelisten");
-      channel$.openConnection = vi.fn().mockReturnValue(Result.Ok(null));
+    it("uses the client and updates state", async () => {
+      const { client, open } = createClient();
+      const channel$ = new ChannelCore("/eventnamelisten", {
+        client,
+        hostname: "wss://example.com",
+        query: { token: "test" },
+      });
       const connectedHandler = vi.fn();
       const statusHandler = vi.fn();
       channel$.onConnected(connectedHandler);
@@ -45,7 +63,13 @@ describe("ChannelCore", () => {
       const result = await channel$.connect();
 
       expect(result.error).toBeNull();
-      expect(channel$.openConnection).toHaveBeenCalled();
+      expect(open).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "/eventnamelisten",
+          hostname: "wss://example.com",
+          query: { token: "test" },
+        }),
+      );
       expect(channel$.initial).toBe(false);
       expect(channel$.connecting).toBe(false);
       expect(channel$.connected).toBe(true);
@@ -55,9 +79,19 @@ describe("ChannelCore", () => {
       expect(statusHandler).toHaveBeenCalledWith("connected");
     });
 
-    it("returns provider open errors", async () => {
+    it("returns an error when client is missing", async () => {
       const channel$ = new ChannelCore("/eventnamelisten");
-      channel$.openConnection = vi.fn().mockReturnValue(Result.Err("failed"));
+
+      const result = await channel$.connect();
+
+      expect(result.error?.message).toBe("缺少 channel client");
+      expect(channel$.status).toBe("failed");
+    });
+
+    it("returns client open errors", async () => {
+      const client = new ChannelClientCore();
+      client.open = vi.fn().mockReturnValue(Result.Err("failed"));
+      const channel$ = new ChannelCore("/eventnamelisten", { client });
 
       const result = await channel$.connect();
 
@@ -68,24 +102,79 @@ describe("ChannelCore", () => {
     });
 
     it("sends initialMessage after connection opens", async () => {
+      const { client, send } = createClient();
       const channel$ = new ChannelCore<string, { type: string }>(
         "/eventnamelisten",
         {
+          client,
           initialMessage: { type: "hello" },
         },
       );
-      channel$.openConnection = vi.fn().mockReturnValue(Result.Ok(null));
-      channel$.postMessage = vi.fn().mockReturnValue(Result.Ok(null));
 
       await channel$.connect();
 
-      expect(channel$.postMessage).toHaveBeenCalledWith({ type: "hello" });
+      expect(send).toHaveBeenCalledWith({ type: "hello" });
       expect(channel$.lastSent).toEqual({ type: "hello" });
+    });
+
+    it("lets different clients coexist on the same page", async () => {
+      const web = createClient();
+      const velo = createClient();
+      const webChannel$ = new ChannelCore("/web-events", {
+        client: web.client,
+      });
+      const veloChannel$ = new ChannelCore("/velo-events", {
+        client: velo.client,
+      });
+
+      await Promise.all([webChannel$.connect(), veloChannel$.connect()]);
+      await webChannel$.send("web");
+      await veloChannel$.send("velo");
+
+      expect(web.open).toHaveBeenCalledTimes(1);
+      expect(velo.open).toHaveBeenCalledTimes(1);
+      expect(web.send).toHaveBeenCalledWith("web");
+      expect(velo.send).toHaveBeenCalledWith("velo");
+    });
+
+    it("lets one client create multiple independent connections", async () => {
+      const { client, open } = createClient();
+      const firstChannel$ = new ChannelCore("/first", { client });
+      const secondChannel$ = new ChannelCore("/second", { client });
+
+      await Promise.all([firstChannel$.connect(), secondChannel$.connect()]);
+
+      expect(open).toHaveBeenCalledTimes(2);
+      expect(open.mock.calls[0][0].endpoint).toBe("/first");
+      expect(open.mock.calls[1][0].endpoint).toBe("/second");
+    });
+
+    it("can close while the client is still opening", async () => {
+      const client = new ChannelClientCore();
+      const send = vi.fn().mockReturnValue(Result.Ok(null));
+      const close = vi.fn().mockReturnValue(Result.Ok(null));
+      let finishOpen: (result: ReturnType<typeof Result.Ok>) => void;
+      client.open = vi.fn().mockReturnValue(
+        new Promise((resolve) => {
+          finishOpen = resolve;
+        }),
+      );
+      const channel$ = new ChannelCore("/events", { client });
+
+      const connecting = channel$.connect();
+      await channel$.close(1000, "leave page");
+      finishOpen!(Result.Ok({ send, close }));
+      const result = await connecting;
+
+      expect(result.error?.message).toBe("连接已取消");
+      expect(close).toHaveBeenCalledWith(1000, "connect canceled");
+      expect(channel$.status).toBe("closed");
+      expect(channel$.connected).toBe(false);
     });
   });
 
   describe("message", () => {
-    it("onMessage receives the business object", async () => {
+    it("onMessage receives the business object", () => {
       const channel$ = new ChannelCore<{ type: string }, { type: string }>(
         "/eventnamelisten",
       );
@@ -103,6 +192,16 @@ describe("ChannelCore", () => {
       expect(changeHandler).toHaveBeenCalledWith({
         type: "download_progress",
       });
+    });
+
+    it("receives provider messages through the client callback", async () => {
+      const { client, open } = createClient();
+      const channel$ = new ChannelCore<{ type: string }>("/events", { client });
+
+      await channel$.connect();
+      open.mock.calls[0][0].onMessage({ type: "updated" });
+
+      expect(channel$.lastMessage).toEqual({ type: "updated" });
     });
 
     it("can process raw messages before emitting", () => {
@@ -129,12 +228,12 @@ describe("ChannelCore", () => {
       expect(result.error?.message).toBe("连接未建立");
     });
 
-    it("submits object through provider postMessage", async () => {
+    it("submits objects through the connection", async () => {
+      const { client, send } = createClient();
       const channel$ = new ChannelCore<string, { type: string }>(
         "/eventnamelisten",
+        { client },
       );
-      channel$.openConnection = vi.fn().mockReturnValue(Result.Ok(null));
-      channel$.postMessage = vi.fn().mockReturnValue(Result.Ok(null));
       const sentHandler = vi.fn();
       channel$.onSent(sentHandler);
 
@@ -142,7 +241,7 @@ describe("ChannelCore", () => {
       const result = await channel$.sendMessage({ type: "hello" });
 
       expect(result.error).toBeNull();
-      expect(channel$.postMessage).toHaveBeenCalledWith({ type: "hello" });
+      expect(send).toHaveBeenCalledWith({ type: "hello" });
       expect(channel$.lastSent).toEqual({ type: "hello" });
       expect(sentHandler).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -152,32 +251,30 @@ describe("ChannelCore", () => {
       );
     });
 
-    it("supports encoding before postMessage", async () => {
+    it("supports encoding before sending", async () => {
+      const { client, send } = createClient();
       const channel$ = new ChannelCore<string, { type: string }>(
         "/eventnamelisten",
         {
+          client,
           encode: (v) => JSON.stringify(v),
         },
       );
-      channel$.openConnection = vi.fn().mockReturnValue(Result.Ok(null));
-      channel$.postMessage = vi.fn().mockReturnValue(Result.Ok(null));
 
       await channel$.connect();
       await channel$.sendMessage({ type: "hello" });
 
-      expect(channel$.postMessage).toHaveBeenCalledWith('{"type":"hello"}');
+      expect(send).toHaveBeenCalledWith('{"type":"hello"}');
     });
   });
 
   describe("close", () => {
     it("closes cleanly before connected", async () => {
       const channel$ = new ChannelCore("/eventnamelisten");
-      channel$.closeConnection = vi.fn().mockReturnValue(Result.Ok(null));
 
       const result = await channel$.close();
 
       expect(result.error).toBeNull();
-      expect(channel$.closeConnection).not.toHaveBeenCalled();
       expect(channel$.connected).toBe(false);
       expect(channel$.status).toBe("closed");
       expect(channel$.closeReason).toEqual({
@@ -187,10 +284,9 @@ describe("ChannelCore", () => {
       });
     });
 
-    it("uses provider closeConnection and updates state", async () => {
-      const channel$ = new ChannelCore("/eventnamelisten");
-      channel$.openConnection = vi.fn().mockReturnValue(Result.Ok(null));
-      channel$.closeConnection = vi.fn().mockReturnValue(Result.Ok(null));
+    it("closes the connection and updates state", async () => {
+      const { client, close } = createClient();
+      const channel$ = new ChannelCore("/eventnamelisten", { client });
       const closeHandler = vi.fn();
       channel$.onClose(closeHandler);
 
@@ -198,7 +294,7 @@ describe("ChannelCore", () => {
       const result = await channel$.close(1000, "done");
 
       expect(result.error).toBeNull();
-      expect(channel$.closeConnection).toHaveBeenCalledWith(1000, "done");
+      expect(close).toHaveBeenCalledWith(1000, "done");
       expect(channel$.connected).toBe(false);
       expect(channel$.status).toBe("closed");
       expect(channel$.closeReason).toEqual({
@@ -214,11 +310,15 @@ describe("ChannelCore", () => {
     });
 
     it("handles provider-side close", async () => {
-      const channel$ = new ChannelCore("/eventnamelisten");
-      channel$.openConnection = vi.fn().mockReturnValue(Result.Ok(null));
+      const { client, open } = createClient();
+      const channel$ = new ChannelCore("/eventnamelisten", { client });
 
       await channel$.connect();
-      channel$.handleClose({ code: 1006, reason: "lost", clean: false });
+      open.mock.calls[0][0].onClose({
+        code: 1006,
+        reason: "lost",
+        clean: false,
+      });
 
       expect(channel$.connected).toBe(false);
       expect(channel$.status).toBe("closed");

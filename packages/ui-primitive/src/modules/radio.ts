@@ -1,5 +1,5 @@
-import { ref, computed } from "@timeless/timeless";
-import { Radio, RadioProps, Label as NativeLabel } from "@timeless/timeless";
+import { ref, computed } from "../core";
+import { Radio, RadioProps, Label as NativeLabel } from "../core";
 import {
   View,
   ViewProps,
@@ -9,7 +9,7 @@ import {
   Button,
   ButtonProps,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import { RadioCore, RadioGroupCore } from "@timeless/inner-vm";
 
 export function Root(

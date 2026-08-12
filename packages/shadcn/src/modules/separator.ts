@@ -1,12 +1,12 @@
+import { ui } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
-import { SeparatorPrimitive } from "@timeless/ui-primitive";
 
 export function Separator(
   props: ViewProps & { orientation?: "horizontal" | "vertical" },
 ) {
   const { orientation = "horizontal", class: cls, ...rest } = props;
-  return SeparatorPrimitive.Separator({
+  return ui.SeparatorPrimitive.Separator({
     ...rest,
     orientation,
     class: classNames([

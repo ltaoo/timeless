@@ -1,10 +1,9 @@
+import { ui, vm } from "@timeless/timeless";
 import { Icon, ListenerManager, View, ViewProps } from "@timeless/timeless";
 import { ref, computed, classNames } from "@timeless/timeless";
-import { CheckboxPrimitive } from "@timeless/ui-primitive";
-import { CheckboxCore } from "@timeless/inner-vm";
 
 export function Checkbox(
-  props: ViewProps & { store: CheckboxCore; id?: string },
+  props: ViewProps & { store: vm.CheckboxCore; id?: string },
 ) {
   const { store, id, ...rest } = props;
   const state_ = ref(store.state);
@@ -16,13 +15,13 @@ export function Checkbox(
     }),
   );
 
-  return CheckboxPrimitive.Root(
+  return ui.CheckboxPrimitive.Root(
     {
       store,
     },
     [
-      CheckboxPrimitive.Input({ store, id }),
-      CheckboxPrimitive.Box(
+      ui.CheckboxPrimitive.Input({ store, id }),
+      ui.CheckboxPrimitive.Box(
         {
           ...rest,
           store,

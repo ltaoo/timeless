@@ -1,18 +1,17 @@
+import { ui, vm } from "@timeless/timeless";
 import { ref, computed, classNames } from "@timeless/timeless";
 import { View, For, ViewProps, Label as NativeLabel } from "@timeless/timeless";
-import { RadioPrimitive } from "@timeless/ui-primitive";
-import { RadioGroupCore, RadioCore } from "@timeless/inner-vm";
 
-export function Radio(props: { store: RadioCore; id?: string }) {
+export function Radio(props: { store: vm.RadioCore; id?: string }) {
   const { store, id } = props;
   const state = ref(store.state);
   const unsub = store.onStateChange(() => {
     state.as(store.state);
   });
 
-  return RadioPrimitive.Root({ store }, [
-    RadioPrimitive.Input({ store, id }),
-    RadioPrimitive.Box(
+  return ui.RadioPrimitive.Root({ store }, [
+    ui.RadioPrimitive.Input({ store, id }),
+    ui.RadioPrimitive.Box(
       {
         store,
         class: classNames([
@@ -31,7 +30,7 @@ export function Radio(props: { store: RadioCore; id?: string }) {
         },
       },
       [
-        RadioPrimitive.Indicator({ store }, [
+        ui.RadioPrimitive.Indicator({ store }, [
           View(
             {
               class: "size-2 rounded-full bg-primary-foreground",
@@ -46,7 +45,7 @@ export function Radio(props: { store: RadioCore; id?: string }) {
 
 export function RadioGroup(
   props: ViewProps & {
-    store: RadioGroupCore<any>;
+    store: vm.RadioGroupCore<any>;
     class?: string;
     itemClass?: string;
     direction?: "horizontal" | "vertical";
@@ -61,7 +60,7 @@ export function RadioGroup(
       ? "flex flex-row flex-wrap gap-4"
       : "flex flex-col gap-2";
 
-  return RadioPrimitive.Group(
+  return ui.RadioPrimitive.Group(
     {
       store,
       class: props.class || container_class,
@@ -79,7 +78,7 @@ export function RadioGroup(
     [
       For({
         each: computed(state, (s) => s.options),
-        render(item: { label: string; value: any; core: RadioCore }) {
+        render(item: { label: string; value: any; core: vm.RadioCore }) {
           return RadioGroupItem({
             store,
             item,
@@ -92,8 +91,8 @@ export function RadioGroup(
 }
 
 export function RadioGroupItem(props: {
-  store: RadioGroupCore<any>;
-  item: { label: string; value: any; core: RadioCore };
+  store: vm.RadioGroupCore<any>;
+  item: { label: string; value: any; core: vm.RadioCore };
   class?: string;
 }) {
   const { item } = props;

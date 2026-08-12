@@ -1,4 +1,4 @@
-import { computed, ref, refobj } from "@timeless/timeless";
+import { computed, ref, refobj } from "../core";
 import {
   View,
   ViewProps,
@@ -6,7 +6,7 @@ import {
   Textarea as NativeTextarea,
   styleNames,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import { InputCore } from "@timeless/inner-vm";
 
 type Provider = {

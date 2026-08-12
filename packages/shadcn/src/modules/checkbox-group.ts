@@ -1,12 +1,11 @@
+import { ui, vm } from "@timeless/timeless";
 import { ref, computed } from "@timeless/timeless";
 import { View, For, Label as NativeLabel } from "@timeless/timeless";
-import { CheckboxPrimitive } from "@timeless/ui-primitive";
-import { CheckboxGroupCore, CheckboxCore } from "@timeless/inner-vm";
 
 import { Checkbox } from "./checkbox";
 
 export function CheckboxGroup(props: {
-  store: CheckboxGroupCore<any>;
+  store: vm.CheckboxGroupCore<any>;
   class?: string;
   itemClass?: string;
   direction?: "horizontal" | "vertical";
@@ -20,7 +19,7 @@ export function CheckboxGroup(props: {
       ? "flex flex-row flex-wrap gap-4"
       : "flex flex-col gap-2";
 
-  return CheckboxPrimitive.Group(
+  return ui.CheckboxPrimitive.Group(
     {
       store,
       class: props.class || container_classname,
@@ -38,7 +37,7 @@ export function CheckboxGroup(props: {
     [
       For({
         each: computed(state, (s) => s.options),
-        render(item: { label: string; value: any; core: CheckboxCore }) {
+        render(item: { label: string; value: any; core: vm.CheckboxCore }) {
           return CheckboxGroupItem({
             store,
             item,
@@ -51,8 +50,8 @@ export function CheckboxGroup(props: {
 }
 
 export function CheckboxGroupItem(props: {
-  store: CheckboxGroupCore<any>;
-  item: { label: string; value: any; core: CheckboxCore };
+  store: vm.CheckboxGroupCore<any>;
+  item: { label: string; value: any; core: vm.CheckboxCore };
   class?: string;
 }) {
   const { item } = props;

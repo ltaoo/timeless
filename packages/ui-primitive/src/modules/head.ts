@@ -1,4 +1,4 @@
-import { View, ViewProps, ViewChildren } from "@timeless/timeless";
+import { View, ViewProps, ViewChildren } from "../core";
 
 export function Head1(props: ViewProps, children?: ViewChildren) {
   return View({ ...props, as: "h1" }, children);

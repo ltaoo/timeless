@@ -523,11 +523,11 @@ export * from "./modules/flow";
 ## 11. 使用示例
 
 ```typescript
-import { FlowCore } from "@timeless/inner-vm";
+import { vm } from "@timeless/timeless";
 import { FlowView } from "@timeless/shadcn";
 
 // 1. 创建 FlowCore
-const flow = new FlowCore({
+const flow = new vm.FlowCore({
   nodes: [
     { id: "1", position: { x: 100, y: 100 }, data: { label: "Start" } },
     { id: "2", position: { x: 400, y: 200 }, data: { label: "Process" } },

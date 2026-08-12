@@ -1,27 +1,65 @@
 // console.log(cn);
-const { ref, refarr, computed, View, Button, For, Show } = Timeless;
+const { ref, refarr, computed, View, Button, For, Show, Match } = Timeless;
 
-function App($container) {
+function create_match_example_model() {
+  const when_ = ref("loading");
+
+  return {
+    when_,
+    select(value) {
+      when_.as(value);
+    },
+  };
+}
+
+function MatchExample(model) {
+  return View(
+    {
+      class:
+        "space-y-3 rounded-md border border-zinc-200 p-4 dark:border-zinc-700",
+    },
+    [
+      View({ class: "font-medium" }, ["Match cases.else 示例"]),
+      View({ class: "flex flex-wrap gap-2" }, [
+        Button({ onClick: () => model.select("loading") }, ["loading"]),
+        Button({ onClick: () => model.select("success") }, ["success"]),
+        Button({ onClick: () => model.select("timeout") }, [
+          "timeout（未匹配）",
+        ]),
+      ]),
+      Match({
+        when: model.when_,
+        cases: {
+          loading: () => View({}, ["正在加载"]),
+          success: () => View({}, ["加载成功"]),
+          else: (value) => View({}, [`默认分支，实际 when 值：${value}`]),
+        },
+      }),
+    ],
+  );
+}
+
+function App(match_example_model) {
   const count = ref(1);
   const commitList = refarr([
-    // { id: 1, message: "Initial commit" },
-    // {
-    //   id: 2,
-    //   message: "Add feature A",
-    //   authors: [
-    //     {
-    //       name: "litao",
-    //       latest: "2025/01/01",
-    //       percent: 0.01,
-    //     },
-    //     {
-    //       name: "ltaoo",
-    //       latest: "2025/01/02",
-    //       percent: 0.03,
-    //     },
-    //   ],
-    // },
-    // { id: 3, message: "Fix bug B" },
+    { id: 1, message: "Initial commit" },
+    {
+      id: 2,
+      message: "Add feature A",
+      authors: [
+        {
+          name: "litao",
+          latest: "2025/01/01",
+          percent: 0.01,
+        },
+        {
+          name: "ltaoo",
+          latest: "2025/01/02",
+          percent: 0.03,
+        },
+      ],
+    },
+    { id: 3, message: "Fix bug B" },
   ]);
 
   return View(
@@ -34,6 +72,7 @@ function App($container) {
       },
     },
     [
+      MatchExample(match_example_model),
       View({ style: { display: "flex", "flex-wrap": "wrap", gap: "8px" } }, [
         View(
           {
@@ -238,5 +277,6 @@ document.addEventListener("DOMContentLoaded", function () {
     console.error("[Render] Root element not found");
     return;
   }
-  Timeless.DOM.render(App(), $root);
+  const match_example_model = create_match_example_model();
+  Timeless.DOM.render(App(match_example_model), $root);
 });

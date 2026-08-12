@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   classNames,
   combine,
@@ -6,12 +7,10 @@ import {
   View,
 } from "@timeless/timeless";
 import { Icon, Show, ViewProps } from "@timeless/timeless";
-import { InputPrimitive } from "@timeless/ui-primitive";
-import { InputCore } from "@timeless/inner-vm";
 
 export function Input(
   props: ViewProps & {
-    store: InputCore<any>;
+    store: vm.InputCore<any>;
     id?: string;
   },
 ) {
@@ -26,10 +25,10 @@ export function Input(
   const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
   const isLoading = computed(state_, (d) => d.loading || false);
 
-  return InputPrimitive.Root(
+  return ui.InputPrimitive.Root(
     { store, class: classNames(["t-input relative", props.class]) },
     [
-      InputPrimitive.Input({
+      ui.InputPrimitive.Input({
         ...rest,
         id,
         store,
@@ -67,7 +66,7 @@ export function Input(
         ),
         ok() {
           return [
-            InputPrimitive.Clear(
+            ui.InputPrimitive.Clear(
               {
                 store,
                 class:
@@ -78,7 +77,7 @@ export function Input(
           ];
         },
       }),
-      InputPrimitive.Loading(
+      ui.InputPrimitive.Loading(
         {
           store,
           class:

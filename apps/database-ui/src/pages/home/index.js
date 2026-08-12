@@ -1,22 +1,22 @@
 var platform = getPlatform();
 
 var FIELD_TYPE_OPTIONS = [
-  new Timeless.ui.SelectItemCore({ value: "int", label: "int" }),
-  new Timeless.ui.SelectItemCore({ value: "varchar", label: "varchar" }),
-  new Timeless.ui.SelectItemCore({ value: "text", label: "text" }),
-  new Timeless.ui.SelectItemCore({ value: "datetime", label: "datetime" }),
-  new Timeless.ui.SelectItemCore({ value: "decimal", label: "decimal" }),
-  new Timeless.ui.SelectItemCore({ value: "boolean", label: "boolean" }),
+  new Timeless.vm.SelectItemCore({ value: "int", label: "int" }),
+  new Timeless.vm.SelectItemCore({ value: "varchar", label: "varchar" }),
+  new Timeless.vm.SelectItemCore({ value: "text", label: "text" }),
+  new Timeless.vm.SelectItemCore({ value: "datetime", label: "datetime" }),
+  new Timeless.vm.SelectItemCore({ value: "decimal", label: "decimal" }),
+  new Timeless.vm.SelectItemCore({ value: "boolean", label: "boolean" }),
 ];
 
 function makeTypeOptions() {
   return [
-    new Timeless.ui.SelectItemCore({ value: "int", label: "int" }),
-    new Timeless.ui.SelectItemCore({ value: "varchar", label: "varchar" }),
-    new Timeless.ui.SelectItemCore({ value: "text", label: "text" }),
-    new Timeless.ui.SelectItemCore({ value: "datetime", label: "datetime" }),
-    new Timeless.ui.SelectItemCore({ value: "decimal", label: "decimal" }),
-    new Timeless.ui.SelectItemCore({ value: "boolean", label: "boolean" }),
+    new Timeless.vm.SelectItemCore({ value: "int", label: "int" }),
+    new Timeless.vm.SelectItemCore({ value: "varchar", label: "varchar" }),
+    new Timeless.vm.SelectItemCore({ value: "text", label: "text" }),
+    new Timeless.vm.SelectItemCore({ value: "datetime", label: "datetime" }),
+    new Timeless.vm.SelectItemCore({ value: "decimal", label: "decimal" }),
+    new Timeless.vm.SelectItemCore({ value: "boolean", label: "boolean" }),
   ];
 }
 
@@ -86,12 +86,12 @@ function FormRender(props, children) {
  */
 function createTypeConfigs(fieldData) {
   var configs = {
-    int: new Timeless.ui.ObjectFieldCore({
+    int: new Timeless.vm.ObjectFieldCore({
       fields: {
-        length: new Timeless.ui.SingleFieldCore({
+        length: new Timeless.vm.SingleFieldCore({
           label: "长度",
           name: "length",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: String(
               fieldData.type === "int" && fieldData.length
                 ? fieldData.length
@@ -102,12 +102,12 @@ function createTypeConfigs(fieldData) {
         }),
       },
     }),
-    varchar: new Timeless.ui.ObjectFieldCore({
+    varchar: new Timeless.vm.ObjectFieldCore({
       fields: {
-        length: new Timeless.ui.SingleFieldCore({
+        length: new Timeless.vm.SingleFieldCore({
           label: "长度",
           name: "length",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: String(
               fieldData.type === "varchar" && fieldData.length
                 ? fieldData.length
@@ -118,29 +118,29 @@ function createTypeConfigs(fieldData) {
         }),
       },
     }),
-    text: new Timeless.ui.ObjectFieldCore({ fields: {} }),
-    datetime: new Timeless.ui.ObjectFieldCore({ fields: {} }),
-    decimal: new Timeless.ui.ObjectFieldCore({
+    text: new Timeless.vm.ObjectFieldCore({ fields: {} }),
+    datetime: new Timeless.vm.ObjectFieldCore({ fields: {} }),
+    decimal: new Timeless.vm.ObjectFieldCore({
       fields: {
-        precision: new Timeless.ui.SingleFieldCore({
+        precision: new Timeless.vm.SingleFieldCore({
           label: "精度",
           name: "precision",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: String(fieldData.precision || 10),
             placeholder: "如 10",
           }),
         }),
-        scale: new Timeless.ui.SingleFieldCore({
+        scale: new Timeless.vm.SingleFieldCore({
           label: "小数位",
           name: "scale",
-          input: new Timeless.ui.InputCore({
+          input: new Timeless.vm.InputCore({
             defaultValue: String(fieldData.scale || 2),
             placeholder: "如 2",
           }),
         }),
       },
     }),
-    boolean: new Timeless.ui.ObjectFieldCore({ fields: {} }),
+    boolean: new Timeless.vm.ObjectFieldCore({ fields: {} }),
   };
   return configs;
 }
@@ -153,18 +153,18 @@ function createFieldEditor(fieldData) {
   var currentType = fieldData.type || "varchar";
   var currentConfig_ = ref(configs[currentType] || configs["varchar"]);
 
-  var name$ = new Timeless.ui.SingleFieldCore({
+  var name$ = new Timeless.vm.SingleFieldCore({
     label: "名称",
     name: "name",
-    input: new Timeless.ui.InputCore({
+    input: new Timeless.vm.InputCore({
       defaultValue: fieldData.name || "",
       placeholder: "字段名称",
     }),
   });
-  var type$ = new Timeless.ui.SingleFieldCore({
+  var type$ = new Timeless.vm.SingleFieldCore({
     label: "类型",
     name: "type",
-    input: new Timeless.ui.SelectCore({
+    input: new Timeless.vm.SelectCore({
       defaultValue: currentType,
       platform: platform,
       options: makeTypeOptions(),
@@ -175,20 +175,20 @@ function createFieldEditor(fieldData) {
       },
     }),
   });
-  var primaryKey$ = new Timeless.ui.SingleFieldCore({
+  var primaryKey$ = new Timeless.vm.SingleFieldCore({
     label: "主键",
     name: "primaryKey",
-    input: new Timeless.ui.CheckboxCore({}),
+    input: new Timeless.vm.CheckboxCore({}),
   });
-  var nullable$ = new Timeless.ui.SingleFieldCore({
+  var nullable$ = new Timeless.vm.SingleFieldCore({
     label: "允许为空",
     name: "nullable",
-    input: new Timeless.ui.CheckboxCore({}),
+    input: new Timeless.vm.CheckboxCore({}),
   });
-  var foreignKey$ = new Timeless.ui.SingleFieldCore({
+  var foreignKey$ = new Timeless.vm.SingleFieldCore({
     label: "外键",
     name: "foreignKey",
-    input: new Timeless.ui.InputCore({
+    input: new Timeless.vm.InputCore({
       defaultValue: fieldData.foreignKey || "",
       placeholder: "如 users.id",
     }),
@@ -279,14 +279,14 @@ function FieldDetailView(props) {
  * @param {ViewComponentProps} props
  */
 export default function HomePageView(props) {
-  var view$ = new Timeless.ui.ScrollViewCore({});
+  var view$ = new Timeless.vm.ScrollViewCore({});
 
   // === 节点数据响应式引用（用于渲染后更新视图） ===
   var nodeDataRefs = {};
 
-  var flow$ = new Timeless.ui.FlowCanvasModel({
+  var flow$ = new Timeless.vm.FlowCanvasModel({
     nodes: [
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "users",
         type: "table",
         position: { x: 0, y: 160 },
@@ -303,7 +303,7 @@ export default function HomePageView(props) {
           ],
         },
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "posts",
         type: "table",
         position: { x: 420, y: 0 },
@@ -326,7 +326,7 @@ export default function HomePageView(props) {
           ],
         },
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "comments",
         type: "table",
         position: { x: 420, y: 400 },
@@ -354,7 +354,7 @@ export default function HomePageView(props) {
           ],
         },
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "tags",
         type: "table",
         position: { x: 840, y: 0 },
@@ -367,7 +367,7 @@ export default function HomePageView(props) {
           ],
         },
       }),
-      new Timeless.ui.FlowNodeModel({
+      new Timeless.vm.FlowNodeModel({
         id: "post_tags",
         type: "table",
         position: { x: 840, y: 280 },
@@ -432,18 +432,18 @@ export default function HomePageView(props) {
 
   // === Dialog 状态 ===
   var editingNode_ = ref(null);
-  var tableName$ = new Timeless.ui.SingleFieldCore({
+  var tableName$ = new Timeless.vm.SingleFieldCore({
     label: "表名",
     name: "tableName",
-    input: new Timeless.ui.InputCore({
+    input: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "表名",
     }),
   });
-  var tableDesc$ = new Timeless.ui.SingleFieldCore({
+  var tableDesc$ = new Timeless.vm.SingleFieldCore({
     label: "描述",
     name: "tableDesc",
-    input: new Timeless.ui.InputCore({
+    input: new Timeless.vm.InputCore({
       defaultValue: "",
       placeholder: "表描述",
     }),
@@ -451,7 +451,7 @@ export default function HomePageView(props) {
   var field_editors = refarr([]);
   var selected_id_ = ref("");
 
-  var dialog$ = new Timeless.ui.DialogCore({
+  var dialog$ = new Timeless.vm.DialogCore({
     title: "编辑表结构",
     footer: true,
     onOk: function () {
@@ -459,7 +459,7 @@ export default function HomePageView(props) {
     },
   });
 
-  var addFieldBtn$ = new Timeless.ui.ButtonCore({
+  var addFieldBtn$ = new Timeless.vm.ButtonCore({
     variant: "outline",
     size: "sm",
     onClick: function () {

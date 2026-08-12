@@ -1,17 +1,16 @@
+import { ui, vm } from "@timeless/timeless";
 import { For, type ViewProps, type TimelessElement } from "@timeless/timeless";
 import { classNames, refarr } from "@timeless/timeless";
-import { WaterfallPrimitive } from "@timeless/ui-primitive";
-import type { WaterfallCellModel, WaterfallModel } from "@timeless/inner-vm";
 
 export function Waterfall<T extends Record<string, unknown>>(
   props: ViewProps & {
-    store: WaterfallModel<T>;
-    render: (payload: T, cell: WaterfallCellModel<T>) => TimelessElement;
+    store: vm.WaterfallModel<T>;
+    render: (payload: T, cell: vm.WaterfallCellModel<T>) => TimelessElement;
   },
 ) {
   const { store, class: cls, render, ...rest } = props;
 
-  return WaterfallPrimitive.Root(
+  return ui.WaterfallPrimitive.Root(
     {
       ...rest,
       store,
@@ -25,7 +24,7 @@ export function Waterfall<T extends Record<string, unknown>>(
         each: store.$columns,
         render(column) {
           const visible_cells = refarr([...column.$cells]);
-          return WaterfallPrimitive.Column({ store: column }, [
+          return ui.WaterfallPrimitive.Column({ store: column }, [
             For({
               key: "id",
               each: visible_cells,
@@ -35,7 +34,7 @@ export function Waterfall<T extends Record<string, unknown>>(
                   ? render(payload, slot)
                   : null;
 
-                const cell$ = WaterfallPrimitive.Cell(
+                const cell$ = ui.WaterfallPrimitive.Cell(
                   { store: slot },
                   user_content ? [user_content] : [],
                 );

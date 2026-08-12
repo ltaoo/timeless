@@ -1,8 +1,8 @@
+import { ui } from "@timeless/timeless";
 import { ViewProps, ViewChildren } from "@timeless/timeless";
-import { CardPrimitive } from "@timeless/ui-primitive";
 
 export function Card(props: ViewProps, children?: ViewChildren) {
-  return CardPrimitive.Card(
+  return ui.CardPrimitive.Card(
     {
       ...props,
       style: {
@@ -16,7 +16,7 @@ export function Card(props: ViewProps, children?: ViewChildren) {
 }
 
 export function CardHeader(props: ViewProps, children?: ViewChildren) {
-  return CardPrimitive.CardHeader(
+  return ui.CardPrimitive.CardHeader(
     {
       ...props,
       style: {
@@ -29,7 +29,7 @@ export function CardHeader(props: ViewProps, children?: ViewChildren) {
 }
 
 export function CardTitle(props: ViewProps, children?: ViewChildren) {
-  return CardPrimitive.CardTitle(
+  return ui.CardPrimitive.CardTitle(
     {
       ...props,
       style: {
@@ -44,7 +44,7 @@ export function CardTitle(props: ViewProps, children?: ViewChildren) {
 }
 
 export function CardDescription(props: ViewProps, children?: ViewChildren) {
-  return CardPrimitive.CardDescription(
+  return ui.CardPrimitive.CardDescription(
     {
       ...props,
       style: {
@@ -58,7 +58,7 @@ export function CardDescription(props: ViewProps, children?: ViewChildren) {
 }
 
 export function CardContent(props: ViewProps, children?: ViewChildren) {
-  return CardPrimitive.CardContent(
+  return ui.CardPrimitive.CardContent(
     {
       ...props,
       style: {
@@ -70,7 +70,7 @@ export function CardContent(props: ViewProps, children?: ViewChildren) {
 }
 
 export function CardFooter(props: ViewProps, children?: ViewChildren) {
-  return CardPrimitive.CardFooter(
+  return ui.CardPrimitive.CardFooter(
     {
       ...props,
       style: {

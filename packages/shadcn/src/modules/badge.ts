@@ -1,6 +1,6 @@
+import { ui } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
 import { ViewProps, ViewChildren } from "@timeless/timeless";
-import { BadgePrimitive } from "@timeless/ui-primitive";
 
 const VARIANTS = {
   default:
@@ -18,7 +18,7 @@ export function Badge(
   children?: ViewChildren,
 ) {
   const { variant = "default", class: cls, ...rest } = props;
-  return BadgePrimitive.Badge(
+  return ui.BadgePrimitive.Badge(
     {
       ...rest,
       variant,

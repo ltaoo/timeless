@@ -11,9 +11,14 @@ export default createLibConfig({
   formats: ["es", "cjs", "umd"],
   external: ["@timeless/inner-base", "@timeless/inner-types"],
   globals: {
-    "@timeless/inner-base": "Timeless.base",
+    "@timeless/inner-base": "Timeless",
   },
   alias: {
     "@": resolve(__dirname, "src"),
+  },
+  bundle_analysis: {
+    package_name: pkg.name,
+    package_root: __dirname,
+    workspace_root: resolve(__dirname, "../.."),
   },
 });

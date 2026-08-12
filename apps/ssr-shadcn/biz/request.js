@@ -1,4 +1,4 @@
-import { request_factory } from "@timeless/kit";
+import { request_factory } from "@timeless/timeless";
 
 export const request = request_factory({
   headers: { "Content-Type": "application/json" },

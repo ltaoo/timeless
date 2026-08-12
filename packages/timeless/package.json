@@ -1,11 +1,11 @@
 {
   "name": "@timeless/timeless",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build && vite build --config vite.lite.config.ts"
   },
   "type": "module",
   "files": [
@@ -16,8 +16,11 @@
     "tailwindcss": "^3.0.0 || ^4.0.0"
   },
   "dependencies": {
+    "@timeless/inner-icons": "workspace:^",
     "@timeless/inner-primitive": "workspace:^",
     "@timeless/inner-reactive": "workspace:^",
+    "@timeless/inner-kit": "workspace:^",
+    "@timeless/inner-utils": "workspace:^",
     "@timeless/ui-primitive": "workspace:^",
     "@timeless/inner-vm": "workspace:^"
   },

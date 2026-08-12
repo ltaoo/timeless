@@ -1,4 +1,4 @@
-import { ref, computed } from "@timeless/timeless";
+import { ref, computed } from "../core";
 import {
   ViewChildren,
   Fragment,
@@ -6,7 +6,7 @@ import {
   Show,
   Button,
   ButtonProps,
-} from "@timeless/timeless";
+} from "../core";
 import { ButtonCore } from "@timeless/inner-vm";
 
 export function Root(

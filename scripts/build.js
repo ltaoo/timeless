@@ -12,8 +12,8 @@ const OUTPUT_PARENT = path.join(ROOT, "dist", "timeless");
 const OUTPUT_DIR = path.join(OUTPUT_PARENT, VERSION);
 
 // Keep this order explicit. Several packages resolve workspace package `dist`
-// entries during their own build, and timeless/ui-primitive form a cycle. In
-// particular ui-primitive must be refreshed before the final timeless bundle.
+// entries during their own build, so dependencies must be refreshed before
+// their consumers.
 const BUILD_ORDER = [
   "base",
   "reactive",
@@ -32,15 +32,30 @@ const BUILD_ORDER = [
 
 // Browser distribution consumed by wx_channels_download and the web demos.
 const ARTIFACTS = [
-  ["timeless", "timeless.umd.min.js"],
+  ["timeless", "timeless.umd.min.js", "bundle-analysis.json"],
+  ["timeless", "timeless.lite.umd.min.js", "bundle-analysis-lite.json"],
+  ["utils", "timeless.utils.umd.min.js", "bundle-analysis.json"],
   ["timeless-dom", "timeless.dom.umd.min.js"],
-  ["utils", "timeless.utils.umd.min.js"],
   ["provider-web", "timeless.web.umd.min.js"],
   ["shadcn", "timeless.shadcn.umd.min.js"],
   ["shadcn", "timeless.shadcn.css"],
   ["weui", "timeless.weui.umd.min.js"],
   ["weui", "timeless.weui.css"],
 ];
+
+// Each profile is a valid browser loading combination. The full and lite
+// bundles are alternatives, so cross-profile overlap is intentional.
+const LOAD_PROFILES = {
+  full: [
+    "timeless.umd.min.js",
+    "timeless.dom.umd.min.js",
+    "timeless.web.umd.min.js",
+    "timeless.shadcn.umd.min.js",
+    "timeless.weui.umd.min.js",
+  ],
+  lite: ["timeless.lite.umd.min.js"],
+  lite_with_utils: ["timeless.lite.umd.min.js", "timeless.utils.umd.min.js"],
+};
 
 const isProd = process.argv.includes("--prod");
 const buildEnv = {
@@ -95,7 +110,7 @@ function collectArtifacts() {
 
   const files = [];
   try {
-    for (const [packageDir, filename] of ARTIFACTS) {
+    for (const [packageDir, filename, analysis] of ARTIFACTS) {
       const source = path.join(PACKAGES_DIR, packageDir, "dist", filename);
       if (!fs.existsSync(source) || !fs.statSync(source).isFile()) {
         throw new Error(
@@ -105,7 +120,12 @@ function collectArtifacts() {
       const destination = path.join(stagingDir, filename);
       fs.copyFileSync(source, destination);
       const bytes = fs.statSync(destination).size;
-      files.push({ filename, package: packageDir, bytes });
+      files.push({
+        filename,
+        package: packageDir,
+        bytes,
+        ...(analysis ? { analysis } : {}),
+      });
       console.log(`Collected ${filename} (${(bytes / 1024).toFixed(1)} KiB)`);
     }
 
@@ -118,6 +138,7 @@ function collectArtifacts() {
           production: isProd,
           generatedAt: new Date().toISOString(),
           files,
+          load_profiles: LOAD_PROFILES,
         },
         null,
         2,
@@ -132,7 +153,9 @@ function collectArtifacts() {
   }
 
   console.log(`\nBuild complete: ${path.relative(ROOT, OUTPUT_DIR)}`);
-  console.log(`Collected ${files.length} browser artifacts plus manifest.json.`);
+  console.log(
+    `Collected ${files.length} browser artifacts plus manifest.json.`,
+  );
 }
 
 function main() {

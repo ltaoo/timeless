@@ -1,7 +1,6 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, refobj } from "@timeless/timeless";
 import { For, Show, ViewChildren, ViewProps } from "@timeless/timeless";
-import { TabsPrimitive } from "@timeless/ui-primitive";
-import { TabHeaderCore } from "@timeless/inner-vm";
 
 type TabItem = {
   value: string;
@@ -11,7 +10,7 @@ type TabItem = {
 
 export function Tabs(
   props: ViewProps & {
-    store: TabHeaderCore<any>;
+    store: vm.TabHeaderCore<any>;
     items?: TabItem[];
   },
   children?: ViewChildren,
@@ -23,14 +22,14 @@ export function Tabs(
     state_.as(v);
   });
 
-  return TabsPrimitive.Root(
+  return ui.TabsPrimitive.Root(
     {
       store,
       style: { width: "100%" },
       ...rest,
     },
     [
-      TabsPrimitive.List(
+      ui.TabsPrimitive.List(
         {
           store,
           style: {
@@ -45,7 +44,7 @@ export function Tabs(
             each: items || computed(state_, (d) => d.tabs),
             render(item: TabItem, index) {
               const i = index.value;
-              return TabsPrimitive.Tab(
+              return ui.TabsPrimitive.Tab(
                 {
                   store,
                   value: item.value,
@@ -76,7 +75,7 @@ export function Tabs(
                 },
                 [
                   item.label,
-                  TabsPrimitive.Indicator({
+                  ui.TabsPrimitive.Indicator({
                     store,
                     value: item.value,
                     style: computed(state_, (d) => {
@@ -116,7 +115,7 @@ export function Tabs(
                   when: computed(state_, (d) => d.curId === item.value),
                   ok() {
                     return [
-                      TabsPrimitive.Content(
+                      ui.TabsPrimitive.Content(
                         {
                           store,
                           value: item.value,

@@ -1,7 +1,7 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function DataDisplayView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   const progressVal = ref(60);
   const stepIdx = ref(1);
 
@@ -15,7 +15,7 @@ export default function DataDisplayView() {
             ]),
             Affix(
               {
-                store: new Timeless.ui.AffixCore({ top: 20 }),
+                store: new Timeless.vm.AffixCore({ top: 20 }),
                 offsetTop: 20,
                 class:
                   "inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm text-white shadow-md",
@@ -42,7 +42,7 @@ export default function DataDisplayView() {
         Item("Controls", [
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 size: "sm",
                 onClick() {
                   progressVal.as(Math.max(0, progressVal.value - 10));
@@ -53,7 +53,7 @@ export default function DataDisplayView() {
           ),
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 size: "sm",
                 onClick() {
                   progressVal.as(Math.min(100, progressVal.value + 10));
@@ -67,7 +67,7 @@ export default function DataDisplayView() {
       Section("Steps", [
         Item("3 Steps", [
           Steps({
-            store: new Timeless.ui.StepCore({
+            store: new Timeless.vm.StepCore({
               value: stepIdx.value,
             }),
             items: [
@@ -80,7 +80,7 @@ export default function DataDisplayView() {
         Item("Controls", [
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 size: "sm",
                 onClick() {
                   stepIdx.as(Math.max(0, stepIdx.value - 1));
@@ -91,7 +91,7 @@ export default function DataDisplayView() {
           ),
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 size: "sm",
                 onClick() {
                   stepIdx.as(Math.min(3, stepIdx.value + 1));

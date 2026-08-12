@@ -1,4 +1,4 @@
-import { computed, Fragment, refobj } from "@timeless/timeless";
+import { computed, Fragment, refobj } from "../core";
 import {
   View,
   ViewProps,
@@ -6,7 +6,7 @@ import {
   Checkbox,
   Button,
   ButtonProps,
-} from "@timeless/timeless";
+} from "../core";
 import { SwitchCore } from "@timeless/inner-vm";
 
 export function Root(

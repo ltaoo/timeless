@@ -1,5 +1,5 @@
-import { refobj, computed, isRef } from "@timeless/timeless";
-import { View, ViewProps, ViewChildren, isStyleRef } from "@timeless/timeless";
+import { refobj, computed, isRef } from "../core";
+import { View, ViewProps, ViewChildren, isStyleRef } from "../core";
 import { PopperCore } from "@timeless/inner-vm";
 
 // import { getHost } from "@/host";

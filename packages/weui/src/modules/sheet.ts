@@ -1,21 +1,32 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, Icon, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps } from "@timeless/timeless";
-import { SheetPrimitive } from "@timeless/ui-primitive";
-import { DialogCore, getGlobalLayerManager } from "@timeless/inner-vm";
 
 const SHEET_BASE_Z = 100;
 const Z_INDEX_NEST_GAP = 50;
 
 const SIDE_POS: Record<string, Record<string, string>> = {
-  right: { top: "0", right: "0", bottom: "0", width: "75%", "max-width": "400px" },
-  left: { top: "0", left: "0", bottom: "0", width: "75%", "max-width": "400px" },
+  right: {
+    top: "0",
+    right: "0",
+    bottom: "0",
+    width: "75%",
+    "max-width": "400px",
+  },
+  left: {
+    top: "0",
+    left: "0",
+    bottom: "0",
+    width: "75%",
+    "max-width": "400px",
+  },
   top: { top: "0", left: "0", right: "0" },
   bottom: { bottom: "0", left: "0", right: "0" },
 };
 
 export function Sheet(
   props: ViewProps & {
-    store: DialogCore;
+    store: vm.DialogCore;
     side?: "right" | "top" | "bottom" | "left";
     zIndex?: number;
   },
@@ -24,14 +35,16 @@ export function Sheet(
   const { store, side = "right", zIndex: manualZIndex, ...rest } = props;
   const state_ = refobj(store.state);
 
-  const zIndex = manualZIndex ?? SHEET_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
+  const zIndex =
+    manualZIndex ??
+    SHEET_BASE_Z + vm.getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   store.onStateChange((v) => {
     state_.as(v);
   });
 
-  return SheetPrimitive.Root({ store }, () => [
-    SheetPrimitive.Overlay({
+  return ui.SheetPrimitive.Root({ store }, () => [
+    ui.SheetPrimitive.Overlay({
       store,
       style: computed(state_, (d) => {
         const result: Record<string, string> = {
@@ -58,7 +71,7 @@ export function Sheet(
         },
       },
       [
-        SheetPrimitive.Content(
+        ui.SheetPrimitive.Content(
           {
             store,
             side,
@@ -83,7 +96,7 @@ export function Sheet(
             ...rest,
           },
           [
-            SheetPrimitive.Close(
+            ui.SheetPrimitive.Close(
               {
                 store,
                 style: {

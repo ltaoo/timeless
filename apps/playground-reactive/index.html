@@ -53,6 +53,31 @@
       width: 100vw;
       height: 100vh;
     }
+    .wx-file-picker-dialog__breadcrumbs {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 10px;
+    }
+    .flex {
+      display: flex;
+      align-items: center;
+    }
+    .wx-file-picker-dialog__path-separator {
+      padding: 0 4px;
+      color: var(--FG-2);
+      user-select: none;
+    }
+    .wx-file-picker-dialog__path-part {
+      padding: 3px 6px;
+      border-radius: 5px;
+      color: var(--FG-0);
+      cursor: pointer;
+    }
+    .wx-file-picker-dialog__path-part:hover {
+      background: var(--BG-COLOR-ACTIVE);
+    }
   </style>
 </head>
 
@@ -61,7 +86,9 @@
   <script src="./public/timeless.umd.min.js"></script>
   <script src="./public/timeless.dom.umd.min.js"></script>
   <div id="root"></div>
-  <script src="./index.js"></script>
+  <script src="./show.js"></script>
+  <!-- <script src="./match.js"></script> -->
+  <!-- <script src="./index.js"></script> -->
 </body>
 
 </html>

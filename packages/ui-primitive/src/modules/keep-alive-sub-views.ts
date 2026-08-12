@@ -1,4 +1,4 @@
-import { ref, refobj, refarr, computed } from "@timeless/timeless";
+import { ref, refobj, refarr, computed } from "../core";
 import {
   MountedEvent,
   View,
@@ -8,7 +8,7 @@ import {
   LazyView,
   For,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import {
   RouteViewCore,
   HistoryCore,

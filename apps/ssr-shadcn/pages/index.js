@@ -11,6 +11,7 @@ import {
   Link,
   Portal,
   Fragment,
+  ui,
 } from "@timeless/timeless";
 import {
   Button,
@@ -22,7 +23,6 @@ import {
   CardDescription,
   CardContent,
   Separator,
-  ui,
 } from "@timeless/shadcn";
 
 import { NavBar } from "../components/index.js";

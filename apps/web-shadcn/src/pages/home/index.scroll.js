@@ -241,7 +241,7 @@ function DownloadTaskItem(props) {
                 Button(
                   {
                     class: "pause",
-                    store: new Timeless.ui.ButtonCore({
+                    store: new Timeless.vm.ButtonCore({
                       size: "sm",
                       variant: "ghost",
                       onClick() {
@@ -265,7 +265,7 @@ function DownloadTaskItem(props) {
                       Button(
                         {
                           class: "retry_or_resume",
-                          store: new Timeless.ui.ButtonCore({
+                          store: new Timeless.vm.ButtonCore({
                             size: "sm",
                             variant: "ghost",
                             onClick() {
@@ -318,7 +318,7 @@ function DownloadTaskItem(props) {
  * @returns
  */
 export default function HomeIndexScrollViewExampleView(props) {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   const listener$ = ListenerManager();
 
   props.history.onRouteChange((v) => {
@@ -342,7 +342,7 @@ export default function HomeIndexScrollViewExampleView(props) {
             View({ class: classNames(["w-[300px] h-[200px]"]) }, [
               ScrollView(
                 {
-                  store: new Timeless.ui.ScrollViewCore(),
+                  store: new Timeless.vm.ScrollViewCore(),
                   class: classNames([
                     "rounded-md border border-zinc-200 dark:border-zinc-800",
                   ]).toString(),
@@ -366,7 +366,7 @@ export default function HomeIndexScrollViewExampleView(props) {
           ]),
           Item("Pull to Refresh", [
             (() => {
-              const store = new Timeless.ui.ScrollViewCore({
+              const store = new Timeless.vm.ScrollViewCore({
                 onPullToRefresh() {
                   setTimeout(() => {
                     store.finishPullToRefresh();
@@ -404,7 +404,7 @@ export default function HomeIndexScrollViewExampleView(props) {
               const items = refarr(
                 Array.from({ length: 10 }, (_, i) => `Item ${i + 1}`),
               );
-              const store = new Timeless.ui.ScrollViewCore({
+              const store = new Timeless.vm.ScrollViewCore({
                 onReachBottom() {
                   const cur = items.value.length;
                   const more = Array.from(
@@ -455,7 +455,7 @@ export default function HomeIndexScrollViewExampleView(props) {
           Item("Scroll Events", [
             (() => {
               const scrollTop = ref(0);
-              const store = new Timeless.ui.ScrollViewCore({
+              const store = new Timeless.vm.ScrollViewCore({
                 onScroll(pos) {
                   scrollTop.as(Math.round(pos.scrollTop));
                 },
@@ -532,7 +532,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 });
               }
 
-              const waterfall = Timeless.ui.WaterfallModel({
+              const waterfall = Timeless.vm.WaterfallModel({
                 column: 1,
                 size: 10,
                 buffer: 3,
@@ -545,7 +545,7 @@ export default function HomeIndexScrollViewExampleView(props) {
 
               const totalCount = ref(totalItemCount);
 
-              const scrollStore = new Timeless.ui.ScrollViewCore({
+              const scrollStore = new Timeless.vm.ScrollViewCore({
                 onScroll(pos) {
                   waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
                 },
@@ -694,7 +694,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 });
               }
 
-              const waterfall = Timeless.ui.WaterfallModel({
+              const waterfall = Timeless.vm.WaterfallModel({
                 column: 1,
                 size: 10,
                 buffer: 3,
@@ -706,7 +706,7 @@ export default function HomeIndexScrollViewExampleView(props) {
 
               const totalCount = ref(totalItemCount);
 
-              const scrollStore = new Timeless.ui.ScrollViewCore({
+              const scrollStore = new Timeless.vm.ScrollViewCore({
                 onScroll(pos) {
                   waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
                 },
@@ -760,7 +760,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                       ),
                       Button(
                         {
-                          store: new Timeless.ui.ButtonCore({
+                          store: new Timeless.vm.ButtonCore({
                             size: "sm",
                             variant: "outline",
                             onClick() {
@@ -879,7 +879,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 });
               }
 
-              const waterfall = Timeless.ui.WaterfallModel({
+              const waterfall = Timeless.vm.WaterfallModel({
                 column: 1,
                 size: 10,
                 buffer: 3,
@@ -893,7 +893,7 @@ export default function HomeIndexScrollViewExampleView(props) {
 
               let loadedMore = false;
 
-              const scrollStore = new Timeless.ui.ScrollViewCore({
+              const scrollStore = new Timeless.vm.ScrollViewCore({
                 onScroll(pos) {
                   waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
                 },
@@ -949,7 +949,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                       ),
                       Button(
                         {
-                          store: new Timeless.ui.ButtonCore({
+                          store: new Timeless.vm.ButtonCore({
                             size: "sm",
                             variant: "outline",
                             onClick() {
@@ -1036,7 +1036,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                                       {
                                         class:
                                           "text-xs text-red-400 hover:text-red-600",
-                                        store: new Timeless.ui.ButtonCore({
+                                        store: new Timeless.vm.ButtonCore({
                                           size: "sm",
                                           variant: "ghost",
                                           onClick() {
@@ -1093,7 +1093,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 });
               }
 
-              const waterfall = Timeless.ui.WaterfallModel({
+              const waterfall = Timeless.vm.WaterfallModel({
                 column: 1,
                 size: 10,
                 buffer: 3,
@@ -1105,7 +1105,7 @@ export default function HomeIndexScrollViewExampleView(props) {
 
               const totalCount = ref(totalItemCount);
 
-              const scrollStore = new Timeless.ui.ScrollViewCore({
+              const scrollStore = new Timeless.vm.ScrollViewCore({
                 onScroll(pos) {
                   waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
                 },
@@ -1162,7 +1162,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                       View({ class: "flex items-center gap-1" }, [
                         Button(
                           {
-                            store: new Timeless.ui.ButtonCore({
+                            store: new Timeless.vm.ButtonCore({
                               size: "sm",
                               variant: "outline",
                               onClick() {
@@ -1174,7 +1174,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                         ),
                         Button(
                           {
-                            store: new Timeless.ui.ButtonCore({
+                            store: new Timeless.vm.ButtonCore({
                               size: "sm",
                               variant: "ghost",
                               onClick() {
@@ -1297,7 +1297,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 });
               }
 
-              const waterfall = Timeless.ui.WaterfallModel({
+              const waterfall = Timeless.vm.WaterfallModel({
                 column: 1,
                 size: 10,
                 buffer: 3,
@@ -1309,7 +1309,7 @@ export default function HomeIndexScrollViewExampleView(props) {
 
               const totalCount = ref(totalItemCount);
 
-              const scrollStore = new Timeless.ui.ScrollViewCore({
+              const scrollStore = new Timeless.vm.ScrollViewCore({
                 onScroll(pos) {
                   waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
                 },
@@ -1322,7 +1322,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 },
               });
 
-              const popoverStore = new Timeless.ui.PopoverCore({
+              const popoverStore = new Timeless.vm.PopoverCore({
                 side: "bottom",
                 align: "start",
                 destroyOnClose: false,
@@ -1444,7 +1444,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 [
                   Button(
                     {
-                      store: new Timeless.ui.ButtonCore({
+                      store: new Timeless.vm.ButtonCore({
                         variant: "outline",
                       }),
                     },
@@ -1487,7 +1487,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 });
               }
 
-              const waterfall = Timeless.ui.WaterfallModel({
+              const waterfall = Timeless.vm.WaterfallModel({
                 column: 1,
                 size: 10,
                 buffer: 3,
@@ -1499,7 +1499,7 @@ export default function HomeIndexScrollViewExampleView(props) {
 
               const totalCount = ref(totalItemCount);
 
-              const scrollStore = new Timeless.ui.ScrollViewCore({
+              const scrollStore = new Timeless.vm.ScrollViewCore({
                 onScroll(pos) {
                   waterfall.methods.handleScroll({ scrollTop: pos.scrollTop });
                 },
@@ -1512,7 +1512,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 },
               });
 
-              const popoverStore = new Timeless.ui.PopoverCore({
+              const popoverStore = new Timeless.vm.PopoverCore({
                 side: "bottom",
                 align: "start",
               });
@@ -1644,7 +1644,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                 [
                   Button(
                     {
-                      store: new Timeless.ui.ButtonCore({
+                      store: new Timeless.vm.ButtonCore({
                         variant: "outline",
                       }),
                     },
@@ -1662,7 +1662,7 @@ export default function HomeIndexScrollViewExampleView(props) {
               const tasks_ = refarr(mockData);
               const taskCount_ = ref(mockData.length);
 
-              const scrollStore = new Timeless.ui.ScrollViewCore({
+              const scrollStore = new Timeless.vm.ScrollViewCore({
                 onPullToRefresh() {
                   // Simulate refreshing task statuses
                   setTimeout(() => {
@@ -1760,7 +1760,7 @@ export default function HomeIndexScrollViewExampleView(props) {
                       ]),
                       Button(
                         {
-                          store: new Timeless.ui.ButtonCore({
+                          store: new Timeless.vm.ButtonCore({
                             size: "sm",
                             variant: "ghost",
                             onClick() {

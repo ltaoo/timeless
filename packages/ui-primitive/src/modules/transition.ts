@@ -1,5 +1,5 @@
-import { refobj, computed } from "@timeless/timeless";
-import { Show, View, ViewProps, ViewChildren } from "@timeless/timeless";
+import { refobj, computed } from "../core";
+import { Show, View, ViewProps, ViewChildren } from "../core";
 import { PresenceCore } from "@timeless/inner-vm";
 
 export function Transition(

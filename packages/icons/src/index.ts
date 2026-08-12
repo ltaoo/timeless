@@ -4,6 +4,7 @@ import activity from "./asn/activity";
 import arrowDownToLine from "./asn/arrow-down-to-line";
 import arrowLeft from "./asn/arrow-left";
 import bolt from "./asn/bolt";
+import braces from "./asn/braces";
 import calendar from "./asn/calendar";
 import check from "./asn/check";
 import chevronDown from "./asn/chevron-down";
@@ -14,13 +15,16 @@ import circleAlert from "./asn/circle-alert";
 import circleArrowDown from "./asn/circle-arrow-down";
 import circleEllipsis from "./asn/circle-ellipsis";
 import circleX from "./asn/circle-x";
+import clock3 from "./asn/clock-3";
 import clockArrowDown from "./asn/clock-arrow-down";
 import clock from "./asn/clock";
 import cloudDownload from "./asn/cloud-download";
 import copy from "./asn/copy";
+import cornerDownRight from "./asn/corner-down-right";
 import download from "./asn/download";
 import ellipsisVertical from "./asn/ellipsis-vertical";
 import ellipsis from "./asn/ellipsis";
+import externalLink from "./asn/external-link";
 import fileBox from "./asn/file-box";
 import fileImage from "./asn/file-image";
 import fileLock from "./asn/file-lock";
@@ -33,6 +37,7 @@ import fileVolume from "./asn/file-volume";
 import file from "./asn/file";
 import film from "./asn/film";
 import folderClosed from "./asn/folder-closed";
+import folderOpen from "./asn/folder-open";
 import folder from "./asn/folder";
 import funnel from "./asn/funnel";
 import gauge from "./asn/gauge";
@@ -42,7 +47,9 @@ import hardDriveDownload from "./asn/hard-drive-download";
 import hardDrive from "./asn/hard-drive";
 import history from "./asn/history";
 import house from "./asn/house";
+import image from "./asn/image";
 import inbox from "./asn/inbox";
+import library from "./asn/library";
 import listFilter from "./asn/list-filter";
 import loaderCircle from "./asn/loader-circle";
 import loader from "./asn/loader";
@@ -64,6 +71,7 @@ import search from "./asn/search";
 import server from "./asn/server";
 import settings from "./asn/settings";
 import squareArrowDown from "./asn/square-arrow-down";
+import square from "./asn/square";
 import sun from "./asn/sun";
 import table from "./asn/table";
 import trash2 from "./asn/trash-2";
@@ -72,6 +80,7 @@ import undo2 from "./asn/undo-2";
 import upload from "./asn/upload";
 import user from "./asn/user";
 import users from "./asn/users";
+import video from "./asn/video";
 import wrench from "./asn/wrench";
 import x from "./asn/x";
 
@@ -80,6 +89,7 @@ export const iconRegistry = {
   "arrow-down-to-line": arrowDownToLine,
   "arrow-left": arrowLeft,
   "bolt": bolt,
+  "braces": braces,
   "calendar": calendar,
   "check": check,
   "chevron-down": chevronDown,
@@ -90,13 +100,16 @@ export const iconRegistry = {
   "circle-arrow-down": circleArrowDown,
   "circle-ellipsis": circleEllipsis,
   "circle-x": circleX,
+  "clock3": clock3,
   "clock-arrow-down": clockArrowDown,
   "clock": clock,
   "cloud-download": cloudDownload,
   "copy": copy,
+  "corner-down-right": cornerDownRight,
   "download": download,
   "ellipsis-vertical": ellipsisVertical,
   "ellipsis": ellipsis,
+  "external-link": externalLink,
   "file-box": fileBox,
   "file-image": fileImage,
   "file-lock": fileLock,
@@ -109,6 +122,7 @@ export const iconRegistry = {
   "file": file,
   "film": film,
   "folder-closed": folderClosed,
+  "folder-open": folderOpen,
   "folder": folder,
   "funnel": funnel,
   "gauge": gauge,
@@ -118,7 +132,9 @@ export const iconRegistry = {
   "hard-drive": hardDrive,
   "history": history,
   "house": house,
+  "image": image,
   "inbox": inbox,
+  "library": library,
   "list-filter": listFilter,
   "loader-circle": loaderCircle,
   "loader": loader,
@@ -140,6 +156,7 @@ export const iconRegistry = {
   "server": server,
   "settings": settings,
   "square-arrow-down": squareArrowDown,
+  "square": square,
   "sun": sun,
   "table": table,
   "trash2": trash2,
@@ -148,6 +165,7 @@ export const iconRegistry = {
   "upload": upload,
   "user": user,
   "users": users,
+  "video": video,
   "wrench": wrench,
   "x": x,
 };

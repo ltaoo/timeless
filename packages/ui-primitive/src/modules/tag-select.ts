@@ -1,4 +1,4 @@
-import { refobj, computed, isRef } from "@timeless/timeless";
+import { refobj, computed, isRef } from "../core";
 import {
   View,
   ViewProps,
@@ -10,7 +10,7 @@ import {
   Input as NativeInput,
   isStyleRef,
   classNames,
-} from "@timeless/timeless";
+} from "../core";
 import { TagSelectCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";

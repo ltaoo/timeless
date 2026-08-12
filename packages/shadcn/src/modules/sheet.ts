@@ -1,7 +1,6 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, Icon, refobj } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps } from "@timeless/timeless";
-import { SheetPrimitive } from "@timeless/ui-primitive";
-import { DialogCore, getGlobalLayerManager } from "@timeless/inner-vm";
 
 const SHEET_BASE_Z = 100;
 const Z_INDEX_NEST_GAP = 50;
@@ -36,7 +35,7 @@ const ANIMATION_OUT = {
 
 export function Sheet(
   props: ViewProps & {
-    store: DialogCore;
+    store: vm.DialogCore;
     side?: "right" | "top" | "bottom" | "left";
     zIndex?: number;
   },
@@ -45,14 +44,16 @@ export function Sheet(
   const { store, side = "right", zIndex: manualZIndex, ...rest } = props;
   const state_ = refobj(store.state);
 
-  const zIndex = manualZIndex ?? SHEET_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
+  const zIndex =
+    manualZIndex ??
+    SHEET_BASE_Z + vm.getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   store.onStateChange((v) => {
     state_.as(v);
   });
 
-  return SheetPrimitive.Root({ store }, () => [
-    SheetPrimitive.Overlay({
+  return ui.SheetPrimitive.Root({ store }, () => [
+    ui.SheetPrimitive.Overlay({
       store,
       zIndex,
       class: computed(state_, (d) => {
@@ -68,7 +69,7 @@ export function Sheet(
         style: { "z-index": zIndex },
       },
       [
-        SheetPrimitive.Content(
+        ui.SheetPrimitive.Content(
           {
             store,
             side,
@@ -89,7 +90,7 @@ export function Sheet(
             ...rest,
           },
           [
-            SheetPrimitive.Close(
+            ui.SheetPrimitive.Close(
               {
                 store,
                 class:

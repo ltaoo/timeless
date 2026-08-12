@@ -3,7 +3,7 @@ import {
   ViewProps,
   ViewChildren,
   // Icon as NativeIcon,
-} from "@timeless/timeless";
+} from "../core";
 import { ToastCore } from "@timeless/inner-vm";
 
 // import { Presence } from "./presence";

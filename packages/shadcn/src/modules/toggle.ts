@@ -1,9 +1,10 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, refobj } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
-import { TogglePrimitive } from "@timeless/ui-primitive";
-import { SwitchCore } from "@timeless/inner-vm";
 
-export function Toggle(props: ViewProps & { store: SwitchCore; id?: string }) {
+export function Toggle(
+  props: ViewProps & { store: vm.SwitchCore; id?: string },
+) {
   const { store, id, ...rest } = props;
   const state_ = refobj(store.state);
 
@@ -11,7 +12,7 @@ export function Toggle(props: ViewProps & { store: SwitchCore; id?: string }) {
     state_.as(v);
   });
 
-  return TogglePrimitive.Root(
+  return ui.TogglePrimitive.Root(
     {
       store,
       id,
@@ -27,7 +28,7 @@ export function Toggle(props: ViewProps & { store: SwitchCore; id?: string }) {
       ...rest,
     },
     [
-      TogglePrimitive.Thumb({
+      ui.TogglePrimitive.Thumb({
         store,
         class: computed(state_, (d) => {
           const baseClass =

@@ -1,8 +1,11 @@
 /**
  * @file Store 入口 - 路由管理
  */
-import { Result } from "@timeless/timeless";
 import {
+  InputPrimitive,
+  Result,
+  ScrollViewPrimitive,
+  TextareaPrimitive,
   buildRoutes,
   HttpClientCore,
   NavigatorCore,
@@ -11,12 +14,7 @@ import {
   HistoryCore,
   ClipboardModel,
   ApplicationModel,
-} from "@timeless/kit";
-import {
-  InputPrimitive,
-  ScrollViewPrimitive,
-  TextareaPrimitive,
-} from "@timeless/shadcn";
+} from "@timeless/timeless";
 import * as web from "@timeless/provider-web";
 
 import HomeLayoutView from "@/pages/home/layout.js";

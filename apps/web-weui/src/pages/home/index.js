@@ -3,7 +3,7 @@ import { TaskDeleteConfirmDialog } from "./task-delete-confirm-dialog.js";
 import { ClearTasksConfirmDialog } from "./clear-tasks-confirm-dialog.js";
 
 export default function HomePageView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   const platform = getPlatform();
 
   return ScrollView(
@@ -34,32 +34,32 @@ export default function HomePageView() {
       // ===== Button =====
       Section("Button", [
         Item("Variants", [
-          Button({ store: new Timeless.ui.ButtonCore({}) }, ["Primary"]),
+          Button({ store: new Timeless.vm.ButtonCore({}) }, ["Primary"]),
           Button(
-            { store: new Timeless.ui.ButtonCore({ variant: "default" }) },
+            { store: new Timeless.vm.ButtonCore({ variant: "default" }) },
             ["Default"],
           ),
-          Button({ store: new Timeless.ui.ButtonCore({ variant: "warn" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ variant: "warn" }) }, [
             "Warn",
           ]),
-          Button({ store: new Timeless.ui.ButtonCore({ variant: "text" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ variant: "text" }) }, [
             "Text",
           ]),
         ]),
         Item("Sizes", [
-          Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ size: "sm" }) }, [
             "Small",
           ]),
-          Button({ store: new Timeless.ui.ButtonCore({ size: "md" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ size: "md" }) }, [
             "Medium",
           ]),
-          Button({ store: new Timeless.ui.ButtonCore({ size: "lg" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ size: "lg" }) }, [
             "Large",
           ]),
         ]),
         Item("Loading", [
           (() => {
-            const store = new Timeless.ui.ButtonCore({
+            const store = new Timeless.vm.ButtonCore({
               onClick: () => {
                 store.setLoading(true);
                 setTimeout(() => store.setLoading(false), 2000);
@@ -68,7 +68,7 @@ export default function HomePageView() {
             return Button({ store }, ["Click to Load"]);
           })(),
           (() => {
-            const store = new Timeless.ui.ButtonCore({
+            const store = new Timeless.vm.ButtonCore({
               variant: "default",
               onClick: () => {
                 store.setLoading(true);
@@ -79,12 +79,12 @@ export default function HomePageView() {
           })(),
         ]),
         Item("Disabled", [
-          Button({ store: new Timeless.ui.ButtonCore({ disabled: true }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ disabled: true }) }, [
             "Disabled",
           ]),
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 variant: "warn",
                 disabled: true,
               }),
@@ -109,7 +109,7 @@ export default function HomePageView() {
         Item("Default", [
           View({ style: { width: "100%" } }, [
             Input({
-              store: new Timeless.ui.InputCore({
+              store: new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "请输入内容...",
                 allowClear: false,
@@ -120,7 +120,7 @@ export default function HomePageView() {
         Item("With Clear", [
           View({ style: { width: "100%" } }, [
             Input({
-              store: new Timeless.ui.InputCore({
+              store: new Timeless.vm.InputCore({
                 defaultValue: "可清除的输入",
                 placeholder: "请输入...",
                 allowClear: true,
@@ -131,7 +131,7 @@ export default function HomePageView() {
         Item("Disabled", [
           View({ style: { width: "100%" } }, [
             Input({
-              store: new Timeless.ui.InputCore({
+              store: new Timeless.vm.InputCore({
                 defaultValue: "不可编辑",
                 disabled: true,
               }),
@@ -145,7 +145,7 @@ export default function HomePageView() {
         Item("Default", [
           View({ style: { width: "100%" } }, [
             Textarea({
-              store: new Timeless.ui.InputCore({
+              store: new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "请输入多行文本...",
               }),
@@ -158,9 +158,9 @@ export default function HomePageView() {
       Section("Checkbox", [
         Item("Default", [
           (() => {
-            const store1 = new Timeless.ui.CheckboxCore({});
-            const store2 = new Timeless.ui.CheckboxCore({});
-            const store3 = new Timeless.ui.CheckboxCore({
+            const store1 = new Timeless.vm.CheckboxCore({});
+            const store2 = new Timeless.vm.CheckboxCore({});
+            const store3 = new Timeless.vm.CheckboxCore({
               disabled: true,
             });
             return Fragment({}, [
@@ -203,13 +203,13 @@ export default function HomePageView() {
       Section("Switch", [
         Item("Default", [
           (() => {
-            const store1 = Timeless.ui.SwitchCore({
+            const store1 = Timeless.vm.SwitchCore({
               defaultValue: true,
             });
-            const store2 = Timeless.ui.SwitchCore({
+            const store2 = Timeless.vm.SwitchCore({
               defaultValue: false,
             });
-            const store3 = Timeless.ui.SwitchCore({
+            const store3 = Timeless.vm.SwitchCore({
               disabled: true,
               defaultValue: false,
             });
@@ -226,10 +226,10 @@ export default function HomePageView() {
       Section("Toggle", [
         Item("Default", [
           (() => {
-            const store1 = Timeless.ui.SwitchCore({
+            const store1 = Timeless.vm.SwitchCore({
               defaultValue: false,
             });
-            const store2 = Timeless.ui.SwitchCore({
+            const store2 = Timeless.vm.SwitchCore({
               defaultValue: true,
             });
             return Fragment({}, [
@@ -245,24 +245,24 @@ export default function HomePageView() {
         Item("Basic", [
           View({ style: { width: "100%", height: "40px" } }, [
             Select({
-              store: new Timeless.ui.SelectCore({
+              store: new Timeless.vm.SelectCore({
                 defaultValue: null,
                 placeholder: "请选择水果",
                 platform,
                 options: [
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "apple",
                     label: "苹果",
                   }),
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "banana",
                     label: "香蕉",
                   }),
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "orange",
                     label: "橙子",
                   }),
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "grape",
                     label: "葡萄",
                   }),
@@ -274,24 +274,24 @@ export default function HomePageView() {
         Item("With Default Value", [
           View({ style: { width: "100%", height: "40px" } }, [
             Select({
-              store: new Timeless.ui.SelectCore({
+              store: new Timeless.vm.SelectCore({
                 defaultValue: "beijing",
                 placeholder: "选择城市",
                 platform,
                 options: [
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "beijing",
                     label: "北京",
                   }),
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "shanghai",
                     label: "上海",
                   }),
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "guangzhou",
                     label: "广州",
                   }),
-                  new Timeless.ui.SelectItemCore({
+                  new Timeless.vm.SelectItemCore({
                     value: "shenzhen",
                     label: "深圳",
                   }),
@@ -307,7 +307,7 @@ export default function HomePageView() {
         Item("Default", [
           View({ style: { width: "100%" } }, [
             Tabs({
-              store: new Timeless.ui.TabHeaderCore({
+              store: new Timeless.vm.TabHeaderCore({
                 key: "tab-demo",
                 options: [
                   { value: "tab1", label: "选项一" },
@@ -444,7 +444,7 @@ export default function HomePageView() {
                 ),
               ]),
               CardFooter({}, [
-                Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, [
+                Button({ store: new Timeless.vm.ButtonCore({ size: "sm" }) }, [
                   "操作按钮",
                 ]),
               ]),
@@ -457,7 +457,7 @@ export default function HomePageView() {
       Section("Dialog", [
         Item("Default", [
           (() => {
-            const dialog$ = new Timeless.ui.DialogCore({
+            const dialog$ = new Timeless.vm.DialogCore({
               title: "确认操作",
               footer: true,
               onOk() {
@@ -467,13 +467,13 @@ export default function HomePageView() {
                 dialog$.hide();
               },
             });
-            const btn$ = new Timeless.ui.ButtonCore({
+            const btn$ = new Timeless.vm.ButtonCore({
               variant: "primary",
               onClick() {
                 dialog$.show();
               },
             });
-            const checkbox$ = new Timeless.ui.CheckboxCore({});
+            const checkbox$ = new Timeless.vm.CheckboxCore({});
             return Fragment({}, [
               Button({ store: btn$ }, ["打开弹窗"]),
               Dialog({ store: dialog$ }, [
@@ -495,11 +495,11 @@ export default function HomePageView() {
         ]),
         Item("Without Footer", [
           (() => {
-            const dialog$ = new Timeless.ui.DialogCore({
+            const dialog$ = new Timeless.vm.DialogCore({
               title: "提示",
               footer: false,
             });
-            const btn$ = new Timeless.ui.ButtonCore({
+            const btn$ = new Timeless.vm.ButtonCore({
               variant: "default",
               onClick() {
                 dialog$.show();
@@ -514,7 +514,7 @@ export default function HomePageView() {
         ]),
         Item("With Custom Checkbox", [
           (() => {
-            const dialog$ = new Timeless.ui.DialogCore({
+            const dialog$ = new Timeless.vm.DialogCore({
               title: "删除下载记录",
               footer: true,
               onOk() {
@@ -524,7 +524,7 @@ export default function HomePageView() {
                 dialog$.hide();
               },
             });
-            const btn$ = new Timeless.ui.ButtonCore({
+            const btn$ = new Timeless.vm.ButtonCore({
               variant: "warn",
               onClick() {
                 dialog$.show();
@@ -557,7 +557,7 @@ export default function HomePageView() {
             // share delete_delete_files_ ref
             const sharedDeleteFiles$ = ref(false);
 
-            const deleteDialog$ = new Timeless.ui.DialogCore({
+            const deleteDialog$ = new Timeless.vm.DialogCore({
               title: "删除下载记录",
               footer: true,
               onOk() {
@@ -566,7 +566,7 @@ export default function HomePageView() {
               },
               onCancel() { deleteDialog$.hide(); },
             });
-            const clearDialog$ = new Timeless.ui.DialogCore({
+            const clearDialog$ = new Timeless.vm.DialogCore({
               title: "清空下载记录",
               footer: true,
               onOk() {
@@ -594,11 +594,11 @@ export default function HomePageView() {
               },
             };
 
-            const openDeleteBtn$ = new Timeless.ui.ButtonCore({
+            const openDeleteBtn$ = new Timeless.vm.ButtonCore({
               variant: "warn",
               onClick() { deleteDialog$.show(); },
             });
-            const openClearBtn$ = new Timeless.ui.ButtonCore({
+            const openClearBtn$ = new Timeless.vm.ButtonCore({
               variant: "default",
               onClick() { clearDialog$.show(); },
             });
@@ -628,25 +628,25 @@ export default function HomePageView() {
       Section("Sheet", [
         Item("Sides", [
           (() => {
-            const sheet_right$ = new Timeless.ui.DialogCore({
+            const sheet_right$ = new Timeless.vm.DialogCore({
               title: "右侧面板",
               onOk() {
                 sheet_right$.hide();
               },
             });
-            const sheet_bottom$ = new Timeless.ui.DialogCore({
+            const sheet_bottom$ = new Timeless.vm.DialogCore({
               title: "底部面板",
               onOk() {
                 sheet_bottom$.hide();
               },
             });
-            const btn_right$ = new Timeless.ui.ButtonCore({
+            const btn_right$ = new Timeless.vm.ButtonCore({
               variant: "default",
               onClick() {
                 sheet_right$.show();
               },
             });
-            const btn_bottom$ = new Timeless.ui.ButtonCore({
+            const btn_bottom$ = new Timeless.vm.ButtonCore({
               variant: "default",
               onClick() {
                 sheet_bottom$.show();
@@ -687,8 +687,8 @@ export default function HomePageView() {
       Section("Toast", [
         Item("Default", [
           (() => {
-            const toast$ = new Timeless.ui.ToastCore({});
-            const btn$ = new Timeless.ui.ButtonCore({
+            const toast$ = new Timeless.vm.ToastCore({});
+            const btn$ = new Timeless.vm.ButtonCore({
               variant: "default",
               onClick() {
                 // toast$.show({ text: "操作成功" });

@@ -1,9 +1,9 @@
-import { Fragment, refobj } from "@timeless/timeless";
+import { Fragment, refobj } from "../core";
 import {
   ViewProps,
   ViewChildren,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import {
   ContextMenuCore,
   MenuCore,

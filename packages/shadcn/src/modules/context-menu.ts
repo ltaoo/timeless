@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   ref,
   computed,
@@ -15,14 +16,6 @@ import {
   ViewProps,
   TimelessElement,
 } from "@timeless/timeless";
-import { ContextMenuPrimitive } from "@timeless/ui-primitive";
-import {
-  ContextMenuCore,
-  MenuCore,
-  MenuItemCore,
-  MenuSeparatorCore,
-  MenuGroupCore,
-} from "@timeless/inner-vm";
 
 const ContextMenuContentClassName =
   "cn-menu-target cn-menu-translucent min-w-36 origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fill-mode-both data-open:fade-in-0 data-open:zoom-in-95";
@@ -34,15 +27,15 @@ const ContextMenuItemClassName =
   "group/menubar-item relative flex cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-destructive!";
 
 export function ContextMenu(
-  props: ViewProps & { store: ContextMenuCore },
+  props: ViewProps & { store: vm.ContextMenuCore },
   children?: ViewChildren,
-) {
+): TimelessElement {
   const state_ = refobj(props.store.state);
   // const presence_state_ = refobj(props.store.menu.presence.state);
 
   return Fragment({}, [
-    ContextMenuPrimitive.Trigger({ store: props.store }, children),
-    ContextMenuPrimitive.Content(
+    ui.ContextMenuPrimitive.Trigger({ store: props.store }, children),
+    ui.ContextMenuPrimitive.Content(
       {
         ...props,
         animation: {
@@ -56,14 +49,16 @@ export function ContextMenu(
             each: computed(state_, (t) => {
               return t.items;
             }),
-            render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
-              if (item instanceof MenuSeparatorCore) {
+            render(
+              item: vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore,
+            ) {
+              if (item instanceof vm.MenuSeparatorCore) {
                 return ContextMenuSeparator({});
               }
-              if (item instanceof MenuGroupCore) {
+              if (item instanceof vm.MenuGroupCore) {
                 return ContextMenuGroup({ store: item });
               }
-              return ContextMenuItem({ store: item as MenuItemCore });
+              return ContextMenuItem({ store: item as vm.MenuItemCore });
             },
           }),
         ]),
@@ -73,19 +68,21 @@ export function ContextMenu(
 }
 
 function ContextMenuSeparator(_props: ViewProps) {
-  return ContextMenuPrimitive.Separator({ class: "-mx-1 my-1 h-px bg-border" });
+  return ui.ContextMenuPrimitive.Separator({
+    class: "-mx-1 my-1 h-px bg-border",
+  });
 }
 
-function ContextMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
+function ContextMenuGroup(props: ViewProps & { store: vm.MenuGroupCore }) {
   const state_ = refobj(props.store.state);
   const has_label_ = computed(state_, (t) => !!t.label);
 
-  return ContextMenuPrimitive.Group({ store: props.store }, [
+  return ui.ContextMenuPrimitive.Group({ store: props.store }, [
     Show({
       when: has_label_,
       ok() {
         return [
-          ContextMenuPrimitive.Label(
+          ui.ContextMenuPrimitive.Label(
             {
               class:
                 "px-1.5 py-1.5 text-xs font-medium text-muted-foreground data-inset:pl-7",
@@ -97,26 +94,26 @@ function ContextMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
     }),
     For({
       each: computed(state_, (t) => t.items),
-      render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
-        if (item instanceof MenuSeparatorCore) {
+      render(item: vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore) {
+        if (item instanceof vm.MenuSeparatorCore) {
           return ContextMenuSeparator({});
         }
-        if (item instanceof MenuGroupCore) {
+        if (item instanceof vm.MenuGroupCore) {
           return ContextMenuGroup({ store: item });
         }
-        return ContextMenuItem({ store: item as MenuItemCore });
+        return ContextMenuItem({ store: item as vm.MenuItemCore });
       },
     }),
   ]);
 }
 
-function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
+function ContextMenuItem(props: ViewProps & { store: vm.MenuItemCore }) {
   const state_ = refobj(props.store.state);
   const show_chevron_ = ref(!!props.store.menu);
   const has_icon_ = computed(state_, (t) => !!t.icon);
   const has_shortcut_ = computed(state_, (t) => !!t.shortcut);
   const menu_state_ = refobj(
-    props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
+    props.store.menu ? props.store.menu.state : ({} as vm.MenuCore["state"]),
   );
   const listener$ = ListenerManager([
     state_,
@@ -149,7 +146,7 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
       },
     },
     [
-      ContextMenuPrimitive.Item(
+      ui.ContextMenuPrimitive.Item(
         {
           store: props.store,
           class: classNames([
@@ -212,7 +209,7 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
           return Show({
             when: computed(menu_state_, (t) => t.open),
             ok() {
-              return ContextMenuPrimitive.SubMenuContent(
+              return ui.ContextMenuPrimitive.SubMenuContent(
                 {
                   store: menu,
                   animation: {
@@ -231,18 +228,18 @@ function ContextMenuItem(props: ViewProps & { store: MenuItemCore }) {
                           }),
                           render(
                             item:
-                              | MenuItemCore
-                              | MenuSeparatorCore
-                              | MenuGroupCore,
+                              | vm.MenuItemCore
+                              | vm.MenuSeparatorCore
+                              | vm.MenuGroupCore,
                           ) {
-                            if (item instanceof MenuSeparatorCore) {
+                            if (item instanceof vm.MenuSeparatorCore) {
                               return ContextMenuSeparator({});
                             }
-                            if (item instanceof MenuGroupCore) {
+                            if (item instanceof vm.MenuGroupCore) {
                               return ContextMenuGroup({ store: item });
                             }
                             return ContextMenuItem({
-                              store: item as MenuItemCore,
+                              store: item as vm.MenuItemCore,
                             });
                           },
                         });

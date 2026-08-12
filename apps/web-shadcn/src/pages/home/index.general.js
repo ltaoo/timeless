@@ -1,7 +1,7 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function GeneralView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   const list_ = refarr([]);
 
   setTimeout(() => {
@@ -12,49 +12,49 @@ export default function GeneralView() {
     Flex({ direction: "col", gap: "24px" }, [
       Section("Button", [
         Item("Variants", [
-          Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
+          Button({ store: new Timeless.vm.ButtonCore({}) }, ["Default"]),
           Button(
             {
-              store: new Timeless.ui.ButtonCore({ variant: "secondary" }),
+              store: new Timeless.vm.ButtonCore({ variant: "secondary" }),
             },
             ["Secondary"],
           ),
           Button(
-            { store: new Timeless.ui.ButtonCore({ variant: "outline" }) },
+            { store: new Timeless.vm.ButtonCore({ variant: "outline" }) },
             ["Outline"],
           ),
-          Button({ store: new Timeless.ui.ButtonCore({ variant: "ghost" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ variant: "ghost" }) }, [
             "Ghost",
           ]),
           Button(
-            { store: new Timeless.ui.ButtonCore({ variant: "destructive" }) },
+            { store: new Timeless.vm.ButtonCore({ variant: "destructive" }) },
             ["Destructive"],
           ),
-          Button({ store: new Timeless.ui.ButtonCore({ variant: "link" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ variant: "link" }) }, [
             "Link",
           ]),
         ]),
         Item("Sizes", [
-          Button({ store: new Timeless.ui.ButtonCore({ size: "xs" }) }, ["XS"]),
-          Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, ["SM"]),
-          Button({ store: new Timeless.ui.ButtonCore({}) }, ["Default"]),
-          Button({ store: new Timeless.ui.ButtonCore({ size: "lg" }) }, ["LG"]),
-          Button({ store: new Timeless.ui.ButtonCore({ size: "icon-xs" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ size: "xs" }) }, ["XS"]),
+          Button({ store: new Timeless.vm.ButtonCore({ size: "sm" }) }, ["SM"]),
+          Button({ store: new Timeless.vm.ButtonCore({}) }, ["Default"]),
+          Button({ store: new Timeless.vm.ButtonCore({ size: "lg" }) }, ["LG"]),
+          Button({ store: new Timeless.vm.ButtonCore({ size: "icon-xs" }) }, [
             Icon({ name: "bolt", size: 12 }),
           ]),
-          Button({ store: new Timeless.ui.ButtonCore({ size: "icon-sm" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ size: "icon-sm" }) }, [
             Icon({ name: "bolt", size: 16 }),
           ]),
-          Button({ store: new Timeless.ui.ButtonCore({ size: "icon" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ size: "icon" }) }, [
             Icon({ name: "bolt", size: 24 }),
           ]),
-          Button({ store: new Timeless.ui.ButtonCore({ size: "icon-lg" }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ size: "icon-lg" }) }, [
             Icon({ name: "bolt", size: 28 }),
           ]),
         ]),
         Item("Loading", [
           (() => {
-            const store = new Timeless.ui.ButtonCore({
+            const store = new Timeless.vm.ButtonCore({
               onClick: () => {
                 store.setLoading(true);
                 setTimeout(() => {
@@ -65,7 +65,7 @@ export default function GeneralView() {
             return Button({ store }, ["Click to Load"]);
           })(),
           (() => {
-            const store = new Timeless.ui.ButtonCore({
+            const store = new Timeless.vm.ButtonCore({
               variant: "secondary",
               onClick: () => {
                 store.setLoading(true);
@@ -77,7 +77,7 @@ export default function GeneralView() {
             return Button({ store }, ["Click to Load"]);
           })(),
           (() => {
-            const store = new Timeless.ui.ButtonCore({
+            const store = new Timeless.vm.ButtonCore({
               variant: "outline",
               onClick: () => {
                 store.setLoading(true);
@@ -92,20 +92,20 @@ export default function GeneralView() {
         Item("With Prefix Icon", [
           Button(
             {
-              store: new Timeless.ui.ButtonCore({}),
+              store: new Timeless.vm.ButtonCore({}),
               prefix: [Icon({ name: "download", size: 24 })],
             },
             ["Download"],
           ),
           (() => {
             const playing = ref(false);
-            const playStore = new Timeless.ui.ButtonCore({
+            const playStore = new Timeless.vm.ButtonCore({
               variant: "secondary",
               onClick: () => {
                 playing.as(true);
               },
             });
-            const cancelStore = new Timeless.ui.ButtonCore({
+            const cancelStore = new Timeless.vm.ButtonCore({
               variant: "secondary",
               onClick: () => {
                 playing.as(false);
@@ -152,7 +152,7 @@ export default function GeneralView() {
           })(),
           Button(
             {
-              store: new Timeless.ui.ButtonCore({ variant: "outline" }),
+              store: new Timeless.vm.ButtonCore({ variant: "outline" }),
               prefix: [Icon({ name: "bolt", size: 24 })],
             },
             ["Settings"],
@@ -185,12 +185,12 @@ export default function GeneralView() {
           }),
         ]),
         Item("Disabled", [
-          Button({ store: new Timeless.ui.ButtonCore({ disabled: true }) }, [
+          Button({ store: new Timeless.vm.ButtonCore({ disabled: true }) }, [
             "Disabled",
           ]),
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 variant: "secondary",
                 disabled: true,
               }),
@@ -199,7 +199,7 @@ export default function GeneralView() {
           ),
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 variant: "outline",
                 disabled: true,
               }),
@@ -243,7 +243,7 @@ export default function GeneralView() {
               View({ class: "text-sm" }, ["This is the card content area."]),
             ]),
             CardFooter({}, [
-              Button({ store: new Timeless.ui.ButtonCore({ size: "sm" }) }, [
+              Button({ store: new Timeless.vm.ButtonCore({ size: "sm" }) }, [
                 "Action",
               ]),
             ]),

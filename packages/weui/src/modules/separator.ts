@@ -1,5 +1,5 @@
+import { ui } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
-import { SeparatorPrimitive } from "@timeless/ui-primitive";
 
 export function Separator(
   props: ViewProps & { orientation?: "horizontal" | "vertical" },
@@ -19,7 +19,7 @@ export function Separator(
           background: "var(--weui-SEPARATOR-0)",
           "flex-shrink": "0",
         };
-  return SeparatorPrimitive.Separator({
+  return ui.SeparatorPrimitive.Separator({
     ...rest,
     orientation,
     style,

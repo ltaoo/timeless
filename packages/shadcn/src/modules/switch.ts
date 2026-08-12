@@ -1,12 +1,13 @@
+import { ui, vm } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
-import { SwitchPrimitive } from "@timeless/ui-primitive";
-import { SwitchCore } from "@timeless/inner-vm";
 
-export function Switch(props: ViewProps & { store: SwitchCore; id?: string }) {
+export function Switch(
+  props: ViewProps & { store: vm.SwitchCore; id?: string },
+) {
   const { store, id, class: cls, ...rest } = props;
 
-  return SwitchPrimitive.Root(
+  return ui.SwitchPrimitive.Root(
     {
       ...rest,
       store,
@@ -17,7 +18,7 @@ export function Switch(props: ViewProps & { store: SwitchCore; id?: string }) {
       ]),
     },
     [
-      SwitchPrimitive.Thumb({
+      ui.SwitchPrimitive.Thumb({
         store,
         class:
           "pointer-events-none block h-5 w-5 translate-x-0 rounded-full bg-white shadow-lg ring-0 transition-transform group-data-[checked]:translate-x-5 dark:bg-zinc-950",

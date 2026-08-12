@@ -10,7 +10,7 @@ export default createLibConfig({
   },
   external: ["@timeless/inner-kit"],
   globals: {
-    "@timeless/inner-kit": "Timeless",
+    "@timeless/inner-kit": "Timeless.kit",
   },
   formats: ["es", "cjs", "umd"],
   minify: true,

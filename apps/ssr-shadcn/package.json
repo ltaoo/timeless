@@ -11,7 +11,6 @@
   "dependencies": {
     "@timeless/timeless": "workspace:^",
     "@timeless/timeless-dom": "workspace:^",
-    "@timeless/inner-kit": "workspace:^",
     "@timeless/shadcn": "workspace:^"
   },
   "devDependencies": {

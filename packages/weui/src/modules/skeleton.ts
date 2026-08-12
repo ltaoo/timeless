@@ -1,8 +1,8 @@
+import { ui } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
-import { SkeletonPrimitive } from "@timeless/ui-primitive";
 
 export function Skeleton(props: ViewProps) {
-  return SkeletonPrimitive.Skeleton({
+  return ui.SkeletonPrimitive.Skeleton({
     ...props,
     style: {
       "border-radius": "4px",

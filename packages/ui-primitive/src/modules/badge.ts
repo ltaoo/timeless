@@ -1,4 +1,4 @@
-import { View, ViewProps, ViewChildren } from "@timeless/timeless";
+import { View, ViewProps, ViewChildren } from "../core";
 
 export function Badge(
   props: ViewProps & {

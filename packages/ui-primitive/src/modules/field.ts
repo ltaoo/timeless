@@ -1,5 +1,5 @@
-import { computed, refobj } from "@timeless/timeless";
-import { View, ViewProps, ViewChildren, Show } from "@timeless/timeless";
+import { computed, refobj } from "../core";
+import { View, ViewProps, ViewChildren, Show } from "../core";
 import { SingleFieldCore } from "@timeless/inner-vm";
 
 // export function Field(

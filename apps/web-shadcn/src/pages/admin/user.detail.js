@@ -25,7 +25,7 @@ export default function AdminUserDetailView(props) {
           View({ class: "flex items-center gap-2" }, [
             Button(
               {
-                store: new Timeless.ui.ButtonCore({
+                store: new Timeless.vm.ButtonCore({
                   variant: "outline",
                   onClick() {
                     props.history.push("root.admin_layout.users");
@@ -36,7 +36,7 @@ export default function AdminUserDetailView(props) {
             ),
             Button(
               {
-                store: new Timeless.ui.ButtonCore({
+                store: new Timeless.vm.ButtonCore({
                   variant: "outline",
                   onClick() {
                     props.history.push("root.admin_layout.user_detail", {

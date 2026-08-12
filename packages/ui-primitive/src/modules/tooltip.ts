@@ -4,14 +4,14 @@ import {
   computed,
   styleNames,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import {
   View,
   ViewProps,
   ViewChildren,
   Fragment,
   Portal as NativePortal,
-} from "@timeless/timeless";
+} from "../core";
 import { TooltipCore, Align, Side } from "@timeless/inner-vm";
 
 // import { getHost } from "@/host";

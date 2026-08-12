@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   classNames,
   combine,
@@ -7,15 +8,10 @@ import {
   refobj,
 } from "@timeless/timeless";
 import { For, View, ViewProps, Show } from "@timeless/timeless";
-import {
-  TimePickerPrimitive,
-  ScrollViewPrimitive,
-} from "@timeless/ui-primitive";
-import { ScrollViewCore, TimePickerCore } from "@timeless/inner-vm";
 
 export function TimePicker(
   props: ViewProps & {
-    store: TimePickerCore;
+    store: vm.TimePickerCore;
     id?: string;
     placeholder?: string;
   },
@@ -43,9 +39,9 @@ export function TimePicker(
   const item_height = 32;
   const scroll_padding_items = 2;
 
-  const hourview$ = new ScrollViewCore({});
-  const minuteview$ = new ScrollViewCore({});
-  const secondview$ = new ScrollViewCore({});
+  const hourview$ = new vm.ScrollViewCore({});
+  const minuteview$ = new vm.ScrollViewCore({});
+  const secondview$ = new vm.ScrollViewCore({});
 
   function format_temp_time(s: {
     t_hour: number | null;
@@ -67,14 +63,14 @@ export function TimePicker(
     return `${h}:${m}`;
   }
 
-  function scroll_to_index(view$: ScrollViewCore, index: number) {
+  function scroll_to_index(view$: vm.ScrollViewCore, index: number) {
     const safeIndex = index >= 0 ? index : 0;
     const top = Math.max(0, (safeIndex - scroll_padding_items) * item_height);
     view$.setScrollTop(top);
   }
 
-  return TimePickerPrimitive.Root({ store }, [
-    TimePickerPrimitive.Trigger(
+  return ui.TimePickerPrimitive.Root({ store }, [
+    ui.TimePickerPrimitive.Trigger(
       {
         store,
         id,
@@ -94,7 +90,7 @@ export function TimePicker(
         },
       },
       [
-        TimePickerPrimitive.Value({
+        ui.TimePickerPrimitive.Value({
           store,
           placeholder,
           class: computed(state_, (d) => {
@@ -107,7 +103,7 @@ export function TimePicker(
           when: showClear,
           ok() {
             return [
-              TimePickerPrimitive.Clear(
+              ui.TimePickerPrimitive.Clear(
                 {
                   store,
                   class:
@@ -119,7 +115,7 @@ export function TimePicker(
           },
           else() {
             return [
-              TimePickerPrimitive.Icon(
+              ui.TimePickerPrimitive.Icon(
                 { class: "size-4 text-muted-foreground" },
                 [Icon({ name: "clock", size: 16 })],
               ),
@@ -128,7 +124,7 @@ export function TimePicker(
         }),
       ],
     ),
-    TimePickerPrimitive.Content(
+    ui.TimePickerPrimitive.Content(
       {
         ...rest,
         animation: {
@@ -174,7 +170,7 @@ export function TimePicker(
               ]),
             },
             [
-              ScrollViewPrimitive.Root(
+              ui.ScrollViewPrimitive.Root(
                 {
                   store: hourview$,
                   class:
@@ -195,7 +191,7 @@ export function TimePicker(
                   For({
                     each: store.generateHours(),
                     render(hour) {
-                      return TimePickerPrimitive.HourItem(
+                      return ui.TimePickerPrimitive.HourItem(
                         {
                           store,
                           value: hour,
@@ -216,7 +212,7 @@ export function TimePicker(
                   }),
                 ],
               ),
-              ScrollViewPrimitive.Root(
+              ui.ScrollViewPrimitive.Root(
                 {
                   store: minuteview$,
                   class: classNames([
@@ -239,7 +235,7 @@ export function TimePicker(
                   For({
                     each: store.generateMinutes(),
                     render(minute) {
-                      return TimePickerPrimitive.MinuteItem(
+                      return ui.TimePickerPrimitive.MinuteItem(
                         {
                           store,
                           value: minute,
@@ -263,7 +259,7 @@ export function TimePicker(
                 when: store.showSeconds,
                 ok() {
                   return [
-                    ScrollViewPrimitive.Root(
+                    ui.ScrollViewPrimitive.Root(
                       {
                         store: secondview$,
                         class:
@@ -286,7 +282,7 @@ export function TimePicker(
                         For({
                           each: store.generateSeconds(),
                           render(second) {
-                            return TimePickerPrimitive.SecondItem(
+                            return ui.TimePickerPrimitive.SecondItem(
                               {
                                 store,
                                 value: second,
@@ -317,7 +313,7 @@ export function TimePicker(
               class: "flex justify-end gap-2 border-t border-border p-3",
             },
             [
-              TimePickerPrimitive.ClearButton(
+              ui.TimePickerPrimitive.ClearButton(
                 {
                   store,
                   class:
@@ -325,7 +321,7 @@ export function TimePicker(
                 },
                 ["清除"],
               ),
-              TimePickerPrimitive.ConfirmButton(
+              ui.TimePickerPrimitive.ConfirmButton(
                 {
                   store,
                   class:

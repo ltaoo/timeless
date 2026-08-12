@@ -1,10 +1,10 @@
+import { ui } from "@timeless/timeless";
 import { classNames } from "@timeless/timeless";
 import { ViewProps, ViewChildren } from "@timeless/timeless";
-import { CardPrimitive } from "@timeless/ui-primitive";
 
 export function Card(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return CardPrimitive.Card(
+  return ui.CardPrimitive.Card(
     {
       ...rest,
       class: classNames([
@@ -18,7 +18,7 @@ export function Card(props: ViewProps, children?: ViewChildren) {
 
 export function CardHeader(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return CardPrimitive.CardHeader(
+  return ui.CardPrimitive.CardHeader(
     {
       ...rest,
       class: classNames(["flex flex-col space-y-1.5 p-6", cls]),
@@ -29,7 +29,7 @@ export function CardHeader(props: ViewProps, children?: ViewChildren) {
 
 export function CardTitle(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return CardPrimitive.CardTitle(
+  return ui.CardPrimitive.CardTitle(
     {
       ...rest,
       class: classNames([
@@ -43,7 +43,7 @@ export function CardTitle(props: ViewProps, children?: ViewChildren) {
 
 export function CardDescription(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return CardPrimitive.CardDescription(
+  return ui.CardPrimitive.CardDescription(
     {
       ...rest,
       class: classNames(["text-sm text-zinc-500 dark:text-zinc-400", cls]),
@@ -54,7 +54,7 @@ export function CardDescription(props: ViewProps, children?: ViewChildren) {
 
 export function CardContent(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return CardPrimitive.CardContent(
+  return ui.CardPrimitive.CardContent(
     {
       ...rest,
       class: classNames(["p-6", cls]),
@@ -65,7 +65,7 @@ export function CardContent(props: ViewProps, children?: ViewChildren) {
 
 export function CardFooter(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return CardPrimitive.CardFooter(
+  return ui.CardPrimitive.CardFooter(
     {
       ...rest,
       class: classNames(["flex items-center p-6 pt-0", cls]),

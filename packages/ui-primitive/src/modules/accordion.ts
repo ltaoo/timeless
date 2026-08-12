@@ -1,5 +1,5 @@
-import { computed } from "@timeless/timeless";
-import { View, ViewProps, ViewChildren  } from "@timeless/timeless";
+import { computed } from "../core";
+import { View, ViewProps, ViewChildren  } from "../core";
 import { AccordionCore } from "@timeless/inner-vm";
 
 

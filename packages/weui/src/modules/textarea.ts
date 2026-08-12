@@ -1,11 +1,10 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, refobj } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
-import { TextareaPrimitive } from "@timeless/ui-primitive";
-import { InputCore } from "@timeless/inner-vm";
 
 export function Textarea(
   props: ViewProps & {
-    store: InputCore<any>;
+    store: vm.InputCore<any>;
     id?: string;
   },
 ) {
@@ -16,10 +15,10 @@ export function Textarea(
     state_.as(v);
   });
 
-  return TextareaPrimitive.Root(
+  return ui.TextareaPrimitive.Root(
     { store, style: { position: "relative", width: "100%" } },
     [
-      TextareaPrimitive.Textarea({
+      ui.TextareaPrimitive.Textarea({
         ...rest,
         store,
         id,

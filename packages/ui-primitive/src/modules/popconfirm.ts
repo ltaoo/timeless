@@ -1,4 +1,4 @@
-import { refobj } from "@timeless/timeless";
+import { refobj } from "../core";
 import {
   View,
   ViewProps,
@@ -7,7 +7,7 @@ import {
   Button,
   ButtonProps,
   Portal as NativePortal,
-} from "@timeless/timeless";
+} from "../core";
 import { PopconfirmCore } from "@timeless/inner-vm";
 
 import * as PopperPrimitive from "./popper";

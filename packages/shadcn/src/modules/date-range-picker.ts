@@ -1,7 +1,6 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, Icon, refobj } from "@timeless/timeless";
 import { For, View, ViewProps, Show } from "@timeless/timeless";
-import { DateRangePickerPrimitive } from "@timeless/ui-primitive";
-import { DateRangePickerCore, TooltipCore } from "@timeless/inner-vm";
 
 import { Tooltip } from "./tooltip";
 
@@ -14,7 +13,7 @@ const NAV_BTN_DISABLED_CLASS =
   "inline-flex items-center justify-center size-7 rounded-md text-muted-foreground/40 cursor-not-allowed";
 
 function NavButton(props: {
-  store: DateRangePickerCore;
+  store: vm.DateRangePickerCore;
   type: "leftPrev" | "leftNext" | "rightPrev" | "rightNext";
   children: any[];
 }) {
@@ -23,15 +22,15 @@ function NavButton(props: {
   const calendar_state_ = refobj(store.$calendar.state);
 
   const ButtonComponent = {
-    leftPrev: DateRangePickerPrimitive.LeftPrevButton,
-    leftNext: DateRangePickerPrimitive.LeftNextButton,
-    rightPrev: DateRangePickerPrimitive.RightPrevButton,
-    rightNext: DateRangePickerPrimitive.RightNextButton,
+    leftPrev: ui.DateRangePickerPrimitive.LeftPrevButton,
+    leftNext: ui.DateRangePickerPrimitive.LeftNextButton,
+    rightPrev: ui.DateRangePickerPrimitive.RightPrevButton,
+    rightNext: ui.DateRangePickerPrimitive.RightNextButton,
   }[type];
 
   // 左面板下一月和右面板上一月有限制
   if (type === "leftNext") {
-    const tooltip$ = new TooltipCore({ side: "top" });
+    const tooltip$ = new vm.TooltipCore({ side: "top" });
     return View({}, [
       Show({
         when: computed(calendar_state_, (s) => !s.canLeftNext),
@@ -58,7 +57,7 @@ function NavButton(props: {
   }
 
   if (type === "rightPrev") {
-    const tooltip$ = new TooltipCore({ side: "top" });
+    const tooltip$ = new vm.TooltipCore({ side: "top" });
     return View({}, [
       Show({
         when: computed(calendar_state_, (s) => !s.canRightPrev),
@@ -89,7 +88,7 @@ function NavButton(props: {
 }
 
 function CalendarPanel(props: {
-  store: DateRangePickerCore;
+  store: vm.DateRangePickerCore;
   side: "left" | "right";
 }) {
   const { store, side } = props;
@@ -98,8 +97,8 @@ function CalendarPanel(props: {
 
   const Header =
     side === "left"
-      ? DateRangePickerPrimitive.LeftCalendarHeader
-      : DateRangePickerPrimitive.RightCalendarHeader;
+      ? ui.DateRangePickerPrimitive.LeftCalendarHeader
+      : ui.DateRangePickerPrimitive.RightCalendarHeader;
 
   return View({ class: "w-full" }, [
     // Header
@@ -117,7 +116,7 @@ function CalendarPanel(props: {
       }),
     ]),
     // Grid
-    DateRangePickerPrimitive.CalendarGrid({ store, class: "w-full" }, [
+    ui.DateRangePickerPrimitive.CalendarGrid({ store, class: "w-full" }, [
       // Weekday Headers
       View(
         { class: "grid grid-cols-7 mb-1" },
@@ -142,7 +141,7 @@ function CalendarPanel(props: {
             For({
               each: computed(week, (t: any) => t.dates) as any,
               render(day: any) {
-                return DateRangePickerPrimitive.CalendarCell(
+                return ui.DateRangePickerPrimitive.CalendarCell(
                   {
                     store,
                     value: day.value,
@@ -244,7 +243,7 @@ function CalendarPanel(props: {
 
 export function DateRangePicker(
   props: ViewProps & {
-    store: DateRangePickerCore;
+    store: vm.DateRangePickerCore;
     id?: string;
     placeholder?: string;
   },
@@ -264,8 +263,8 @@ export function DateRangePicker(
     presence_.as(v);
   });
 
-  return DateRangePickerPrimitive.Root({ store }, [
-    DateRangePickerPrimitive.Trigger(
+  return ui.DateRangePickerPrimitive.Root({ store }, [
+    ui.DateRangePickerPrimitive.Trigger(
       {
         store,
         id,
@@ -279,7 +278,7 @@ export function DateRangePicker(
         }),
       },
       [
-        DateRangePickerPrimitive.Value({
+        ui.DateRangePickerPrimitive.Value({
           store,
           placeholder,
           class: computed(state_, (d) => {
@@ -288,13 +287,13 @@ export function DateRangePicker(
               : "text-muted-foreground";
           }),
         }),
-        DateRangePickerPrimitive.Icon(
+        ui.DateRangePickerPrimitive.Icon(
           { class: "size-4 text-muted-foreground" },
           [Icon({ name: "calendar", size: 16 })],
         ),
       ],
     ),
-    DateRangePickerPrimitive.Content(
+    ui.DateRangePickerPrimitive.Content(
       {
         ...rest,
         animation: {
@@ -306,7 +305,7 @@ export function DateRangePicker(
           "cn-menu-target cn-menu-translucent w-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden",
       },
       () => [
-        DateRangePickerPrimitive.Calendars({ store, class: "w-full" }, [
+        ui.DateRangePickerPrimitive.Calendars({ store, class: "w-full" }, [
           View({ class: "grid grid-cols-[280px_280px] items-start gap-0" }, [
             View({ class: "w-[280px] p-3 border-r border-border" }, [
               CalendarPanel({ store, side: "left" }),

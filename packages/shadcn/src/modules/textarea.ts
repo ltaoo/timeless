@@ -1,11 +1,10 @@
+import { ui, vm } from "@timeless/timeless";
 import { combine, computed, Icon, refobj, View } from "@timeless/timeless";
 import { Show, ViewProps } from "@timeless/timeless";
-import { TextareaPrimitive } from "@timeless/ui-primitive";
-import { InputCore } from "@timeless/inner-vm";
 
 export function Textarea(
   props: ViewProps & {
-    store: InputCore<any>;
+    store: vm.InputCore<any>;
     id?: string;
     showClear?: boolean;
     showLoading?: boolean;
@@ -29,9 +28,9 @@ export function Textarea(
   const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
   const isLoading = computed(state_, (d) => d.loading || false);
 
-  return TextareaPrimitive.Root({ store, class: "flex flex-col gap-1" }, [
-    TextareaPrimitive.Root({ store, class: "relative inline-flex" }, [
-      TextareaPrimitive.Textarea({
+  return ui.TextareaPrimitive.Root({ store, class: "flex flex-col gap-1" }, [
+    ui.TextareaPrimitive.Root({ store, class: "relative inline-flex" }, [
+      ui.TextareaPrimitive.Textarea({
         ...rest,
         store,
         id,
@@ -47,7 +46,7 @@ export function Textarea(
         when: computed(hasValue, (t) => t && showClear),
         ok() {
           return [
-            TextareaPrimitive.Clear(
+            ui.TextareaPrimitive.Clear(
               {
                 store,
                 class: computed(hasValue, (has) =>
@@ -65,7 +64,7 @@ export function Textarea(
         when: computed(isLoading, (t) => t && showLoading),
         ok() {
           return [
-            TextareaPrimitive.Loading(
+            ui.TextareaPrimitive.Loading(
               {
                 store,
                 class: computed(isLoading, (loading) =>
@@ -91,7 +90,7 @@ export function Textarea(
       when: showCount,
       ok() {
         return [
-          TextareaPrimitive.Count(
+          ui.TextareaPrimitive.Count(
             {
               store,
               class: "self-end text-xs text-muted-foreground",

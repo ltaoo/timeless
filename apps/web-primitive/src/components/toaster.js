@@ -2,7 +2,7 @@ const { refobj, computed } = Timeless;
 
 // Simple toaster using SonnerCore
 export function initToaster() {
-  const { SonnerCore } = Timeless.ui;
+  const { SonnerCore } = Timeless.vm;
   const sonner = SonnerCore();
 
   sonner.subscribe((toasts) => {

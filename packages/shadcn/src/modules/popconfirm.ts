@@ -1,11 +1,10 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, ref, refobj, ViewStyleProperties } from "@timeless/timeless";
 import { View, Show, ViewChildren, ViewProps } from "@timeless/timeless";
-import { PopconfirmPrimitive } from "@timeless/ui-primitive";
-import { PopconfirmCore } from "@timeless/inner-vm";
 
 export function Popconfirm(
   props: ViewProps & {
-    store: PopconfirmCore;
+    store: vm.PopconfirmCore;
     title?: ViewChildren;
     description?: ViewChildren;
     confirmText?: string;
@@ -28,16 +27,16 @@ export function Popconfirm(
   const confirmText = props.confirmText || "确定";
   const cancelText = props.cancelText || "取消";
 
-  return PopconfirmPrimitive.Root(
+  return ui.PopconfirmPrimitive.Root(
     {
       onUnmounted() {
         unlistens.forEach((fn) => fn());
       },
     },
     [
-      PopconfirmPrimitive.Trigger({ store: props.store }, children),
-      PopconfirmPrimitive.Portal({ store: props.store }, [
-        PopconfirmPrimitive.Content(
+      ui.PopconfirmPrimitive.Trigger({ store: props.store }, children),
+      ui.PopconfirmPrimitive.Portal({ store: props.store }, [
+        ui.PopconfirmPrimitive.Content(
           {
             ...props,
             class: computed(state_, (t) => {
@@ -67,7 +66,9 @@ export function Popconfirm(
                 return [base, borderClass].join(" ");
               }),
               style: computed(popper_state_, (s) => {
-                const [side, align = "center"] = (s.placement || "bottom").split("-");
+                const [side, align = "center"] = (
+                  s.placement || "bottom"
+                ).split("-");
                 const styles: ViewStyleProperties = {};
                 if (side === "bottom") styles.top = "-6px";
                 if (side === "top") styles.bottom = "-6px";
@@ -130,7 +131,7 @@ export function Popconfirm(
                 class: "flex justify-end gap-2",
               },
               [
-                PopconfirmPrimitive.Cancel(
+                ui.PopconfirmPrimitive.Cancel(
                   {
                     store: props.store,
                     class:
@@ -138,7 +139,7 @@ export function Popconfirm(
                   },
                   [cancelText],
                 ),
-                PopconfirmPrimitive.Confirm(
+                ui.PopconfirmPrimitive.Confirm(
                   {
                     store: props.store,
                     class: computed(state_, (s) => {

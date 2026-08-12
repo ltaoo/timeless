@@ -268,7 +268,7 @@ shadcn/weui = ui-primitive + CSS 样式（视觉层）
 
 ### `@timeless/timeless` — 框架核心
 
-**组合**：`inner-reactive` + `inner-primitive` + `inner-vm`（导出为 `ui` 命名空间）
+**组合**：`inner-reactive` + `inner-primitive` + `ui-primitive` + `inner-kit`（导出为 `kit` 命名空间）+ `inner-vm`（导出为 `ui` 命名空间）
 
 **给用户的一站式导入**：
 ```ts
@@ -279,9 +279,13 @@ import { View, Text, For, Show, Input } from "@timeless/timeless";
 // 无头状态机
 import { ui } from "@timeless/timeless";
 const dialog = ui.DialogCore({ open: ref(false) });
+
+// 通用业务模型
+import { kit } from "@timeless/timeless";
+const HistoryCore = kit.HistoryCore;
 ```
 
-**依赖**：`inner-reactive`、`inner-primitive`、`inner-vm`
+**依赖**：`inner-reactive`、`inner-primitive`、`ui-primitive`、`inner-kit`、`inner-vm`
 
 ---
 

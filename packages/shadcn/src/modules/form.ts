@@ -1,13 +1,15 @@
+import { vm } from "@timeless/timeless";
 import { View, ViewProps, ViewChildren } from "@timeless/timeless";
-import { ObjectFieldCore, ArrayFieldCore } from "@timeless/inner-vm";
 
 export function Form(
-  props: ViewProps & { store: ObjectFieldCore<any> | ArrayFieldCore<any> },
+  props: ViewProps & {
+    store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+  },
   children?: ViewChildren,
 ) {
-  // if (props.store.symbol === "ObjectFieldCore") {
+  // if (props.store.symbol === "vm.ObjectFieldCore") {
   //   return ObjectFieldPrimitive.Fields({
-  //     store: props.store as ObjectFieldCore<any>,
+  //     store: props.store as vm.ObjectFieldCore<any>,
   //     render() {
   //       // return [Field({ store: field, autoRender: true })];
   //       return [View({}, ["Hello"])];
@@ -15,8 +17,8 @@ export function Form(
   //   });
   // }
 
-  // if (props.store.symbol === "ArrayFieldCore") {
-  //   const arrayStore = props.store as ArrayFieldCore<any>;
+  // if (props.store.symbol === "vm.ArrayFieldCore") {
+  //   const arrayStore = props.store as vm.ArrayFieldCore<any>;
   //   return View({ class: "space-y-4" }, [
   //     ArrayFieldPrimitive.Items({
   //       store: arrayStore,
@@ -40,7 +42,7 @@ export function Form(
   //                   Button(
   //                     {
   //                       class: "h-8 w-8",
-  //                       store: new Timeless.ui.ButtonCore({
+  //                       store: new Timeless.vm.ButtonCore({
   //                         variant: "ghost",
   //                         size: "icon",
   //                       }),
@@ -62,7 +64,7 @@ export function Form(
   //       [
   //         Button(
   //           {
-  //             store: new Timeless.ui.ButtonCore({
+  //             store: new Timeless.vm.ButtonCore({
   //               variant: "outline",
   //             }),
   //             class: "w-full",

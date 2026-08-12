@@ -1,5 +1,5 @@
-import { ref, computed, Ref, isRef } from "@timeless/timeless";
-import { View, ViewProps, ViewChildren, isStyleRef } from "@timeless/timeless";
+import { ref, computed, Ref, isRef } from "../core";
+import { View, ViewProps, ViewChildren, isStyleRef } from "../core";
 import { ProgressCore } from "@timeless/inner-vm";
 
 export function Root(

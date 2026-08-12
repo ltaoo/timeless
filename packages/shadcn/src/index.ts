@@ -1,5 +1,4 @@
-import { registerIcons } from "@timeless/timeless";
-import { iconRegistry } from "@timeless/inner-icons";
+import { icons, registerIcons } from "@timeless/timeless";
 
 import { Input } from "./modules/input";
 import { FileDropZone, FileInput } from "./modules/file-picker";
@@ -105,13 +104,10 @@ try {
     import("./styles/globals.css");
   }
 } catch {}
-registerIcons(iconRegistry);
+registerIcons(icons.iconRegistry);
 
 console.log("shadcn.version" + __Version);
 export const TimelessShadcnVersion = __Version;
-
-export * from "@timeless/ui-primitive";
-export * as ui from "@timeless/inner-vm";
 
 export {
   Input,

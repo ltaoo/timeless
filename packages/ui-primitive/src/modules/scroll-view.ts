@@ -1,11 +1,11 @@
-import { ref, computed } from "@timeless/timeless";
+import { ref, computed } from "../core";
 import {
   View,
   ViewProps,
   ViewChildren,
   Show,
   TimelessElement,
-} from "@timeless/timeless";
+} from "../core";
 import { ScrollViewCore } from "@timeless/inner-vm";
 
 type Provider = Partial<{

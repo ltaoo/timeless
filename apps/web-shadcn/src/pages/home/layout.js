@@ -143,7 +143,7 @@ export default function HomeLayoutView(props) {
                     [
                       Button(
                         {
-                          store: new Timeless.ui.ButtonCore({
+                          store: new Timeless.vm.ButtonCore({
                             variant: "outline",
                             onClick() {
                               props.history.push("root.admin_layout.dashboard");
@@ -154,7 +154,7 @@ export default function HomeLayoutView(props) {
                       ),
                       Button(
                         {
-                          store: new Timeless.ui.ButtonCore({
+                          store: new Timeless.vm.ButtonCore({
                             variant: "outline",
                             onClick() {
                               const cur = props.app.getTheme();
@@ -167,14 +167,14 @@ export default function HomeLayoutView(props) {
                       ),
                       // User Avatar
                       (() => {
-                        const dropdown$ = new Timeless.ui.DropdownMenuCore({
+                        const dropdown$ = new Timeless.vm.DropdownMenuCore({
                           trigger: "hover",
                           side: "right",
                           align: "end",
                           offsetX: 4,
                           offsetY: -8,
                           items: [
-                            new Timeless.ui.MenuItemCore({
+                            new Timeless.vm.MenuItemCore({
                               label: "Profile",
                               onClick() {
                                 const toasts = [
@@ -231,17 +231,17 @@ export default function HomeLayoutView(props) {
                                 props.app.tip(pick);
                               },
                             }),
-                            new Timeless.ui.MenuItemCore({
+                            new Timeless.vm.MenuItemCore({
                               label: "Bill",
                               onClick() {
                                 console.log("Bill clicked");
                               },
                             }),
-                            new Timeless.ui.MenuItemCore({
+                            new Timeless.vm.MenuItemCore({
                               label: "Other",
-                              menu: new Timeless.ui.MenuCore({
+                              menu: new Timeless.vm.MenuCore({
                                 items: [
-                                  new Timeless.ui.MenuItemCore({
+                                  new Timeless.vm.MenuItemCore({
                                     label: "Toast",
                                     onClick() {
                                       const toasts = [
@@ -275,26 +275,26 @@ export default function HomeLayoutView(props) {
                                       props.app.tip(pick);
                                     },
                                   }),
-                                  new Timeless.ui.MenuItemCore({
+                                  new Timeless.vm.MenuItemCore({
                                     label: "Item 2",
                                     onClick() {
                                       console.log("Item 2 clicked");
                                     },
                                   }),
-                                  new Timeless.ui.MenuItemCore({
+                                  new Timeless.vm.MenuItemCore({
                                     label: "Item 3",
                                     onClick() {
                                       console.log("Item 3 clicked");
                                     },
                                   }),
-                                  new Timeless.ui.MenuItemCore({
+                                  new Timeless.vm.MenuItemCore({
                                     label: "Close DropdownMenu",
                                     onClick() {
                                       console.log("Item 4 clicked");
                                       dropdown$.hide();
                                     },
                                   }),
-                                  new Timeless.ui.MenuItemCore({
+                                  new Timeless.vm.MenuItemCore({
                                     label: "Item 5",
                                     onClick() {
                                       console.log("Item 5 clicked");
@@ -306,7 +306,7 @@ export default function HomeLayoutView(props) {
                                 console.log("Other clicked");
                               },
                             }),
-                            new Timeless.ui.MenuItemCore({
+                            new Timeless.vm.MenuItemCore({
                               label: "Logout",
                               onClick() {
                                 console.log("Logout clicked");

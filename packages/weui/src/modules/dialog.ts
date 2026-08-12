@@ -1,20 +1,21 @@
+import { ui, vm } from "@timeless/timeless";
 import { computed, Fragment, refobj, styleNames } from "@timeless/timeless";
 import { View, ViewChildren, ViewProps, Show } from "@timeless/timeless";
-import { DialogPrimitive } from "@timeless/ui-primitive";
-import { DialogCore, getGlobalLayerManager } from "@timeless/inner-vm";
 
 const DIALOG_BASE_Z = 200;
 const Z_INDEX_NEST_GAP = 50;
 
 export function Dialog(
-  props: ViewProps & { store: DialogCore; zIndex?: number },
+  props: ViewProps & { store: vm.DialogCore; zIndex?: number },
   children?: ViewChildren | (() => ViewChildren),
 ) {
   const { store, style, zIndex: manualZIndex, ...rest } = props;
   const state_ = refobj(store.state);
   const presence_state_ = refobj(store.presence.state);
 
-  const zIndex = manualZIndex ?? DIALOG_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
+  const zIndex =
+    manualZIndex ??
+    DIALOG_BASE_Z + vm.getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   const unlistens = [
     store.onStateChange((v) => {
@@ -25,7 +26,7 @@ export function Dialog(
     }),
   ];
 
-  return DialogPrimitive.Root(
+  return ui.DialogPrimitive.Root(
     {
       store,
       onUnmounted() {
@@ -33,7 +34,7 @@ export function Dialog(
       },
     },
     () => [
-      DialogPrimitive.Overlay({
+      ui.DialogPrimitive.Overlay({
         store,
         style: computed(presence_state_, (d) => {
           const result: Record<string, string> = {
@@ -64,7 +65,7 @@ export function Dialog(
           },
         },
         [
-          DialogPrimitive.Content(
+          ui.DialogPrimitive.Content(
             {
               ...rest,
               store,
@@ -92,13 +93,13 @@ export function Dialog(
                 when: computed(state_, (d) => !!d.title),
                 ok() {
                   return [
-                    DialogPrimitive.Header(
+                    ui.DialogPrimitive.Header(
                       {
                         store,
                         style: { padding: "32px 24px 16px" },
                       },
                       [
-                        DialogPrimitive.Title(
+                        ui.DialogPrimitive.Title(
                           {
                             store,
                             style: {
@@ -126,7 +127,7 @@ export function Dialog(
                 },
                 typeof children === "function" ? children() : children || [],
               ),
-              DialogPrimitive.Close(
+              ui.DialogPrimitive.Close(
                 {
                   store,
                   style: { display: "none" },
@@ -137,7 +138,7 @@ export function Dialog(
                 when: computed(state_, (d) => !!d.footer),
                 ok() {
                   return [
-                    DialogPrimitive.Footer(
+                    ui.DialogPrimitive.Footer(
                       {
                         store,
                         style: {

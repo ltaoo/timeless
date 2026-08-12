@@ -1,9 +1,8 @@
+import { ui, vm } from "@timeless/timeless";
 import { ViewChildren, ViewProps, View } from "@timeless/timeless";
-import { ToastPrimitive } from "@timeless/ui-primitive";
-import { ToastCore } from "@timeless/inner-vm";
 
 export function Toast(
-  props: ViewProps & { store: ToastCore },
+  props: ViewProps & { store: vm.ToastCore },
   children: ViewChildren = [],
 ) {
   const { store } = props;
@@ -13,13 +12,13 @@ export function Toast(
   //   state_.as(v);
   // });
 
-  return ToastPrimitive.Root({ store }, [
+  return ui.ToastPrimitive.Root({ store }, [
     View({}, children),
     // Show({
     //   when: computed(state_, (d) => !!d.mask),
     //   ok() {
     //     return [
-    //       ToastPrimitive.Mask(
+    //       ui.ToastPrimitive.Mask(
     //         {
     //           store,
     //           class: "fixed inset-0 z-[998] bg-black/20",
@@ -29,7 +28,7 @@ export function Toast(
     //     ];
     //   },
     // }),
-    // ToastPrimitive.Viewport(
+    // ui.ToastPrimitive.Viewport(
     //   {
     //     store,
     //     class:
@@ -37,7 +36,7 @@ export function Toast(
     //     ...rest,
     //   },
     //   [
-    //     ToastPrimitive.Item(
+    //     ui.ToastPrimitive.Item(
     //       {
     //         store,
     //         class: computed(state_, (d) => {
@@ -55,7 +54,7 @@ export function Toast(
     //           when: computed(state_, (d) => d.icon === "loading"),
     //           ok() {
     //             return [
-    //               ToastPrimitive.Icon(
+    //               ui.ToastPrimitive.Icon(
     //                 {
     //                   store,
     //                   class:
@@ -69,7 +68,7 @@ export function Toast(
     //         For({
     //           each: computed(state_, (d) => d.texts || []),
     //           render(text: string) {
-    //             return ToastPrimitive.Text({
+    //             return ui.ToastPrimitive.Text({
     //               store,
     //               text,
     //               class: "text-sm text-center",

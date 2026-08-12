@@ -18,7 +18,7 @@ export default createLibConfig({
   globals: {
     "@timeless/inner-reactive": "Timeless",
     "@timeless/inner-base": "Timeless",
-    "@timeless/inner-vm": "Timeless.ui",
+    "@timeless/inner-vm": "Timeless.vm",
     "@timeless/inner-utils": "Timeless.utils",
   },
   minify: true,

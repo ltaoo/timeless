@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   classNames,
   combine,
@@ -11,12 +12,10 @@ import {
   ViewProps,
   ViewChildren,
 } from "@timeless/timeless";
-import { FilePickerPrimitive } from "@timeless/ui-primitive";
-import { FilePickerCore } from "@timeless/inner-vm";
 
 export function FileDropZone(
   props: ViewProps & {
-    store: FilePickerCore;
+    store: vm.FilePickerCore;
     tip?: string;
   },
   children?: ViewChildren,
@@ -57,15 +56,15 @@ export function FileDropZone(
     error_msg_.as(`不支持的文件类型，仅支持 ${data.accept}`);
   });
 
-  return FilePickerPrimitive.Root(
+  return ui.FilePickerPrimitive.Root(
     { store, class: classNames(["t-file-dropzone relative", rest.class]) },
     [
       // Hidden native input for click-to-select
-      FilePickerPrimitive.Input({
+      ui.FilePickerPrimitive.Input({
         store,
         class: "sr-only",
       }),
-      FilePickerPrimitive.DropZone(
+      ui.FilePickerPrimitive.DropZone(
         {
           store,
           class: classNames([
@@ -178,7 +177,7 @@ export function FileDropZone(
                       class: "text-muted-foreground",
                     }),
                     View({ class: "truncate" }, [file_names_]),
-                    FilePickerPrimitive.Clear(
+                    ui.FilePickerPrimitive.Clear(
                       {
                         store,
                         class:
@@ -218,7 +217,7 @@ export function FileDropZone(
 
 export function FileInput(
   props: ViewProps & {
-    store: FilePickerCore;
+    store: vm.FilePickerCore;
     id?: string;
   },
 ) {
@@ -232,10 +231,10 @@ export function FileInput(
   const hasValue = computed(state_, (d) => d.value && d.value.length > 0);
   const isLoading = computed(state_, (d) => d.loading || false);
 
-  return FilePickerPrimitive.Root(
+  return ui.FilePickerPrimitive.Root(
     { store, class: classNames(["t-file-input relative", props.class]) },
     [
-      FilePickerPrimitive.Input({
+      ui.FilePickerPrimitive.Input({
         ...rest,
         id,
         store,
@@ -253,7 +252,7 @@ export function FileInput(
         ),
         ok() {
           return [
-            FilePickerPrimitive.Clear(
+            ui.FilePickerPrimitive.Clear(
               {
                 store,
                 class:
@@ -264,7 +263,7 @@ export function FileInput(
           ];
         },
       }),
-      FilePickerPrimitive.Loading(
+      ui.FilePickerPrimitive.Loading(
         {
           store,
           class:

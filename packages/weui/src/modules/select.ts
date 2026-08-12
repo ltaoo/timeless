@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   computed,
   Fragment,
@@ -5,18 +6,16 @@ import {
   refobj,
 } from "@timeless/timeless";
 import { For, ViewProps, Show, View, Icon } from "@timeless/timeless";
-import { SelectPrimitive } from "@timeless/ui-primitive";
-import { SelectCore, SelectItemCore, SelectGroupCore } from "@timeless/inner-vm";
 
 export function Select(
-  props: ViewProps & { store: SelectCore<any>; id?: string },
+  props: ViewProps & { store: vm.SelectCore<any>; id?: string },
 ) {
   const { store, id, ...rest } = props;
   const state_ = refobj(store.state);
   const listener$ = ListenerManager([state_]);
 
   const methods = {
-    render_opt(option: SelectItemCore<any>) {
+    render_opt(option: vm.SelectItemCore<any>) {
       const item_ = refobj(option.state);
       const listener$ = ListenerManager([item_]);
       listener$.add(
@@ -24,7 +23,7 @@ export function Select(
           item_.as(v);
         }),
       );
-      return SelectPrimitive.Item(
+      return ui.SelectPrimitive.Item(
         {
           select$: store,
           item$: option,
@@ -53,7 +52,7 @@ export function Select(
           },
         },
         [
-          SelectPrimitive.ItemIndicator(
+          ui.SelectPrimitive.ItemIndicator(
             {
               store: option,
               style: {
@@ -66,12 +65,12 @@ export function Select(
             },
             [Icon({ name: "check", size: 14 })],
           ),
-          SelectPrimitive.ItemText({}, [option.label]),
+          ui.SelectPrimitive.ItemText({}, [option.label]),
         ],
       );
     },
-    render_entry(entry: SelectItemCore<any> | SelectGroupCore<any>) {
-      if (entry && entry instanceof SelectGroupCore) {
+    render_entry(entry: vm.SelectItemCore<any> | vm.SelectGroupCore<any>) {
+      if (entry && entry instanceof vm.SelectGroupCore) {
         return Fragment({}, [
           Show({
             when: !!entry.label,
@@ -99,7 +98,7 @@ export function Select(
           }),
         ]);
       }
-      return methods.render_opt(entry as SelectItemCore<any>);
+      return methods.render_opt(entry as vm.SelectItemCore<any>);
     },
   };
 
@@ -108,7 +107,7 @@ export function Select(
   });
   listener$.add(filtered_entries_);
 
-  return SelectPrimitive.Root(
+  return ui.SelectPrimitive.Root(
     {
       store,
       onMounted() {
@@ -121,7 +120,7 @@ export function Select(
       },
     },
     [
-      SelectPrimitive.Trigger(
+      ui.SelectPrimitive.Trigger(
         {
           id,
           store,
@@ -149,7 +148,7 @@ export function Select(
             when: computed(state_, (t) => t.search),
             ok() {
               return [
-                SelectPrimitive.Search({
+                ui.SelectPrimitive.Search({
                   store,
                   style: {
                     width: "100%",
@@ -163,7 +162,7 @@ export function Select(
               ];
             },
             else() {
-              return SelectPrimitive.Value({
+              return ui.SelectPrimitive.Value({
                 store,
                 style: computed(state_, (t) => {
                   if (t.value != null) {
@@ -179,7 +178,7 @@ export function Select(
               });
             },
           }),
-          SelectPrimitive.Icon(
+          ui.SelectPrimitive.Icon(
             {
               store,
               style: {
@@ -192,7 +191,7 @@ export function Select(
           ),
         ],
       ),
-      SelectPrimitive.Content(
+      ui.SelectPrimitive.Content(
         {
           ...rest,
           store,
@@ -212,7 +211,7 @@ export function Select(
           },
         },
         () => [
-          SelectPrimitive.Viewport(
+          ui.SelectPrimitive.Viewport(
             {
               store,
               style: { padding: "4px 0" },

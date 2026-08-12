@@ -1,18 +1,17 @@
+import { ui, vm } from "@timeless/timeless";
 import { Ref } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
-import { ProgressPrimitive } from "@timeless/ui-primitive";
-import { ProgressCore } from "@timeless/inner-vm";
 
 export function Progress(
   props: ViewProps & {
-    store?: ProgressCore;
+    store?: vm.ProgressCore;
     value?: Ref<number> | number;
     max?: number;
   },
 ) {
   const { store, value, max, ...rest } = props;
 
-  return ProgressPrimitive.Root(
+  return ui.ProgressPrimitive.Root(
     {
       store,
       value,
@@ -22,7 +21,7 @@ export function Progress(
       ...rest,
     },
     [
-      ProgressPrimitive.Indicator({
+      ui.ProgressPrimitive.Indicator({
         store,
         // @ts-ignore
         value,

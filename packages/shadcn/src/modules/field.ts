@@ -1,3 +1,4 @@
+import { vm } from "@timeless/timeless";
 import { computed, ref, refobj, classNames, combine } from "@timeless/timeless";
 import {
   View,
@@ -8,8 +9,8 @@ import {
   Fragment,
   Label as NativeLabel,
   ListenerManager,
+  TimelessElement,
 } from "@timeless/timeless";
-import { SingleFieldCore } from "@timeless/inner-vm";
 
 import { Separator as BaseSeparator } from "./separator";
 
@@ -78,12 +79,12 @@ export function FieldSeparator(
 
 export function FieldLabel(
   props: ViewProps & {
-    store?: SingleFieldCore<any>;
+    store?: vm.SingleFieldCore<any>;
     for?: string;
     weight?: "normal" | "medium";
     tone?: "default" | "destructive";
   },
-) {
+): TimelessElement {
   const {
     class: cls,
     store,
@@ -123,11 +124,11 @@ export function FieldLabel(
 }
 export function FieldInlineLabel(
   props: ViewProps & {
-    store?: SingleFieldCore<any>;
+    store?: vm.SingleFieldCore<any>;
     for?: string;
   },
   children?: ViewChildren,
-) {
+): TimelessElement {
   const { class: cls, store, ...rest } = props;
 
   const state_ = refobj(store.state);
@@ -177,7 +178,7 @@ export function FieldError(props: {}, children: ViewChildren = []) {
 
 export function Field(
   props: ViewProps & {
-    store: SingleFieldCore<any>;
+    store: vm.SingleFieldCore<any>;
     id?: string;
     // autoRender?: boolean;
     orientation?: "vertical" | "horizontal";

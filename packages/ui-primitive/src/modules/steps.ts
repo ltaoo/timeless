@@ -1,4 +1,4 @@
-import { refobj, computed } from "@timeless/timeless";
+import { refobj, computed } from "../core";
 import {
   View,
   ViewProps,
@@ -6,7 +6,7 @@ import {
   For,
   Show,
   Text,
-} from "@timeless/timeless";
+} from "../core";
 import { StepCore } from "@timeless/inner-vm";
 
 export type StepItem = {

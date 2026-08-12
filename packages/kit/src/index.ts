@@ -9,11 +9,13 @@ export { HistoryCore } from "./history";
 export { NavigatorCore } from "./navigator";
 export { HttpClientCore } from "./http_client";
 export {
+  ChannelClientCore,
   ChannelCore,
-  onChannelCreated,
   type ChannelCloseReason,
+  type ChannelConnection,
   type ChannelCoreProps,
   type ChannelMessageMeta,
+  type ChannelOpenOptions,
   type ChannelSentMessage,
   type ChannelState,
   type ChannelStatus,

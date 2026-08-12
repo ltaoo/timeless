@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@timeless/inner-kit": "workspace:^",
     "@timeless/provider-web": "workspace:^",
     "@timeless/shadcn": "workspace:^",
     "@timeless/timeless": "workspace:^",

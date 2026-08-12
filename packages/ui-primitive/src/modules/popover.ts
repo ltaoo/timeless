@@ -1,4 +1,4 @@
-import { refobj, computed } from "@timeless/timeless";
+import { refobj, computed } from "../core";
 import {
   View,
   ViewProps,
@@ -7,7 +7,7 @@ import {
   Button,
   ButtonProps,
   Portal as NativePortal,
-} from "@timeless/timeless";
+} from "../core";
 import {
   PopoverCore,
   Align,

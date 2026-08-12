@@ -1,7 +1,7 @@
 import { Section, Item } from "@/components/index.js";
 
 export default function CommandView() {
-  const view$ = new Timeless.ui.ScrollViewCore({});
+  const view$ = new Timeless.vm.ScrollViewCore({});
   const isOpen = ref(false);
   const searchQuery = ref("");
   const selectedIndex = ref(0);
@@ -9,7 +9,7 @@ export default function CommandView() {
   const contentCenterX = ref(0);
   const contentTop = ref(0);
 
-  const searchInput = new Timeless.ui.InputCore({
+  const searchInput = new Timeless.vm.InputCore({
     placeholder: "Type a command...",
     defaultValue: "",
   });
@@ -141,14 +141,14 @@ export default function CommandView() {
   }
 
   // Click Outside Model - close panel when clicking outside
-  const $clickOutside = Timeless.ui.ClickOutsideModel({
+  const $clickOutside = Timeless.vm.ClickOutsideModel({
     onOutside() {
       close();
     },
   });
 
   // Register Ctrl+P shortcut
-  const $shortcut = Timeless.ui.ShortcutModel({});
+  const $shortcut = Timeless.vm.ShortcutModel({});
   $shortcut.methods.register({
     "ControlLeft+KeyP"() {
       open();
@@ -250,7 +250,7 @@ export default function CommandView() {
         Item("Press Ctrl+P to open", [
           Button(
             {
-              store: new Timeless.ui.ButtonCore({
+              store: new Timeless.vm.ButtonCore({
                 variant: "outline",
                 onClick() {
                   open();

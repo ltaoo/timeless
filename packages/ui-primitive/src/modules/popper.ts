@@ -1,4 +1,4 @@
-import { refobj, computed, Logger } from "@timeless/timeless";
+import { refobj, computed, Logger } from "../core";
 import {
   styleNames,
   classNames,
@@ -8,7 +8,7 @@ import {
   Fragment,
   Show,
   ListenerManager,
-} from "@timeless/timeless";
+} from "../core";
 import {
   PopperCore,
   DismissableLayerCore,

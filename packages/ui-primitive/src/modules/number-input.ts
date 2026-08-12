@@ -1,4 +1,4 @@
-import { ref, combine } from "@timeless/timeless";
+import { ref, combine } from "../core";
 import {
   View,
   ViewProps,
@@ -6,7 +6,7 @@ import {
   NumberInput as NativeNumberInput,
   ListenerManager,
   VNodeEvent,
-} from "@timeless/timeless";
+} from "../core";
 import { NumberInputCore } from "@timeless/inner-vm";
 
 export function Root(

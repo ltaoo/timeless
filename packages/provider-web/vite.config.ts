@@ -12,11 +12,16 @@ export default createLibConfig({
   globals: {
     "@timeless/timeless": "Timeless",
     "@timeless/inner-kit": "Timeless.kit",
-    "@timeless/inner-vm": "Timeless.ui",
+    "@timeless/inner-vm": "Timeless.vm",
   },
   formats: ["es", "cjs", "umd"],
   minify: false,
   alias: {
     "@": resolve(__dirname, "src"),
+  },
+  bundle_analysis: {
+    package_name: pkg.name,
+    package_root: __dirname,
+    workspace_root: resolve(__dirname, "../.."),
   },
 });

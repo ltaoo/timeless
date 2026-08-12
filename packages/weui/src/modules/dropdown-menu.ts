@@ -1,3 +1,4 @@
+import { ui, vm } from "@timeless/timeless";
 import {
   ref,
   computed,
@@ -14,32 +15,24 @@ import {
   Fragment,
   TimelessElement,
 } from "@timeless/timeless";
-import { DropdownMenuPrimitive } from "@timeless/ui-primitive";
-import {
-  DropdownMenuCore,
-  MenuCore,
-  MenuItemCore,
-  MenuSeparatorCore,
-  MenuGroupCore,
-  MenuCheckboxMenu,
-  MenuRadioItem,
-  MenuRadioGroupItem,
-} from "@timeless/inner-vm";
 
 export function DropdownMenu(
-  props: ViewProps & { store: DropdownMenuCore },
+  props: ViewProps & { store: vm.DropdownMenuCore },
   children?: ViewChildren,
-) {
+): TimelessElement {
   const state_ = refobj(props.store.state);
 
   return Fragment({}, [
     Show({
       when: !!children,
       ok() {
-        return DropdownMenuPrimitive.Trigger({ store: props.store }, children);
+        return ui.DropdownMenuPrimitive.Trigger(
+          { store: props.store },
+          children,
+        );
       },
     }),
-    DropdownMenuPrimitive.Content(
+    ui.DropdownMenuPrimitive.Content(
       {
         ...props,
         animation: {
@@ -57,14 +50,16 @@ export function DropdownMenu(
               each: computed(state_, (t) => {
                 return t.items;
               }),
-              render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
-                if (item instanceof MenuSeparatorCore) {
+              render(
+                item: vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore,
+              ) {
+                if (item instanceof vm.MenuSeparatorCore) {
                   return DropdownMenuSeparator({});
                 }
-                if (item instanceof MenuGroupCore) {
+                if (item instanceof vm.MenuGroupCore) {
                   return DropdownMenuGroup({ store: item });
                 }
-                return DropdownMenuItem({ store: item as MenuItemCore });
+                return DropdownMenuItem({ store: item as vm.MenuItemCore });
               },
             }),
           ],
@@ -75,16 +70,16 @@ export function DropdownMenu(
 }
 
 function DropdownMenuSeparator(_props: ViewProps) {
-  return DropdownMenuPrimitive.Separator({
+  return ui.DropdownMenuPrimitive.Separator({
     class: "weui-dropdown-menu__separator",
   });
 }
 
-function DropdownMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
+function DropdownMenuGroup(props: ViewProps & { store: vm.MenuGroupCore }) {
   const state_ = refobj(props.store.state);
   const has_label_ = computed(state_, (t) => !!t.label);
 
-  return DropdownMenuPrimitive.Group({ store: props.store }, [
+  return ui.DropdownMenuPrimitive.Group({ store: props.store }, [
     Show({
       when: has_label_,
       ok() {
@@ -100,24 +95,24 @@ function DropdownMenuGroup(props: ViewProps & { store: MenuGroupCore }) {
     }),
     For({
       each: computed(state_, (t) => t.items),
-      render(item: MenuItemCore | MenuSeparatorCore | MenuGroupCore) {
-        if (item instanceof MenuSeparatorCore) {
+      render(item: vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore) {
+        if (item instanceof vm.MenuSeparatorCore) {
           return DropdownMenuSeparator({});
         }
-        if (item instanceof MenuGroupCore) {
+        if (item instanceof vm.MenuGroupCore) {
           return DropdownMenuGroup({ store: item });
         }
-        return DropdownMenuItem({ store: item as MenuItemCore });
+        return DropdownMenuItem({ store: item as vm.MenuItemCore });
       },
     }),
   ]);
 }
 
-function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
+function DropdownMenuItem(props: ViewProps & { store: vm.MenuItemCore }) {
   const is_checkable =
-    props.store instanceof MenuCheckboxMenu ||
-    props.store instanceof MenuRadioItem ||
-    props.store instanceof MenuRadioGroupItem;
+    props.store instanceof vm.MenuCheckboxMenu ||
+    props.store instanceof vm.MenuRadioItem ||
+    props.store instanceof vm.MenuRadioGroupItem;
 
   const state_ = refobj(props.store.state);
   const show_chevron_ = ref(!!props.store.menu);
@@ -131,7 +126,7 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
   });
   const has_icon_ = computed(state_, (t) => !!t.icon);
   const menu_state_ = refobj(
-    props.store.menu ? props.store.menu.state : ({} as MenuCore["state"]),
+    props.store.menu ? props.store.menu.state : ({} as vm.MenuCore["state"]),
   );
   const listener$ = ListenerManager([
     state_,
@@ -163,7 +158,7 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
       },
     },
     [
-      DropdownMenuPrimitive.Item(
+      ui.DropdownMenuPrimitive.Item(
         {
           store: props.store,
           class: computed(state_, (t) => {
@@ -223,7 +218,7 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
               when: computed(menu_state_, (t) => t.open),
               ok() {
                 return [
-                  DropdownMenuPrimitive.SubMenuContent(
+                  ui.DropdownMenuPrimitive.SubMenuContent(
                     {
                       store: menu,
                       animation: {
@@ -234,7 +229,8 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
                     [
                       View(
                         {
-                          class: "weui-dropdown-menu weui-dropdown-menu__submenu",
+                          class:
+                            "weui-dropdown-menu weui-dropdown-menu__submenu",
                         },
                         [
                           Show({
@@ -247,20 +243,20 @@ function DropdownMenuItem(props: ViewProps & { store: MenuItemCore }) {
                                   }),
                                   render(
                                     item:
-                                      | MenuItemCore
-                                      | MenuSeparatorCore
-                                      | MenuGroupCore,
+                                      | vm.MenuItemCore
+                                      | vm.MenuSeparatorCore
+                                      | vm.MenuGroupCore,
                                   ) {
-                                    if (item instanceof MenuSeparatorCore) {
+                                    if (item instanceof vm.MenuSeparatorCore) {
                                       return DropdownMenuSeparator({});
                                     }
-                                    if (item instanceof MenuGroupCore) {
+                                    if (item instanceof vm.MenuGroupCore) {
                                       return DropdownMenuGroup({
                                         store: item,
                                       });
                                     }
                                     return DropdownMenuItem({
-                                      store: item as MenuItemCore,
+                                      store: item as vm.MenuItemCore,
                                     });
                                   },
                                 }),

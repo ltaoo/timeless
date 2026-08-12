@@ -233,7 +233,7 @@ export default function TablesPageView(props) {
             minSize: 160,
             style: { overflow: "hidden" },
             content() {
-              var searchInput$ = new Timeless.ui.InputCore({
+              var searchInput$ = new Timeless.vm.InputCore({
                 defaultValue: "",
                 placeholder: "Search tables...",
               });
@@ -908,7 +908,7 @@ export default function TablesPageView(props) {
                                                 ),
                                                 ok() {
                                                   var filterInput$ =
-                                                    new Timeless.ui.InputCore({
+                                                    new Timeless.vm.InputCore({
                                                       defaultValue:
                                                         filters_.value[
                                                           col.name
