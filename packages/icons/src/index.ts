@@ -3,6 +3,7 @@ export * from "./asn/index";
 import activity from "./asn/activity";
 import arrowDownToLine from "./asn/arrow-down-to-line";
 import arrowLeft from "./asn/arrow-left";
+import arrowRight from "./asn/arrow-right";
 import bolt from "./asn/bolt";
 import braces from "./asn/braces";
 import calendar from "./asn/calendar";
@@ -88,6 +89,7 @@ export const iconRegistry = {
   "activity": activity,
   "arrow-down-to-line": arrowDownToLine,
   "arrow-left": arrowLeft,
+  "arrow-right": arrowRight,
   "bolt": bolt,
   "braces": braces,
   "calendar": calendar,

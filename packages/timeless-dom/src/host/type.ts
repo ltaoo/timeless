@@ -1,6 +1,7 @@
 import { DOMGrid } from "./grid";
 import { DOMView } from "./view";
 import { DOMText } from "./text";
+import { DOMRichText } from "./rich-text";
 import { DOMLabel } from "./label";
 import { DOMFragment } from "./fragment";
 import { DOMLazyView } from "./lazy-view";
@@ -36,6 +37,7 @@ export type DOMHostNode =
   | DOMLazyView
   | DOMView
   | DOMText
+  | DOMRichText
   | DOMLabel
   | DOMImg
   | DOMVideo

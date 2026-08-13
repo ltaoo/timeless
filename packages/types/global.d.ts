@@ -619,6 +619,7 @@ declare module "packages/base/src/debounce" {
     export function debounce<T extends (...args: any[]) => any>(wait: number, func: T): (...args: Parameters<T>) => void;
 }
 declare module "packages/base/src/index" {
+    export { default as mitt } from "mitt";
     export * from "packages/base/src/base";
     export * from "packages/base/src/result/index";
     export * from "packages/base/src/error/index";
@@ -780,13 +781,13 @@ declare module "packages/primitive/src/reactive/show" {
     };
 }
 declare module "packages/primitive/src/reactive/match" {
-    import { Ref } from "packages/reactive/src/index";
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event";
     type MatchCase = () => ViewChildren;
     type MatchElseCase<T> = (value: T) => ViewChildren;
     type MatchProps<T> = {
-        when: Ref<T> | T;
+        when: DerivedRef<T> | Ref<T> | T;
         cases: Record<string | number, MatchCase | MatchElseCase<T>>;
         fallback?: () => ViewChildren;
         onMounted?: (event: MountedEvent) => void;
@@ -2728,6 +2729,37 @@ declare module "packages/primitive/src/content/rich-text" {
         t: string;
         $elm: any;
         state: import("packages/primitive/src/content/box").BoxState & RichTextState;
+        events: Partial<{
+            onMounted?: (event: MountedEvent<MountedEvent>) => void | (() => void);
+            beforeUnmounted?: () => void;
+            onUnmounted?: () => void;
+            onClick?: (e: MouseEvent) => void;
+            onDoubleClick?: (e: MouseEvent) => void;
+            onMouseDown?: (e: MouseEvent) => void;
+            onMouseUp?: (e: MouseEvent) => void;
+            onMouseEnter?: (e: MouseEvent) => void;
+            onMouseLeave?: (e: MouseEvent) => void;
+            onMouseMove?: (e: MouseEvent) => void;
+            onLongPress?: (e: PointerEvent) => void;
+            onPointerDown?: (e: PointerEvent) => void;
+            onPointerUp?: (e: PointerEvent) => void;
+            onInput?: (e: Event) => void;
+            onChange?: (e: Event) => void;
+            onFocus?: (e: FocusEvent) => void;
+            onBlur?: (e: FocusEvent) => void;
+            onKeyDown?: (e: KeyboardEvent) => void;
+            onKeyUp?: (e: KeyboardEvent) => void;
+            onContextMenu?: (e: MouseEvent) => void;
+            onDragStart?: (e: DragEvent) => void;
+            onDrag?: (e: DragEvent) => void;
+            onDragEnd?: (e: DragEvent) => void;
+            onDragEnter?: (e: DragEvent) => void;
+            onDragOver?: (e: DragEvent) => void;
+            onDragLeave?: (e: DragEvent) => void;
+            onDrop?: (e: DragEvent) => void;
+            onWheel?: (e: WheelEvent) => void;
+            onAnimationEnd?: (e: AnimationEvent) => void;
+        }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
@@ -5152,12 +5184,5297 @@ declare module "packages/primitive/src/index" {
     export { patch } from "packages/primitive/src/hmr/patch";
     export type { PatchOptions } from "packages/primitive/src/hmr/patch";
     export { hmrState, hmrRestore } from "packages/primitive/src/hmr/state";
-    export { Logger, Result, base, debounce, throttle } from "packages/base/src/index";
+    export { Logger, Result, base, debounce, mitt, throttle, } from "packages/base/src/index";
     export type { Handler, Platform, MutableRecord2, MutableRecord, Unpacked, UnpackedResult, } from "packages/base/src/index";
 }
 declare module "packages/timeless/src/core" {
     export * from "packages/reactive/src/index";
     export * from "packages/primitive/src/index";
+}
+declare module "packages/icons/src/asn/activity" {
+    const _default: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-activity-icon lucide-activity";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2";
+            };
+        }];
+    };
+    export default _default;
+}
+declare module "packages/icons/src/asn/arrow-down-to-line" {
+    const _default_1: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-arrow-down-to-line-icon lucide-arrow-down-to-line";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 17V3";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m6 11 6 6 6-6";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19 21H5";
+            };
+        }];
+    };
+    export default _default_1;
+}
+declare module "packages/icons/src/asn/arrow-left" {
+    const _default_2: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-arrow-left-icon lucide-arrow-left";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m12 19-7-7 7-7";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19 12H5";
+            };
+        }];
+    };
+    export default _default_2;
+}
+declare module "packages/icons/src/asn/arrow-right" {
+    const _default_3: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-arrow-right-icon lucide-arrow-right";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M5 12h14";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m12 5 7 7-7 7";
+            };
+        }];
+    };
+    export default _default_3;
+}
+declare module "packages/icons/src/asn/bolt" {
+    const _default_4: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-bolt-icon lucide-bolt";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "4";
+            };
+        }];
+    };
+    export default _default_4;
+}
+declare module "packages/icons/src/asn/braces" {
+    const _default_5: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-braces-icon lucide-braces";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1";
+            };
+        }];
+    };
+    export default _default_5;
+}
+declare module "packages/icons/src/asn/calendar" {
+    const _default_6: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-calendar-icon lucide-calendar";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 2v4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 2v4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 10h18";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "4";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_6;
+}
+declare module "packages/icons/src/asn/check" {
+    const _default_7: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-check-icon lucide-check";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M20 6 9 17l-5-5";
+            };
+        }];
+    };
+    export default _default_7;
+}
+declare module "packages/icons/src/asn/chevron-down" {
+    const _default_8: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-chevron-down-icon lucide-chevron-down";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m6 9 6 6 6-6";
+            };
+        }];
+    };
+    export default _default_8;
+}
+declare module "packages/icons/src/asn/chevron-left" {
+    const _default_9: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-chevron-left-icon lucide-chevron-left";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m15 18-6-6 6-6";
+            };
+        }];
+    };
+    export default _default_9;
+}
+declare module "packages/icons/src/asn/chevron-right" {
+    const _default_10: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-chevron-right-icon lucide-chevron-right";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m9 18 6-6-6-6";
+            };
+        }];
+    };
+    export default _default_10;
+}
+declare module "packages/icons/src/asn/chevron-up" {
+    const _default_11: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-chevron-up-icon lucide-chevron-up";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m18 15-6-6-6 6";
+            };
+        }];
+    };
+    export default _default_11;
+}
+declare module "packages/icons/src/asn/circle-alert" {
+    const _default_12: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-circle-alert-icon lucide-circle-alert";
+        };
+        readonly children: readonly [{
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "10";
+            };
+        }, {
+            readonly tag: "line";
+            readonly attrs: {
+                readonly x1: "12";
+                readonly x2: "12";
+                readonly y1: "8";
+                readonly y2: "12";
+            };
+        }, {
+            readonly tag: "line";
+            readonly attrs: {
+                readonly x1: "12";
+                readonly x2: "12.01";
+                readonly y1: "16";
+                readonly y2: "16";
+            };
+        }];
+    };
+    export default _default_12;
+}
+declare module "packages/icons/src/asn/circle-arrow-down" {
+    const _default_13: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-circle-arrow-down-icon lucide-circle-arrow-down";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 8v8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m8 12 4 4 4-4";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "10";
+            };
+        }];
+    };
+    export default _default_13;
+}
+declare module "packages/icons/src/asn/circle-ellipsis" {
+    const _default_14: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-circle-ellipsis-icon lucide-circle-ellipsis";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M17 12h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 12h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M7 12h.01";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "10";
+            };
+        }];
+    };
+    export default _default_14;
+}
+declare module "packages/icons/src/asn/circle-x" {
+    const _default_15: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-circle-x-icon lucide-circle-x";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m15 9-6 6";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m9 9 6 6";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "10";
+            };
+        }];
+    };
+    export default _default_15;
+}
+declare module "packages/icons/src/asn/clock-3" {
+    const _default_16: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-clock3-icon lucide-clock-3";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 6v6h4";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "10";
+            };
+        }];
+    };
+    export default _default_16;
+}
+declare module "packages/icons/src/asn/clock-arrow-down" {
+    const _default_17: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-clock-arrow-down-icon lucide-clock-arrow-down";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 6v6l2 1";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12.337 21.994a10 10 0 1 1 9.588-8.767";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m14 18 4 4 4-4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M18 14v8";
+            };
+        }];
+    };
+    export default _default_17;
+}
+declare module "packages/icons/src/asn/clock" {
+    const _default_18: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-clock";
+        };
+        readonly children: readonly [{
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "10";
+            };
+        }, {
+            readonly tag: "polyline";
+            readonly attrs: {
+                readonly points: "12 6 12 12 16 14";
+            };
+        }];
+    };
+    export default _default_18;
+}
+declare module "packages/icons/src/asn/cloud-download" {
+    const _default_19: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-cloud-download-icon lucide-cloud-download";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 13v8l-4-4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m12 21 4-4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284";
+            };
+        }];
+    };
+    export default _default_19;
+}
+declare module "packages/icons/src/asn/copy" {
+    const _default_20: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-copy-icon lucide-copy";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "14";
+                readonly height: "14";
+                readonly x: "8";
+                readonly y: "8";
+                readonly rx: "2";
+                readonly ry: "2";
+            };
+        }];
+    };
+    export default _default_20;
+}
+declare module "packages/icons/src/asn/corner-down-right" {
+    const _default_21: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-corner-down-right-icon lucide-corner-down-right";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m15 10 5 5-5 5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 4v7a4 4 0 0 0 4 4h12";
+            };
+        }];
+    };
+    export default _default_21;
+}
+declare module "packages/icons/src/asn/download" {
+    const _default_22: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-download-icon lucide-download";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 15V3";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m7 10 5 5 5-5";
+            };
+        }];
+    };
+    export default _default_22;
+}
+declare module "packages/icons/src/asn/ellipsis-vertical" {
+    const _default_23: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical";
+        };
+        readonly children: readonly [{
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "1";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "5";
+                readonly r: "1";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "19";
+                readonly r: "1";
+            };
+        }];
+    };
+    export default _default_23;
+}
+declare module "packages/icons/src/asn/ellipsis" {
+    const _default_24: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-ellipsis-icon lucide-ellipsis";
+        };
+        readonly children: readonly [{
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "1";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "19";
+                readonly cy: "12";
+                readonly r: "1";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "5";
+                readonly cy: "12";
+                readonly r: "1";
+            };
+        }];
+    };
+    export default _default_24;
+}
+declare module "packages/icons/src/asn/external-link" {
+    const _default_25: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-external-link-icon lucide-external-link";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 3h6v6";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 14 21 3";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6";
+            };
+        }];
+    };
+    export default _default_25;
+}
+declare module "packages/icons/src/asn/file-box" {
+    const _default_26: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-box-icon lucide-file-box";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14.5 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v3.8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M11.7 14.2 7 17l-4.7-2.8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 13.1a2 2 0 0 0-.999 1.76v3.24a2 2 0 0 0 .969 1.78L6 21.7a2 2 0 0 0 2.03.01L11 19.9a2 2 0 0 0 1-1.76V14.9a2 2 0 0 0-.97-1.78L8 11.3a2 2 0 0 0-2.03-.01z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M7 17v5";
+            };
+        }];
+    };
+    export default _default_26;
+}
+declare module "packages/icons/src/asn/file-image" {
+    const _default_27: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-image-icon lucide-file-image";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "10";
+                readonly cy: "12";
+                readonly r: "2";
+            };
+        }];
+    };
+    export default _default_27;
+}
+declare module "packages/icons/src/asn/file-lock" {
+    const _default_28: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-lock-icon lucide-file-lock";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 9.8V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9 17v-2a2 2 0 0 0-4 0v2";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "8";
+                readonly height: "5";
+                readonly x: "3";
+                readonly y: "17";
+                readonly rx: "1";
+            };
+        }];
+    };
+    export default _default_28;
+}
+declare module "packages/icons/src/asn/file-play" {
+    const _default_29: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-play-icon lucide-file-play";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z";
+            };
+        }];
+    };
+    export default _default_29;
+}
+declare module "packages/icons/src/asn/file-stack" {
+    const _default_30: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-stack-icon lucide-file-stack";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z";
+            };
+        }];
+    };
+    export default _default_30;
+}
+declare module "packages/icons/src/asn/file-symlink" {
+    const _default_31: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-symlink-icon lucide-file-symlink";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 11V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h7";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m10 18 3-3-3-3";
+            };
+        }];
+    };
+    export default _default_31;
+}
+declare module "packages/icons/src/asn/file-text" {
+    const _default_32: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-text-icon lucide-file-text";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 9H8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 13H8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 17H8";
+            };
+        }];
+    };
+    export default _default_32;
+}
+declare module "packages/icons/src/asn/file-video-camera" {
+    const _default_33: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-video-camera-icon lucide-file-video-camera";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 12V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m10 17.843 3.033-1.755a.64.64 0 0 1 .967.56v4.704a.65.65 0 0 1-.967.56L10 20.157";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "7";
+                readonly height: "6";
+                readonly x: "3";
+                readonly y: "16";
+                readonly rx: "1";
+            };
+        }];
+    };
+    export default _default_33;
+}
+declare module "packages/icons/src/asn/file-volume" {
+    const _default_34: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-volume-icon lucide-file-volume";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 11.55V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-1.95";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 15a5 5 0 0 1 0 6";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 14.502a.5.5 0 0 0-.826-.381l-1.893 1.631a1 1 0 0 1-.651.243H3.5a.5.5 0 0 0-.5.501v3.006a.5.5 0 0 0 .5.501h1.129a1 1 0 0 1 .652.243l1.893 1.633a.5.5 0 0 0 .826-.38z";
+            };
+        }];
+    };
+    export default _default_34;
+}
+declare module "packages/icons/src/asn/file" {
+    const _default_35: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-icon lucide-file";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }];
+    };
+    export default _default_35;
+}
+declare module "packages/icons/src/asn/film" {
+    const _default_36: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-film-icon lucide-film";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M7 3v18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 7.5h4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12h18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 16.5h4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M17 3v18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M17 7.5h4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M17 16.5h4";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "3";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_36;
+}
+declare module "packages/icons/src/asn/folder-closed" {
+    const _default_37: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-folder-closed-icon lucide-folder-closed";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2 10h20";
+            };
+        }];
+    };
+    export default _default_37;
+}
+declare module "packages/icons/src/asn/folder-open" {
+    const _default_38: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-folder-open-icon lucide-folder-open";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2";
+            };
+        }];
+    };
+    export default _default_38;
+}
+declare module "packages/icons/src/asn/folder" {
+    const _default_39: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-folder-icon lucide-folder";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z";
+            };
+        }];
+    };
+    export default _default_39;
+}
+declare module "packages/icons/src/asn/funnel" {
+    const _default_40: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-funnel-icon lucide-funnel";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z";
+            };
+        }];
+    };
+    export default _default_40;
+}
+declare module "packages/icons/src/asn/gauge" {
+    const _default_41: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-gauge-icon lucide-gauge";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m12 14 4-4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3.34 19a10 10 0 1 1 17.32 0";
+            };
+        }];
+    };
+    export default _default_41;
+}
+declare module "packages/icons/src/asn/git-fork" {
+    const _default_42: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-git-fork-icon lucide-git-fork";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 12v3";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "18";
+                readonly r: "3";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "6";
+                readonly cy: "6";
+                readonly r: "3";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "18";
+                readonly cy: "6";
+                readonly r: "3";
+            };
+        }];
+    };
+    export default _default_42;
+}
+declare module "packages/icons/src/asn/grid-3x3" {
+    const _default_43: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-grid3x3-icon lucide-grid-3x3";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 9h18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 15h18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9 3v18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 3v18";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "3";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_43;
+}
+declare module "packages/icons/src/asn/hard-drive-download" {
+    const _default_44: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-hard-drive-download-icon lucide-hard-drive-download";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 2v8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m16 6-4 4-4-4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 18h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 18h.01";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "20";
+                readonly height: "8";
+                readonly x: "2";
+                readonly y: "14";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_44;
+}
+declare module "packages/icons/src/asn/hard-drive" {
+    const _default_45: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-hard-drive-icon lucide-hard-drive";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 16h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21.946 12.013H2.054";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 16h.01";
+            };
+        }];
+    };
+    export default _default_45;
+}
+declare module "packages/icons/src/asn/history" {
+    const _default_46: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-history-icon lucide-history";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 3v5h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 7v5l4 2";
+            };
+        }];
+    };
+    export default _default_46;
+}
+declare module "packages/icons/src/asn/house" {
+    const _default_47: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-house-icon lucide-house";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z";
+            };
+        }];
+    };
+    export default _default_47;
+}
+declare module "packages/icons/src/asn/image" {
+    const _default_48: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-image-icon lucide-image";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "9";
+                readonly cy: "9";
+                readonly r: "2";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "3";
+                readonly rx: "2";
+                readonly ry: "2";
+            };
+        }];
+    };
+    export default _default_48;
+}
+declare module "packages/icons/src/asn/inbox" {
+    const _default_49: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-inbox-icon lucide-inbox";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
+            };
+        }, {
+            readonly tag: "polyline";
+            readonly attrs: {
+                readonly points: "22 12 16 12 14 15 10 15 8 12 2 12";
+            };
+        }];
+    };
+    export default _default_49;
+}
+declare module "packages/icons/src/asn/library" {
+    const _default_50: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-library-icon lucide-library";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m16 6 4 14";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 6v14";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 8v12";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 4v16";
+            };
+        }];
+    };
+    export default _default_50;
+}
+declare module "packages/icons/src/asn/list-filter" {
+    const _default_51: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-list-filter-icon lucide-list-filter";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2 5h20";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 12h12";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9 19h6";
+            };
+        }];
+    };
+    export default _default_51;
+}
+declare module "packages/icons/src/asn/loader-circle" {
+    const _default_52: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-loader-circle-icon lucide-loader-circle";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 12a9 9 0 1 1-6.219-8.56";
+            };
+        }];
+    };
+    export default _default_52;
+}
+declare module "packages/icons/src/asn/loader" {
+    const _default_53: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-loader-icon lucide-loader";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 2v4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m16.2 7.8 2.9-2.9";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M18 12h4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m16.2 16.2 2.9 2.9";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 18v4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m4.9 19.1 2.9-2.9";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2 12h4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m4.9 4.9 2.9 2.9";
+            };
+        }];
+    };
+    export default _default_53;
+}
+declare module "packages/icons/src/asn/menu" {
+    const _default_54: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-menu-icon lucide-menu";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 5h16";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 12h16";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 19h16";
+            };
+        }];
+    };
+    export default _default_54;
+}
+declare module "packages/icons/src/asn/message-square-more" {
+    const _default_55: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-message-square-more-icon lucide-message-square-more";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 11h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 11h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 11h.01";
+            };
+        }];
+    };
+    export default _default_55;
+}
+declare module "packages/icons/src/asn/moon" {
+    const _default_56: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-moon-icon lucide-moon";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401";
+            };
+        }];
+    };
+    export default _default_56;
+}
+declare module "packages/icons/src/asn/panel-left" {
+    const _default_57: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-panel-left-icon lucide-panel-left";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9 3v18";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "3";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_57;
+}
+declare module "packages/icons/src/asn/pause" {
+    const _default_58: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-pause-icon lucide-pause";
+        };
+        readonly children: readonly [{
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly x: "14";
+                readonly y: "3";
+                readonly width: "5";
+                readonly height: "18";
+                readonly rx: "1";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly x: "5";
+                readonly y: "3";
+                readonly width: "5";
+                readonly height: "18";
+                readonly rx: "1";
+            };
+        }];
+    };
+    export default _default_58;
+}
+declare module "packages/icons/src/asn/play" {
+    const _default_59: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-play-icon lucide-play";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z";
+            };
+        }];
+    };
+    export default _default_59;
+}
+declare module "packages/icons/src/asn/plus" {
+    const _default_60: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-plus-icon lucide-plus";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M5 12h14";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 5v14";
+            };
+        }];
+    };
+    export default _default_60;
+}
+declare module "packages/icons/src/asn/radio-tower" {
+    const _default_61: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-radio-tower-icon lucide-radio-tower";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4.9 16.1C1 12.2 1 5.8 4.9 1.9";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M7.8 4.7a6.14 6.14 0 0 0-.8 7.5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16.2 4.8c2 2 2.26 5.11.8 7.47";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19.1 1.9a9.96 9.96 0 0 1 0 14.1";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9.5 18h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m8 22 4-11 4 11";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "9";
+                readonly r: "2";
+            };
+        }];
+    };
+    export default _default_61;
+}
+declare module "packages/icons/src/asn/refresh-ccw" {
+    const _default_62: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-refresh-ccw-icon lucide-refresh-ccw";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 3v5h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 16h5v5";
+            };
+        }];
+    };
+    export default _default_62;
+}
+declare module "packages/icons/src/asn/refresh-cw" {
+    const _default_63: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-refresh-cw-icon lucide-refresh-cw";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 3v5h-5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 16H3v5";
+            };
+        }];
+    };
+    export default _default_63;
+}
+declare module "packages/icons/src/asn/rotate-ccw" {
+    const _default_64: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-rotate-ccw-icon lucide-rotate-ccw";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 3v5h5";
+            };
+        }];
+    };
+    export default _default_64;
+}
+declare module "packages/icons/src/asn/rss" {
+    const _default_65: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-rss-icon lucide-rss";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 11a9 9 0 0 1 9 9";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 4a16 16 0 0 1 16 16";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "5";
+                readonly cy: "19";
+                readonly r: "1";
+            };
+        }];
+    };
+    export default _default_65;
+}
+declare module "packages/icons/src/asn/save" {
+    const _default_66: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-save-icon lucide-save";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M7 3v4a1 1 0 0 0 1 1h7";
+            };
+        }];
+    };
+    export default _default_66;
+}
+declare module "packages/icons/src/asn/scroll-text" {
+    const _default_67: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-scroll-text-icon lucide-scroll-text";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 12h-5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 8h-5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19 17V5a2 2 0 0 0-2-2H4";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3";
+            };
+        }];
+    };
+    export default _default_67;
+}
+declare module "packages/icons/src/asn/search" {
+    const _default_68: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-search-icon lucide-search";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m21 21-4.34-4.34";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "11";
+                readonly cy: "11";
+                readonly r: "8";
+            };
+        }];
+    };
+    export default _default_68;
+}
+declare module "packages/icons/src/asn/server" {
+    const _default_69: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-server-icon lucide-server";
+        };
+        readonly children: readonly [{
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "20";
+                readonly height: "8";
+                readonly x: "2";
+                readonly y: "2";
+                readonly rx: "2";
+                readonly ry: "2";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "20";
+                readonly height: "8";
+                readonly x: "2";
+                readonly y: "14";
+                readonly rx: "2";
+                readonly ry: "2";
+            };
+        }, {
+            readonly tag: "line";
+            readonly attrs: {
+                readonly x1: "6";
+                readonly x2: "6.01";
+                readonly y1: "6";
+                readonly y2: "6";
+            };
+        }, {
+            readonly tag: "line";
+            readonly attrs: {
+                readonly x1: "6";
+                readonly x2: "6.01";
+                readonly y1: "18";
+                readonly y2: "18";
+            };
+        }];
+    };
+    export default _default_69;
+}
+declare module "packages/icons/src/asn/settings" {
+    const _default_70: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-settings-icon lucide-settings";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "3";
+            };
+        }];
+    };
+    export default _default_70;
+}
+declare module "packages/icons/src/asn/square-arrow-down" {
+    const _default_71: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-square-arrow-down-icon lucide-square-arrow-down";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 8v8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m8 12 4 4 4-4";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "3";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_71;
+}
+declare module "packages/icons/src/asn/square" {
+    const _default_72: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-square-icon lucide-square";
+        };
+        readonly children: readonly [{
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "3";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_72;
+}
+declare module "packages/icons/src/asn/sun" {
+    const _default_73: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-sun-icon lucide-sun";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 2v2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 20v2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m4.93 4.93 1.41 1.41";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m17.66 17.66 1.41 1.41";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2 12h2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M20 12h2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m6.34 17.66-1.41 1.41";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m19.07 4.93-1.41 1.41";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "4";
+            };
+        }];
+    };
+    export default _default_73;
+}
+declare module "packages/icons/src/asn/table" {
+    const _default_74: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-table-icon lucide-table";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 3v18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 9h18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 15h18";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "18";
+                readonly height: "18";
+                readonly x: "3";
+                readonly y: "3";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_74;
+}
+declare module "packages/icons/src/asn/trash-2" {
+    const _default_75: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-trash2-icon lucide-trash-2";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 11v6";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 11v6";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 6h18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2";
+            };
+        }];
+    };
+    export default _default_75;
+}
+declare module "packages/icons/src/asn/trash" {
+    const _default_76: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-trash-icon lucide-trash";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 6h18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2";
+            };
+        }];
+    };
+    export default _default_76;
+}
+declare module "packages/icons/src/asn/undo-2" {
+    const _default_77: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-undo2-icon lucide-undo-2";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9 14 4 9l5-5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11";
+            };
+        }];
+    };
+    export default _default_77;
+}
+declare module "packages/icons/src/asn/upload" {
+    const _default_78: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-upload-icon lucide-upload";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 3v12";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m17 8-5-5-5 5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
+            };
+        }];
+    };
+    export default _default_78;
+}
+declare module "packages/icons/src/asn/user" {
+    const _default_79: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-user-icon lucide-user";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "7";
+                readonly r: "4";
+            };
+        }];
+    };
+    export default _default_79;
+}
+declare module "packages/icons/src/asn/users" {
+    const _default_80: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-users-icon lucide-users";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 3.128a4 4 0 0 1 0 7.744";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M22 21v-2a4 4 0 0 0-3-3.87";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "9";
+                readonly cy: "7";
+                readonly r: "4";
+            };
+        }];
+    };
+    export default _default_80;
+}
+declare module "packages/icons/src/asn/video" {
+    const _default_81: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-video-icon lucide-video";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly x: "2";
+                readonly y: "6";
+                readonly width: "14";
+                readonly height: "12";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_81;
+}
+declare module "packages/icons/src/asn/wrench" {
+    const _default_82: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-wrench-icon lucide-wrench";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z";
+            };
+        }];
+    };
+    export default _default_82;
+}
+declare module "packages/icons/src/asn/x" {
+    const _default_83: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-x-icon lucide-x";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M18 6 6 18";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m6 6 12 12";
+            };
+        }];
+    };
+    export default _default_83;
+}
+declare module "packages/icons/src/asn/index" {
+    export { default as Activity } from "packages/icons/src/asn/activity";
+    export { default as ArrowDownToLine } from "packages/icons/src/asn/arrow-down-to-line";
+    export { default as ArrowLeft } from "packages/icons/src/asn/arrow-left";
+    export { default as ArrowRight } from "packages/icons/src/asn/arrow-right";
+    export { default as Bolt } from "packages/icons/src/asn/bolt";
+    export { default as Braces } from "packages/icons/src/asn/braces";
+    export { default as Calendar } from "packages/icons/src/asn/calendar";
+    export { default as Check } from "packages/icons/src/asn/check";
+    export { default as ChevronDown } from "packages/icons/src/asn/chevron-down";
+    export { default as ChevronLeft } from "packages/icons/src/asn/chevron-left";
+    export { default as ChevronRight } from "packages/icons/src/asn/chevron-right";
+    export { default as ChevronUp } from "packages/icons/src/asn/chevron-up";
+    export { default as CircleAlert } from "packages/icons/src/asn/circle-alert";
+    export { default as CircleArrowDown } from "packages/icons/src/asn/circle-arrow-down";
+    export { default as CircleEllipsis } from "packages/icons/src/asn/circle-ellipsis";
+    export { default as CircleX } from "packages/icons/src/asn/circle-x";
+    export { default as Clock3 } from "packages/icons/src/asn/clock-3";
+    export { default as ClockArrowDown } from "packages/icons/src/asn/clock-arrow-down";
+    export { default as Clock } from "packages/icons/src/asn/clock";
+    export { default as CloudDownload } from "packages/icons/src/asn/cloud-download";
+    export { default as Copy } from "packages/icons/src/asn/copy";
+    export { default as CornerDownRight } from "packages/icons/src/asn/corner-down-right";
+    export { default as Download } from "packages/icons/src/asn/download";
+    export { default as EllipsisVertical } from "packages/icons/src/asn/ellipsis-vertical";
+    export { default as Ellipsis } from "packages/icons/src/asn/ellipsis";
+    export { default as ExternalLink } from "packages/icons/src/asn/external-link";
+    export { default as FileBox } from "packages/icons/src/asn/file-box";
+    export { default as FileImage } from "packages/icons/src/asn/file-image";
+    export { default as FileLock } from "packages/icons/src/asn/file-lock";
+    export { default as FilePlay } from "packages/icons/src/asn/file-play";
+    export { default as FileStack } from "packages/icons/src/asn/file-stack";
+    export { default as FileSymlink } from "packages/icons/src/asn/file-symlink";
+    export { default as FileText } from "packages/icons/src/asn/file-text";
+    export { default as FileVideoCamera } from "packages/icons/src/asn/file-video-camera";
+    export { default as FileVolume } from "packages/icons/src/asn/file-volume";
+    export { default as File } from "packages/icons/src/asn/file";
+    export { default as Film } from "packages/icons/src/asn/film";
+    export { default as FolderClosed } from "packages/icons/src/asn/folder-closed";
+    export { default as FolderOpen } from "packages/icons/src/asn/folder-open";
+    export { default as Folder } from "packages/icons/src/asn/folder";
+    export { default as Funnel } from "packages/icons/src/asn/funnel";
+    export { default as Gauge } from "packages/icons/src/asn/gauge";
+    export { default as GitFork } from "packages/icons/src/asn/git-fork";
+    export { default as Grid3x3 } from "packages/icons/src/asn/grid-3x3";
+    export { default as HardDriveDownload } from "packages/icons/src/asn/hard-drive-download";
+    export { default as HardDrive } from "packages/icons/src/asn/hard-drive";
+    export { default as History } from "packages/icons/src/asn/history";
+    export { default as House } from "packages/icons/src/asn/house";
+    export { default as Image } from "packages/icons/src/asn/image";
+    export { default as Inbox } from "packages/icons/src/asn/inbox";
+    export { default as Library } from "packages/icons/src/asn/library";
+    export { default as ListFilter } from "packages/icons/src/asn/list-filter";
+    export { default as LoaderCircle } from "packages/icons/src/asn/loader-circle";
+    export { default as Loader } from "packages/icons/src/asn/loader";
+    export { default as Menu } from "packages/icons/src/asn/menu";
+    export { default as MessageSquareMore } from "packages/icons/src/asn/message-square-more";
+    export { default as Moon } from "packages/icons/src/asn/moon";
+    export { default as PanelLeft } from "packages/icons/src/asn/panel-left";
+    export { default as Pause } from "packages/icons/src/asn/pause";
+    export { default as Play } from "packages/icons/src/asn/play";
+    export { default as Plus } from "packages/icons/src/asn/plus";
+    export { default as RadioTower } from "packages/icons/src/asn/radio-tower";
+    export { default as RefreshCcw } from "packages/icons/src/asn/refresh-ccw";
+    export { default as RefreshCw } from "packages/icons/src/asn/refresh-cw";
+    export { default as RotateCcw } from "packages/icons/src/asn/rotate-ccw";
+    export { default as Rss } from "packages/icons/src/asn/rss";
+    export { default as Save } from "packages/icons/src/asn/save";
+    export { default as ScrollText } from "packages/icons/src/asn/scroll-text";
+    export { default as Search } from "packages/icons/src/asn/search";
+    export { default as Server } from "packages/icons/src/asn/server";
+    export { default as Settings } from "packages/icons/src/asn/settings";
+    export { default as SquareArrowDown } from "packages/icons/src/asn/square-arrow-down";
+    export { default as Square } from "packages/icons/src/asn/square";
+    export { default as Sun } from "packages/icons/src/asn/sun";
+    export { default as Table } from "packages/icons/src/asn/table";
+    export { default as Trash2 } from "packages/icons/src/asn/trash-2";
+    export { default as Trash } from "packages/icons/src/asn/trash";
+    export { default as Undo2 } from "packages/icons/src/asn/undo-2";
+    export { default as Upload } from "packages/icons/src/asn/upload";
+    export { default as User } from "packages/icons/src/asn/user";
+    export { default as Users } from "packages/icons/src/asn/users";
+    export { default as Video } from "packages/icons/src/asn/video";
+    export { default as Wrench } from "packages/icons/src/asn/wrench";
+    export { default as X } from "packages/icons/src/asn/x";
+}
+declare module "packages/icons/src/index" {
+    export * from "packages/icons/src/asn/index";
+    export const iconRegistry: {
+        activity: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-activity-icon lucide-activity";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2";
+                };
+            }];
+        };
+        "arrow-down-to-line": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-arrow-down-to-line-icon lucide-arrow-down-to-line";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 17V3";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m6 11 6 6 6-6";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19 21H5";
+                };
+            }];
+        };
+        "arrow-left": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-arrow-left-icon lucide-arrow-left";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m12 19-7-7 7-7";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19 12H5";
+                };
+            }];
+        };
+        "arrow-right": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-arrow-right-icon lucide-arrow-right";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M5 12h14";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m12 5 7 7-7 7";
+                };
+            }];
+        };
+        bolt: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-bolt-icon lucide-bolt";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "4";
+                };
+            }];
+        };
+        braces: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-braces-icon lucide-braces";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1";
+                };
+            }];
+        };
+        calendar: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-calendar-icon lucide-calendar";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 2v4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 2v4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 10h18";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "4";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        check: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-check-icon lucide-check";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M20 6 9 17l-5-5";
+                };
+            }];
+        };
+        "chevron-down": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-chevron-down-icon lucide-chevron-down";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m6 9 6 6 6-6";
+                };
+            }];
+        };
+        "chevron-left": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-chevron-left-icon lucide-chevron-left";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m15 18-6-6 6-6";
+                };
+            }];
+        };
+        "chevron-right": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-chevron-right-icon lucide-chevron-right";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m9 18 6-6-6-6";
+                };
+            }];
+        };
+        "chevron-up": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-chevron-up-icon lucide-chevron-up";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m18 15-6-6-6 6";
+                };
+            }];
+        };
+        "circle-alert": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-circle-alert-icon lucide-circle-alert";
+            };
+            readonly children: readonly [{
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "10";
+                };
+            }, {
+                readonly tag: "line";
+                readonly attrs: {
+                    readonly x1: "12";
+                    readonly x2: "12";
+                    readonly y1: "8";
+                    readonly y2: "12";
+                };
+            }, {
+                readonly tag: "line";
+                readonly attrs: {
+                    readonly x1: "12";
+                    readonly x2: "12.01";
+                    readonly y1: "16";
+                    readonly y2: "16";
+                };
+            }];
+        };
+        "circle-arrow-down": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-circle-arrow-down-icon lucide-circle-arrow-down";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 8v8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m8 12 4 4 4-4";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "10";
+                };
+            }];
+        };
+        "circle-ellipsis": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-circle-ellipsis-icon lucide-circle-ellipsis";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M17 12h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 12h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M7 12h.01";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "10";
+                };
+            }];
+        };
+        "circle-x": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-circle-x-icon lucide-circle-x";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m15 9-6 6";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m9 9 6 6";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "10";
+                };
+            }];
+        };
+        clock3: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-clock3-icon lucide-clock-3";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 6v6h4";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "10";
+                };
+            }];
+        };
+        "clock-arrow-down": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-clock-arrow-down-icon lucide-clock-arrow-down";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 6v6l2 1";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12.337 21.994a10 10 0 1 1 9.588-8.767";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m14 18 4 4 4-4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M18 14v8";
+                };
+            }];
+        };
+        clock: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-clock";
+            };
+            readonly children: readonly [{
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "10";
+                };
+            }, {
+                readonly tag: "polyline";
+                readonly attrs: {
+                    readonly points: "12 6 12 12 16 14";
+                };
+            }];
+        };
+        "cloud-download": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-cloud-download-icon lucide-cloud-download";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 13v8l-4-4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m12 21 4-4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284";
+                };
+            }];
+        };
+        copy: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-copy-icon lucide-copy";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "14";
+                    readonly height: "14";
+                    readonly x: "8";
+                    readonly y: "8";
+                    readonly rx: "2";
+                    readonly ry: "2";
+                };
+            }];
+        };
+        "corner-down-right": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-corner-down-right-icon lucide-corner-down-right";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m15 10 5 5-5 5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 4v7a4 4 0 0 0 4 4h12";
+                };
+            }];
+        };
+        download: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-download-icon lucide-download";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 15V3";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m7 10 5 5 5-5";
+                };
+            }];
+        };
+        "ellipsis-vertical": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical";
+            };
+            readonly children: readonly [{
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "1";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "5";
+                    readonly r: "1";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "19";
+                    readonly r: "1";
+                };
+            }];
+        };
+        ellipsis: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-ellipsis-icon lucide-ellipsis";
+            };
+            readonly children: readonly [{
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "1";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "19";
+                    readonly cy: "12";
+                    readonly r: "1";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "5";
+                    readonly cy: "12";
+                    readonly r: "1";
+                };
+            }];
+        };
+        "external-link": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-external-link-icon lucide-external-link";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 3h6v6";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 14 21 3";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6";
+                };
+            }];
+        };
+        "file-box": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-box-icon lucide-file-box";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14.5 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v3.8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M11.7 14.2 7 17l-4.7-2.8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 13.1a2 2 0 0 0-.999 1.76v3.24a2 2 0 0 0 .969 1.78L6 21.7a2 2 0 0 0 2.03.01L11 19.9a2 2 0 0 0 1-1.76V14.9a2 2 0 0 0-.97-1.78L8 11.3a2 2 0 0 0-2.03-.01z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M7 17v5";
+                };
+            }];
+        };
+        "file-image": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-image-icon lucide-file-image";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "10";
+                    readonly cy: "12";
+                    readonly r: "2";
+                };
+            }];
+        };
+        "file-lock": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-lock-icon lucide-file-lock";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 9.8V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9 17v-2a2 2 0 0 0-4 0v2";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "8";
+                    readonly height: "5";
+                    readonly x: "3";
+                    readonly y: "17";
+                    readonly rx: "1";
+                };
+            }];
+        };
+        "file-play": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-play-icon lucide-file-play";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z";
+                };
+            }];
+        };
+        "file-stack": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-stack-icon lucide-file-stack";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z";
+                };
+            }];
+        };
+        "file-symlink": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-symlink-icon lucide-file-symlink";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 11V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h7";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m10 18 3-3-3-3";
+                };
+            }];
+        };
+        "file-text": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-text-icon lucide-file-text";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 9H8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 13H8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 17H8";
+                };
+            }];
+        };
+        "file-video-camera": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-video-camera-icon lucide-file-video-camera";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 12V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m10 17.843 3.033-1.755a.64.64 0 0 1 .967.56v4.704a.65.65 0 0 1-.967.56L10 20.157";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "7";
+                    readonly height: "6";
+                    readonly x: "3";
+                    readonly y: "16";
+                    readonly rx: "1";
+                };
+            }];
+        };
+        "file-volume": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-volume-icon lucide-file-volume";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 11.55V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-1.95";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 15a5 5 0 0 1 0 6";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 14.502a.5.5 0 0 0-.826-.381l-1.893 1.631a1 1 0 0 1-.651.243H3.5a.5.5 0 0 0-.5.501v3.006a.5.5 0 0 0 .5.501h1.129a1 1 0 0 1 .652.243l1.893 1.633a.5.5 0 0 0 .826-.38z";
+                };
+            }];
+        };
+        file: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-icon lucide-file";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }];
+        };
+        film: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-film-icon lucide-film";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M7 3v18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 7.5h4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12h18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 16.5h4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M17 3v18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M17 7.5h4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M17 16.5h4";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "3";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        "folder-closed": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-folder-closed-icon lucide-folder-closed";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2 10h20";
+                };
+            }];
+        };
+        "folder-open": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-folder-open-icon lucide-folder-open";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2";
+                };
+            }];
+        };
+        folder: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-folder-icon lucide-folder";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z";
+                };
+            }];
+        };
+        funnel: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-funnel-icon lucide-funnel";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z";
+                };
+            }];
+        };
+        gauge: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-gauge-icon lucide-gauge";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m12 14 4-4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3.34 19a10 10 0 1 1 17.32 0";
+                };
+            }];
+        };
+        "git-fork": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-git-fork-icon lucide-git-fork";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 12v3";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "18";
+                    readonly r: "3";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "6";
+                    readonly cy: "6";
+                    readonly r: "3";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "18";
+                    readonly cy: "6";
+                    readonly r: "3";
+                };
+            }];
+        };
+        "grid-3x3": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-grid3x3-icon lucide-grid-3x3";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 9h18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 15h18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9 3v18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 3v18";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "3";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        "hard-drive-download": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-hard-drive-download-icon lucide-hard-drive-download";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 2v8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m16 6-4 4-4-4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 18h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 18h.01";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "20";
+                    readonly height: "8";
+                    readonly x: "2";
+                    readonly y: "14";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        "hard-drive": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-hard-drive-icon lucide-hard-drive";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 16h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21.946 12.013H2.054";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 16h.01";
+                };
+            }];
+        };
+        history: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-history-icon lucide-history";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 3v5h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 7v5l4 2";
+                };
+            }];
+        };
+        house: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-house-icon lucide-house";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z";
+                };
+            }];
+        };
+        image: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-image-icon lucide-image";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "9";
+                    readonly cy: "9";
+                    readonly r: "2";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "3";
+                    readonly rx: "2";
+                    readonly ry: "2";
+                };
+            }];
+        };
+        inbox: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-inbox-icon lucide-inbox";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
+                };
+            }, {
+                readonly tag: "polyline";
+                readonly attrs: {
+                    readonly points: "22 12 16 12 14 15 10 15 8 12 2 12";
+                };
+            }];
+        };
+        library: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-library-icon lucide-library";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m16 6 4 14";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 6v14";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 8v12";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 4v16";
+                };
+            }];
+        };
+        "list-filter": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-list-filter-icon lucide-list-filter";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2 5h20";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 12h12";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9 19h6";
+                };
+            }];
+        };
+        "loader-circle": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-loader-circle-icon lucide-loader-circle";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 12a9 9 0 1 1-6.219-8.56";
+                };
+            }];
+        };
+        loader: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-loader-icon lucide-loader";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 2v4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m16.2 7.8 2.9-2.9";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M18 12h4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m16.2 16.2 2.9 2.9";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 18v4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m4.9 19.1 2.9-2.9";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2 12h4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m4.9 4.9 2.9 2.9";
+                };
+            }];
+        };
+        menu: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-menu-icon lucide-menu";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 5h16";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 12h16";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 19h16";
+                };
+            }];
+        };
+        "message-square-more": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-message-square-more-icon lucide-message-square-more";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 11h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 11h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 11h.01";
+                };
+            }];
+        };
+        moon: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-moon-icon lucide-moon";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401";
+                };
+            }];
+        };
+        "panel-left": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-panel-left-icon lucide-panel-left";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9 3v18";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "3";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        pause: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-pause-icon lucide-pause";
+            };
+            readonly children: readonly [{
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly x: "14";
+                    readonly y: "3";
+                    readonly width: "5";
+                    readonly height: "18";
+                    readonly rx: "1";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly x: "5";
+                    readonly y: "3";
+                    readonly width: "5";
+                    readonly height: "18";
+                    readonly rx: "1";
+                };
+            }];
+        };
+        play: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-play-icon lucide-play";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z";
+                };
+            }];
+        };
+        plus: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-plus-icon lucide-plus";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M5 12h14";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 5v14";
+                };
+            }];
+        };
+        "radio-tower": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-radio-tower-icon lucide-radio-tower";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4.9 16.1C1 12.2 1 5.8 4.9 1.9";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M7.8 4.7a6.14 6.14 0 0 0-.8 7.5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16.2 4.8c2 2 2.26 5.11.8 7.47";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19.1 1.9a9.96 9.96 0 0 1 0 14.1";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9.5 18h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m8 22 4-11 4 11";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "9";
+                    readonly r: "2";
+                };
+            }];
+        };
+        "refresh-ccw": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-refresh-ccw-icon lucide-refresh-ccw";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 3v5h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 16h5v5";
+                };
+            }];
+        };
+        "refresh-cw": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-refresh-cw-icon lucide-refresh-cw";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 3v5h-5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 16H3v5";
+                };
+            }];
+        };
+        "rotate-ccw": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-rotate-ccw-icon lucide-rotate-ccw";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 3v5h5";
+                };
+            }];
+        };
+        rss: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-rss-icon lucide-rss";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 11a9 9 0 0 1 9 9";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 4a16 16 0 0 1 16 16";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "5";
+                    readonly cy: "19";
+                    readonly r: "1";
+                };
+            }];
+        };
+        save: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-save-icon lucide-save";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M7 3v4a1 1 0 0 0 1 1h7";
+                };
+            }];
+        };
+        "scroll-text": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-scroll-text-icon lucide-scroll-text";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 12h-5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 8h-5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19 17V5a2 2 0 0 0-2-2H4";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3";
+                };
+            }];
+        };
+        search: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-search-icon lucide-search";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m21 21-4.34-4.34";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "11";
+                    readonly cy: "11";
+                    readonly r: "8";
+                };
+            }];
+        };
+        server: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-server-icon lucide-server";
+            };
+            readonly children: readonly [{
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "20";
+                    readonly height: "8";
+                    readonly x: "2";
+                    readonly y: "2";
+                    readonly rx: "2";
+                    readonly ry: "2";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "20";
+                    readonly height: "8";
+                    readonly x: "2";
+                    readonly y: "14";
+                    readonly rx: "2";
+                    readonly ry: "2";
+                };
+            }, {
+                readonly tag: "line";
+                readonly attrs: {
+                    readonly x1: "6";
+                    readonly x2: "6.01";
+                    readonly y1: "6";
+                    readonly y2: "6";
+                };
+            }, {
+                readonly tag: "line";
+                readonly attrs: {
+                    readonly x1: "6";
+                    readonly x2: "6.01";
+                    readonly y1: "18";
+                    readonly y2: "18";
+                };
+            }];
+        };
+        settings: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-settings-icon lucide-settings";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "3";
+                };
+            }];
+        };
+        "square-arrow-down": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-square-arrow-down-icon lucide-square-arrow-down";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 8v8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m8 12 4 4 4-4";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "3";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        square: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-square-icon lucide-square";
+            };
+            readonly children: readonly [{
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "3";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        sun: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-sun-icon lucide-sun";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 2v2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 20v2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m4.93 4.93 1.41 1.41";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m17.66 17.66 1.41 1.41";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2 12h2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M20 12h2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m6.34 17.66-1.41 1.41";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m19.07 4.93-1.41 1.41";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "4";
+                };
+            }];
+        };
+        table: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-table-icon lucide-table";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 3v18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 9h18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 15h18";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "18";
+                    readonly height: "18";
+                    readonly x: "3";
+                    readonly y: "3";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        trash2: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-trash2-icon lucide-trash-2";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 11v6";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 11v6";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 6h18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2";
+                };
+            }];
+        };
+        trash: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-trash-icon lucide-trash";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 6h18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2";
+                };
+            }];
+        };
+        undo2: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-undo2-icon lucide-undo-2";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9 14 4 9l5-5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11";
+                };
+            }];
+        };
+        upload: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-upload-icon lucide-upload";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 3v12";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m17 8-5-5-5 5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
+                };
+            }];
+        };
+        user: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-user-icon lucide-user";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "7";
+                    readonly r: "4";
+                };
+            }];
+        };
+        users: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-users-icon lucide-users";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 3.128a4 4 0 0 1 0 7.744";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M22 21v-2a4 4 0 0 0-3-3.87";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "9";
+                    readonly cy: "7";
+                    readonly r: "4";
+                };
+            }];
+        };
+        video: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-video-icon lucide-video";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly x: "2";
+                    readonly y: "6";
+                    readonly width: "14";
+                    readonly height: "12";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        wrench: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-wrench-icon lucide-wrench";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z";
+                };
+            }];
+        };
+        x: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-x-icon lucide-x";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M18 6 6 18";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m6 6 12 12";
+                };
+            }];
+        };
+    };
 }
 declare module "packages/types/src/index" {
     export type Unpacked<T> = T extends (infer U)[] ? U : T extends (...args: any[]) => infer U ? U : T extends Promise<infer U> ? U : T;
@@ -5936,19 +11253,49 @@ declare module "packages/kit/src/http_client/index" {
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
     }
 }
-declare module "packages/kit/src/channel/index" {
-    /**
-     * @file Bidirectional channel core.
-     */
-    import { BaseDomain, BizError, Handler, Result } from "packages/base/src/index";
+declare module "packages/kit/src/http_client/socket" {
+    import { Result } from "packages/base/src/index";
     export type MaybePromise<T> = T | Promise<T>;
-    export type ChannelStatus = "idle" | "connecting" | "connected" | "closing" | "closed" | "failed";
-    export type ChannelCloseReason = {
+    export type SocketCloseReason = {
         code?: number;
         reason?: string;
         clean?: boolean;
         event?: unknown;
     };
+    export type SocketMessageMeta = {
+        event?: unknown;
+        receivedAt?: number;
+    };
+    export type SocketConnection = {
+        send: (data: unknown) => MaybePromise<Result<null> | void>;
+        close: (code?: number, reason?: string) => MaybePromise<Result<null> | void>;
+    };
+    export type SocketOpenOptions = {
+        endpoint: unknown;
+        hostname: string;
+        headers: Record<string, string | number>;
+        query?: Record<string, string | number | boolean | null | undefined>;
+        params?: any;
+        signal: AbortSignal;
+        onMessage: (data: unknown, meta?: SocketMessageMeta) => void;
+        onClose: (reason: SocketCloseReason) => void;
+        onError: (error: unknown) => void;
+    };
+    /**
+     * Socket transport abstraction. Platform providers implement `open`; the
+     * channel domain owns connection state, message processing, and reconnection.
+     */
+    export class SocketClientCore {
+        open(options: SocketOpenOptions): MaybePromise<Result<SocketConnection>>;
+    }
+}
+declare module "packages/kit/src/channel/index" {
+    /**
+     * @file Bidirectional, long-lived channel domain model.
+     */
+    import { BaseDomain, BizError, Handler, Result } from "packages/base/src/index";
+    import { SocketClientCore, SocketCloseReason, SocketMessageMeta } from "@/http_client/socket";
+    export type ChannelStatus = "idle" | "connecting" | "connected" | "reconnecting" | "closing" | "closed" | "failed";
     export type ChannelMessageMeta = {
         raw: unknown;
         event?: unknown;
@@ -5959,32 +11306,18 @@ declare module "packages/kit/src/channel/index" {
         raw: unknown;
         sentAt: number;
     };
-    export type ChannelConnection = {
-        send: (data: unknown) => MaybePromise<Result<null> | void>;
-        close: (code?: number, reason?: string) => MaybePromise<Result<null> | void>;
+    export type ChannelReconnectInfo = {
+        attempt: number;
+        delay: number;
+        scheduledAt: number;
     };
-    export type ChannelOpenOptions = {
-        endpoint: unknown;
-        hostname: string;
-        headers: Record<string, string | number>;
-        query?: Record<string, string | number | boolean | null | undefined>;
-        params?: any;
-        signal: AbortSignal;
-        onMessage: (data: unknown, meta?: Partial<ChannelMessageMeta>) => void;
-        onClose: (reason: ChannelCloseReason) => void;
-        onError: (error: unknown) => void;
+    export type ChannelReconnectOptions = {
+        enabled?: boolean;
+        interval?: number;
     };
-    /**
-     * Platform transport for channels. A provider installs `open`, while each
-     * ChannelCore owns the lifecycle and state of one logical connection.
-     */
-    export class ChannelClientCore {
-        open(options: ChannelOpenOptions): MaybePromise<Result<ChannelConnection>>;
-    }
     export type ChannelCoreProps<TMessage = unknown, TSend = unknown> = {
         _name?: string;
-        endpoint?: unknown;
-        client?: ChannelClientCore;
+        client?: SocketClientCore;
         hostname?: string;
         headers?: Record<string, string | number>;
         query?: Record<string, string | number | boolean | null | undefined>;
@@ -5992,10 +11325,13 @@ declare module "packages/kit/src/channel/index" {
         initialMessage?: TSend;
         process?: (v: unknown, meta: ChannelMessageMeta) => TMessage;
         encode?: (v: TSend) => unknown;
+        reconnect?: ChannelReconnectOptions;
         onConnected?: () => void;
+        onReconnecting?: (info: ChannelReconnectInfo) => void;
+        onReconnected?: () => void;
         onMessage?: (message: TMessage) => void;
         onSent?: (message: ChannelSentMessage<TSend>) => void;
-        onClose?: (reason: ChannelCloseReason) => void;
+        onClose?: (reason: SocketCloseReason) => void;
         onFailed?: (error: BizError) => void;
         onStatusChange?: (status: ChannelStatus) => void;
         onConnecting?: (connecting: boolean) => void;
@@ -6008,29 +11344,35 @@ declare module "packages/kit/src/channel/index" {
         error: BizError | null;
         lastMessage: TMessage | null;
         lastSent: TSend | null;
-        closeReason: ChannelCloseReason | null;
+        closeReason: SocketCloseReason | null;
+        reconnectAttempt: number;
+        nextReconnectAt: number | null;
     };
     enum Events {
         BeforeConnect = 0,
         ConnectingChange = 1,
         StatusChange = 2,
         Connected = 3,
-        Message = 4,
-        MessageChange = 5,
-        Sent = 6,
-        Close = 7,
-        Failed = 8,
-        StateChange = 9
+        Reconnecting = 4,
+        Reconnected = 5,
+        Message = 6,
+        MessageChange = 7,
+        Sent = 8,
+        Close = 9,
+        Failed = 10,
+        StateChange = 11
     }
     type TheTypesOfEvents<TMessage, TSend> = {
         [Events.BeforeConnect]: void;
         [Events.ConnectingChange]: boolean;
         [Events.StatusChange]: ChannelStatus;
         [Events.Connected]: void;
+        [Events.Reconnecting]: ChannelReconnectInfo;
+        [Events.Reconnected]: void;
         [Events.Message]: TMessage;
         [Events.MessageChange]: TMessage | null;
         [Events.Sent]: ChannelSentMessage<TSend>;
-        [Events.Close]: ChannelCloseReason;
+        [Events.Close]: SocketCloseReason;
         [Events.Failed]: BizError;
         [Events.StateChange]: ChannelState<TMessage, TSend>;
     };
@@ -6038,7 +11380,7 @@ declare module "packages/kit/src/channel/index" {
     export type TheSendMessageOfChannelCore<T extends ChannelCore<any, any>> = NonNullable<T["lastSent"]>;
     export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain<TheTypesOfEvents<TMessage, TSend>> {
         _name: string;
-        client?: ChannelClientCore;
+        client?: SocketClientCore;
         endpoint: unknown;
         hostname: string;
         headers: Record<string, string | number>;
@@ -6054,15 +11396,22 @@ declare module "packages/kit/src/channel/index" {
         error: BizError | null;
         lastMessage: TMessage | null;
         lastSent: TSend | null;
-        closeReason: ChannelCloseReason | null;
+        closeReason: SocketCloseReason | null;
+        reconnectAttempt: number;
+        nextReconnectAt: number | null;
         pending: Promise<Result<null>> | null;
+        id: string;
         private connection;
         private connectionController;
-        id: string;
+        private reconnectTimer;
+        private reconnectEnabled;
+        private reconnectDelay;
+        private shouldConnect;
+        private connectedOnce;
         get state(): ChannelState<TMessage, TSend>;
-        constructor(props: ChannelCoreProps<TMessage, TSend>);
         constructor(endpoint: unknown, props?: ChannelCoreProps<TMessage, TSend>);
         connect(): Promise<Result<any>>;
+        private beginConnect;
         private runConnect;
         sendMessage(data: TSend): Promise<Result<any>>;
         send(data: TSend): Promise<Result<any>>;
@@ -6074,14 +11423,19 @@ declare module "packages/kit/src/channel/index" {
         setHostname(hostname: string): void;
         setHeaders(headers: Record<string, string | number>): void;
         appendHeaders(headers: Record<string, string | number>): void;
-        setClient(client: ChannelClientCore): void;
+        setClient(client: SocketClientCore): void;
         setError(error: BizError): void;
         destroy(): void;
-        handleConnected(): void;
-        receiveMessage(data: unknown, extra?: Partial<ChannelMessageMeta>): void;
-        handleClose(reason?: ChannelCloseReason): void;
-        handleError(error: unknown): any;
+        receiveMessage(data: unknown, extra?: SocketMessageMeta): void;
+        private discardConnection;
+        private handleConnected;
+        private handleClose;
+        private finishClose;
+        private handleError;
         private fail;
+        private reportError;
+        private scheduleReconnect;
+        private cancelReconnect;
         private setConnecting;
         private setStatus;
         private emitState;
@@ -6089,7 +11443,8 @@ declare module "packages/kit/src/channel/index" {
         onConnectingChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.ConnectingChange]>): () => void;
         onStatusChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.StatusChange]>): () => void;
         onConnected(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Connected]>): () => void;
-        onOpen(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Connected]>): () => void;
+        onReconnecting(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Reconnecting]>): () => void;
+        onReconnected(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Reconnected]>): () => void;
         onMessage(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Message]>): () => void;
         onMessageChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.MessageChange]>): () => void;
         onSent(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Sent]>): () => void;
@@ -15239,7 +20594,8 @@ declare module "packages/kit/src/index" {
     export { HistoryCore } from "packages/kit/src/history/index";
     export { NavigatorCore } from "packages/kit/src/navigator/index";
     export { HttpClientCore } from "packages/kit/src/http_client/index";
-    export { ChannelClientCore, ChannelCore, type ChannelCloseReason, type ChannelConnection, type ChannelCoreProps, type ChannelMessageMeta, type ChannelOpenOptions, type ChannelSentMessage, type ChannelState, type ChannelStatus, } from "packages/kit/src/channel/index";
+    export { SocketClientCore, type MaybePromise, type SocketCloseReason, type SocketConnection, type SocketMessageMeta, type SocketOpenOptions, } from "packages/kit/src/http_client/socket";
+    export { ChannelCore, type ChannelCoreProps, type ChannelMessageMeta, type ChannelReconnectInfo, type ChannelSentMessage, type ChannelState, type ChannelStatus, } from "packages/kit/src/channel/index";
     export { RouteViewCore, RouteMenusModel } from "packages/kit/src/route_view/index";
     export { buildRoutes } from "packages/kit/src/route_view/utils";
     export type { OriginalRouteConfigure, PageKeysType, PathnameKey, RouteConfig, RouteConfigure, BuildRoutesPageKeys, ConfigureForPageKeys, } from "packages/kit/src/route_view/utils";
@@ -17809,4968 +23165,384 @@ declare module "packages/ui-primitive/src/index" {
 }
 declare module "packages/timeless/src/index" {
     export * from "packages/timeless/src/core";
+    export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
     export * as ui from "packages/ui-primitive/src/index";
+    export * as utils from "packages/utils/src/index";
     export * as vm from "packages/ui-vm/src/index";
-    export { Result, base } from "packages/primitive/src/index";
-}
-declare module "packages/icons/src/asn/activity" {
-    const _default: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-activity-icon lucide-activity";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2";
-            };
-        }];
-    };
-    export default _default;
-}
-declare module "packages/icons/src/asn/arrow-down-to-line" {
-    const _default_1: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-arrow-down-to-line-icon lucide-arrow-down-to-line";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 17V3";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m6 11 6 6 6-6";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M19 21H5";
-            };
-        }];
-    };
-    export default _default_1;
-}
-declare module "packages/icons/src/asn/arrow-left" {
-    const _default_2: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-arrow-left-icon lucide-arrow-left";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m12 19-7-7 7-7";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M19 12H5";
-            };
-        }];
-    };
-    export default _default_2;
-}
-declare module "packages/icons/src/asn/bolt" {
-    const _default_3: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-bolt-icon lucide-bolt";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "4";
-            };
-        }];
-    };
-    export default _default_3;
-}
-declare module "packages/icons/src/asn/calendar" {
-    const _default_4: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-calendar-icon lucide-calendar";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M8 2v4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16 2v4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 10h18";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "18";
-                readonly height: "18";
-                readonly x: "3";
-                readonly y: "4";
-                readonly rx: "2";
-            };
-        }];
-    };
-    export default _default_4;
-}
-declare module "packages/icons/src/asn/check" {
-    const _default_5: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-check-icon lucide-check";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M20 6 9 17l-5-5";
-            };
-        }];
-    };
-    export default _default_5;
-}
-declare module "packages/icons/src/asn/chevron-down" {
-    const _default_6: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-chevron-down-icon lucide-chevron-down";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m6 9 6 6 6-6";
-            };
-        }];
-    };
-    export default _default_6;
-}
-declare module "packages/icons/src/asn/chevron-left" {
-    const _default_7: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-chevron-left-icon lucide-chevron-left";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m15 18-6-6 6-6";
-            };
-        }];
-    };
-    export default _default_7;
-}
-declare module "packages/icons/src/asn/chevron-right" {
-    const _default_8: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-chevron-right-icon lucide-chevron-right";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m9 18 6-6-6-6";
-            };
-        }];
-    };
-    export default _default_8;
-}
-declare module "packages/icons/src/asn/chevron-up" {
-    const _default_9: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-chevron-up-icon lucide-chevron-up";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m18 15-6-6-6 6";
-            };
-        }];
-    };
-    export default _default_9;
-}
-declare module "packages/icons/src/asn/circle-alert" {
-    const _default_10: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-circle-alert-icon lucide-circle-alert";
-        };
-        readonly children: readonly [{
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "10";
-            };
-        }, {
-            readonly tag: "line";
-            readonly attrs: {
-                readonly x1: "12";
-                readonly x2: "12";
-                readonly y1: "8";
-                readonly y2: "12";
-            };
-        }, {
-            readonly tag: "line";
-            readonly attrs: {
-                readonly x1: "12";
-                readonly x2: "12.01";
-                readonly y1: "16";
-                readonly y2: "16";
-            };
-        }];
-    };
-    export default _default_10;
-}
-declare module "packages/icons/src/asn/circle-arrow-down" {
-    const _default_11: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-circle-arrow-down-icon lucide-circle-arrow-down";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 8v8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m8 12 4 4 4-4";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "10";
-            };
-        }];
-    };
-    export default _default_11;
-}
-declare module "packages/icons/src/asn/circle-ellipsis" {
-    const _default_12: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-circle-ellipsis-icon lucide-circle-ellipsis";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M17 12h.01";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 12h.01";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M7 12h.01";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "10";
-            };
-        }];
-    };
-    export default _default_12;
-}
-declare module "packages/icons/src/asn/circle-x" {
-    const _default_13: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-circle-x-icon lucide-circle-x";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m15 9-6 6";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m9 9 6 6";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "10";
-            };
-        }];
-    };
-    export default _default_13;
-}
-declare module "packages/icons/src/asn/clock-arrow-down" {
-    const _default_14: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-clock-arrow-down-icon lucide-clock-arrow-down";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 6v6l2 1";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12.337 21.994a10 10 0 1 1 9.588-8.767";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m14 18 4 4 4-4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M18 14v8";
-            };
-        }];
-    };
-    export default _default_14;
-}
-declare module "packages/icons/src/asn/clock" {
-    const _default_15: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-clock";
-        };
-        readonly children: readonly [{
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "10";
-            };
-        }, {
-            readonly tag: "polyline";
-            readonly attrs: {
-                readonly points: "12 6 12 12 16 14";
-            };
-        }];
-    };
-    export default _default_15;
-}
-declare module "packages/icons/src/asn/cloud-download" {
-    const _default_16: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-cloud-download-icon lucide-cloud-download";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 13v8l-4-4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m12 21 4-4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284";
-            };
-        }];
-    };
-    export default _default_16;
-}
-declare module "packages/icons/src/asn/copy" {
-    const _default_17: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-copy-icon lucide-copy";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "14";
-                readonly height: "14";
-                readonly x: "8";
-                readonly y: "8";
-                readonly rx: "2";
-                readonly ry: "2";
-            };
-        }];
-    };
-    export default _default_17;
-}
-declare module "packages/icons/src/asn/download" {
-    const _default_18: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-download-icon lucide-download";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 15V3";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m7 10 5 5 5-5";
-            };
-        }];
-    };
-    export default _default_18;
-}
-declare module "packages/icons/src/asn/ellipsis-vertical" {
-    const _default_19: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical";
-        };
-        readonly children: readonly [{
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "1";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "5";
-                readonly r: "1";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "19";
-                readonly r: "1";
-            };
-        }];
-    };
-    export default _default_19;
-}
-declare module "packages/icons/src/asn/ellipsis" {
-    const _default_20: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-ellipsis-icon lucide-ellipsis";
-        };
-        readonly children: readonly [{
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "1";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "19";
-                readonly cy: "12";
-                readonly r: "1";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "5";
-                readonly cy: "12";
-                readonly r: "1";
-            };
-        }];
-    };
-    export default _default_20;
-}
-declare module "packages/icons/src/asn/file-box" {
-    const _default_21: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-box-icon lucide-file-box";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14.5 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v3.8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M11.7 14.2 7 17l-4.7-2.8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 13.1a2 2 0 0 0-.999 1.76v3.24a2 2 0 0 0 .969 1.78L6 21.7a2 2 0 0 0 2.03.01L11 19.9a2 2 0 0 0 1-1.76V14.9a2 2 0 0 0-.97-1.78L8 11.3a2 2 0 0 0-2.03-.01z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M7 17v5";
-            };
-        }];
-    };
-    export default _default_21;
-}
-declare module "packages/icons/src/asn/file-image" {
-    const _default_22: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-image-icon lucide-file-image";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "10";
-                readonly cy: "12";
-                readonly r: "2";
-            };
-        }];
-    };
-    export default _default_22;
-}
-declare module "packages/icons/src/asn/file-lock" {
-    const _default_23: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-lock-icon lucide-file-lock";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 9.8V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M9 17v-2a2 2 0 0 0-4 0v2";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "8";
-                readonly height: "5";
-                readonly x: "3";
-                readonly y: "17";
-                readonly rx: "1";
-            };
-        }];
-    };
-    export default _default_23;
-}
-declare module "packages/icons/src/asn/file-play" {
-    const _default_24: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-play-icon lucide-file-play";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z";
-            };
-        }];
-    };
-    export default _default_24;
-}
-declare module "packages/icons/src/asn/file-stack" {
-    const _default_25: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-stack-icon lucide-file-stack";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z";
-            };
-        }];
-    };
-    export default _default_25;
-}
-declare module "packages/icons/src/asn/file-symlink" {
-    const _default_26: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-symlink-icon lucide-file-symlink";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 11V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h7";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m10 18 3-3-3-3";
-            };
-        }];
-    };
-    export default _default_26;
-}
-declare module "packages/icons/src/asn/file-text" {
-    const _default_27: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-text-icon lucide-file-text";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M10 9H8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16 13H8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16 17H8";
-            };
-        }];
-    };
-    export default _default_27;
-}
-declare module "packages/icons/src/asn/file-video-camera" {
-    const _default_28: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-video-camera-icon lucide-file-video-camera";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 12V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m10 17.843 3.033-1.755a.64.64 0 0 1 .967.56v4.704a.65.65 0 0 1-.967.56L10 20.157";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "7";
-                readonly height: "6";
-                readonly x: "3";
-                readonly y: "16";
-                readonly rx: "1";
-            };
-        }];
-    };
-    export default _default_28;
-}
-declare module "packages/icons/src/asn/file-volume" {
-    const _default_29: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-volume-icon lucide-file-volume";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 11.55V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-1.95";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 15a5 5 0 0 1 0 6";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M8 14.502a.5.5 0 0 0-.826-.381l-1.893 1.631a1 1 0 0 1-.651.243H3.5a.5.5 0 0 0-.5.501v3.006a.5.5 0 0 0 .5.501h1.129a1 1 0 0 1 .652.243l1.893 1.633a.5.5 0 0 0 .826-.38z";
-            };
-        }];
-    };
-    export default _default_29;
-}
-declare module "packages/icons/src/asn/file" {
-    const _default_30: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-file-icon lucide-file";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-            };
-        }];
-    };
-    export default _default_30;
-}
-declare module "packages/icons/src/asn/film" {
-    const _default_31: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-film-icon lucide-film";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M7 3v18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 7.5h4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 12h18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 16.5h4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M17 3v18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M17 7.5h4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M17 16.5h4";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "18";
-                readonly height: "18";
-                readonly x: "3";
-                readonly y: "3";
-                readonly rx: "2";
-            };
-        }];
-    };
-    export default _default_31;
-}
-declare module "packages/icons/src/asn/folder-closed" {
-    const _default_32: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-folder-closed-icon lucide-folder-closed";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M2 10h20";
-            };
-        }];
-    };
-    export default _default_32;
-}
-declare module "packages/icons/src/asn/folder" {
-    const _default_33: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-folder-icon lucide-folder";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z";
-            };
-        }];
-    };
-    export default _default_33;
-}
-declare module "packages/icons/src/asn/funnel" {
-    const _default_34: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-funnel-icon lucide-funnel";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z";
-            };
-        }];
-    };
-    export default _default_34;
-}
-declare module "packages/icons/src/asn/gauge" {
-    const _default_35: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-gauge-icon lucide-gauge";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m12 14 4-4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3.34 19a10 10 0 1 1 17.32 0";
-            };
-        }];
-    };
-    export default _default_35;
-}
-declare module "packages/icons/src/asn/git-fork" {
-    const _default_36: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-git-fork-icon lucide-git-fork";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 12v3";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "18";
-                readonly r: "3";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "6";
-                readonly cy: "6";
-                readonly r: "3";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "18";
-                readonly cy: "6";
-                readonly r: "3";
-            };
-        }];
-    };
-    export default _default_36;
-}
-declare module "packages/icons/src/asn/grid-3x3" {
-    const _default_37: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-grid3x3-icon lucide-grid-3x3";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 9h18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 15h18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M9 3v18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M15 3v18";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "18";
-                readonly height: "18";
-                readonly x: "3";
-                readonly y: "3";
-                readonly rx: "2";
-            };
-        }];
-    };
-    export default _default_37;
-}
-declare module "packages/icons/src/asn/hard-drive-download" {
-    const _default_38: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-hard-drive-download-icon lucide-hard-drive-download";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 2v8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m16 6-4 4-4-4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M6 18h.01";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M10 18h.01";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "20";
-                readonly height: "8";
-                readonly x: "2";
-                readonly y: "14";
-                readonly rx: "2";
-            };
-        }];
-    };
-    export default _default_38;
-}
-declare module "packages/icons/src/asn/hard-drive" {
-    const _default_39: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-hard-drive-icon lucide-hard-drive";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M10 16h.01";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21.946 12.013H2.054";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M6 16h.01";
-            };
-        }];
-    };
-    export default _default_39;
-}
-declare module "packages/icons/src/asn/history" {
-    const _default_40: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-history-icon lucide-history";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 3v5h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 7v5l4 2";
-            };
-        }];
-    };
-    export default _default_40;
-}
-declare module "packages/icons/src/asn/house" {
-    const _default_41: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-house-icon lucide-house";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z";
-            };
-        }];
-    };
-    export default _default_41;
-}
-declare module "packages/icons/src/asn/inbox" {
-    const _default_42: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-inbox-icon lucide-inbox";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
-            };
-        }, {
-            readonly tag: "polyline";
-            readonly attrs: {
-                readonly points: "22 12 16 12 14 15 10 15 8 12 2 12";
-            };
-        }];
-    };
-    export default _default_42;
-}
-declare module "packages/icons/src/asn/list-filter" {
-    const _default_43: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-list-filter-icon lucide-list-filter";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M2 5h20";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M6 12h12";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M9 19h6";
-            };
-        }];
-    };
-    export default _default_43;
-}
-declare module "packages/icons/src/asn/loader-circle" {
-    const _default_44: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-loader-circle-icon lucide-loader-circle";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21 12a9 9 0 1 1-6.219-8.56";
-            };
-        }];
-    };
-    export default _default_44;
-}
-declare module "packages/icons/src/asn/loader" {
-    const _default_45: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-loader-icon lucide-loader";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 2v4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m16.2 7.8 2.9-2.9";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M18 12h4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m16.2 16.2 2.9 2.9";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 18v4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m4.9 19.1 2.9-2.9";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M2 12h4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m4.9 4.9 2.9 2.9";
-            };
-        }];
-    };
-    export default _default_45;
-}
-declare module "packages/icons/src/asn/menu" {
-    const _default_46: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-menu-icon lucide-menu";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 5h16";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 12h16";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 19h16";
-            };
-        }];
-    };
-    export default _default_46;
-}
-declare module "packages/icons/src/asn/message-square-more" {
-    const _default_47: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-message-square-more-icon lucide-message-square-more";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 11h.01";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16 11h.01";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M8 11h.01";
-            };
-        }];
-    };
-    export default _default_47;
-}
-declare module "packages/icons/src/asn/moon" {
-    const _default_48: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-moon-icon lucide-moon";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401";
-            };
-        }];
-    };
-    export default _default_48;
-}
-declare module "packages/icons/src/asn/panel-left" {
-    const _default_49: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-panel-left-icon lucide-panel-left";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M9 3v18";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "18";
-                readonly height: "18";
-                readonly x: "3";
-                readonly y: "3";
-                readonly rx: "2";
-            };
-        }];
-    };
-    export default _default_49;
-}
-declare module "packages/icons/src/asn/pause" {
-    const _default_50: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-pause-icon lucide-pause";
-        };
-        readonly children: readonly [{
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly x: "14";
-                readonly y: "3";
-                readonly width: "5";
-                readonly height: "18";
-                readonly rx: "1";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly x: "5";
-                readonly y: "3";
-                readonly width: "5";
-                readonly height: "18";
-                readonly rx: "1";
-            };
-        }];
-    };
-    export default _default_50;
-}
-declare module "packages/icons/src/asn/play" {
-    const _default_51: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-play-icon lucide-play";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z";
-            };
-        }];
-    };
-    export default _default_51;
-}
-declare module "packages/icons/src/asn/plus" {
-    const _default_52: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-plus-icon lucide-plus";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M5 12h14";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 5v14";
-            };
-        }];
-    };
-    export default _default_52;
-}
-declare module "packages/icons/src/asn/radio-tower" {
-    const _default_53: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-radio-tower-icon lucide-radio-tower";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4.9 16.1C1 12.2 1 5.8 4.9 1.9";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M7.8 4.7a6.14 6.14 0 0 0-.8 7.5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16.2 4.8c2 2 2.26 5.11.8 7.47";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M19.1 1.9a9.96 9.96 0 0 1 0 14.1";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M9.5 18h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m8 22 4-11 4 11";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "9";
-                readonly r: "2";
-            };
-        }];
-    };
-    export default _default_53;
-}
-declare module "packages/icons/src/asn/refresh-ccw" {
-    const _default_54: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-refresh-ccw-icon lucide-refresh-ccw";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 3v5h5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16 16h5v5";
-            };
-        }];
-    };
-    export default _default_54;
-}
-declare module "packages/icons/src/asn/refresh-cw" {
-    const _default_55: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-refresh-cw-icon lucide-refresh-cw";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21 3v5h-5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M8 16H3v5";
-            };
-        }];
-    };
-    export default _default_55;
-}
-declare module "packages/icons/src/asn/rotate-ccw" {
-    const _default_56: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-rotate-ccw-icon lucide-rotate-ccw";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 3v5h5";
-            };
-        }];
-    };
-    export default _default_56;
-}
-declare module "packages/icons/src/asn/rss" {
-    const _default_57: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-rss-icon lucide-rss";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 11a9 9 0 0 1 9 9";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 4a16 16 0 0 1 16 16";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "5";
-                readonly cy: "19";
-                readonly r: "1";
-            };
-        }];
-    };
-    export default _default_57;
-}
-declare module "packages/icons/src/asn/save" {
-    const _default_58: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-save-icon lucide-save";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M7 3v4a1 1 0 0 0 1 1h7";
-            };
-        }];
-    };
-    export default _default_58;
-}
-declare module "packages/icons/src/asn/scroll-text" {
-    const _default_59: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-scroll-text-icon lucide-scroll-text";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M15 12h-5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M15 8h-5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M19 17V5a2 2 0 0 0-2-2H4";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3";
-            };
-        }];
-    };
-    export default _default_59;
-}
-declare module "packages/icons/src/asn/search" {
-    const _default_60: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-search-icon lucide-search";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m21 21-4.34-4.34";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "11";
-                readonly cy: "11";
-                readonly r: "8";
-            };
-        }];
-    };
-    export default _default_60;
-}
-declare module "packages/icons/src/asn/server" {
-    const _default_61: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-server-icon lucide-server";
-        };
-        readonly children: readonly [{
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "20";
-                readonly height: "8";
-                readonly x: "2";
-                readonly y: "2";
-                readonly rx: "2";
-                readonly ry: "2";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "20";
-                readonly height: "8";
-                readonly x: "2";
-                readonly y: "14";
-                readonly rx: "2";
-                readonly ry: "2";
-            };
-        }, {
-            readonly tag: "line";
-            readonly attrs: {
-                readonly x1: "6";
-                readonly x2: "6.01";
-                readonly y1: "6";
-                readonly y2: "6";
-            };
-        }, {
-            readonly tag: "line";
-            readonly attrs: {
-                readonly x1: "6";
-                readonly x2: "6.01";
-                readonly y1: "18";
-                readonly y2: "18";
-            };
-        }];
-    };
-    export default _default_61;
-}
-declare module "packages/icons/src/asn/settings" {
-    const _default_62: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-settings-icon lucide-settings";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "3";
-            };
-        }];
-    };
-    export default _default_62;
-}
-declare module "packages/icons/src/asn/square-arrow-down" {
-    const _default_63: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-square-arrow-down-icon lucide-square-arrow-down";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 8v8";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m8 12 4 4 4-4";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "18";
-                readonly height: "18";
-                readonly x: "3";
-                readonly y: "3";
-                readonly rx: "2";
-            };
-        }];
-    };
-    export default _default_63;
-}
-declare module "packages/icons/src/asn/sun" {
-    const _default_64: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-sun-icon lucide-sun";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 2v2";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 20v2";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m4.93 4.93 1.41 1.41";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m17.66 17.66 1.41 1.41";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M2 12h2";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M20 12h2";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m6.34 17.66-1.41 1.41";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m19.07 4.93-1.41 1.41";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "12";
-                readonly r: "4";
-            };
-        }];
-    };
-    export default _default_64;
-}
-declare module "packages/icons/src/asn/table" {
-    const _default_65: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-table-icon lucide-table";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 3v18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 9h18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 15h18";
-            };
-        }, {
-            readonly tag: "rect";
-            readonly attrs: {
-                readonly width: "18";
-                readonly height: "18";
-                readonly x: "3";
-                readonly y: "3";
-                readonly rx: "2";
-            };
-        }];
-    };
-    export default _default_65;
-}
-declare module "packages/icons/src/asn/trash-2" {
-    const _default_66: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-trash2-icon lucide-trash-2";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M10 11v6";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14 11v6";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 6h18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2";
-            };
-        }];
-    };
-    export default _default_66;
-}
-declare module "packages/icons/src/asn/trash" {
-    const _default_67: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-trash-icon lucide-trash";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M3 6h18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2";
-            };
-        }];
-    };
-    export default _default_67;
-}
-declare module "packages/icons/src/asn/undo-2" {
-    const _default_68: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-undo2-icon lucide-undo-2";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M9 14 4 9l5-5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11";
-            };
-        }];
-    };
-    export default _default_68;
-}
-declare module "packages/icons/src/asn/upload" {
-    const _default_69: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-upload-icon lucide-upload";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M12 3v12";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m17 8-5-5-5 5";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
-            };
-        }];
-    };
-    export default _default_69;
-}
-declare module "packages/icons/src/asn/user" {
-    const _default_70: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-user-icon lucide-user";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "12";
-                readonly cy: "7";
-                readonly r: "4";
-            };
-        }];
-    };
-    export default _default_70;
-}
-declare module "packages/icons/src/asn/users" {
-    const _default_71: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-users-icon lucide-users";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M16 3.128a4 4 0 0 1 0 7.744";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M22 21v-2a4 4 0 0 0-3-3.87";
-            };
-        }, {
-            readonly tag: "circle";
-            readonly attrs: {
-                readonly cx: "9";
-                readonly cy: "7";
-                readonly r: "4";
-            };
-        }];
-    };
-    export default _default_71;
-}
-declare module "packages/icons/src/asn/wrench" {
-    const _default_72: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-wrench-icon lucide-wrench";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z";
-            };
-        }];
-    };
-    export default _default_72;
-}
-declare module "packages/icons/src/asn/x" {
-    const _default_73: {
-        readonly tag: "svg";
-        readonly attrs: {
-            readonly viewBox: "0 0 24 24";
-            readonly fill: "none";
-            readonly stroke: "currentColor";
-            readonly "stroke-width": "2";
-            readonly "stroke-linecap": "round";
-            readonly "stroke-linejoin": "round";
-            readonly class: "lucide lucide-x-icon lucide-x";
-        };
-        readonly children: readonly [{
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "M18 6 6 18";
-            };
-        }, {
-            readonly tag: "path";
-            readonly attrs: {
-                readonly d: "m6 6 12 12";
-            };
-        }];
-    };
-    export default _default_73;
-}
-declare module "packages/icons/src/asn/index" {
-    export { default as Activity } from "packages/icons/src/asn/activity";
-    export { default as ArrowDownToLine } from "packages/icons/src/asn/arrow-down-to-line";
-    export { default as ArrowLeft } from "packages/icons/src/asn/arrow-left";
-    export { default as Bolt } from "packages/icons/src/asn/bolt";
-    export { default as Calendar } from "packages/icons/src/asn/calendar";
-    export { default as Check } from "packages/icons/src/asn/check";
-    export { default as ChevronDown } from "packages/icons/src/asn/chevron-down";
-    export { default as ChevronLeft } from "packages/icons/src/asn/chevron-left";
-    export { default as ChevronRight } from "packages/icons/src/asn/chevron-right";
-    export { default as ChevronUp } from "packages/icons/src/asn/chevron-up";
-    export { default as CircleAlert } from "packages/icons/src/asn/circle-alert";
-    export { default as CircleArrowDown } from "packages/icons/src/asn/circle-arrow-down";
-    export { default as CircleEllipsis } from "packages/icons/src/asn/circle-ellipsis";
-    export { default as CircleX } from "packages/icons/src/asn/circle-x";
-    export { default as ClockArrowDown } from "packages/icons/src/asn/clock-arrow-down";
-    export { default as Clock } from "packages/icons/src/asn/clock";
-    export { default as CloudDownload } from "packages/icons/src/asn/cloud-download";
-    export { default as Copy } from "packages/icons/src/asn/copy";
-    export { default as Download } from "packages/icons/src/asn/download";
-    export { default as EllipsisVertical } from "packages/icons/src/asn/ellipsis-vertical";
-    export { default as Ellipsis } from "packages/icons/src/asn/ellipsis";
-    export { default as FileBox } from "packages/icons/src/asn/file-box";
-    export { default as FileImage } from "packages/icons/src/asn/file-image";
-    export { default as FileLock } from "packages/icons/src/asn/file-lock";
-    export { default as FilePlay } from "packages/icons/src/asn/file-play";
-    export { default as FileStack } from "packages/icons/src/asn/file-stack";
-    export { default as FileSymlink } from "packages/icons/src/asn/file-symlink";
-    export { default as FileText } from "packages/icons/src/asn/file-text";
-    export { default as FileVideoCamera } from "packages/icons/src/asn/file-video-camera";
-    export { default as FileVolume } from "packages/icons/src/asn/file-volume";
-    export { default as File } from "packages/icons/src/asn/file";
-    export { default as Film } from "packages/icons/src/asn/film";
-    export { default as FolderClosed } from "packages/icons/src/asn/folder-closed";
-    export { default as Folder } from "packages/icons/src/asn/folder";
-    export { default as Funnel } from "packages/icons/src/asn/funnel";
-    export { default as Gauge } from "packages/icons/src/asn/gauge";
-    export { default as GitFork } from "packages/icons/src/asn/git-fork";
-    export { default as Grid3x3 } from "packages/icons/src/asn/grid-3x3";
-    export { default as HardDriveDownload } from "packages/icons/src/asn/hard-drive-download";
-    export { default as HardDrive } from "packages/icons/src/asn/hard-drive";
-    export { default as History } from "packages/icons/src/asn/history";
-    export { default as House } from "packages/icons/src/asn/house";
-    export { default as Inbox } from "packages/icons/src/asn/inbox";
-    export { default as ListFilter } from "packages/icons/src/asn/list-filter";
-    export { default as LoaderCircle } from "packages/icons/src/asn/loader-circle";
-    export { default as Loader } from "packages/icons/src/asn/loader";
-    export { default as Menu } from "packages/icons/src/asn/menu";
-    export { default as MessageSquareMore } from "packages/icons/src/asn/message-square-more";
-    export { default as Moon } from "packages/icons/src/asn/moon";
-    export { default as PanelLeft } from "packages/icons/src/asn/panel-left";
-    export { default as Pause } from "packages/icons/src/asn/pause";
-    export { default as Play } from "packages/icons/src/asn/play";
-    export { default as Plus } from "packages/icons/src/asn/plus";
-    export { default as RadioTower } from "packages/icons/src/asn/radio-tower";
-    export { default as RefreshCcw } from "packages/icons/src/asn/refresh-ccw";
-    export { default as RefreshCw } from "packages/icons/src/asn/refresh-cw";
-    export { default as RotateCcw } from "packages/icons/src/asn/rotate-ccw";
-    export { default as Rss } from "packages/icons/src/asn/rss";
-    export { default as Save } from "packages/icons/src/asn/save";
-    export { default as ScrollText } from "packages/icons/src/asn/scroll-text";
-    export { default as Search } from "packages/icons/src/asn/search";
-    export { default as Server } from "packages/icons/src/asn/server";
-    export { default as Settings } from "packages/icons/src/asn/settings";
-    export { default as SquareArrowDown } from "packages/icons/src/asn/square-arrow-down";
-    export { default as Sun } from "packages/icons/src/asn/sun";
-    export { default as Table } from "packages/icons/src/asn/table";
-    export { default as Trash2 } from "packages/icons/src/asn/trash-2";
-    export { default as Trash } from "packages/icons/src/asn/trash";
-    export { default as Undo2 } from "packages/icons/src/asn/undo-2";
-    export { default as Upload } from "packages/icons/src/asn/upload";
-    export { default as User } from "packages/icons/src/asn/user";
-    export { default as Users } from "packages/icons/src/asn/users";
-    export { default as Wrench } from "packages/icons/src/asn/wrench";
-    export { default as X } from "packages/icons/src/asn/x";
-}
-declare module "packages/icons/src/index" {
-    export * from "packages/icons/src/asn/index";
-    export const iconRegistry: {
-        activity: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-activity-icon lucide-activity";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2";
-                };
-            }];
-        };
-        "arrow-down-to-line": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-arrow-down-to-line-icon lucide-arrow-down-to-line";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 17V3";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m6 11 6 6 6-6";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M19 21H5";
-                };
-            }];
-        };
-        "arrow-left": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-arrow-left-icon lucide-arrow-left";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m12 19-7-7 7-7";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M19 12H5";
-                };
-            }];
-        };
-        bolt: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-bolt-icon lucide-bolt";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "4";
-                };
-            }];
-        };
-        calendar: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-calendar-icon lucide-calendar";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M8 2v4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16 2v4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 10h18";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "18";
-                    readonly height: "18";
-                    readonly x: "3";
-                    readonly y: "4";
-                    readonly rx: "2";
-                };
-            }];
-        };
-        check: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-check-icon lucide-check";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M20 6 9 17l-5-5";
-                };
-            }];
-        };
-        "chevron-down": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-chevron-down-icon lucide-chevron-down";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m6 9 6 6 6-6";
-                };
-            }];
-        };
-        "chevron-left": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-chevron-left-icon lucide-chevron-left";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m15 18-6-6 6-6";
-                };
-            }];
-        };
-        "chevron-right": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-chevron-right-icon lucide-chevron-right";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m9 18 6-6-6-6";
-                };
-            }];
-        };
-        "chevron-up": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-chevron-up-icon lucide-chevron-up";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m18 15-6-6-6 6";
-                };
-            }];
-        };
-        "circle-alert": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-circle-alert-icon lucide-circle-alert";
-            };
-            readonly children: readonly [{
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "10";
-                };
-            }, {
-                readonly tag: "line";
-                readonly attrs: {
-                    readonly x1: "12";
-                    readonly x2: "12";
-                    readonly y1: "8";
-                    readonly y2: "12";
-                };
-            }, {
-                readonly tag: "line";
-                readonly attrs: {
-                    readonly x1: "12";
-                    readonly x2: "12.01";
-                    readonly y1: "16";
-                    readonly y2: "16";
-                };
-            }];
-        };
-        "circle-arrow-down": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-circle-arrow-down-icon lucide-circle-arrow-down";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 8v8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m8 12 4 4 4-4";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "10";
-                };
-            }];
-        };
-        "circle-ellipsis": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-circle-ellipsis-icon lucide-circle-ellipsis";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M17 12h.01";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 12h.01";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M7 12h.01";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "10";
-                };
-            }];
-        };
-        "circle-x": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-circle-x-icon lucide-circle-x";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m15 9-6 6";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m9 9 6 6";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "10";
-                };
-            }];
-        };
-        "clock-arrow-down": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-clock-arrow-down-icon lucide-clock-arrow-down";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 6v6l2 1";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12.337 21.994a10 10 0 1 1 9.588-8.767";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m14 18 4 4 4-4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M18 14v8";
-                };
-            }];
-        };
-        clock: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-clock";
-            };
-            readonly children: readonly [{
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "10";
-                };
-            }, {
-                readonly tag: "polyline";
-                readonly attrs: {
-                    readonly points: "12 6 12 12 16 14";
-                };
-            }];
-        };
-        "cloud-download": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-cloud-download-icon lucide-cloud-download";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 13v8l-4-4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m12 21 4-4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284";
-                };
-            }];
-        };
-        copy: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-copy-icon lucide-copy";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "14";
-                    readonly height: "14";
-                    readonly x: "8";
-                    readonly y: "8";
-                    readonly rx: "2";
-                    readonly ry: "2";
-                };
-            }];
-        };
-        download: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-download-icon lucide-download";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 15V3";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m7 10 5 5 5-5";
-                };
-            }];
-        };
-        "ellipsis-vertical": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical";
-            };
-            readonly children: readonly [{
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "1";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "5";
-                    readonly r: "1";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "19";
-                    readonly r: "1";
-                };
-            }];
-        };
-        ellipsis: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-ellipsis-icon lucide-ellipsis";
-            };
-            readonly children: readonly [{
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "1";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "19";
-                    readonly cy: "12";
-                    readonly r: "1";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "5";
-                    readonly cy: "12";
-                    readonly r: "1";
-                };
-            }];
-        };
-        "file-box": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-box-icon lucide-file-box";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14.5 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v3.8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M11.7 14.2 7 17l-4.7-2.8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 13.1a2 2 0 0 0-.999 1.76v3.24a2 2 0 0 0 .969 1.78L6 21.7a2 2 0 0 0 2.03.01L11 19.9a2 2 0 0 0 1-1.76V14.9a2 2 0 0 0-.97-1.78L8 11.3a2 2 0 0 0-2.03-.01z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M7 17v5";
-                };
-            }];
-        };
-        "file-image": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-image-icon lucide-file-image";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "10";
-                    readonly cy: "12";
-                    readonly r: "2";
-                };
-            }];
-        };
-        "file-lock": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-lock-icon lucide-file-lock";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 9.8V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M9 17v-2a2 2 0 0 0-4 0v2";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "8";
-                    readonly height: "5";
-                    readonly x: "3";
-                    readonly y: "17";
-                    readonly rx: "1";
-                };
-            }];
-        };
-        "file-play": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-play-icon lucide-file-play";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z";
-                };
-            }];
-        };
-        "file-stack": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-stack-icon lucide-file-stack";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z";
-                };
-            }];
-        };
-        "file-symlink": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-symlink-icon lucide-file-symlink";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 11V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h7";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m10 18 3-3-3-3";
-                };
-            }];
-        };
-        "file-text": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-text-icon lucide-file-text";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M10 9H8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16 13H8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16 17H8";
-                };
-            }];
-        };
-        "file-video-camera": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-video-camera-icon lucide-file-video-camera";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 12V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m10 17.843 3.033-1.755a.64.64 0 0 1 .967.56v4.704a.65.65 0 0 1-.967.56L10 20.157";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "7";
-                    readonly height: "6";
-                    readonly x: "3";
-                    readonly y: "16";
-                    readonly rx: "1";
-                };
-            }];
-        };
-        "file-volume": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-volume-icon lucide-file-volume";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 11.55V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-1.95";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 15a5 5 0 0 1 0 6";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M8 14.502a.5.5 0 0 0-.826-.381l-1.893 1.631a1 1 0 0 1-.651.243H3.5a.5.5 0 0 0-.5.501v3.006a.5.5 0 0 0 .5.501h1.129a1 1 0 0 1 .652.243l1.893 1.633a.5.5 0 0 0 .826-.38z";
-                };
-            }];
-        };
-        file: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-file-icon lucide-file";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
-                };
-            }];
-        };
-        film: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-film-icon lucide-film";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M7 3v18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 7.5h4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 12h18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 16.5h4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M17 3v18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M17 7.5h4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M17 16.5h4";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "18";
-                    readonly height: "18";
-                    readonly x: "3";
-                    readonly y: "3";
-                    readonly rx: "2";
-                };
-            }];
-        };
-        "folder-closed": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-folder-closed-icon lucide-folder-closed";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M2 10h20";
-                };
-            }];
-        };
-        folder: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-folder-icon lucide-folder";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z";
-                };
-            }];
-        };
-        funnel: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-funnel-icon lucide-funnel";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z";
-                };
-            }];
-        };
-        gauge: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-gauge-icon lucide-gauge";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m12 14 4-4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3.34 19a10 10 0 1 1 17.32 0";
-                };
-            }];
-        };
-        "git-fork": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-git-fork-icon lucide-git-fork";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 12v3";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "18";
-                    readonly r: "3";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "6";
-                    readonly cy: "6";
-                    readonly r: "3";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "18";
-                    readonly cy: "6";
-                    readonly r: "3";
-                };
-            }];
-        };
-        "grid-3x3": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-grid3x3-icon lucide-grid-3x3";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 9h18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 15h18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M9 3v18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M15 3v18";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "18";
-                    readonly height: "18";
-                    readonly x: "3";
-                    readonly y: "3";
-                    readonly rx: "2";
-                };
-            }];
-        };
-        "hard-drive-download": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-hard-drive-download-icon lucide-hard-drive-download";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 2v8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m16 6-4 4-4-4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M6 18h.01";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M10 18h.01";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "20";
-                    readonly height: "8";
-                    readonly x: "2";
-                    readonly y: "14";
-                    readonly rx: "2";
-                };
-            }];
-        };
-        "hard-drive": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-hard-drive-icon lucide-hard-drive";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M10 16h.01";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21.946 12.013H2.054";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M6 16h.01";
-                };
-            }];
-        };
-        history: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-history-icon lucide-history";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 3v5h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 7v5l4 2";
-                };
-            }];
-        };
-        house: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-house-icon lucide-house";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z";
-                };
-            }];
-        };
-        inbox: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-inbox-icon lucide-inbox";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z";
-                };
-            }, {
-                readonly tag: "polyline";
-                readonly attrs: {
-                    readonly points: "22 12 16 12 14 15 10 15 8 12 2 12";
-                };
-            }];
-        };
-        "list-filter": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-list-filter-icon lucide-list-filter";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M2 5h20";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M6 12h12";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M9 19h6";
-                };
-            }];
-        };
-        "loader-circle": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-loader-circle-icon lucide-loader-circle";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21 12a9 9 0 1 1-6.219-8.56";
-                };
-            }];
-        };
-        loader: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-loader-icon lucide-loader";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 2v4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m16.2 7.8 2.9-2.9";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M18 12h4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m16.2 16.2 2.9 2.9";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 18v4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m4.9 19.1 2.9-2.9";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M2 12h4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m4.9 4.9 2.9 2.9";
-                };
-            }];
-        };
-        menu: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-menu-icon lucide-menu";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 5h16";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 12h16";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 19h16";
-                };
-            }];
-        };
-        "message-square-more": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-message-square-more-icon lucide-message-square-more";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 11h.01";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16 11h.01";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M8 11h.01";
-                };
-            }];
-        };
-        moon: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-moon-icon lucide-moon";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401";
-                };
-            }];
-        };
-        "panel-left": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-panel-left-icon lucide-panel-left";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M9 3v18";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "18";
-                    readonly height: "18";
-                    readonly x: "3";
-                    readonly y: "3";
-                    readonly rx: "2";
-                };
-            }];
-        };
-        pause: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-pause-icon lucide-pause";
-            };
-            readonly children: readonly [{
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly x: "14";
-                    readonly y: "3";
-                    readonly width: "5";
-                    readonly height: "18";
-                    readonly rx: "1";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly x: "5";
-                    readonly y: "3";
-                    readonly width: "5";
-                    readonly height: "18";
-                    readonly rx: "1";
-                };
-            }];
-        };
-        play: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-play-icon lucide-play";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z";
-                };
-            }];
-        };
-        plus: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-plus-icon lucide-plus";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M5 12h14";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 5v14";
-                };
-            }];
-        };
-        "radio-tower": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-radio-tower-icon lucide-radio-tower";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4.9 16.1C1 12.2 1 5.8 4.9 1.9";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M7.8 4.7a6.14 6.14 0 0 0-.8 7.5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16.2 4.8c2 2 2.26 5.11.8 7.47";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M19.1 1.9a9.96 9.96 0 0 1 0 14.1";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M9.5 18h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m8 22 4-11 4 11";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "9";
-                    readonly r: "2";
-                };
-            }];
-        };
-        "refresh-ccw": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-refresh-ccw-icon lucide-refresh-ccw";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 3v5h5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16 16h5v5";
-                };
-            }];
-        };
-        "refresh-cw": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-refresh-cw-icon lucide-refresh-cw";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21 3v5h-5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M8 16H3v5";
-                };
-            }];
-        };
-        "rotate-ccw": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-rotate-ccw-icon lucide-rotate-ccw";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 3v5h5";
-                };
-            }];
-        };
-        rss: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-rss-icon lucide-rss";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 11a9 9 0 0 1 9 9";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 4a16 16 0 0 1 16 16";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "5";
-                    readonly cy: "19";
-                    readonly r: "1";
-                };
-            }];
-        };
-        save: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-save-icon lucide-save";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M7 3v4a1 1 0 0 0 1 1h7";
-                };
-            }];
-        };
-        "scroll-text": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-scroll-text-icon lucide-scroll-text";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M15 12h-5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M15 8h-5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M19 17V5a2 2 0 0 0-2-2H4";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3";
-                };
-            }];
-        };
-        search: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-search-icon lucide-search";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m21 21-4.34-4.34";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "11";
-                    readonly cy: "11";
-                    readonly r: "8";
-                };
-            }];
-        };
-        server: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-server-icon lucide-server";
-            };
-            readonly children: readonly [{
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "20";
-                    readonly height: "8";
-                    readonly x: "2";
-                    readonly y: "2";
-                    readonly rx: "2";
-                    readonly ry: "2";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "20";
-                    readonly height: "8";
-                    readonly x: "2";
-                    readonly y: "14";
-                    readonly rx: "2";
-                    readonly ry: "2";
-                };
-            }, {
-                readonly tag: "line";
-                readonly attrs: {
-                    readonly x1: "6";
-                    readonly x2: "6.01";
-                    readonly y1: "6";
-                    readonly y2: "6";
-                };
-            }, {
-                readonly tag: "line";
-                readonly attrs: {
-                    readonly x1: "6";
-                    readonly x2: "6.01";
-                    readonly y1: "18";
-                    readonly y2: "18";
-                };
-            }];
-        };
-        settings: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-settings-icon lucide-settings";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "3";
-                };
-            }];
-        };
-        "square-arrow-down": {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-square-arrow-down-icon lucide-square-arrow-down";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 8v8";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m8 12 4 4 4-4";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "18";
-                    readonly height: "18";
-                    readonly x: "3";
-                    readonly y: "3";
-                    readonly rx: "2";
-                };
-            }];
-        };
-        sun: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-sun-icon lucide-sun";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 2v2";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 20v2";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m4.93 4.93 1.41 1.41";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m17.66 17.66 1.41 1.41";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M2 12h2";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M20 12h2";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m6.34 17.66-1.41 1.41";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m19.07 4.93-1.41 1.41";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "12";
-                    readonly r: "4";
-                };
-            }];
-        };
-        table: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-table-icon lucide-table";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 3v18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 9h18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 15h18";
-                };
-            }, {
-                readonly tag: "rect";
-                readonly attrs: {
-                    readonly width: "18";
-                    readonly height: "18";
-                    readonly x: "3";
-                    readonly y: "3";
-                    readonly rx: "2";
-                };
-            }];
-        };
-        trash2: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-trash2-icon lucide-trash-2";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M10 11v6";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14 11v6";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 6h18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2";
-                };
-            }];
-        };
-        trash: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-trash-icon lucide-trash";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M3 6h18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2";
-                };
-            }];
-        };
-        undo2: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-undo2-icon lucide-undo-2";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M9 14 4 9l5-5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11";
-                };
-            }];
-        };
-        upload: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-upload-icon lucide-upload";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M12 3v12";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m17 8-5-5-5 5";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4";
-                };
-            }];
-        };
-        user: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-user-icon lucide-user";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "12";
-                    readonly cy: "7";
-                    readonly r: "4";
-                };
-            }];
-        };
-        users: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-users-icon lucide-users";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M16 3.128a4 4 0 0 1 0 7.744";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M22 21v-2a4 4 0 0 0-3-3.87";
-                };
-            }, {
-                readonly tag: "circle";
-                readonly attrs: {
-                    readonly cx: "9";
-                    readonly cy: "7";
-                    readonly r: "4";
-                };
-            }];
-        };
-        wrench: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-wrench-icon lucide-wrench";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z";
-                };
-            }];
-        };
-        x: {
-            readonly tag: "svg";
-            readonly attrs: {
-                readonly viewBox: "0 0 24 24";
-                readonly fill: "none";
-                readonly stroke: "currentColor";
-                readonly "stroke-width": "2";
-                readonly "stroke-linecap": "round";
-                readonly "stroke-linejoin": "round";
-                readonly class: "lucide lucide-x-icon lucide-x";
-            };
-            readonly children: readonly [{
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "M18 6 6 18";
-                };
-            }, {
-                readonly tag: "path";
-                readonly attrs: {
-                    readonly d: "m6 6 12 12";
-                };
-            }];
-        };
-    };
+    export { Result, base, mitt } from "packages/primitive/src/index";
 }
 declare module "packages/shadcn/src/modules/input" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { InputCore } from "packages/timeless/src/index";
     export function Input(props: ViewProps & {
-        store: InputCore<any>;
+        store: vm.InputCore<any>;
         id?: string;
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/file-picker" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    import { FilePickerCore } from "packages/timeless/src/index";
     export function FileDropZone(props: ViewProps & {
-        store: FilePickerCore;
+        store: vm.FilePickerCore;
         tip?: string;
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FileInput(props: ViewProps & {
-        store: FilePickerCore;
+        store: vm.FilePickerCore;
         id?: string;
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/number-input" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { NumberInputCore } from "packages/timeless/src/index";
     export function NumberInput(props: ViewProps & {
-        store: NumberInputCore;
+        store: vm.NumberInputCore;
         id?: string;
         showControls?: boolean;
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/textarea" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { InputCore } from "packages/timeless/src/index";
     export function Textarea(props: ViewProps & {
-        store: InputCore<any>;
+        store: vm.InputCore<any>;
         id?: string;
         showClear?: boolean;
         showLoading?: boolean;
         showCount?: boolean;
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/label" {
-    import { ViewChildren, LabelProps } from "packages/timeless/src/index";
-    export function Label(props: LabelProps, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: import("packages/primitive/src/content/box").BoxState & import("@timeless/timeless").LabelState;
-        readonly children: import("@timeless/timeless").TimelessElement<any, any>[] & TimelessElement[];
-        render(): any;
-        onMounted(event: MountedEvent): void;
-        onUnmounted(): void;
-    };
+    import { ViewChildren, LabelProps, TimelessElement } from "packages/timeless/src/index";
+    export function Label(props: LabelProps, children?: ViewChildren): TimelessElement;
 }
 declare module "packages/shadcn/src/modules/checkbox" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { CheckboxCore } from "packages/timeless/src/index";
     export function Checkbox(props: ViewProps & {
-        store: CheckboxCore;
+        store: vm.CheckboxCore;
         id?: string;
-    }): any;
-}
-declare module "packages/shadcn/src/modules/checkbox-group" {
-    import { CheckboxGroupCore, CheckboxCore } from "packages/timeless/src/index";
-    export function CheckboxGroup(props: {
-        store: CheckboxGroupCore<any>;
-        class?: string;
-        itemClass?: string;
-        direction?: "horizontal" | "vertical";
-    }): any;
-    export function CheckboxGroupItem(props: {
-        store: CheckboxGroupCore<any>;
-        item: {
-            label: string;
-            value: any;
-            core: CheckboxCore;
-        };
-        class?: string;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
-}
-declare module "packages/shadcn/src/modules/radio" {
-    import { ViewProps } from "packages/timeless/src/index";
-    import { RadioGroupCore, RadioCore } from "packages/timeless/src/index";
-    export function Radio(props: {
-        store: RadioCore;
-        id?: string;
-    }): any;
-    export function RadioGroup(props: ViewProps & {
-        store: RadioGroupCore<any>;
-        class?: string;
-        itemClass?: string;
-        direction?: "horizontal" | "vertical";
-    }): any;
-    export function RadioGroupItem(props: {
-        store: RadioGroupCore<any>;
-        item: {
-            label: string;
-            value: any;
-            core: RadioCore;
-        };
-        class?: string;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
-}
-declare module "packages/shadcn/src/modules/select" {
-    import { ViewProps } from "packages/timeless/src/index";
-    import { SelectCore } from "packages/timeless/src/index";
-    export function Select(props: ViewProps & {
-        store: SelectCore<any>;
-        id?: string;
-    }): any;
-}
-declare module "packages/shadcn/src/modules/search-select" {
-    import { ViewProps } from "packages/timeless/src/index";
-    import { SelectCore } from "packages/timeless/src/index";
-    export function SearchSelect<T>(props: ViewProps & {
-        store: SelectCore<T>;
-    }): any;
-}
-declare module "packages/shadcn/src/modules/link" {
-    import { ViewChildren, LinkProps as NativeLinkProps } from "packages/timeless/src/index";
-    export function Link(props?: NativeLinkProps, children?: ViewChildren): {
+    }): {
         t: string;
         $elm: any;
-        state: any;
-        events: any;
-        children: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
 }
-declare module "packages/shadcn/src/modules/cascader" {
+declare module "packages/shadcn/src/modules/checkbox-group" {
+    import { vm } from "packages/timeless/src/index";
+    export function CheckboxGroup(props: {
+        store: vm.CheckboxGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CheckboxGroupItem(props: {
+        store: vm.CheckboxGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.CheckboxCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
+}
+declare module "packages/shadcn/src/modules/radio" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { CascaderCore } from "packages/timeless/src/index";
-    export function Cascader(props: ViewProps & {
-        store: CascaderCore<any>;
+    export function Radio(props: {
+        store: vm.RadioCore;
         id?: string;
-    }): any;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function RadioGroup(props: ViewProps & {
+        store: vm.RadioGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function RadioGroupItem(props: {
+        store: vm.RadioGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.RadioCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
+}
+declare module "packages/shadcn/src/modules/select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Select(props: ViewProps & {
+        store: vm.SelectCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/shadcn/src/modules/search-select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function SearchSelect<T>(props: ViewProps & {
+        store: vm.SelectCore<T>;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/shadcn/src/modules/link" {
+    import { ViewChildren, LinkProps as NativeLinkProps, TimelessElement } from "packages/timeless/src/index";
+    export function Link(props?: NativeLinkProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/shadcn/src/modules/cascader" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Cascader(props: ViewProps & {
+        store: vm.CascaderCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/date-picker" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { DatePickerCore } from "packages/timeless/src/index";
     export function DatePicker(props: ViewProps & {
-        store: DatePickerCore;
+        store: vm.DatePickerCore;
         id?: string;
         placeholder?: string;
-    }): any;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/tooltip" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { Align, Side } from "packages/timeless/src/index";
     export function Tooltip(props: ViewProps & {
         content?: ViewChildren;
-        side?: Side;
-        align?: Align;
-    }, children?: ViewChildren): any;
-    export function TooltipProvider(props: ViewProps, children?: ViewChildren): any;
+        side?: vm.Side;
+        align?: vm.Align;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TooltipProvider(props: ViewProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/date-range-picker" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { DateRangePickerCore } from "packages/timeless/src/index";
     export function DateRangePicker(props: ViewProps & {
-        store: DateRangePickerCore;
+        store: vm.DateRangePickerCore;
         id?: string;
         placeholder?: string;
-    }): any;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/time-picker" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { TimePickerCore } from "packages/timeless/src/index";
     export function TimePicker(props: ViewProps & {
-        store: TimePickerCore;
+        store: vm.TimePickerCore;
         id?: string;
         placeholder?: string;
-    }): any;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/date-time-picker" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { DatePickerCore, TimePickerCore } from "packages/timeless/src/index";
     export function DateTimePicker(props: ViewProps & {
-        date: DatePickerCore;
-        time: TimePickerCore;
+        date: vm.DatePickerCore;
+        time: vm.TimePickerCore;
         id?: string;
         placeholder?: string;
-    }): any;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/popover" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { PopoverCore } from "packages/timeless/src/index";
     export function Popover(props: ViewProps & {
-        store: PopoverCore;
+        store: vm.PopoverCore;
         title?: ViewChildren;
         content?: ViewChildren;
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/popconfirm" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { PopconfirmCore } from "packages/timeless/src/index";
     export function Popconfirm(props: ViewProps & {
-        store: PopconfirmCore;
+        store: vm.PopconfirmCore;
         title?: ViewChildren;
         description?: ViewChildren;
         confirmText?: string;
         cancelText?: string;
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/toast" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { ToastCore } from "packages/timeless/src/index";
     export function Toast(props: ViewProps & {
-        store: ToastCore;
-    }, children?: ViewChildren): any;
+        store: vm.ToastCore;
+    }, children?: ViewChildren): ViewChildren;
 }
 declare module "packages/shadcn/src/modules/toggle" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { SwitchCore } from "packages/timeless/src/index";
     export function Toggle(props: ViewProps & {
-        store: SwitchCore;
+        store: vm.SwitchCore;
         id?: string;
-    }): any;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/switch" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { SwitchCore } from "packages/timeless/src/index";
     export function Switch(props: ViewProps & {
-        store: SwitchCore;
+        store: vm.SwitchCore;
         id?: string;
-    }): any;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/slider" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -22781,183 +23553,184 @@ declare module "packages/shadcn/src/modules/slider" {
         step?: number;
         disabled?: boolean;
         onChange?: (v: number) => void;
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/progress" {
+    import { vm } from "packages/timeless/src/index";
     import { Ref } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { ProgressCore } from "packages/timeless/src/index";
     export function Progress(props: ViewProps & {
-        store?: ProgressCore;
+        store?: vm.ProgressCore;
         value?: Ref<number> | number;
         max?: number;
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/button" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { ButtonCore } from "packages/timeless/src/index";
     export function Button(props: ViewProps & {
-        store: ButtonCore;
+        store: vm.ButtonCore;
         prefix?: ViewChildren;
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/dialog" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { DialogCore } from "packages/timeless/src/index";
     export function Dialog(props: ViewProps & {
-        store: DialogCore;
+        store: vm.DialogCore;
         zIndex?: number;
-    }, children?: ViewChildren | (() => ViewChildren)): any;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/menu" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps, TimelessElement } from "packages/timeless/src/index";
-    import { MenuCore } from "packages/timeless/src/index";
     export function Menu(props: ViewProps & {
-        store: MenuCore;
+        store: vm.MenuCore;
     }): TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/dropdown-menu" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
-    import { DropdownMenuPrimitive } from "packages/timeless/src/index";
-    import { DropdownMenuCore } from "packages/timeless/src/index";
     export function DropdownMenu(props: ViewProps & {
-        store: DropdownMenuCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: import("packages/primitive/src/content/box").BoxState & {
-            rendered: boolean;
-            children: TimelessElement[];
-        };
-        children: TimelessElement<any, any>[];
-        append(node: any): void;
-        onMounted(event: DropdownMenuPrimitive): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+        store: vm.DropdownMenuCore;
+    }, children?: ViewChildren): TimelessElement;
 }
 declare module "packages/shadcn/src/modules/context-menu" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
-    import { ContextMenuPrimitive } from "packages/timeless/src/index";
-    import { ContextMenuCore } from "packages/timeless/src/index";
     export function ContextMenu(props: ViewProps & {
-        store: ContextMenuCore;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: import("packages/primitive/src/content/box").BoxState & {
-            rendered: boolean;
-            children: TimelessElement[];
-        };
-        children: TimelessElement<any, any>[];
-        append(node: any): void;
-        onMounted(event: ContextMenuPrimitive): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+        store: vm.ContextMenuCore;
+    }, children?: ViewChildren): TimelessElement;
 }
 declare module "packages/shadcn/src/modules/tabs" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { TabHeaderCore } from "packages/timeless/src/index";
     type TabItem = {
         value: string;
         label: string;
         content?: ViewChildren;
     };
     export function Tabs(props: ViewProps & {
-        store: TabHeaderCore<any>;
+        store: vm.TabHeaderCore<any>;
         items?: TabItem[];
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/steps" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { StepCore } from "packages/timeless/src/index";
     export type StepItem = {
         title: string;
         description?: string;
     };
     export function Steps(props: ViewProps & {
-        store: StepCore;
+        store: vm.StepCore;
         items: StepItem[];
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-view" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, type ViewProps } from "packages/timeless/src/index";
-    import { ScrollViewCore } from "packages/timeless/src/index";
     export function ScrollView(props: ViewProps & {
-        store: ScrollViewCore;
-    }, children: ViewChildren): any;
+        store: vm.ScrollViewCore;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
 }
 declare module "packages/shadcn/src/modules/badge" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/separator" {
     import { ViewProps } from "packages/timeless/src/index";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/card" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Card(props: ViewProps, children?: ViewChildren): any;
-    export function CardHeader(props: ViewProps, children?: ViewChildren): any;
-    export function CardTitle(props: ViewProps, children?: ViewChildren): any;
-    export function CardDescription(props: ViewProps, children?: ViewChildren): any;
-    export function CardContent(props: ViewProps, children?: ViewChildren): any;
-    export function CardFooter(props: ViewProps, children?: ViewChildren): any;
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/avatar" {
+    import { ui } from "packages/timeless/src/index";
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     import { Ref } from "packages/timeless/src/index";
-    import { AvatarPrimitive } from "packages/timeless/src/index";
     export function Avatar(props: ViewProps & {
         src: string | Ref<string>;
         alt?: string;
-        size?: Parameters<typeof AvatarPrimitive.Root>[0]["size"];
+        size?: Parameters<typeof ui.AvatarPrimitive.Root>[0]["size"];
         fallback?: string;
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/skeleton" {
     import { ViewProps } from "packages/timeless/src/index";
-    export function Skeleton(props: ViewProps): any;
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/alert" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
-    }, children?: ViewChildren): any;
-    export function AlertTitle(props: ViewProps, children?: ViewChildren): any;
-    export function AlertDescription(props: ViewProps, children?: ViewChildren): any;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-area" {
     export function ScrollArea(props: any, children: any): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/sheet" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { DialogCore } from "packages/timeless/src/index";
     export function Sheet(props: ViewProps & {
-        store: DialogCore;
+        store: vm.DialogCore;
         side?: "right" | "top" | "bottom" | "left";
         zIndex?: number;
-    }, children?: ViewChildren | (() => ViewChildren)): any;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
 }
 declare module "packages/shadcn/src/modules/aspect-ratio" {
     export function AspectRatio(props: any, children: any): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/accordion" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { AccordionCore } from "packages/timeless/src/index";
     type AccordionItem = {
         title: ViewChildren;
         content: ViewChildren;
     };
     export function Accordion(props: ViewProps & {
-        store: AccordionCore;
+        store: vm.AccordionCore;
         items: AccordionItem[];
-    }): any;
+    }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/kbd" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
@@ -22966,96 +23739,80 @@ declare module "packages/shadcn/src/modules/kbd" {
 }
 declare module "packages/shadcn/src/modules/table" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Table(props: ViewProps, children?: ViewChildren): any;
-    export function TableHeader(props: ViewProps, children?: ViewChildren): any;
-    export function TableBody(props: ViewProps, children?: ViewChildren): any;
-    export function TableRow(props: ViewProps, children?: ViewChildren): any;
-    export function TableHead(props: ViewProps, children?: ViewChildren): any;
-    export function TableCell(props: ViewProps, children?: ViewChildren): any;
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/form" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    import { ObjectFieldCore, ArrayFieldCore } from "packages/timeless/src/index";
     export function Form(props: ViewProps & {
-        store: ObjectFieldCore<any> | ArrayFieldCore<any>;
+        store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
     }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/field" {
-    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    import { SingleFieldCore } from "packages/timeless/src/index";
-    export function FieldGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function FieldSet(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function FieldLegend(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function FieldDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
     export function FieldSeparator(props?: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): any;
+    }): TimelessElement<{}, any>;
     export function FieldLabel(props: ViewProps & {
-        store?: SingleFieldCore<any>;
+        store?: vm.SingleFieldCore<any>;
         for?: string;
         weight?: "normal" | "medium";
         tone?: "default" | "destructive";
-    }): {
-        t: string;
-        $elm: any;
-        state: import("packages/primitive/src/content/box").BoxState & import("@timeless/timeless").LabelState;
-        readonly children: import("@timeless/timeless").TimelessElement<any, any>[] & TimelessElement[];
-        render(): any;
-        onMounted(event: SingleFieldCore): void;
-        onUnmounted(): void;
-    };
+    }): TimelessElement;
     export function FieldInlineLabel(props: ViewProps & {
-        store?: SingleFieldCore<any>;
+        store?: vm.SingleFieldCore<any>;
         for?: string;
-    }, children?: ViewChildren): {
-        t: string;
-        $elm: any;
-        state: import("packages/primitive/src/content/box").BoxState & import("@timeless/timeless").LabelState;
-        readonly children: import("@timeless/timeless").TimelessElement<any, any>[] & TimelessElement[];
-        render(): any;
-        onMounted(event: SingleFieldCore): void;
-        onUnmounted(): void;
-    };
-    export function FieldHelp(props: {}, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function FieldError(props: {}, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): TimelessElement;
+    export function FieldHelp(props: {}, children?: ViewChildren): TimelessElement<{}, any>;
+    export function FieldError(props: {}, children?: ViewChildren): TimelessElement<{}, any>;
     export function Field(props: ViewProps & {
-        store: SingleFieldCore<any>;
+        store: vm.SingleFieldCore<any>;
         id?: string;
         orientation?: "vertical" | "horizontal";
         inline?: boolean;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/resizable-panels" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { ResizablePanelsCore, ResizablePanelCore } from "packages/timeless/src/index";
     export function ResizablePanels(props: ViewProps & {
-        store: ResizablePanelsCore;
+        store: vm.ResizablePanelsCore;
         direction?: "horizontal" | "vertical";
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ResizablePanel(props: ViewProps & {
-        store: ResizablePanelCore;
-        group: ResizablePanelsCore;
-    }, children?: ViewChildren): any;
+        store: vm.ResizablePanelCore;
+        group: vm.ResizablePanelsCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export function ResizableHandle(props: ViewProps & {
-        store: ResizablePanelsCore;
-        panelBefore: ResizablePanelCore;
-        panelAfter: ResizablePanelCore;
+        store: vm.ResizablePanelsCore;
+        panelBefore: vm.ResizablePanelCore;
+        panelAfter: vm.ResizablePanelCore;
         withHandle?: boolean;
-    }, children?: ViewChildren): any;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/waterfall" {
+    import { vm } from "packages/timeless/src/index";
     import { type ViewProps, type TimelessElement } from "packages/timeless/src/index";
-    import type { WaterfallCellModel, WaterfallModel } from "packages/timeless/src/index";
     export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
-        store: WaterfallModel<T>;
-        render: (payload: T, cell: WaterfallCellModel<T>) => TimelessElement;
-    }): any;
+        store: vm.WaterfallModel<T>;
+        render: (payload: T, cell: vm.WaterfallCellModel<T>) => TimelessElement;
+    }): TimelessElement<any, any>;
 }
 declare module "packages/shadcn/src/modules/history-panel" {
+    import { kit } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
-    import { HistoryCore } from "packages/timeless/src/index";
     export function HistoryPanel(props: ViewProps & {
-        store: HistoryCore<string, any>;
+        store: kit.HistoryCore<string, any>;
     }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/llm-provider-form" {
@@ -23112,8 +23869,8 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
     }): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/sonner" {
+    import { vm } from "packages/timeless/src/index";
     import { DerivedRef, Ref, TimelessElement } from "packages/timeless/src/index";
-    import { ToasterModel, ToastModel } from "packages/timeless/src/index";
     type OffsetValue = number | string;
     type Offset = OffsetValue | {
         top?: OffsetValue;
@@ -23128,7 +23885,7 @@ declare module "packages/shadcn/src/modules/sonner" {
         position: string;
     };
     type ToasterProps = {
-        store: ToasterModel;
+        store: vm.ToasterModel;
         position?: string;
         theme?: "light" | "dark";
         gap?: number;
@@ -23139,7 +23896,7 @@ declare module "packages/shadcn/src/modules/sonner" {
     };
     export function Toaster(props: ToasterProps): TimelessElement<{}, any>;
     export function Toast(props: {
-        store: ToastModel;
+        store: vm.ToastModel;
         position: string;
         gap: number;
         heights: Ref<HeightEntry[]>;
@@ -23151,23 +23908,22 @@ declare module "packages/shadcn/src/modules/sonner" {
     }): TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/affix" {
+    import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { AffixCore } from "packages/timeless/src/index";
     export function Affix(props: ViewProps & {
-        store: AffixCore;
+        store: vm.AffixCore;
         offsetTop?: number;
         target?: () => HTMLElement | Window;
     }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/flow" {
-    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    import { FlowPrimitive } from "packages/timeless/src/index";
-    import { FlowCanvasModel, FlowNodeModel, FlowEdgeModel } from "packages/timeless/src/index";
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, SVG } from "packages/timeless/src/index";
     type FlowNodeViewRender = Record<string, (props: {
-        node: FlowNodeModel;
+        node: vm.FlowNodeModel;
     }) => ViewChildren>;
     export interface FlowViewProps extends ViewProps {
-        store: FlowCanvasModel;
+        store: vm.FlowCanvasModel;
         nodeTypes?: FlowNodeViewRender;
         showBackground?: boolean;
         backgroundVariant?: "dots" | "lines" | "cross";
@@ -23180,7 +23936,7 @@ declare module "packages/shadcn/src/modules/flow" {
         nodesConnectable?: boolean;
     }
     export interface FlowHandleViewProps extends ViewProps {
-        store: FlowCanvasModel;
+        store: vm.FlowCanvasModel;
         nodeId: string;
         handleId: string;
         type: "source" | "target";
@@ -23191,52 +23947,13 @@ declare module "packages/shadcn/src/modules/flow" {
     }
     export function FlowHandle(props: FlowHandleViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
     export interface FlowNodeViewProps extends ViewProps {
-        store: FlowNodeModel;
+        store: vm.FlowNodeModel;
         nodeTypes: FlowNodeViewRender;
     }
     export function FlowNodeView(props: FlowNodeViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FlowEdgeView(props: ViewProps & {
-        store: FlowEdgeModel;
-    }): {
-        t: string;
-        $elm: SVGGElement;
-        state: import("packages/primitive/src/content/box").BoxState;
-        children: import("@timeless/timeless").TimelessElement<any, any>[];
-        events: Partial<{
-            onMounted?: (event: FlowPrimitive<FlowPrimitive>) => void | (() => void);
-            beforeUnmounted?: () => void;
-            onUnmounted?: () => void;
-            onClick?: (e: MouseEvent) => void;
-            onDoubleClick?: (e: MouseEvent) => void;
-            onMouseDown?: (e: MouseEvent) => void;
-            onMouseUp?: (e: MouseEvent) => void;
-            onMouseEnter?: (e: MouseEvent) => void;
-            onMouseLeave?: (e: MouseEvent) => void;
-            onMouseMove?: (e: MouseEvent) => void;
-            onLongPress?: (e: PointerEvent) => void;
-            onPointerDown?: (e: PointerEvent) => void;
-            onPointerUp?: (e: PointerEvent) => void;
-            onInput?: (e: Event) => void;
-            onChange?: (e: Event) => void;
-            onFocus?: (e: FocusEvent) => void;
-            onBlur?: (e: FocusEvent) => void;
-            onKeyDown?: (e: KeyboardEvent) => void;
-            onKeyUp?: (e: KeyboardEvent) => void;
-            onContextMenu?: (e: MouseEvent) => void;
-            onDragStart?: (e: DragEvent) => void;
-            onDrag?: (e: DragEvent) => void;
-            onDragEnd?: (e: DragEvent) => void;
-            onDragEnter?: (e: DragEvent) => void;
-            onDragOver?: (e: DragEvent) => void;
-            onDragLeave?: (e: DragEvent) => void;
-            onDrop?: (e: DragEvent) => void;
-            onWheel?: (e: WheelEvent) => void;
-            onAnimationEnd?: (e: AnimationEvent) => void;
-        }>;
-        onMounted(event: FlowPrimitive): void;
-        beforeUnmounted(): void;
-        onUnmounted(): void;
-    };
+        store: vm.FlowEdgeModel;
+    }): ReturnType<typeof SVG.G>;
     export function FlowBackground(props: ViewProps & {
         variant?: "dots" | "lines" | "cross";
         gap?: number;
@@ -23244,12 +23961,12 @@ declare module "packages/shadcn/src/modules/flow" {
         color?: string;
     }): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FlowMinimap(props: ViewProps & {
-        store: FlowCanvasModel;
+        store: vm.FlowCanvasModel;
     }): import("@timeless/timeless").TimelessElement<{}, any>;
     export function FlowControls(props: ViewProps & {
-        store: FlowCanvasModel;
+        store: vm.FlowCanvasModel;
     }): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): any;
+    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
     export const FlowEdge_: typeof FlowEdgeView;
     export const FlowNode_: typeof FlowNodeView;
     export const FlowHandle_: typeof FlowHandle;
@@ -23399,7 +24116,6 @@ declare const TabView: typeof import("@timeless/timeless").TabView;
 declare const Text: typeof import("@timeless/timeless").Text;
 declare const TimelessRefArray: typeof import("@timeless/timeless").TimelessRefArray;
 declare const TreeSelect: typeof import("@timeless/timeless").TreeSelect;
-declare const Video: typeof import("@timeless/timeless").Video;
 declare const View: typeof import("@timeless/timeless").View;
 declare const Webview: typeof import("@timeless/timeless").Webview;
 declare const WindowView: typeof import("@timeless/timeless").WindowView;
@@ -23425,6 +24141,7 @@ declare const getobj: typeof import("@timeless/timeless").getobj;
 declare const hmrRestore: typeof import("@timeless/timeless").hmrRestore;
 declare const hmrScope: typeof import("@timeless/timeless").hmrScope;
 declare const hmrState: typeof import("@timeless/timeless").hmrState;
+declare const icons: typeof import("@timeless/timeless").icons;
 declare const isArrayRef: typeof import("@timeless/timeless").isArrayRef;
 declare const isAudio: typeof import("@timeless/timeless").isAudio;
 declare const isClassNameRef: typeof import("@timeless/timeless").isClassNameRef;
@@ -23440,6 +24157,7 @@ declare const isWriteableRef: typeof import("@timeless/timeless").isWriteableRef
 declare const join: typeof import("@timeless/timeless").join;
 declare const kit: typeof import("@timeless/timeless").kit;
 declare const lazy: typeof import("@timeless/timeless").lazy;
+declare const mitt: typeof import("@timeless/timeless").mitt;
 declare const patch: typeof import("@timeless/timeless").patch;
 declare const printDepTree: typeof import("@timeless/timeless").printDepTree;
 declare const provide: typeof import("@timeless/timeless").provide;
@@ -23467,17 +24185,15 @@ declare const throttle: typeof import("@timeless/timeless").throttle;
 declare const ui: typeof import("@timeless/timeless").ui;
 declare const uncomputed: typeof import("@timeless/timeless").uncomputed;
 declare const use: typeof import("@timeless/timeless").use;
+declare const utils: typeof import("@timeless/timeless").utils;
 declare const vm: typeof import("@timeless/timeless").vm;
 
 // @timeless/inner-kit
 declare const ApplicationModel: typeof import("@timeless/inner-kit").ApplicationModel;
-declare const ChannelClientCore: typeof import("@timeless/inner-kit").ChannelClientCore;
-declare const ChannelCloseReason: typeof import("@timeless/inner-kit").ChannelCloseReason;
-declare const ChannelConnection: typeof import("@timeless/inner-kit").ChannelConnection;
 declare const ChannelCore: typeof import("@timeless/inner-kit").ChannelCore;
 declare const ChannelCoreProps: typeof import("@timeless/inner-kit").ChannelCoreProps;
 declare const ChannelMessageMeta: typeof import("@timeless/inner-kit").ChannelMessageMeta;
-declare const ChannelOpenOptions: typeof import("@timeless/inner-kit").ChannelOpenOptions;
+declare const ChannelReconnectInfo: typeof import("@timeless/inner-kit").ChannelReconnectInfo;
 declare const ChannelSentMessage: typeof import("@timeless/inner-kit").ChannelSentMessage;
 declare const ChannelState: typeof import("@timeless/inner-kit").ChannelState;
 declare const ChannelStatus: typeof import("@timeless/inner-kit").ChannelStatus;
@@ -23485,11 +24201,17 @@ declare const ClipboardModel: typeof import("@timeless/inner-kit").ClipboardMode
 declare const HistoryCore: typeof import("@timeless/inner-kit").HistoryCore;
 declare const HttpClientCore: typeof import("@timeless/inner-kit").HttpClientCore;
 declare const ListCore: typeof import("@timeless/inner-kit").ListCore;
+declare const MaybePromise: typeof import("@timeless/inner-kit").MaybePromise;
 declare const NavigatorCore: typeof import("@timeless/inner-kit").NavigatorCore;
 declare const RequestCore: typeof import("@timeless/inner-kit").RequestCore;
 declare const RequestPayload: typeof import("@timeless/inner-kit").RequestPayload;
 declare const RouteMenusModel: typeof import("@timeless/inner-kit").RouteMenusModel;
 declare const RouteViewCore: typeof import("@timeless/inner-kit").RouteViewCore;
+declare const SocketClientCore: typeof import("@timeless/inner-kit").SocketClientCore;
+declare const SocketCloseReason: typeof import("@timeless/inner-kit").SocketCloseReason;
+declare const SocketConnection: typeof import("@timeless/inner-kit").SocketConnection;
+declare const SocketMessageMeta: typeof import("@timeless/inner-kit").SocketMessageMeta;
+declare const SocketOpenOptions: typeof import("@timeless/inner-kit").SocketOpenOptions;
 declare const StorageCore: typeof import("@timeless/inner-kit").StorageCore;
 declare const buildRoutes: typeof import("@timeless/inner-kit").buildRoutes;
 declare const request_factory: typeof import("@timeless/inner-kit").request_factory;
@@ -23585,7 +24307,9 @@ declare const Waterfall: typeof import("@timeless/shadcn").Waterfall;
 declare const Activity: typeof import("@timeless/inner-icons").Activity;
 declare const ArrowDownToLine: typeof import("@timeless/inner-icons").ArrowDownToLine;
 declare const ArrowLeft: typeof import("@timeless/inner-icons").ArrowLeft;
+declare const ArrowRight: typeof import("@timeless/inner-icons").ArrowRight;
 declare const Bolt: typeof import("@timeless/inner-icons").Bolt;
+declare const Braces: typeof import("@timeless/inner-icons").Braces;
 declare const Calendar: typeof import("@timeless/inner-icons").Calendar;
 declare const Check: typeof import("@timeless/inner-icons").Check;
 declare const ChevronDown: typeof import("@timeless/inner-icons").ChevronDown;
@@ -23597,12 +24321,15 @@ declare const CircleArrowDown: typeof import("@timeless/inner-icons").CircleArro
 declare const CircleEllipsis: typeof import("@timeless/inner-icons").CircleEllipsis;
 declare const CircleX: typeof import("@timeless/inner-icons").CircleX;
 declare const Clock: typeof import("@timeless/inner-icons").Clock;
+declare const Clock3: typeof import("@timeless/inner-icons").Clock3;
 declare const ClockArrowDown: typeof import("@timeless/inner-icons").ClockArrowDown;
 declare const CloudDownload: typeof import("@timeless/inner-icons").CloudDownload;
 declare const Copy: typeof import("@timeless/inner-icons").Copy;
+declare const CornerDownRight: typeof import("@timeless/inner-icons").CornerDownRight;
 declare const Download: typeof import("@timeless/inner-icons").Download;
 declare const Ellipsis: typeof import("@timeless/inner-icons").Ellipsis;
 declare const EllipsisVertical: typeof import("@timeless/inner-icons").EllipsisVertical;
+declare const ExternalLink: typeof import("@timeless/inner-icons").ExternalLink;
 declare const File: typeof import("@timeless/inner-icons").File;
 declare const FileBox: typeof import("@timeless/inner-icons").FileBox;
 declare const FileImage: typeof import("@timeless/inner-icons").FileImage;
@@ -23616,6 +24343,7 @@ declare const FileVolume: typeof import("@timeless/inner-icons").FileVolume;
 declare const Film: typeof import("@timeless/inner-icons").Film;
 declare const Folder: typeof import("@timeless/inner-icons").Folder;
 declare const FolderClosed: typeof import("@timeless/inner-icons").FolderClosed;
+declare const FolderOpen: typeof import("@timeless/inner-icons").FolderOpen;
 declare const Funnel: typeof import("@timeless/inner-icons").Funnel;
 declare const Gauge: typeof import("@timeless/inner-icons").Gauge;
 declare const GitFork: typeof import("@timeless/inner-icons").GitFork;
@@ -23624,7 +24352,9 @@ declare const HardDrive: typeof import("@timeless/inner-icons").HardDrive;
 declare const HardDriveDownload: typeof import("@timeless/inner-icons").HardDriveDownload;
 declare const History: typeof import("@timeless/inner-icons").History;
 declare const House: typeof import("@timeless/inner-icons").House;
+declare const Image: typeof import("@timeless/inner-icons").Image;
 declare const Inbox: typeof import("@timeless/inner-icons").Inbox;
+declare const Library: typeof import("@timeless/inner-icons").Library;
 declare const ListFilter: typeof import("@timeless/inner-icons").ListFilter;
 declare const Loader: typeof import("@timeless/inner-icons").Loader;
 declare const LoaderCircle: typeof import("@timeless/inner-icons").LoaderCircle;
@@ -23645,6 +24375,7 @@ declare const ScrollText: typeof import("@timeless/inner-icons").ScrollText;
 declare const Search: typeof import("@timeless/inner-icons").Search;
 declare const Server: typeof import("@timeless/inner-icons").Server;
 declare const Settings: typeof import("@timeless/inner-icons").Settings;
+declare const Square: typeof import("@timeless/inner-icons").Square;
 declare const SquareArrowDown: typeof import("@timeless/inner-icons").SquareArrowDown;
 declare const Sun: typeof import("@timeless/inner-icons").Sun;
 declare const Table: typeof import("@timeless/inner-icons").Table;
@@ -23654,6 +24385,7 @@ declare const Undo2: typeof import("@timeless/inner-icons").Undo2;
 declare const Upload: typeof import("@timeless/inner-icons").Upload;
 declare const User: typeof import("@timeless/inner-icons").User;
 declare const Users: typeof import("@timeless/inner-icons").Users;
+declare const Video: typeof import("@timeless/inner-icons").Video;
 declare const Wrench: typeof import("@timeless/inner-icons").Wrench;
 declare const X: typeof import("@timeless/inner-icons").X;
 declare const iconRegistry: typeof import("@timeless/inner-icons").iconRegistry;

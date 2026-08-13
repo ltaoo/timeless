@@ -1,7 +1,12 @@
+import * as icons from "@timeless/inner-icons";
+import { registerIcons } from "@timeless/inner-primitive";
+
 console.log("timeless.version " + __Version);
 
+registerIcons(icons.iconRegistry);
+
 export * from "./core";
-export * as icons from "@timeless/inner-icons";
+export { icons };
 export * as kit from "@timeless/inner-kit";
 export * as ui from "@timeless/ui-primitive";
 export * as utils from "@timeless/inner-utils";

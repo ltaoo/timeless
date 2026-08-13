@@ -430,7 +430,7 @@ import "tailwindcss/tailwind.css";
 #### `@timeless/provider-web` — 浏览器平台
 **组合**：`timeless` + `inner-kit` + `inner-vm`
 
-提供 `provide_http_client`（axios）、`provide_clipboard`、`provide_history`、`provide_channel`（WebSocket/SSE）等浏览器实现。
+提供 `provide_http_client`（axios）、`provide_socket_client`（WebSocket）、`provide_clipboard`、`provide_history` 等浏览器实现。长连接领域状态和自动重连由 `ChannelCore` 管理。
 
 #### `@timeless/provider-memory` — 内存平台（测试用）
 **组合**：`inner-base` + `inner-kit` + `inner-utils`

@@ -1,5 +1,3 @@
-import { icons, registerIcons } from "@timeless/timeless";
-
 import { Button } from "./modules/button";
 import { Input } from "./modules/input";
 import { Textarea } from "./modules/textarea";
@@ -29,7 +27,6 @@ try {
     import("./index.less");
   }
 } catch {}
-registerIcons(icons.iconRegistry);
 
 export const TimelessWeUIVersion = __Version;
 

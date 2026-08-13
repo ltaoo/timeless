@@ -1,24 +1,24 @@
 /**
- * @file Bidirectional channel core.
+ * @file Bidirectional, long-lived channel domain model.
  */
 import { BaseDomain, BizError, Handler, Result } from "@timeless/inner-base";
 
-export type MaybePromise<T> = T | Promise<T>;
+import {
+  MaybePromise,
+  SocketClientCore,
+  SocketCloseReason,
+  SocketConnection,
+  SocketMessageMeta,
+} from "@/http_client/socket";
 
 export type ChannelStatus =
   | "idle"
   | "connecting"
   | "connected"
+  | "reconnecting"
   | "closing"
   | "closed"
   | "failed";
-
-export type ChannelCloseReason = {
-  code?: number;
-  reason?: string;
-  clean?: boolean;
-  event?: unknown;
-};
 
 export type ChannelMessageMeta = {
   raw: unknown;
@@ -32,40 +32,20 @@ export type ChannelSentMessage<T> = {
   sentAt: number;
 };
 
-export type ChannelConnection = {
-  send: (data: unknown) => MaybePromise<Result<null> | void>;
-  close: (code?: number, reason?: string) => MaybePromise<Result<null> | void>;
+export type ChannelReconnectInfo = {
+  attempt: number;
+  delay: number;
+  scheduledAt: number;
 };
 
-export type ChannelOpenOptions = {
-  endpoint: unknown;
-  hostname: string;
-  headers: Record<string, string | number>;
-  query?: Record<string, string | number | boolean | null | undefined>;
-  params?: any;
-  signal: AbortSignal;
-  onMessage: (data: unknown, meta?: Partial<ChannelMessageMeta>) => void;
-  onClose: (reason: ChannelCloseReason) => void;
-  onError: (error: unknown) => void;
+export type ChannelReconnectOptions = {
+  enabled?: boolean;
+  interval?: number;
 };
-
-/**
- * Platform transport for channels. A provider installs `open`, while each
- * ChannelCore owns the lifecycle and state of one logical connection.
- */
-export class ChannelClientCore {
-  open(options: ChannelOpenOptions): MaybePromise<Result<ChannelConnection>> {
-    void options;
-    const tip = "请通过 provider 实现 ChannelClientCore.open 方法";
-    console.log(tip);
-    return Result.Err(tip);
-  }
-}
 
 export type ChannelCoreProps<TMessage = unknown, TSend = unknown> = {
   _name?: string;
-  endpoint?: unknown;
-  client?: ChannelClientCore;
+  client?: SocketClientCore;
   hostname?: string;
   headers?: Record<string, string | number>;
   query?: Record<string, string | number | boolean | null | undefined>;
@@ -73,10 +53,13 @@ export type ChannelCoreProps<TMessage = unknown, TSend = unknown> = {
   initialMessage?: TSend;
   process?: (v: unknown, meta: ChannelMessageMeta) => TMessage;
   encode?: (v: TSend) => unknown;
+  reconnect?: ChannelReconnectOptions;
   onConnected?: () => void;
+  onReconnecting?: (info: ChannelReconnectInfo) => void;
+  onReconnected?: () => void;
   onMessage?: (message: TMessage) => void;
   onSent?: (message: ChannelSentMessage<TSend>) => void;
-  onClose?: (reason: ChannelCloseReason) => void;
+  onClose?: (reason: SocketCloseReason) => void;
   onFailed?: (error: BizError) => void;
   onStatusChange?: (status: ChannelStatus) => void;
   onConnecting?: (connecting: boolean) => void;
@@ -90,7 +73,9 @@ export type ChannelState<TMessage, TSend> = {
   error: BizError | null;
   lastMessage: TMessage | null;
   lastSent: TSend | null;
-  closeReason: ChannelCloseReason | null;
+  closeReason: SocketCloseReason | null;
+  reconnectAttempt: number;
+  nextReconnectAt: number | null;
 };
 
 enum Events {
@@ -98,6 +83,8 @@ enum Events {
   ConnectingChange,
   StatusChange,
   Connected,
+  Reconnecting,
+  Reconnected,
   Message,
   MessageChange,
   Sent,
@@ -111,10 +98,12 @@ type TheTypesOfEvents<TMessage, TSend> = {
   [Events.ConnectingChange]: boolean;
   [Events.StatusChange]: ChannelStatus;
   [Events.Connected]: void;
+  [Events.Reconnecting]: ChannelReconnectInfo;
+  [Events.Reconnected]: void;
   [Events.Message]: TMessage;
   [Events.MessageChange]: TMessage | null;
   [Events.Sent]: ChannelSentMessage<TSend>;
-  [Events.Close]: ChannelCloseReason;
+  [Events.Close]: SocketCloseReason;
   [Events.Failed]: BizError;
   [Events.StateChange]: ChannelState<TMessage, TSend>;
 };
@@ -130,10 +119,10 @@ function isResult<T>(v: unknown): v is Result<T> {
 }
 
 async function toVoidResult(
-  value: MaybePromise<Result<null> | void>,
+  fn: () => MaybePromise<Result<null> | void>,
 ): Promise<Result<null>> {
   try {
-    const resolved = await value;
+    const resolved = await fn();
     if (isResult<null>(resolved)) {
       return resolved;
     }
@@ -143,9 +132,11 @@ async function toVoidResult(
   }
 }
 
-async function toResult<T>(value: MaybePromise<Result<T>>): Promise<Result<T>> {
+async function toResult<T>(
+  fn: () => MaybePromise<Result<T>>,
+): Promise<Result<T>> {
   try {
-    return await value;
+    return await fn();
   } catch (err) {
     return Result.Err(err as Error);
   }
@@ -155,18 +146,8 @@ function toBizError(error: unknown) {
   if (error instanceof BizError) {
     return error;
   }
-  const r = Result.Err(error as Error);
-  return r.error!;
-}
-
-function isChannelCoreProps(
-  value: unknown,
-): value is ChannelCoreProps<any, any> {
-  return (
-    !!value &&
-    typeof value === "object" &&
-    ("endpoint" in value || "client" in value)
-  );
+  const result = Result.Err(error as Error);
+  return result.error!;
 }
 
 export class ChannelCore<
@@ -174,7 +155,7 @@ export class ChannelCore<
   TSend = unknown,
 > extends BaseDomain<TheTypesOfEvents<TMessage, TSend>> {
   _name = "ChannelCore";
-  client?: ChannelClientCore;
+  client?: SocketClientCore;
   endpoint: unknown;
   hostname = "";
   headers: Record<string, string | number> = {};
@@ -190,11 +171,19 @@ export class ChannelCore<
   error: BizError | null = null;
   lastMessage: TMessage | null = null;
   lastSent: TSend | null = null;
-  closeReason: ChannelCloseReason | null = null;
+  closeReason: SocketCloseReason | null = null;
+  reconnectAttempt = 0;
+  nextReconnectAt: number | null = null;
   pending: Promise<Result<null>> | null = null;
-  private connection: ChannelConnection | null = null;
-  private connectionController: AbortController | null = null;
   id = String(this.uid());
+
+  private connection: SocketConnection | null = null;
+  private connectionController: AbortController | null = null;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private reconnectEnabled = false;
+  private reconnectDelay = 5000;
+  private shouldConnect = false;
+  private connectedOnce = false;
 
   get state(): ChannelState<TMessage, TSend> {
     return {
@@ -206,18 +195,16 @@ export class ChannelCore<
       lastMessage: this.lastMessage,
       lastSent: this.lastSent,
       closeReason: this.closeReason,
+      reconnectAttempt: this.reconnectAttempt,
+      nextReconnectAt: this.nextReconnectAt,
     };
   }
 
-  constructor(props: ChannelCoreProps<TMessage, TSend>);
-  constructor(endpoint: unknown, props?: ChannelCoreProps<TMessage, TSend>);
   constructor(
-    endpointOrProps: unknown | ChannelCoreProps<TMessage, TSend>,
+    endpoint: unknown,
     props: ChannelCoreProps<TMessage, TSend> = {},
   ) {
-    const objectProps = isChannelCoreProps(endpointOrProps);
-    const options = objectProps ? endpointOrProps : props;
-    super({ unique_id: options._name });
+    super({ unique_id: props._name });
 
     const {
       _name,
@@ -229,16 +216,19 @@ export class ChannelCore<
       initialMessage,
       process,
       encode,
+      reconnect,
       onConnected,
+      onReconnecting,
+      onReconnected,
       onMessage,
       onSent,
       onClose,
       onFailed,
       onStatusChange,
       onConnecting,
-    } = options;
+    } = props;
 
-    this.endpoint = objectProps ? options.endpoint : endpointOrProps;
+    this.endpoint = endpoint;
     this.client = client;
     this.hostname = hostname;
     this.headers = headers;
@@ -247,11 +237,20 @@ export class ChannelCore<
     this.initialMessage = initialMessage;
     this.process = process;
     this.encode = encode;
+    this.reconnectEnabled =
+      reconnect !== undefined && reconnect.enabled !== false;
+    this.reconnectDelay = Math.max(0, reconnect?.interval ?? 5000);
     if (_name) {
       this._name = _name;
     }
     if (onConnected) {
       this.onConnected(onConnected);
+    }
+    if (onReconnecting) {
+      this.onReconnecting(onReconnecting);
+    }
+    if (onReconnected) {
+      this.onReconnected(onReconnected);
     }
     if (onMessage) {
       this.onMessage(onMessage);
@@ -273,52 +272,56 @@ export class ChannelCore<
     }
   }
 
-  async connect() {
+  connect() {
+    this.shouldConnect = true;
+    this.cancelReconnect();
+    this.reconnectAttempt = 0;
+    return this.beginConnect(false);
+  }
+
+  private beginConnect(reconnecting: boolean) {
+    if (this.connected) {
+      return Promise.resolve(Result.Ok(null));
+    }
     if (this.pending) {
       return this.pending;
     }
-    const task = this.runConnect();
+    const task = this.runConnect(reconnecting);
     this.pending = task;
-    try {
-      return await task;
-    } finally {
-      this.pending = null;
-    }
+    void task.finally(() => {
+      if (this.pending === task) {
+        this.pending = null;
+      }
+    });
+    return task;
   }
 
-  private async runConnect() {
-    if (this.connected) {
-      return Result.Ok(null);
+  private async runConnect(reconnecting: boolean) {
+    if (this.connection || this.connectionController) {
+      await this.discardConnection("replace unavailable connection");
     }
-
-    if (this.connection) {
-      const previousConnection = this.connection;
-      const previousController = this.connectionController;
-      this.connection = null;
-      this.connectionController = null;
-      previousController?.abort();
-      await toVoidResult(
-        previousConnection.close(1000, "replace failed connection"),
-      );
+    if (!this.shouldConnect) {
+      return Result.Err("连接已取消");
     }
 
     this.initial = false;
     this.error = null;
     this.closeReason = null;
+    this.nextReconnectAt = null;
     this.setConnecting(true);
-    this.setStatus("connecting");
+    this.setStatus(reconnecting ? "reconnecting" : "connecting");
     this.emit(Events.BeforeConnect);
     this.emitState();
 
     if (!this.client) {
-      const error = this.fail("缺少 channel client");
+      const error = this.fail("缺少 socket client", false);
       return Result.Err(error);
     }
 
     const controller = new AbortController();
     this.connectionController = controller;
-    const result = await toResult(
-      this.client.open({
+    const result = await toResult(() =>
+      this.client!.open({
         endpoint: this.endpoint,
         hostname: this.hostname,
         headers: this.headers,
@@ -347,18 +350,16 @@ export class ChannelCore<
         },
       }),
     );
-    if (controller.signal.aborted) {
+    if (controller.signal.aborted || this.connectionController !== controller) {
       if (!result.error) {
-        await toVoidResult(result.data.close(1000, "connect canceled"));
+        await toVoidResult(() => result.data.close(1000, "connect canceled"));
       }
       return Result.Err("连接已取消");
     }
     if (result.error) {
-      if (this.connectionController === controller) {
-        this.connectionController = null;
-      }
+      this.connectionController = null;
       controller.abort();
-      const error = this.fail(result.error);
+      const error = this.fail(result.error, true);
       return Result.Err(error);
     }
 
@@ -377,15 +378,21 @@ export class ChannelCore<
     if (!this.connected || !this.connection) {
       return Result.Err("连接未建立");
     }
-    const raw = this.encode ? this.encode(data) : data;
+    let raw: unknown;
+    try {
+      raw = this.encode ? this.encode(data) : data;
+    } catch (err) {
+      const error = this.reportError(err);
+      return Result.Err(error);
+    }
     const sent: ChannelSentMessage<TSend> = {
       data,
       raw,
       sentAt: Date.now(),
     };
-    const result = await toVoidResult(this.connection.send(raw));
+    const result = await toVoidResult(() => this.connection!.send(raw));
     if (result.error) {
-      const error = this.fail(result.error);
+      const error = this.fail(result.error, true);
       return Result.Err(error);
     }
     this.lastSent = data;
@@ -399,10 +406,10 @@ export class ChannelCore<
   }
 
   async close(code?: number, reason?: string) {
-    if (!this.connected && this.status !== "connecting") {
-      this.handleClose({ code, reason, clean: true });
-      return Result.Ok(null);
-    }
+    this.shouldConnect = false;
+    this.cancelReconnect();
+    this.reconnectAttempt = 0;
+
     const controller = this.connectionController;
     this.connectionController = null;
     controller?.abort();
@@ -412,14 +419,15 @@ export class ChannelCore<
     this.connected = false;
     this.setStatus("closing");
     this.emitState();
+
     const result = connection
-      ? await toVoidResult(connection.close(code, reason))
+      ? await toVoidResult(() => connection.close(code, reason))
       : Result.Ok(null);
     if (result.error) {
-      const error = this.fail(result.error);
+      const error = this.fail(result.error, false);
       return Result.Err(error);
     }
-    this.handleClose({ code, reason, clean: true });
+    this.finishClose({ code, reason, clean: true });
     return Result.Ok(null);
   }
 
@@ -427,16 +435,16 @@ export class ChannelCore<
     return this.close(code, reason);
   }
 
-  reconnect() {
-    if (!this.connected) {
-      return this.connect();
+  async reconnect() {
+    this.shouldConnect = true;
+    this.cancelReconnect();
+    this.reconnectAttempt = Math.max(1, this.reconnectAttempt);
+    const pending = this.pending;
+    await this.discardConnection("reconnect");
+    if (pending) {
+      await pending;
     }
-    return this.close(1000, "reconnect").then((r) => {
-      if (r.error) {
-        return r;
-      }
-      return this.connect();
-    });
+    return this.beginConnect(true);
   }
 
   clear() {
@@ -466,7 +474,7 @@ export class ChannelCore<
     };
   }
 
-  setClient(client: ChannelClientCore) {
+  setClient(client: SocketClientCore) {
     this.client = client;
   }
 
@@ -476,22 +484,11 @@ export class ChannelCore<
   }
 
   destroy() {
-    this.close();
+    void this.close(1000, "destroy");
     super.destroy();
   }
 
-  handleConnected() {
-    const wasConnected = this.connected && this.status === "connected";
-    this.setConnecting(false);
-    this.connected = true;
-    this.setStatus("connected");
-    if (!wasConnected) {
-      this.emit(Events.Connected);
-    }
-    this.emitState();
-  }
-
-  receiveMessage(data: unknown, extra: Partial<ChannelMessageMeta> = {}) {
+  receiveMessage(data: unknown, extra: SocketMessageMeta = {}) {
     try {
       const meta: ChannelMessageMeta = {
         raw: data,
@@ -506,30 +503,69 @@ export class ChannelCore<
       this.emit(Events.MessageChange, message);
       this.emitState();
     } catch (err) {
-      this.fail(err);
+      this.reportError(err);
     }
   }
 
-  handleClose(reason: ChannelCloseReason = {}) {
-    const wasClosed =
-      !this.connected && this.status === "closed" && !!this.closeReason;
+  private async discardConnection(reason: string) {
+    const controller = this.connectionController;
+    this.connectionController = null;
+    controller?.abort();
+    const connection = this.connection;
+    this.connection = null;
+    this.connected = false;
+    if (connection) {
+      await toVoidResult(() => connection.close(1000, reason));
+    }
+  }
+
+  private handleConnected() {
+    const reconnected = this.connectedOnce;
+    this.connectedOnce = true;
+    this.cancelReconnect();
+    this.reconnectAttempt = 0;
+    this.error = null;
+    this.closeReason = null;
+    this.setConnecting(false);
+    this.connected = true;
+    this.setStatus("connected");
+    this.emit(Events.Connected);
+    if (reconnected) {
+      this.emit(Events.Reconnected);
+    }
+    this.emitState();
+  }
+
+  private handleClose(reason: SocketCloseReason = {}) {
+    this.setConnecting(false);
+    this.connection = null;
+    this.connectionController = null;
+    this.connected = false;
+    this.closeReason = reason;
+    const reconnecting = this.reconnectEnabled && this.shouldConnect;
+    this.setStatus(reconnecting ? "reconnecting" : "closed");
+    this.emit(Events.Close, reason);
+    if (!reconnecting || !this.scheduleReconnect()) {
+      this.emitState();
+    }
+  }
+
+  private finishClose(reason: SocketCloseReason) {
     this.setConnecting(false);
     this.connection = null;
     this.connectionController = null;
     this.connected = false;
     this.closeReason = reason;
     this.setStatus("closed");
-    if (!wasClosed) {
-      this.emit(Events.Close, reason);
-    }
+    this.emit(Events.Close, reason);
     this.emitState();
   }
 
-  handleError(error: unknown) {
-    return this.fail(error);
+  private handleError(error: unknown) {
+    return this.fail(error, true);
   }
 
-  private fail(error: unknown) {
+  private fail(error: unknown, reconnect: boolean) {
     const err = toBizError(error);
     this.error = err;
     this.setConnecting(false);
@@ -537,7 +573,52 @@ export class ChannelCore<
     this.setStatus("failed");
     this.emit(Events.Failed, err);
     this.emitState();
+    if (reconnect) {
+      this.scheduleReconnect();
+    }
     return err;
+  }
+
+  private reportError(error: unknown) {
+    const err = toBizError(error);
+    this.error = err;
+    this.emit(Events.Failed, err);
+    this.emitState();
+    return err;
+  }
+
+  private scheduleReconnect() {
+    if (!this.reconnectEnabled || !this.shouldConnect || this.connected) {
+      return false;
+    }
+    this.setStatus("reconnecting");
+    if (this.reconnectTimer !== null) {
+      this.emitState();
+      return true;
+    }
+    this.reconnectAttempt += 1;
+    const info: ChannelReconnectInfo = {
+      attempt: this.reconnectAttempt,
+      delay: this.reconnectDelay,
+      scheduledAt: Date.now() + this.reconnectDelay,
+    };
+    this.nextReconnectAt = info.scheduledAt;
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.nextReconnectAt = null;
+      void this.beginConnect(true);
+    }, this.reconnectDelay);
+    this.emit(Events.Reconnecting, info);
+    this.emitState();
+    return true;
+  }
+
+  private cancelReconnect() {
+    if (this.reconnectTimer !== null) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.nextReconnectAt = null;
   }
 
   private setConnecting(connecting: boolean) {
@@ -586,10 +667,16 @@ export class ChannelCore<
     return this.on(Events.Connected, handler);
   }
 
-  onOpen(
-    handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Connected]>,
+  onReconnecting(
+    handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Reconnecting]>,
   ) {
-    return this.onConnected(handler);
+    return this.on(Events.Reconnecting, handler);
+  }
+
+  onReconnected(
+    handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Reconnected]>,
+  ) {
+    return this.on(Events.Reconnected, handler);
   }
 
   onMessage(

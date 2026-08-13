@@ -110,6 +110,15 @@ export function hydrate_node(
     text$.hydrate(vnode, $elm, opt);
     return text$;
   }
+  if (vnode.t === "rich-text") {
+    if ($elm.nodeType === 3) {
+      return null;
+    }
+    const rich_text$ = build(vnode);
+    vnode.$elm = rich_text$;
+    rich_text$.hydrate(vnode, $elm, opt);
+    return rich_text$;
+  }
   if (vnode.t === "row") {
     const row$ = build(vnode);
     vnode.$elm = row$;

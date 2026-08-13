@@ -1,36 +1,36 @@
 import { Result } from "@timeless/timeless";
 import {
-  ChannelClientCore,
-  type ChannelConnection,
-  type ChannelOpenOptions,
+  SocketClientCore,
+  type SocketConnection,
+  type SocketOpenOptions,
 } from "@timeless/inner-kit";
 
-export type WebChannelProviderOptions = {
+export type WebSocketProviderOptions = {
   debug?: boolean;
   protocols?:
     | string
     | string[]
-    | ((options: ChannelOpenOptions) => string | string[] | undefined);
+    | ((options: SocketOpenOptions) => string | string[] | undefined);
   WebSocket?: typeof WebSocket;
 };
 
-function getWebSocketCtor(options: WebChannelProviderOptions) {
+function getWebSocketCtor(options: WebSocketProviderOptions) {
   return options.WebSocket || globalThis.WebSocket;
 }
 
 function getProtocols(
-  channelOptions: ChannelOpenOptions,
-  options: WebChannelProviderOptions,
+  socketOptions: SocketOpenOptions,
+  options: WebSocketProviderOptions,
 ) {
   if (typeof options.protocols === "function") {
-    return options.protocols(channelOptions);
+    return options.protocols(socketOptions);
   }
   return options.protocols;
 }
 
-function normalizeUrl(options: ChannelOpenOptions) {
+function normalizeUrl(options: SocketOpenOptions) {
   if (typeof options.endpoint !== "string") {
-    return Result.Err("ChannelOpenOptions.endpoint 必须是字符串");
+    return Result.Err("SocketOpenOptions.endpoint 必须是字符串");
   }
 
   const endpoint = options.endpoint;
@@ -121,22 +121,22 @@ function decodeMessage(data: unknown) {
 }
 
 export function connect(
-  client: ChannelClientCore,
-  options: WebChannelProviderOptions = {},
+  client: SocketClientCore,
+  options: WebSocketProviderOptions = {},
 ) {
-  client.open = (channelOptions) => {
+  client.open = (socketOptions) => {
     const WebSocketCtor = getWebSocketCtor(options);
     if (typeof WebSocketCtor !== "function") {
       return Result.Err("当前环境缺少 WebSocket");
     }
 
-    const url = normalizeUrl(channelOptions);
+    const url = normalizeUrl(socketOptions);
     if (url.error) {
       return Result.Err(url.error);
     }
 
     return new Promise((resolve) => {
-      const protocols = getProtocols(channelOptions, options);
+      const protocols = getProtocols(socketOptions, options);
       const socket =
         protocols !== undefined
           ? new WebSocketCtor(url.data, protocols)
@@ -144,7 +144,7 @@ export function connect(
 
       let settled = false;
       const settle = (
-        result: ReturnType<typeof Result.Ok<ChannelConnection>>,
+        result: ReturnType<typeof Result.Ok<SocketConnection>>,
       ) => {
         if (settled) {
           return;
@@ -153,7 +153,7 @@ export function connect(
         resolve(result);
       };
 
-      const connection: ChannelConnection = {
+      const connection: SocketConnection = {
         send(data) {
           if (socket.readyState !== socket.OPEN) {
             return Result.Err("WebSocket 未连接");
@@ -180,7 +180,7 @@ export function connect(
       const handleAbort = () => {
         connection.close(1000, "connect canceled");
       };
-      channelOptions.signal.addEventListener("abort", handleAbort, {
+      socketOptions.signal.addEventListener("abort", handleAbort, {
         once: true,
       });
 
@@ -196,7 +196,7 @@ export function connect(
         if (options.debug) {
           console.log("[provider-web]websocket message", data);
         }
-        channelOptions.onMessage(data, { event });
+        socketOptions.onMessage(data, { event });
       };
 
       socket.onerror = (event) => {
@@ -205,19 +205,19 @@ export function connect(
           settle(Result.Err(error));
           return;
         }
-        channelOptions.onError(error);
+        socketOptions.onError(error);
         if (options.debug) {
           console.log("[provider-web]websocket error", event);
         }
       };
 
       socket.onclose = (event) => {
-        channelOptions.signal.removeEventListener("abort", handleAbort);
+        socketOptions.signal.removeEventListener("abort", handleAbort);
         if (!settled) {
           settle(Result.Err(event.reason || "WebSocket closed before open"));
           return;
         }
-        channelOptions.onClose({
+        socketOptions.onClose({
           code: event.code,
           reason: event.reason,
           clean: event.wasClean,

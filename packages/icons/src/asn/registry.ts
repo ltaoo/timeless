@@ -1,6 +1,7 @@
 import activity from "./activity";
 import arrowDownToLine from "./arrow-down-to-line";
 import arrowLeft from "./arrow-left";
+import arrowRight from "./arrow-right";
 import bolt from "./bolt";
 import braces from "./braces";
 import calendar from "./calendar";
@@ -86,6 +87,7 @@ export const iconRegistry = {
   "activity": activity,
   "arrow-down-to-line": arrowDownToLine,
   "arrow-left": arrowLeft,
+  "arrow-right": arrowRight,
   "bolt": bolt,
   "braces": braces,
   "calendar": calendar,

@@ -1,6 +1,6 @@
 {
   "name": "@timeless/inner-vite-plugin",
-  "version": "0.31.0",
+  "version": "0.31.1",
   "description": "Timeless HMR plugin for Vite",
   "main": "dist/index.js",
   "module": "dist/timeless.vite-plugin.esm.js",

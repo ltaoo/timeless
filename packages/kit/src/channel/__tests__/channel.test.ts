@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import { Result } from "@timeless/inner-base";
 
-import { ChannelClientCore, ChannelCore } from "../index";
+import { SocketClientCore } from "../../http_client/socket";
+import { ChannelCore } from "../index";
 
 function createClient() {
-  const client = new ChannelClientCore();
+  const client = new SocketClientCore();
   const send = vi.fn().mockReturnValue(Result.Ok(null));
   const close = vi.fn().mockReturnValue(Result.Ok(null));
   const open = vi.fn().mockReturnValue(Result.Ok({ send, close }));
@@ -12,12 +13,15 @@ function createClient() {
   return { client, open, send, close };
 }
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe("ChannelCore", () => {
   describe("constructor", () => {
     it("accepts an endpoint and client", () => {
       const { client } = createClient();
-      const channel$ = new ChannelCore({
-        endpoint: "/eventnamelisten",
+      const channel$ = new ChannelCore("/eventnamelisten", {
         client,
       });
 
@@ -84,14 +88,16 @@ describe("ChannelCore", () => {
 
       const result = await channel$.connect();
 
-      expect(result.error?.message).toBe("缺少 channel client");
+      expect(result.error?.message).toBe("缺少 socket client");
       expect(channel$.status).toBe("failed");
     });
 
     it("returns client open errors", async () => {
-      const client = new ChannelClientCore();
+      const client = new SocketClientCore();
       client.open = vi.fn().mockReturnValue(Result.Err("failed"));
-      const channel$ = new ChannelCore("/eventnamelisten", { client });
+      const channel$ = new ChannelCore("/eventnamelisten", {
+        client,
+      });
 
       const result = await channel$.connect();
 
@@ -150,7 +156,7 @@ describe("ChannelCore", () => {
     });
 
     it("can close while the client is still opening", async () => {
-      const client = new ChannelClientCore();
+      const client = new SocketClientCore();
       const send = vi.fn().mockReturnValue(Result.Ok(null));
       const close = vi.fn().mockReturnValue(Result.Ok(null));
       let finishOpen: (result: ReturnType<typeof Result.Ok>) => void;
@@ -215,6 +221,23 @@ describe("ChannelCore", () => {
       channel$.receiveMessage('{"type":"download_progress"}');
 
       expect(channel$.lastMessage).toEqual({ type: "download_progress" });
+    });
+
+    it("keeps the connection open when message processing fails", async () => {
+      const { client } = createClient();
+      const channel$ = new ChannelCore("/events", {
+        client,
+        process: () => {
+          throw new Error("invalid message");
+        },
+      });
+
+      await channel$.connect();
+      channel$.receiveMessage("invalid");
+
+      expect(channel$.connected).toBe(true);
+      expect(channel$.status).toBe("connected");
+      expect(channel$.error?.message).toBe("invalid message");
     });
   });
 
@@ -286,7 +309,9 @@ describe("ChannelCore", () => {
 
     it("closes the connection and updates state", async () => {
       const { client, close } = createClient();
-      const channel$ = new ChannelCore("/eventnamelisten", { client });
+      const channel$ = new ChannelCore("/eventnamelisten", {
+        client,
+      });
       const closeHandler = vi.fn();
       channel$.onClose(closeHandler);
 
@@ -311,7 +336,9 @@ describe("ChannelCore", () => {
 
     it("handles provider-side close", async () => {
       const { client, open } = createClient();
-      const channel$ = new ChannelCore("/eventnamelisten", { client });
+      const channel$ = new ChannelCore("/eventnamelisten", {
+        client,
+      });
 
       await channel$.connect();
       open.mock.calls[0][0].onClose({
@@ -327,6 +354,145 @@ describe("ChannelCore", () => {
         reason: "lost",
         clean: false,
       });
+    });
+  });
+
+  describe("reconnect", () => {
+    it("reconnects immediately when requested", async () => {
+      const { client, open, close } = createClient();
+      const channel$ = new ChannelCore("/events", { client });
+      const reconnectedHandler = vi.fn();
+      channel$.onReconnected(reconnectedHandler);
+
+      await channel$.connect();
+      const result = await channel$.reconnect();
+
+      expect(result.error).toBeNull();
+      expect(close).toHaveBeenCalledWith(1000, "reconnect");
+      expect(open).toHaveBeenCalledTimes(2);
+      expect(channel$.connected).toBe(true);
+      expect(channel$.status).toBe("connected");
+      expect(reconnectedHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it("automatically reconnects after a remote close", async () => {
+      vi.useFakeTimers();
+      const { client, open } = createClient();
+      const channel$ = new ChannelCore("/events", {
+        client,
+        reconnect: {},
+      });
+      const reconnectingHandler = vi.fn();
+      const reconnectedHandler = vi.fn();
+      const closeStatusHandler = vi.fn(() => channel$.status);
+      channel$.onReconnecting(reconnectingHandler);
+      channel$.onReconnected(reconnectedHandler);
+      channel$.onClose(closeStatusHandler);
+
+      await channel$.connect();
+      open.mock.calls[0][0].onClose({
+        code: 1006,
+        reason: "lost",
+        clean: false,
+      });
+
+      expect(channel$.connected).toBe(false);
+      expect(channel$.status).toBe("reconnecting");
+      expect(closeStatusHandler).toHaveReturnedWith("reconnecting");
+      expect(channel$.reconnectAttempt).toBe(1);
+      expect(channel$.nextReconnectAt).toBe(Date.now() + 5000);
+      expect(reconnectingHandler).toHaveBeenCalledWith({
+        attempt: 1,
+        delay: 5000,
+        scheduledAt: Date.now() + 5000,
+      });
+
+      await vi.advanceTimersByTimeAsync(5000);
+
+      expect(open).toHaveBeenCalledTimes(2);
+      expect(channel$.connected).toBe(true);
+      expect(channel$.status).toBe("connected");
+      expect(channel$.reconnectAttempt).toBe(0);
+      expect(channel$.nextReconnectAt).toBeNull();
+      expect(reconnectedHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it("retries an initial connection failure", async () => {
+      vi.useFakeTimers();
+      const { client, open, send, close } = createClient();
+      open
+        .mockReturnValueOnce(Result.Err("offline"))
+        .mockReturnValueOnce(Result.Ok({ send, close }));
+      const channel$ = new ChannelCore("/events", {
+        client,
+        reconnect: { interval: 1000 },
+      });
+
+      const result = await channel$.connect();
+
+      expect(result.error?.message).toBe("offline");
+      expect(channel$.status).toBe("reconnecting");
+      expect(channel$.error?.message).toBe("offline");
+
+      await vi.advanceTimersByTimeAsync(1000);
+
+      expect(open).toHaveBeenCalledTimes(2);
+      expect(channel$.connected).toBe(true);
+      expect(channel$.status).toBe("connected");
+      expect(channel$.error).toBeNull();
+    });
+
+    it("does not schedule duplicate reconnect timers", async () => {
+      vi.useFakeTimers();
+      const { client, open } = createClient();
+      const channel$ = new ChannelCore("/events", {
+        client,
+        reconnect: { interval: 1000 },
+      });
+
+      await channel$.connect();
+      const options = open.mock.calls[0][0];
+      options.onError(new Error("network error"));
+      options.onClose({ code: 1006, clean: false });
+
+      expect(channel$.reconnectAttempt).toBe(1);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(open).toHaveBeenCalledTimes(2);
+    });
+
+    it("stops a scheduled reconnect after an active close", async () => {
+      vi.useFakeTimers();
+      const { client, open } = createClient();
+      const channel$ = new ChannelCore("/events", {
+        client,
+        reconnect: { interval: 1000 },
+      });
+
+      await channel$.connect();
+      open.mock.calls[0][0].onClose({ code: 1006, clean: false });
+      await channel$.close(1000, "leave page");
+      await vi.advanceTimersByTimeAsync(1000);
+
+      expect(open).toHaveBeenCalledTimes(1);
+      expect(channel$.status).toBe("closed");
+      expect(channel$.connected).toBe(false);
+      expect(channel$.nextReconnectAt).toBeNull();
+    });
+
+    it("can disable automatic reconnect", async () => {
+      vi.useFakeTimers();
+      const { client, open } = createClient();
+      const channel$ = new ChannelCore("/events", {
+        client,
+        reconnect: { enabled: false },
+      });
+
+      await channel$.connect();
+      open.mock.calls[0][0].onClose({ code: 1006, clean: false });
+      await vi.advanceTimersByTimeAsync(5000);
+
+      expect(open).toHaveBeenCalledTimes(1);
+      expect(channel$.status).toBe("closed");
     });
   });
 });

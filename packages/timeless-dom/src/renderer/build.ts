@@ -3,6 +3,7 @@ import { type TimelessElement, VNodeView } from "@timeless/timeless";
 import { DOMView } from "@/host/view";
 import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
+import { DOMRichText } from "@/host/rich-text";
 import { DOMShow } from "@/host/show";
 import { DOMMatch } from "@/host/match";
 import { DOMFor } from "@/host/for";
@@ -79,6 +80,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const text$ = DOMText({ build, elm });
     elm.$elm = text$;
     return text$;
+  }
+  if (elm.t === "rich-text") {
+    const rich_text$ = DOMRichText({ build, elm });
+    elm.$elm = rich_text$;
+    return rich_text$;
   }
   if (elm.t === "label") {
     const label$ = DOMLabel({ build, elm });

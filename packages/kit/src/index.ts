@@ -9,13 +9,18 @@ export { HistoryCore } from "./history";
 export { NavigatorCore } from "./navigator";
 export { HttpClientCore } from "./http_client";
 export {
-  ChannelClientCore,
+  SocketClientCore,
+  type MaybePromise,
+  type SocketCloseReason,
+  type SocketConnection,
+  type SocketMessageMeta,
+  type SocketOpenOptions,
+} from "./http_client/socket";
+export {
   ChannelCore,
-  type ChannelCloseReason,
-  type ChannelConnection,
   type ChannelCoreProps,
   type ChannelMessageMeta,
-  type ChannelOpenOptions,
+  type ChannelReconnectInfo,
   type ChannelSentMessage,
   type ChannelState,
   type ChannelStatus,

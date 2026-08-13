@@ -1,8 +1,5 @@
 import { Result } from "@timeless/inner-base";
-import {
-  ChannelClientCore,
-  type ChannelOpenOptions,
-} from "@timeless/inner-kit";
+import { SocketClientCore, type SocketOpenOptions } from "@timeless/inner-kit";
 
 export type VeloInvoke = (
   url: string,
@@ -20,13 +17,13 @@ export type VeloRuntime = {
   __goMessageHandlers?: Array<(payload: unknown) => void>;
 };
 
-export type VeloChannelProviderOptions = {
+export type VeloSocketProviderOptions = {
   debug?: boolean;
   runtime?: VeloRuntime;
   invoke?: VeloInvoke;
 };
 
-function getRuntime(options: VeloChannelProviderOptions) {
+function getRuntime(options: VeloSocketProviderOptions) {
   if (options.runtime) {
     return options.runtime;
   }
@@ -41,9 +38,9 @@ function normalizeHeaders(headers: Record<string, string | number>) {
   return result;
 }
 
-function buildEndpoint(options: ChannelOpenOptions) {
+function buildEndpoint(options: SocketOpenOptions) {
   if (typeof options.endpoint !== "string") {
-    return Result.Err("ChannelOpenOptions.endpoint 必须是字符串");
+    return Result.Err("SocketOpenOptions.endpoint 必须是字符串");
   }
   const endpoint = [options.hostname || "", options.endpoint].join("");
   const query = options.query;
@@ -108,11 +105,11 @@ function isBoxError(resp: unknown) {
 }
 
 export function connect(
-  client: ChannelClientCore,
-  options: VeloChannelProviderOptions = {},
+  client: SocketClientCore,
+  options: VeloSocketProviderOptions = {},
 ) {
-  client.open = (channelOptions) => {
-    if (channelOptions.signal.aborted) {
+  client.open = (socketOptions) => {
+    if (socketOptions.signal.aborted) {
       return Result.Err("连接已取消");
     }
 
@@ -121,7 +118,7 @@ export function connect(
       if (options.debug) {
         console.log("[provider-velo]receive", payload);
       }
-      channelOptions.onMessage(payload);
+      socketOptions.onMessage(payload);
     };
     const added = addMessageHandler(runtime, messageHandler);
     if (added.error) {
@@ -135,14 +132,14 @@ export function connect(
       }
       closed = true;
       added.data();
-      channelOptions.signal.removeEventListener("abort", close);
+      socketOptions.signal.removeEventListener("abort", close);
       return Result.Ok(null);
     };
-    channelOptions.signal.addEventListener("abort", close, { once: true });
+    socketOptions.signal.addEventListener("abort", close, { once: true });
 
     return Result.Ok({
       async send(data: unknown) {
-        const endpoint = buildEndpoint(channelOptions);
+        const endpoint = buildEndpoint(socketOptions);
         if (endpoint.error) {
           return Result.Err(endpoint.error);
         }
@@ -156,7 +153,7 @@ export function connect(
           }
           const resp = await invoke(endpoint.data, {
             method: "POST",
-            headers: normalizeHeaders(channelOptions.headers),
+            headers: normalizeHeaders(socketOptions.headers),
             args: data,
           });
           if (isBoxError(resp)) {

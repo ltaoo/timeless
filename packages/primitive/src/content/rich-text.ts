@@ -39,7 +39,36 @@ export function RichText(props: RichTextProps) {
 
   let $elm: any = null;
 
-  const box$ = Box<RichTextState>(rest, {} as RichTextState);
+  const box$ = Box<RichTextState>(rest, { content: "" });
+  const state = box$.state;
+  const events = box$.events;
+
+  const methods = {
+    set_content(value: string) {
+      state.content = value;
+      if ($elm && typeof $elm.setContent === "function") {
+        $elm.setContent(value);
+      }
+    },
+    subscribe_props() {
+      box$.methods.subscribe_props();
+      if (isRef(content)) {
+        methods.set_content(content.value);
+        box$.methods.unsubscribe(
+          content.subscribe({
+            onChange(value) {
+              methods.set_content(value);
+            },
+          }),
+        );
+        return;
+      }
+      methods.set_content(content);
+    },
+  };
+
+  methods.subscribe_props();
+  box$.methods.add_event();
 
   return {
     t: "rich-text",
@@ -50,18 +79,26 @@ export function RichText(props: RichTextProps) {
       box$.methods.set$elm(v);
       $elm = v;
     },
-    state: box$.state,
+    state,
+    events,
     onMounted(event: MountedEvent) {
+      state.rendered = true;
       if (rest.onMounted) {
         box$.methods.unsubscribe(rest.onMounted(event));
       }
     },
-    beforeUnmounted() {},
+    beforeUnmounted() {
+      if (rest.beforeUnmounted) {
+        rest.beforeUnmounted();
+      }
+    },
     onUnmounted() {
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
       box$.methods.destroy();
+      state.rendered = false;
+      $elm = null;
     },
   };
 }

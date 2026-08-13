@@ -1,6 +1,7 @@
 export { default as Activity } from "./activity";
 export { default as ArrowDownToLine } from "./arrow-down-to-line";
 export { default as ArrowLeft } from "./arrow-left";
+export { default as ArrowRight } from "./arrow-right";
 export { default as Bolt } from "./bolt";
 export { default as Braces } from "./braces";
 export { default as Calendar } from "./calendar";
