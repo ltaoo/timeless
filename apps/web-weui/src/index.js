@@ -4,7 +4,7 @@ function ApplicationRootView() {
   const root_view$ = history$.$view;
 
   return Fragment({}, [
-    StandardSubViews({
+    Timeless.ui.StandardSubViews({
       view: root_view$,
       views,
       client: client$,

@@ -75,7 +75,9 @@ export function Content(
     ...rest
   } = props;
 
-  const zIndex = manualZIndex ?? POPOVER_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
+  const zIndex =
+    manualZIndex ??
+    POPOVER_BASE_Z + getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
 
   const state_ = refobj(store.state);
   const listener$ = ListenerManager();
@@ -138,6 +140,11 @@ export function Content(
             });
             return next_style;
           }
+          const anchor_y = t.anchorY;
+          const use_bottom_anchor =
+            t.placement.split("-")[0] === "top" && typeof anchor_y === "number";
+          const translate_y = use_bottom_anchor ? anchor_y : t.y;
+
           return {
             "z-index": zIndex,
             position: t.strategy,
@@ -146,7 +153,7 @@ export function Content(
             opacity: t.isPlaced ? 1 : 0,
             "pointer-events": t.isPlaced ? "initial" : "none",
             transform: t.isPlaced
-              ? `translate3d(${Math.round(t.x)}px, ${Math.round(t.y)}px, 0)`
+              ? `translate3d(${Math.round(t.x)}px, ${Math.round(translate_y)}px, 0)${use_bottom_anchor ? " translateY(-100%)" : ""}`
               : "translate3d(0, 0, 0)",
             height: t.height !== undefined ? `${t.height}px` : undefined,
           };
@@ -172,6 +179,7 @@ export function Content(
               bottom: v.bottom,
               x: v.x,
               y: v.y,
+              anchorY: v.anchorY,
               minWidth: v.minWidth,
               margin: v.margin,
               isPlaced: v.isPlaced,

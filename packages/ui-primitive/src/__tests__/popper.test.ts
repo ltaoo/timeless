@@ -70,4 +70,35 @@ describe("PopperPrimitive platform", () => {
     expect(position.placement).toBe("top-end");
     expect(position.y).toBeLessThan(750);
   });
+
+  it("top placement 应使用固定底边锚点，让内容高度变化时由 CSS 向上生长", async () => {
+    const platform = createPlatform(rect(0, 0, 1000, 800));
+    const popper = new PopperCore({
+      side: "bottom",
+      align: "end",
+      offsetY: 8,
+      platform,
+    });
+
+    popper.setReference({
+      getRect: () => rect(930, 750, 50, 30),
+    });
+
+    const content = Content({ store: popper });
+    content.onMounted({
+      target: {
+        getBoundingClientRect: () => rect(0, 0, 140, 120),
+      },
+    });
+
+    await popper.place();
+
+    expect(popper.state.placement).toBe("top-end");
+    expect(popper.state.anchorY).toBeTypeOf("number");
+    expect(popper.state.height).toBeUndefined();
+    expect(content.state.style.transform).toContain(
+      `translate3d(${Math.round(popper.state.x)}px, ${Math.round(popper.state.anchorY!)}px, 0)`,
+    );
+    expect(content.state.style.transform).toContain("translateY(-100%)");
+  });
 });

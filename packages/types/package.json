@@ -1,6 +1,6 @@
 {
   "name": "@timeless/inner-types",
-  "version": "0.31.1",
+  "version": "0.31.2",
   "description": "Shared types for Timeless",
   "type": "module",
   "main": "src/index.ts",

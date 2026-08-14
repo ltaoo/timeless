@@ -1,10 +1,13 @@
 import { Section, Item } from "@/components/index.js";
 import { TaskDeleteConfirmDialog } from "./task-delete-confirm-dialog.js";
 import { ClearTasksConfirmDialog } from "./clear-tasks-confirm-dialog.js";
+import { createDownloadPanelModel } from "./download-panel-model.js";
+import { DownloadPanelPopover } from "./download-panel.js";
 
 export default function HomePageView() {
   const view$ = new Timeless.vm.ScrollViewCore({});
   const platform = getPlatform();
+  const download_panel$ = createDownloadPanelModel();
 
   return ScrollView(
     {
@@ -728,6 +731,15 @@ export default function HomePageView() {
               // ]),
             ]);
           })(),
+        ]),
+      ]),
+
+      // ===== Popover + DropdownMenu =====
+      Section("Popover + DropdownMenu", [
+        Item("Download panel", [
+          View({ class: "download-panel-demo" }, [
+            DownloadPanelPopover({ store: download_panel$ }),
+          ]),
         ]),
       ]),
     ],

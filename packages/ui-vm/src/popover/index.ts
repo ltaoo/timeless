@@ -35,6 +35,8 @@ type PopoverProps = {
   side?: Side;
   align?: Align;
   strategy?: "fixed" | "absolute";
+  offsetX?: number;
+  offsetY?: number;
   closeable?: boolean;
   /** 关闭时是否销毁内容 DOM，默认 true。设为 false 时关闭仅隐藏，再次打开恢复原状态 */
   destroyOnClose?: boolean;
@@ -77,6 +79,8 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       side = "bottom",
       align = "end",
       strategy = "fixed",
+      offsetX = 0,
+      offsetY = 0,
       closeable = true,
       destroyOnClose = true,
     } = props;
@@ -89,6 +93,8 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       side,
       align,
       strategy,
+      offsetX,
+      offsetY,
     });
     this.presence = new PresenceCore();
     this.layer = new DismissableLayerCore();

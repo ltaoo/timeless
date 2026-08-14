@@ -76,6 +76,14 @@ type PopperState = {
   strategy: Strategy;
   x: number;
   y: number;
+  /**
+   * 上方 placement 使用的固定底边锚点。
+   *
+   * Primitive 会将浮层的顶部定位到该坐标，再通过 translateY(-100%)
+   * 把浮层底边对齐到这里。这样内容高度变化时可以只依赖 CSS 向上生长，
+   * 无需重新执行 place()。
+   */
+  anchorY?: number;
   placement: Placement;
   isPlaced: boolean;
   top?: number;
@@ -190,6 +198,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
 
   _enter = false;
   _focus = false;
+  _place_request_id = 0;
   _scrolling_subscriber: null | (() => void) = null;
 
   constructor(props: Partial<{ _name: string }> & Partial<PopperProps> = {}) {
@@ -337,6 +346,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   setState(v: { x: number; y: number }) {
     this.state.x = v.x;
     this.state.y = v.y;
+    this.state.anchorY = undefined;
     this.state.isPlaced = true;
     this.emit(Events.StateChange, {
       ...this.state,
@@ -612,6 +622,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 计算浮动元素位置 */
   async place(source?: { desc: string }) {
+    const place_request_id = ++this._place_request_id;
     // const has$el = !!(this.reference as any)?.$el;
     if (!this.reference || !this.floating) {
       logger.warn(
@@ -629,14 +640,26 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
 
-    const result = await this.computePosition();
+    let result;
+    try {
+      result = await this.computePosition();
+    } catch (error) {
+      logger.warn("place failed", error);
+      return;
+    }
+    if (!result || place_request_id !== this._place_request_id) {
+      return;
+    }
     // const { x, y, width, height } = this.reference.getRect();
     const { x, y, middleware_data } = result;
-    let x_with_offset = x + this.offsetX;
-    let y_with_offset = y + this.offsetY;
     const [placed_side, placed_align] = getSideAndAlignFromPlacement(
       result.placement,
     );
+    const [preferred_side] = getSideAndAlignFromPlacement(this.placement);
+    const flipped = placed_side !== preferred_side;
+    const applied_offset_y = flipped ? -this.offsetY : this.offsetY;
+    const x_with_offset = x + this.offsetX;
+    const y_with_offset = y + applied_offset_y;
     // When the reference is wider/taller than the floating element,
     // override arrow position based on alignment instead of pointing at reference center
     // if (middleware_data.arrow && this.floating && this.reference) {
@@ -681,12 +704,19 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     // const viewport = this.platform.getViewportSize();
     // available_height = viewport.height - y - 10;
     const content_height = floating_rect.height;
+    const constrained_height =
+      typeof available_height === "number" && available_height < content_height
+        ? available_height
+        : undefined;
+    const rendered_height = constrained_height ?? content_height;
     // const height = Math.min(content_height, available_height);
     // const should_scroll =
     //   content_height > available_height && available_height > 0;
     this.state = {
       x: x_with_offset,
       y: y_with_offset,
+      anchorY:
+        placed_side === "top" ? y_with_offset + rendered_height : undefined,
       strategy: this.strategy,
       placement: result.placement,
       isPlaced: true,
@@ -695,12 +725,16 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
       canScrollUp: false,
       canScrollDown: false,
     };
-    this.state.height = available_height;
+    this.state.height = constrained_height;
     logger.log("place - before emit placed", {
       source: source?.desc || "unknown",
       x,
       y,
+      anchorY: this.state.anchorY,
       offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      appliedOffsetY: applied_offset_y,
+      flipped,
       height: this.state.height,
       available_height,
       content_height,
@@ -742,8 +776,22 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     }
 
     // Manual test: compute position without floating-ui
-    const reference_rect = reference$.getRect();
-    const floating_rect = floating$.getRect();
+    let reference_rect: Rect;
+    let floating_rect: Rect;
+    try {
+      reference_rect = reference$.getRect();
+      floating_rect = floating$.getRect();
+    } catch (error) {
+      logger.warn("computePosition failed to read rect", error);
+      return null;
+    }
+    if (!isValidRect(reference_rect) || !isValidRect(floating_rect)) {
+      logger.warn("computePosition received invalid rect", {
+        reference: reference_rect,
+        floating: floating_rect,
+      });
+      return null;
+    }
     logger.log(
       "MANUAL TEST before computeDomPosition",
       this.unique_id,
@@ -794,6 +842,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this.state.canScrollUp = false;
     this.state.x = 0;
     this.state.y = 0;
+    this.state.anchorY = undefined;
     this.state.top = undefined;
     this.state.bottom = undefined;
     this.state.height = undefined;
@@ -1157,6 +1206,16 @@ export function computePositionInItemAlignedMode(
 function getSideAndAlignFromPlacement(placement: Placement) {
   const [side, align = "center"] = placement.split("-");
   return [side as Side, align as Align] as const;
+}
+
+function isValidRect(rect: unknown): rect is Rect {
+  if (!rect || typeof rect !== "object") {
+    return false;
+  }
+  const value = rect as Partial<Rect>;
+  return [value.x, value.y, value.width, value.height].every(
+    (field) => typeof field === "number" && Number.isFinite(field),
+  );
 }
 
 export { getPopperPlatform, setPopperPlatform } from "./platform";

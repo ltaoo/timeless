@@ -3,10 +3,10 @@
  */
 import HomePageView from "@/pages/home/index.js";
 
-ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
-InputPrimitive.setInputProvider(Timeless.web);
-TextareaPrimitive.setTextareaProvider(Timeless.web);
-Timeless.NavigatorCore.prefix = "/";
+Timeless.ui.ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
+Timeless.ui.InputPrimitive.setInputProvider(Timeless.web);
+Timeless.ui.TextareaPrimitive.setTextareaProvider(Timeless.web);
+Timeless.kit.NavigatorCore.prefix = "/";
 
 const routes_configure = /** @type {const} */ ({
   home: {
@@ -16,11 +16,11 @@ const routes_configure = /** @type {const} */ ({
   },
 });
 
-const router = Timeless.buildRoutes(routes_configure);
+const router = Timeless.kit.buildRoutes(routes_configure);
 const routes = router.routes;
 export const views = router.views;
 
-export const storage$ = new Timeless.StorageCore({
+export const storage$ = new Timeless.kit.StorageCore({
   key: "timeless-weui",
   defaultValues: { theme: "light" },
   values: (() => {
@@ -30,13 +30,13 @@ export const storage$ = new Timeless.StorageCore({
   client: globalThis.localStorage,
 });
 
-export const client$ = new Timeless.HttpClientCore({
+export const client$ = new Timeless.kit.HttpClientCore({
   headers: { "Content-Type": "application/json" },
 });
 Timeless.web.provide_http_client(client$);
 
-export const router$ = new Timeless.NavigatorCore();
-export const view$ = new Timeless.RouteViewCore({
+export const router$ = new Timeless.kit.NavigatorCore();
+export const view$ = new Timeless.kit.RouteViewCore({
   name: "root",
   pathname: "/",
   title: "ROOT",
@@ -45,7 +45,7 @@ export const view$ = new Timeless.RouteViewCore({
   views: [],
 });
 view$.isRoot = true;
-export const history$ = new Timeless.HistoryCore({
+export const history$ = new Timeless.kit.HistoryCore({
   view: view$,
   router: router$,
   routes,
@@ -53,7 +53,7 @@ export const history$ = new Timeless.HistoryCore({
 });
 Timeless.web.provide_history(history$);
 
-export const app = new Timeless.ApplicationModel({
+export const app = new Timeless.kit.ApplicationModel({
   storage: storage$,
   async beforeReady() {
     history$.push("root.home", {}, { ignore: true });

@@ -43,6 +43,7 @@ export function Show(props: ShowProps) {
   const _parent_owner = get_owner();
   // Create own owner so render-created refs are tracked separately from parent
   let _owner = create_owner(_parent_owner);
+  let _needs_remount = false;
 
   const state: ShowState = {
     rendered: false,
@@ -175,9 +176,11 @@ export function Show(props: ShowProps) {
       state.children = v;
     },
     onMounted(event: MountedEvent) {
+      let reinserted_children = false;
       // Re-subscribe to when prop when remounting after unmount
       // (listener$ is cleared by destroy() in onUnmounted)
-      if (listener$.length === 0) {
+      if (_needs_remount) {
+        _needs_remount = false;
         // _owner was disposed in onUnmounted, re-create it
         // so build_children_with_condition can track new render-created refs
         dispose_owner(_owner);
@@ -189,21 +192,27 @@ export function Show(props: ShowProps) {
         // The parent's insertChildren has already rendered stale children
         // into DOM at this point, so we need to replace them.
         if ($elm && typeof $elm.removeChildren === "function") {
-          const freshChildren = methods.build_children_with_condition(state.value);
+          $elm.removeChildren();
+          const freshChildren = methods.build_children_with_condition(
+            state.value,
+          );
           state.children = freshChildren;
           if ($elm && typeof $elm.insertChildren === "function") {
             $elm.insertChildren(freshChildren);
+            reinserted_children = true;
           }
         }
       }
       if (onMounted) {
         listener$.add(onMounted(event));
       }
-      for (const child of state.children) {
-        if (isElement(child) && child.onMounted) {
-          child.onMounted({
-            target: child.$elm,
-          });
+      if (!reinserted_children) {
+        for (const child of state.children) {
+          if (isElement(child) && child.onMounted) {
+            child.onMounted({
+              target: child.$elm,
+            });
+          }
         }
       }
     },
@@ -226,6 +235,7 @@ export function Show(props: ShowProps) {
       dispose_owner(_owner);
       _hmr_subs.forEach((fn) => fn());
       _hmr_subs.length = 0;
+      _needs_remount = true;
       // Don't clear state.children here — they are needed if this Show
       // is re-mounted by a parent (e.g. Presence show/hide cycle).
       // When Show's own condition flips false, onChange already clears children.

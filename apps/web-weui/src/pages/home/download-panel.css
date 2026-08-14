@@ -1,0 +1,176 @@
+.download-panel-demo {
+  display: flex;
+  width: 100%;
+  min-height: 72px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border: 1px solid var(--weui-FG-4);
+  border-radius: 10px;
+  background: var(--weui-BG-2);
+}
+
+.download-icon-button,
+.download-panel__more-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--weui-FG-0);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 160ms ease,
+    opacity 160ms ease;
+}
+
+.download-icon-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+}
+
+.download-icon-button:hover,
+.download-icon-button:focus-visible,
+.download-panel__more-button:hover,
+.download-panel__more-button:focus-visible {
+  background: var(--weui-BG-COLOR-ACTIVE);
+  outline: none;
+}
+
+.download-panel {
+  display: flex;
+  width: min(400px, calc(100vw - 32px));
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--weui-FG-0);
+  background: var(--weui-BG-2);
+  border: 1px solid var(--weui-FG-4);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 16%);
+}
+
+.download-panel__header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 12px 8px;
+}
+
+.download-panel__title {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.download-panel__more-button {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+.download-panel__more-button:hover,
+.download-panel__more-button:focus-visible {
+  opacity: 1;
+}
+
+.download-panel__content {
+  min-height: 0;
+}
+
+.download-panel__loading {
+  display: flex;
+  min-height: 104px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 20px 20px;
+  color: var(--weui-FG-1);
+  text-align: center;
+}
+
+.download-panel__spinner {
+  display: inline-flex;
+  margin-bottom: 8px;
+  animation: download-panel-spin 800ms linear infinite;
+}
+
+.download-panel__loading-title {
+  color: var(--weui-FG-0);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.download-panel__loading-hint {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.download-panel__list {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 8px 8px;
+}
+
+.download-panel__item {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 6px;
+  border-top: 1px solid var(--weui-FG-5);
+}
+
+.download-panel__item-icon,
+.download-panel__item-status {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-panel__item-icon {
+  width: 30px;
+  height: 30px;
+  color: var(--weui-BRAND);
+  background: var(--weui-BG-COLOR-ACTIVE);
+  border-radius: 6px;
+}
+
+.download-panel__item-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.download-panel__item-title {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 19px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.download-panel__item-meta {
+  color: var(--weui-FG-2);
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.download-panel__item-status {
+  width: 24px;
+  height: 24px;
+  color: var(--weui-BRAND);
+}
+
+@keyframes download-panel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

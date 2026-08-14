@@ -26,6 +26,13 @@ describe("PopoverCore", () => {
       const popover = new PopoverCore({ closeable: false });
       expect(popover._closeable).toBe(false);
     });
+
+    it("应将 offsetX 和 offsetY 转交给 PopperCore", () => {
+      const popover = new PopoverCore({ offsetX: 3, offsetY: -8 });
+
+      expect(popover.popper.offsetX).toBe(3);
+      expect(popover.popper.offsetY).toBe(-8);
+    });
   });
 
   describe("show / hide", () => {
