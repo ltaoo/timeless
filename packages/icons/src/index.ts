@@ -27,6 +27,7 @@ import ellipsisVertical from "./asn/ellipsis-vertical";
 import ellipsis from "./asn/ellipsis";
 import externalLink from "./asn/external-link";
 import fileBox from "./asn/file-box";
+import fileCode from "./asn/file-code";
 import fileImage from "./asn/file-image";
 import fileLock from "./asn/file-lock";
 import filePlay from "./asn/file-play";
@@ -42,6 +43,7 @@ import folderOpen from "./asn/folder-open";
 import folder from "./asn/folder";
 import funnel from "./asn/funnel";
 import gauge from "./asn/gauge";
+import gitBranch from "./asn/git-branch";
 import gitFork from "./asn/git-fork";
 import grid3x3 from "./asn/grid-3x3";
 import hardDriveDownload from "./asn/hard-drive-download";
@@ -113,6 +115,7 @@ export const iconRegistry = {
   "ellipsis": ellipsis,
   "external-link": externalLink,
   "file-box": fileBox,
+  "file-code": fileCode,
   "file-image": fileImage,
   "file-lock": fileLock,
   "file-play": filePlay,
@@ -128,6 +131,7 @@ export const iconRegistry = {
   "folder": folder,
   "funnel": funnel,
   "gauge": gauge,
+  "git-branch": gitBranch,
   "git-fork": gitFork,
   "grid-3x3": grid3x3,
   "hard-drive-download": hardDriveDownload,

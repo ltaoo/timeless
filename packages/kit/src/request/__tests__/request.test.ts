@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { RequestCore } from "../index";
 import { HttpClientCore } from "@/http_client/index";
-import { request } from "../utils";
+import { request, request_factory } from "../utils";
 import { Result } from "@timeless/inner-base";
 
 describe("RequestCore", () => {
@@ -113,6 +113,30 @@ describe("RequestCore", () => {
       req.onStateChange(handler);
       await req.run();
       expect(handler).toHaveBeenCalled();
+    });
+
+    it("并发调用应复用处理后的请求结果", async () => {
+      let resolveRequest!: (value: ReturnType<typeof Result.Ok>) => void;
+      mockClient.get = vi.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        }),
+      );
+      const process = vi.fn((response: any) => Result.Ok(response.data.data));
+      const api = request_factory({ process });
+      const req = new RequestCore(() => api.get("/api/test"), {
+        client: mockClient,
+      });
+
+      const first = req.run();
+      const second = req.run();
+      resolveRequest(Result.Ok({ code: 0, data: { list: [] } }));
+
+      const [firstResult, secondResult] = await Promise.all([first, second]);
+      expect(firstResult.data).toEqual({ list: [] });
+      expect(secondResult.data).toEqual({ list: [] });
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(process).toHaveBeenCalledTimes(1);
     });
   });
 

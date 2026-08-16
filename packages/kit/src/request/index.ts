@@ -197,12 +197,20 @@ export class RequestCore<
       return Result.Err("缺少 client");
     }
     if (this.pending !== null) {
-      const r = await this.pending;
-      if (r.error) {
-        return Result.Err(r.error);
-      }
-      return Result.Ok(r.data as P);
+      return this.pending;
     }
+    const task = this.execute(args);
+    this.pending = task;
+    try {
+      return await task;
+    } finally {
+      if (this.pending === task) {
+        this.pending = null;
+      }
+    }
+  }
+
+  private async execute(args: Parameters<F>): Promise<Result<P>> {
     // this.args = args;
     this.loading = true;
     this.initial = false;
@@ -252,9 +260,8 @@ export class RequestCore<
     if (r2.error) {
       return Result.Err(r2.error);
     }
-    this.pending = r2.data;
     const [r] = await Promise.all([
-      this.pending,
+      r2.data,
       this.delay === null ? null : sleep(this.delay),
     ]);
     this.loading = false;
