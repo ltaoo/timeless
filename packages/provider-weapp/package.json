@@ -1,6 +1,6 @@
 {
   "name": "@timeless/provider-weapp",
-  "version": "0.31.3",
+  "version": "0.31.4",
   "main": "dist/index.js",
   "module": "dist/timeless.weapp.esm.js",
   "types": "dist/index.d.ts",

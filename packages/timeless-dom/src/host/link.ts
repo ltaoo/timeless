@@ -30,7 +30,7 @@ export function DOMLink(props: {
       const $elm = document.createElement("a");
       box$.methods.set$elm($elm);
       box$.methods.applyState(props.elm.state, { initial: true });
-      if (props.elm.state.href) {
+      if (props.elm.state.href && !props.elm.state.disabled) {
         $elm.href = props.elm.state.href;
       }
       if (props.elm.state.target) {

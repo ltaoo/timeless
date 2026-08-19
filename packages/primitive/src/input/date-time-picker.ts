@@ -24,6 +24,7 @@ import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import { TimelessElement, ViewChildren } from "@/content/type";
 import { Box, BoxProps } from "@/content/box";
+import { bind_inert_disabled } from "@/util/disabled";
 
 /** Props for DateTimePicker component */
 export type DateTimePickerProps = BoxProps & {
@@ -134,17 +135,12 @@ export function DateTimePicker(
       }
     },
     subscribe_disabled() {
-      if (isRef(disabled)) {
-        state.disabled = disabled.value as boolean;
-        const unsub = disabled.subscribe({
-          onChange(v) {
-            state.disabled = v as boolean;
-          },
-        });
-        box$.methods.unsubscribe(unsub);
-      } else {
-        state.disabled = disabled as boolean;
-      }
+      bind_inert_disabled({
+        value: disabled,
+        state,
+        apply_attr: box$.methods.apply_attr,
+        add_cleanup: box$.methods.unsubscribe,
+      });
     },
   };
 

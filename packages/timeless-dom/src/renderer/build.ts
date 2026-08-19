@@ -371,5 +371,7 @@ export function build(elm: TimelessElement): VNodeView<any> {
     elm.$elm = clipPath$;
     return clipPath$;
   }
-  return DOMView({ build, elm });
+  const view$ = DOMView({ build, elm });
+  elm.$elm = view$;
+  return view$;
 }

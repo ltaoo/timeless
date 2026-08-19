@@ -7,6 +7,7 @@ import {
 import { isRef } from "@timeless/inner-reactive";
 import { ListenerManager } from "@/util/listener";
 import { MountedEvent } from "@/event";
+import { bind_disabled } from "@/util/disabled";
 
 import { InputProps } from "./input";
 
@@ -66,6 +67,7 @@ export function Textarea(props: TextareaProps) {
     id: "",
     name: "",
     value: "",
+    disabled: false,
     style: {},
     styleSet: [],
   };
@@ -167,28 +169,14 @@ export function Textarea(props: TextareaProps) {
         }
       }
 
-      // Handle disabled attribute
-      if (disabled !== undefined) {
-        if (isRef(disabled)) {
-          const unsub = disabled.subscribe({
-            onChange(v) {
-              state.disabled = v as boolean;
-              if (v) {
-                $elm.setAttribute("disabled", "");
-              } else {
-                $elm.removeAttribute("disabled");
-              }
-              // methods.setProp("disabled", v);
-            },
-          });
-          manager$.push(unsub);
-          // methods.setProp("disabled", disabled.value);
-          state.disabled = disabled.value;
-        } else {
-          // methods.setProp("disabled", disabled);
-          state.disabled = disabled;
-        }
-      }
+      bind_disabled({
+        value: disabled,
+        set_disabled(value) {
+          state.disabled = value;
+          methods.applyAttr("disabled", value);
+        },
+        add_cleanup: manager$.add,
+      });
 
       // Handle readonly attribute
       if (readonly !== undefined) {
@@ -315,6 +303,9 @@ export function Textarea(props: TextareaProps) {
 
       if (attributes) {
         Object.keys(attributes).forEach((k) => {
+          if (k === "disabled" && disabled !== undefined) {
+            return;
+          }
           const vv = attributes[k];
           if (isRef(vv)) {
             const unsub = vv.subscribe({

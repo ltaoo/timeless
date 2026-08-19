@@ -4,6 +4,7 @@ import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
 import { ListenerManager } from "@/util/listener";
 import { Logger } from "@/util/logger";
+import { bind_disabled } from "@/util/disabled";
 
 const logger = Logger({ prefix: "primitive", scope: "input/input" });
 
@@ -46,6 +47,7 @@ export function Input(props: InputProps = {}) {
     value,
     placeholder,
     disabled,
+    attributes,
     readonly,
     maxLength,
     minLength,
@@ -61,11 +63,18 @@ export function Input(props: InputProps = {}) {
     ...rest
   } = props;
 
+  let input_attributes = attributes;
+  if (disabled !== undefined) {
+    input_attributes = { ...attributes };
+    delete input_attributes.disabled;
+  }
+
   let $elm: any = null;
 
-  const box$ = Box<InputState>(rest, {
+  const box$ = Box<InputState>({ ...rest, attributes: input_attributes }, {
     value: "",
     autoComplete: false,
+    disabled: false,
   } as InputState);
   const listener$ = ListenerManager();
 
@@ -158,25 +167,15 @@ export function Input(props: InputProps = {}) {
         }
       }
 
-      // Handle disabled attribute
-      if (disabled !== undefined) {
-        if (isRef(disabled)) {
-          const unsub_disabled = disabled.subscribe({
-            onChange(v) {
-              state.disabled = v;
-              if (v) {
-                $elm.setAttribute("disabled", "");
-              } else {
-                $elm.removeAttribute("disabled");
-              }
-            },
-          });
-          listener$.push(unsub_disabled);
-          state.disabled = disabled.value;
-        } else {
-          state.disabled = disabled;
-        }
-      }
+      bind_disabled({
+        value: disabled,
+        set_disabled(value) {
+          state.disabled = value;
+          state.attributes.disabled = value ? "" : undefined;
+          box$.methods.apply_attr("disabled", value);
+        },
+        add_cleanup: listener$.add,
+      });
 
       // Handle readonly attribute
       if (readonly !== undefined) {

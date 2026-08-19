@@ -2,28 +2,53 @@ import { Ref, isRef } from "@timeless/inner-reactive";
 
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
+import { bind_disabled, DisabledValue } from "@/util/disabled";
 
 export type FilePickerProps = BoxProps & {
   accept?: string | Ref<string>;
   multiple?: boolean | Ref<boolean>;
   capture?: string | Ref<string>;
   files?: Ref<FileList | null>;
+  disabled?: DisabledValue;
   onChange?: (event: Event) => void;
   onFileDrop?: (files: FileList, event: DragEvent) => void;
 };
 type FilePickerState = {
   accept: string;
   multiple: boolean;
+  disabled: boolean;
 };
 
 export function FilePicker(props: FilePickerProps = {}) {
-  const { accept, multiple, capture, files, onChange, onFileDrop, ...rest } = props;
+  const {
+    accept,
+    multiple,
+    capture,
+    files,
+    disabled,
+    attributes,
+    onChange,
+    onFileDrop,
+    ...rest
+  } = props;
+  let file_picker_attributes = attributes;
+  if (disabled !== undefined) {
+    file_picker_attributes = { ...attributes };
+    delete file_picker_attributes.disabled;
+  }
 
   let $elm: any = null;
-  const box$ = Box<FilePickerState>(rest, {
-    accept: "",
-    multiple: false,
-  });
+  const box$ = Box<FilePickerState>(
+    {
+      ...rest,
+      attributes: file_picker_attributes,
+    },
+    {
+      accept: "",
+      multiple: false,
+      disabled: false,
+    },
+  );
 
   const state = box$.state;
   const events = box$.events;
@@ -59,6 +84,15 @@ export function FilePicker(props: FilePickerProps = {}) {
           state.multiple = multiple;
         }
       }
+      bind_disabled({
+        value: disabled,
+        set_disabled(value) {
+          state.disabled = value;
+          state.attributes.disabled = value ? "" : undefined;
+          box$.methods.apply_attr("disabled", value);
+        },
+        add_cleanup: box$.methods.unsubscribe,
+      });
     },
     updateFiles(fileList: FileList) {
       if (files && isRef(files)) {
@@ -99,6 +133,9 @@ export function FilePicker(props: FilePickerProps = {}) {
   if (onChange) {
     const originalOnChange = events.onChange;
     events.onChange = function (event: Event) {
+      if (state.disabled) {
+        return;
+      }
       if (originalOnChange) {
         originalOnChange(event);
       }
@@ -111,6 +148,9 @@ export function FilePicker(props: FilePickerProps = {}) {
   } else {
     const originalOnChange = events.onChange;
     events.onChange = function (event: Event) {
+      if (state.disabled) {
+        return;
+      }
       if (originalOnChange) {
         originalOnChange(event);
       }
@@ -122,10 +162,16 @@ export function FilePicker(props: FilePickerProps = {}) {
   }
 
   events.onDragOver = function (e: DragEvent) {
+    if (state.disabled) {
+      return;
+    }
     e.preventDefault();
   };
 
   events.onDrop = function (e: DragEvent) {
+    if (state.disabled) {
+      return;
+    }
     e.preventDefault();
     if (!e.dataTransfer) {
       return;

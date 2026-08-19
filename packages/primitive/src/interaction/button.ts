@@ -1,21 +1,57 @@
-import { isRef } from "@timeless/inner-reactive";
+import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import { Text } from "@/content/text";
 import { isElement, ViewChildren, resolve_children } from "@/content/type";
 import { MountedEvent } from "@/event/index";
 import { Box, BoxProps } from "@/content/box";
-import { ListenerManager } from "@/util/listener";
 
-export type ButtonProps = BoxProps & {};
-type ButtonState = {};
+export type ButtonProps = BoxProps & {
+  disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+};
+type ButtonState = {
+  disabled: boolean;
+};
 
 export function Button(props: ButtonProps = {}, children?: ViewChildren) {
+  const { disabled, attributes, ...rest } = props;
+  let button_attributes = attributes;
+  if (disabled !== undefined) {
+    button_attributes = { ...attributes };
+    delete button_attributes.disabled;
+  }
+
   let $elm: any = null;
-  const box$ = Box<ButtonState>(props, {});
+  const box$ = Box<ButtonState>(
+    { ...rest, attributes: button_attributes },
+    { disabled: false },
+  );
   const state = box$.state;
   const events = box$.events;
 
   const methods = {
+    apply_disabled(value: boolean) {
+      state.disabled = value;
+      state.attributes.disabled = value ? "" : undefined;
+      methods.apply_attr("disabled", value);
+    },
+
+    subscribe_disabled() {
+      if (disabled === undefined) {
+        return;
+      }
+      if (isRef(disabled)) {
+        methods.apply_disabled(disabled.value);
+        const unsubscribe_disabled = disabled.subscribe({
+          onChange(value) {
+            methods.apply_disabled(value);
+          },
+        });
+        box$.methods.unsubscribe(unsubscribe_disabled);
+        return;
+      }
+      methods.apply_disabled(disabled);
+    },
+
     // Helper: normalize children (convert functions, wrap refs)
     normalize_children(children?: ViewChildren) {
       const resolved = resolve_children(children);
@@ -77,6 +113,7 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
   };
 
   box$.methods.subscribe_props();
+  methods.subscribe_disabled();
   box$.methods.add_event();
   methods.normalize_children(children);
 

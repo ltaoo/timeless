@@ -4,6 +4,7 @@ import { MountedEvent } from "@/event";
 import { ViewProps } from "@/content/view";
 import { Logger } from "@/util/logger";
 import { Box, BoxProps } from "@/content/box";
+import { bind_disabled } from "@/util/disabled";
 
 const logger = Logger({ prefix: "primitive", scope: "input/switch" });
 
@@ -38,6 +39,7 @@ export function Switch(props: SwitchProps) {
     name,
     checked,
     disabled,
+    attributes,
     readonly,
     required,
     loading,
@@ -46,8 +48,14 @@ export function Switch(props: SwitchProps) {
     ...rest
   } = props;
 
+  let switch_attributes = attributes;
+  if (disabled !== undefined) {
+    switch_attributes = { ...attributes };
+    delete switch_attributes.disabled;
+  }
+
   let $elm: any = null;
-  const box$ = Box<SwitchState>(rest, {
+  const box$ = Box<SwitchState>({ ...rest, attributes: switch_attributes }, {
     id: "",
     name: "",
     checked: false,
@@ -130,23 +138,15 @@ export function Switch(props: SwitchProps) {
         }
       }
 
-      // Handle disabled attribute
-      if (disabled !== undefined) {
-        if (isRef(disabled)) {
-          state.disabled = disabled.value;
-          const unsub = disabled.subscribe({
-            onChange(v) {
-              state.disabled = v;
-              // methods.setProp("disabled", v);
-            },
-          });
-          box$.methods.unsubscribe(unsub);
-          // methods.setProp("disabled", disabled.value);
-        } else {
-          // methods.setProp("disabled", disabled as boolean);
-          state.disabled = disabled as boolean;
-        }
-      }
+      bind_disabled({
+        value: disabled,
+        set_disabled(value) {
+          state.disabled = value;
+          state.attributes.disabled = value ? "" : undefined;
+          box$.methods.apply_attr("disabled", value);
+        },
+        add_cleanup: box$.methods.unsubscribe,
+      });
 
       // Handle readonly attribute
       if (readonly !== undefined) {
@@ -204,6 +204,7 @@ export function Switch(props: SwitchProps) {
       return $elm;
     },
     set $elm(value: any) {
+      box$.methods.set$elm(value);
       $elm = value;
     },
     state,

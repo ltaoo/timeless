@@ -1,6 +1,6 @@
 {
   "name": "@timeless/inner-utils",
-  "version": "0.31.3",
+  "version": "0.31.4",
   "description": "Utils for Timeless",
   "main": "dist/index.js",
   "module": "dist/timeless.utils.esm.js",

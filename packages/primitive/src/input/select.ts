@@ -5,6 +5,7 @@ import { MountedEvent } from "@/event";
 import { For, ForProps } from "@/reactive/for";
 import { Show } from "@/reactive/show";
 import { Box, BoxProps } from "@/content/box";
+import { bind_disabled } from "@/util/disabled";
 
 type SelectValue = string[];
 
@@ -74,6 +75,7 @@ export function Select<T extends { value: any; label: string }>(
     value,
     placeholder = "请选择",
     disabled,
+    attributes,
     readonly,
     required,
     name,
@@ -83,12 +85,19 @@ export function Select<T extends { value: any; label: string }>(
     ...rest
   } = props;
 
+  let select_attributes = attributes;
+  if (disabled !== undefined) {
+    select_attributes = { ...attributes };
+    delete select_attributes.disabled;
+  }
+
   let $elm: any = null;
 
-  const box$ = Box<SelectState<T>>(rest, {
+  const box$ = Box<SelectState<T>>({ ...rest, attributes: select_attributes }, {
     placeholder: "",
     value: null,
     selected: null,
+    disabled: false,
   } as SelectState<T>);
   const for$ = For({
     key,
@@ -140,16 +149,15 @@ export function Select<T extends { value: any; label: string }>(
           state.placeholder = placeholder;
         }
       }
-      if (disabled !== undefined) {
-        if (isRef(disabled)) {
-          box$.methods.unsubscribe(
-            disabled.subscribe({
-              onChange(v) {},
-            }),
-          );
-        } else {
-        }
-      }
+      bind_disabled({
+        value: disabled,
+        set_disabled(value) {
+          state.disabled = value;
+          state.attributes.disabled = value ? "" : undefined;
+          box$.methods.apply_attr("disabled", value);
+        },
+        add_cleanup: box$.methods.unsubscribe,
+      });
       if (readonly !== undefined) {
         if (isRef(readonly)) {
           box$.methods.unsubscribe(
@@ -239,6 +247,9 @@ export function Select<T extends { value: any; label: string }>(
   state.children = for$.children;
   const events = box$.events;
   events.onChange = function (event) {
+    if (state.disabled) {
+      return;
+    }
     if (onChange) {
       onChange(event);
     }

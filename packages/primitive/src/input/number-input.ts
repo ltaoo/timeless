@@ -2,6 +2,7 @@ import { DerivedRef, Ref, isRef } from "@timeless/inner-reactive";
 
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
+import { bind_disabled } from "@/util/disabled";
 
 export type NumberInputProps = BoxProps & {
   value?: (number | null) | DerivedRef<number | null> | Ref<number | null>;
@@ -24,16 +25,28 @@ type NumberInputState = {
 };
 
 export function NumberInput(props: NumberInputProps = {}) {
-  const { ...rest } = props;
+  const { disabled, attributes, ...rest } = props;
+  let number_input_attributes = attributes;
+  if (disabled !== undefined) {
+    number_input_attributes = { ...attributes };
+    delete number_input_attributes.disabled;
+  }
 
   let $elm: any = null;
-  const box$ = Box<NumberInputState>(rest, {
-    value: "",
-    step: 1,
-    precision: 0,
-    min: Number.MIN_SAFE_INTEGER,
-    max: Number.MAX_SAFE_INTEGER,
-  });
+  const box$ = Box<NumberInputState>(
+    {
+      ...rest,
+      attributes: number_input_attributes,
+    },
+    {
+      value: "",
+      step: 1,
+      precision: 0,
+      min: Number.MIN_SAFE_INTEGER,
+      max: Number.MAX_SAFE_INTEGER,
+      disabled: false,
+    },
+  );
 
   const state = box$.state;
   const events = box$.events;
@@ -74,21 +87,15 @@ export function NumberInput(props: NumberInputProps = {}) {
           state.placeholder = placeholder;
         }
       }
-      const disabled = props.disabled;
-      if (disabled !== undefined) {
-        if (isRef(disabled)) {
-          state.disabled = disabled.value;
-          box$.methods.unsubscribe(
-            disabled.subscribe({
-              onChange(v) {
-                state.disabled = v;
-              },
-            }),
-          );
-        } else {
-          state.disabled = disabled;
-        }
-      }
+      bind_disabled({
+        value: disabled,
+        set_disabled(value) {
+          state.disabled = value;
+          state.attributes.disabled = value ? "" : undefined;
+          box$.methods.apply_attr("disabled", value);
+        },
+        add_cleanup: box$.methods.unsubscribe,
+      });
 
       const step = props.step;
       if (step !== undefined) {

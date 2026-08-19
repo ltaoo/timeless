@@ -4,6 +4,7 @@ import { ViewProps } from "@/content/view";
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
 import { ListenerManager } from "@/util/listener";
+import { bind_disabled } from "@/util/disabled";
 
 export type RadioProps = BoxProps & {
   id?: string;
@@ -35,6 +36,7 @@ export function Radio(props: RadioProps) {
     name,
     checked,
     disabled,
+    attributes,
     readonly,
     required,
     tabindex,
@@ -43,9 +45,15 @@ export function Radio(props: RadioProps) {
     ...rest
   } = props;
 
+  let radio_attributes = attributes;
+  if (disabled !== undefined) {
+    radio_attributes = { ...attributes };
+    delete radio_attributes.disabled;
+  }
+
   let $elm: any = null;
   const listener$ = ListenerManager();
-  const box$ = Box<RadioState>(rest, {
+  const box$ = Box<RadioState>({ ...rest, attributes: radio_attributes }, {
     checked: false,
     disabled: false,
     readonly: false,
@@ -111,21 +119,15 @@ export function Radio(props: RadioProps) {
         }
       }
 
-      // Handle disabled attribute
-      if (disabled !== undefined) {
-        if (isRef(disabled)) {
-          state.disabled = disabled.value;
-          const unsub = disabled.subscribe({
-            onChange(v) {
-              state.disabled = v;
-              methods.setProp("disabled", v);
-            },
-          });
-          listener$.push(unsub);
-        } else {
-          state.disabled = disabled;
-        }
-      }
+      bind_disabled({
+        value: disabled,
+        set_disabled(value) {
+          state.disabled = value;
+          state.attributes.disabled = value ? "" : undefined;
+          box$.methods.apply_attr("disabled", value);
+        },
+        add_cleanup: listener$.add,
+      });
 
       // Handle readonly attribute
       if (readonly !== undefined) {

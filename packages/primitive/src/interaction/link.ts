@@ -3,6 +3,7 @@ import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 import { isElement, ViewChildren } from "@/content/type";
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
+import { bind_disabled } from "@/util/disabled";
 
 export type LinkTarget =
   | "_self"
@@ -27,7 +28,7 @@ type LinkState = {
   href?: string;
   target?: LinkTarget;
   rel?: string;
-  disabled?: boolean;
+  disabled: boolean;
   download?: boolean | string;
   referrerPolicy?: ReferrerPolicy;
   hreflang?: string;
@@ -52,34 +53,60 @@ export function Link(props: LinkProps = {}, children?: ViewChildren) {
     ...rest
   } = props;
 
+  let link_attributes = attributes;
+  if (disabled !== undefined) {
+    link_attributes = { ...attributes };
+    delete link_attributes.href;
+    delete link_attributes["aria-disabled"];
+  }
+
   let $elm: any = null;
-  const box$ = Box<LinkState>(rest, {} as LinkState);
+  const box$ = Box<LinkState>(
+    { ...rest, attributes: link_attributes },
+    { disabled: false },
+  );
   const state = box$.state;
   const events = box$.events;
 
   const methods = {
+    apply_href(value?: string) {
+      state.href = value;
+      box$.methods.apply_attr("href", state.disabled ? undefined : value);
+    },
+
+    apply_disabled(value: boolean) {
+      state.disabled = value;
+      state.attributes["aria-disabled"] = value ? "true" : undefined;
+      box$.methods.apply_attr("aria-disabled", value ? "true" : undefined);
+      box$.methods.apply_attr("href", value ? undefined : state.href);
+    },
+
     subscribe_props() {
       box$.methods.subscribe_props();
       if (href) {
         if (isRef(href)) {
-          state.href = href.value;
-          href.subscribe({
-            onChange(v) {
-              state.href = v;
-            },
-          });
+          methods.apply_href(href.value);
+          box$.methods.unsubscribe(
+            href.subscribe({
+              onChange(value) {
+                methods.apply_href(value);
+              },
+            }),
+          );
         } else {
-          state.href = href;
+          methods.apply_href(href);
         }
       }
       if (target) {
         if (isRef(target)) {
           state.target = target.value;
-          target.subscribe({
-            onChange(v) {
-              state.target = v;
-            },
-          });
+          box$.methods.unsubscribe(
+            target.subscribe({
+              onChange(v) {
+                state.target = v;
+              },
+            }),
+          );
         } else {
           state.target = target;
         }
@@ -87,20 +114,36 @@ export function Link(props: LinkProps = {}, children?: ViewChildren) {
       if (rel) {
         if (isRef(rel)) {
           state.rel = rel.value;
-          rel.subscribe({
-            onChange(v) {
-              state.rel = v;
-            },
-          });
+          box$.methods.unsubscribe(
+            rel.subscribe({
+              onChange(v) {
+                state.rel = v;
+              },
+            }),
+          );
         } else {
           state.rel = rel;
         }
       }
+      bind_disabled({
+        value: disabled,
+        set_disabled: methods.apply_disabled,
+        add_cleanup: box$.methods.unsubscribe,
+      });
     },
   };
 
   methods.subscribe_props();
   box$.methods.add_event();
+  const on_click = events.onClick;
+  events.onClick = function (event) {
+    if (state.disabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    on_click?.(event);
+  };
   box$.methods.build_children(children);
 
   return {
@@ -109,6 +152,7 @@ export function Link(props: LinkProps = {}, children?: ViewChildren) {
       return $elm;
     },
     set $elm(v) {
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state,
