@@ -18,8 +18,10 @@ class UmdSmokeTestModel {
 
   create_browser_context() {
     const context = {
+      clearInterval: () => {},
       clearTimeout,
       console,
+      setInterval: () => 0,
       setTimeout,
     };
     context.globalThis = context;
@@ -48,6 +50,27 @@ class UmdSmokeTestModel {
     this.assert(typeof timeless.base === "function", "lite is missing base");
     this.assert(timeless.Result, "lite is missing Result");
     this.assert(!("utils" in timeless), "lite unexpectedly contains utils");
+    this.assert(!("vm" in timeless), "lite unexpectedly contains VM");
+
+    this.load_script(context, "timeless.dom.umd.min.js");
+
+    this.assert(
+      context.Timeless === timeless,
+      "DOM replaced the global Timeless namespace",
+    );
+    this.assert(timeless.DOM, "DOM did not attach Timeless.DOM");
+    this.assert(
+      typeof timeless.DOM.render === "function",
+      "DOM is missing render with lite",
+    );
+    this.assert(
+      typeof timeless.DOM.hydrate === "function",
+      "DOM is missing hydrate with lite",
+    );
+    this.assert(
+      timeless.getPlatform() === timeless.DOM.platform,
+      "DOM did not configure the lite primitive platform",
+    );
 
     const ref_before_utils = timeless.ref;
     this.load_script(context, "timeless.utils.umd.min.js");
@@ -69,6 +92,19 @@ class UmdSmokeTestModel {
     const parsed = timeless.utils.parseJSONStr('{"ok":true}');
     this.assert(parsed.error === null, "utils could not use lite Result.Ok");
     this.assert(parsed.data.ok === true, "utils returned unexpected JSON data");
+
+    const full_context = this.create_browser_context();
+    this.load_script(full_context, "timeless.umd.min.js");
+    this.load_script(full_context, "timeless.dom.umd.min.js");
+    const full_timeless = full_context.Timeless;
+    this.assert(
+      typeof full_timeless.DOM.render === "function",
+      "DOM is missing render with full Timeless",
+    );
+    this.assert(
+      full_timeless.vm.getPopperPlatform() === full_timeless.DOM.platform,
+      "DOM did not configure the full Timeless VM Popper platform",
+    );
 
     return {
       lite_exports: Object.keys(timeless).filter((key) => key !== "utils")

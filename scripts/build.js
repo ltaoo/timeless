@@ -53,7 +53,7 @@ const LOAD_PROFILES = {
     "timeless.shadcn.umd.min.js",
     "timeless.weui.umd.min.js",
   ],
-  lite: ["timeless.lite.umd.min.js"],
+  lite: ["timeless.lite.umd.min.js", "timeless.dom.umd.min.js"],
   lite_with_utils: ["timeless.lite.umd.min.js", "timeless.utils.umd.min.js"],
 };
 

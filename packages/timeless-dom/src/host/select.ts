@@ -28,6 +28,7 @@ export function DOMSelect(props: {
     render() {
       const $elm = document.createElement("select");
 
+      common$.methods.set$elm($elm);
       common$.methods.applyState(props.elm.state, { initial: true });
       const r = common$.methods.buildChildren(props.elm.children);
       const $placeholder = document.createElement("option");

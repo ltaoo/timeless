@@ -256,6 +256,7 @@ export function Select<T extends { value: any; label: string }>(
       return $elm;
     },
     set $elm(value: any) {
+      box$.methods.set$elm(value);
       $elm = value;
     },
     state,

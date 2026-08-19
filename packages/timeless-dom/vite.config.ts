@@ -10,10 +10,9 @@ export default createLibConfig({
     __Version: JSON.stringify(pkg.version),
   },
   globalName: "Timeless.DOM",
-  external: ["@timeless/timeless", "@timeless/inner-vm"],
+  external: ["@timeless/timeless"],
   globals: {
     "@timeless/timeless": "Timeless",
-    "@timeless/inner-vm": "Timeless.vm",
   },
   formats: ["es", "cjs", "umd"],
   fileName: (format) => {

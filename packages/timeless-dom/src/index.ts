@@ -1,5 +1,4 @@
 import { setPlatform, type Platform } from "@timeless/timeless";
-import { setPopperPlatform } from "@timeless/inner-vm";
 
 interface Rect {
   x: number;
@@ -266,7 +265,3 @@ export const platform = setPlatform<Platform>({
 
   getDocumentElement,
 });
-
-// PopperCore owns its platform selection. Keep it on the same DOM adapter as
-// the primitive renderer instead of letting view primitives replace it later.
-setPopperPlatform(platform);

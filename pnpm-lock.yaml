@@ -759,9 +759,6 @@ importers:
 
   packages/timeless-dom:
     dependencies:
-      '@timeless/inner-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
