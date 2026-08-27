@@ -29,6 +29,7 @@ import fileCode from "./file-code";
 import fileImage from "./file-image";
 import fileLock from "./file-lock";
 import filePlay from "./file-play";
+import fileSearch from "./file-search";
 import fileStack from "./file-stack";
 import fileSymlink from "./file-symlink";
 import fileText from "./file-text";
@@ -57,6 +58,7 @@ import loader from "./loader";
 import menu from "./menu";
 import messageSquareMore from "./message-square-more";
 import moon from "./moon";
+import music from "./music";
 import panelLeft from "./panel-left";
 import pause from "./pause";
 import play from "./play";
@@ -117,6 +119,7 @@ export const iconRegistry = {
   "file-image": fileImage,
   "file-lock": fileLock,
   "file-play": filePlay,
+  "file-search": fileSearch,
   "file-stack": fileStack,
   "file-symlink": fileSymlink,
   "file-text": fileText,
@@ -145,6 +148,7 @@ export const iconRegistry = {
   "menu": menu,
   "message-square-more": messageSquareMore,
   "moon": moon,
+  "music": music,
   "panel-left": panelLeft,
   "pause": pause,
   "play": play,

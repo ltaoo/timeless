@@ -316,6 +316,17 @@ export function PopperPositionContent(
                 .join(" ");
             }),
           ]),
+          style: styleNames([
+            rest.style,
+            store.position === "item-aligned"
+              ? {
+                  "box-sizing": "border-box",
+                  "max-height": "100%",
+                  display: "flex",
+                  "flex-direction": "column",
+                }
+              : undefined,
+          ]),
           // onKeyDown: handleKeyDown,
           onAnimationEnd(e: AnimationEvent) {
             if (e.target === e.currentTarget) {

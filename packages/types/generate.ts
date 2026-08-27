@@ -6,11 +6,15 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../..");
 
-const PACKAGES: { name: string; entry: string; namespace: string }[] = [
+const PACKAGES: { name: string; entry: string; namespace?: string }[] = [
   {
     name: "@timeless/inner-reactive",
     entry: "packages/reactive/src/index.ts",
     namespace: "reactive",
+  },
+  {
+    name: "@timeless/lite",
+    entry: "packages/lite/src/index.ts",
   },
   {
     name: "@timeless/timeless",
@@ -59,6 +63,7 @@ const BASE_COMPILER_OPTIONS: ts.CompilerOptions = {
     "@timeless/inner-types": ["packages/types/src/index.ts"],
     "@timeless/inner-utils": ["packages/utils/src/index.ts"],
     "@timeless/inner-vm": ["packages/ui-vm/src/index.ts"],
+    "@timeless/lite": ["packages/lite/src/index.ts"],
     "@timeless/shadcn": ["packages/shadcn/src/index.ts"],
     "@timeless/timeless": ["packages/timeless/src/index.ts"],
     "@timeless/ui-primitive": ["packages/ui-primitive/src/index.ts"],
@@ -214,6 +219,7 @@ function generate() {
   dtsLines.push("// === Timeless namespace ===");
   dtsLines.push("declare const Timeless: {");
   for (const pkg of PACKAGES) {
+    if (!pkg.namespace) continue;
     dtsLines.push(`  ${pkg.namespace}: typeof import("${pkg.name}");`);
   }
   dtsLines.push("  [key: string]: any;");

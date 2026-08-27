@@ -5187,7 +5187,7 @@ declare module "packages/primitive/src/index" {
     export { Logger, Result, base, debounce, mitt, throttle, } from "packages/base/src/index";
     export type { Handler, Platform, MutableRecord2, MutableRecord, Unpacked, UnpackedResult, } from "packages/base/src/index";
 }
-declare module "packages/timeless/src/core" {
+declare module "packages/lite/src/index" {
     export * from "packages/reactive/src/index";
     export * from "packages/primitive/src/index";
 }
@@ -23164,7 +23164,7 @@ declare module "packages/ui-primitive/src/index" {
     export * as FlowPrimitive from "packages/ui-primitive/src/modules/flow";
 }
 declare module "packages/timeless/src/index" {
-    export * from "packages/timeless/src/core";
+    export * from "packages/lite/src/index";
     export * as icons from "packages/icons/src/index";
     export * as kit from "packages/kit/src/index";
     export * as ui from "packages/ui-primitive/src/index";
@@ -24046,6 +24046,7 @@ declare module "packages/shadcn/src/index" {
 // === Package module aliases ===
 declare module "@timeless/types" { export * from "packages/types/src/index"; }
 declare module "@timeless/inner-reactive" { export * from "packages/reactive/src/index"; }
+declare module "@timeless/lite" { export * from "packages/lite/src/index"; }
 declare module "@timeless/timeless" { export * from "packages/timeless/src/index"; }
 declare module "@timeless/inner-kit" { export * from "packages/kit/src/index"; }
 declare module "@timeless/shadcn" { export * from "packages/shadcn/src/index"; }

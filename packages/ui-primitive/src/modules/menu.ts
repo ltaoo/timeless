@@ -1,4 +1,4 @@
-import { refobj, computed } from "../core";
+import { refobj, computed, classNames } from "../core";
 import { Logger } from "../core";
 import {
   View,
@@ -71,7 +71,14 @@ export function ContentImpl(
   },
   children: ViewChildren,
 ) {
-  const { animation, ...rest } = props;
+  const {
+    animation,
+    store,
+    onMouseEnter,
+    onMouseLeave,
+    onAnimationEnd,
+    ...content_props
+  } = props;
 
   let _was_exiting = false;
   const state_ = refobj(props.store.state);
@@ -108,48 +115,52 @@ export function ContentImpl(
                 props.store.hide({ reason: "reference out of view callback" });
               },
               onMouseEnter(event) {
-                props.store.handleEnter();
-                if (rest.onMouseEnter) {
-                  rest.onMouseEnter(event);
+                store.handleEnter();
+                if (onMouseEnter) {
+                  onMouseEnter(event);
                 }
               },
               onMouseLeave(event) {
-                props.store.handleLeave();
-                if (rest.onMouseLeave) {
-                  rest.onMouseLeave(event);
+                store.handleLeave();
+                if (onMouseLeave) {
+                  onMouseLeave(event);
                 }
               },
             },
             [
               View(
                 {
-                  class: computed(presence_, (t) => {
-                    if (t.exit) {
-                      _was_exiting = true;
-                    }
-                    // Keep exit animation class during unmount to prevent flash
-                    // When exit=false but mounted=false, the animation class would become ""
-                    // causing the element to snap to full opacity before DOM removal
-                    if (!t.mounted && _was_exiting) {
-                      _was_exiting = false;
-                      return animation?.out || "";
-                    }
-                    if (t.mounted) {
-                      _was_exiting = false;
-                    }
-                    return [
-                      t.enter && animation?.in ? animation.in : "",
-                      t.exit && animation?.out ? animation.out : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ");
-                  }),
+                  ...content_props,
+                  class: classNames([
+                    content_props.class,
+                    computed(presence_, (t) => {
+                      if (t.exit) {
+                        _was_exiting = true;
+                      }
+                      // Keep exit animation class during unmount to prevent flash
+                      // When exit=false but mounted=false, the animation class would become ""
+                      // causing the element to snap to full opacity before DOM removal
+                      if (!t.mounted && _was_exiting) {
+                        _was_exiting = false;
+                        return animation?.out || "";
+                      }
+                      if (t.mounted) {
+                        _was_exiting = false;
+                      }
+                      return [
+                        t.enter && animation?.in ? animation.in : "",
+                        t.exit && animation?.out ? animation.out : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ");
+                    }),
+                  ]),
                   onAnimationEnd(e: AnimationEvent) {
                     if (e.target === e.currentTarget) {
-                      props.store.presence.handleAnimationEnd();
+                      store.presence.handleAnimationEnd();
                     }
-                    if (rest.onAnimationEnd) {
-                      rest.onAnimationEnd(e);
+                    if (onAnimationEnd) {
+                      onAnimationEnd(e);
                     }
                   },
                 },

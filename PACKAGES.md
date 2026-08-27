@@ -23,10 +23,10 @@ Timeless 是一个**平台无关的前端框架**，核心理念是"一次编写
 │  ui-primitive          │  a2ui (JSON→UI)             │
 │  (无样式 DOM 绑定)      │                              │
 ├──────────────────────────────────────────────────────┤
-│           @timeless/timeless (框架核心 barrel)         │
+│           @timeless/timeless (完整框架 barrel)         │
 ├──────────┬──────────┬──────────┬─────────────────────┤
-│ reactive │ primitive│ inner-vm │ inner-kit           │
-│ (响应式)  │ (VNode)  │ (状态机)  │ (应用服务)           │
+│ @timeless/lite      │ inner-vm │ inner-kit           │
+│ (响应式 + VNode)     │ (状态机)  │ (应用服务)           │
 ├──────────┴──────────┴──────────┴─────────────────────┤
 │              inner-base (事件/Result/平台抽象)         │
 │              inner-types (TS 类型工具)                 │
@@ -266,9 +266,23 @@ shadcn/weui = ui-primitive + CSS 样式（视觉层）
 
 ## 可发布包（面向用户）
 
+### `@timeless/lite` — 平台无关轻量核心
+
+**组合**：`inner-reactive` + `inner-primitive`
+
+提供响应式系统和 VNode 元素工厂，不包含状态机、业务套件、图标、工具集或具体平台渲染器。浏览器发布文件 `timeless.lite.umd.min.js` 由此包构建。
+
+```ts
+import { ref, computed, View, Text, For, Show } from "@timeless/lite";
+```
+
+**依赖**：`inner-reactive`、`inner-primitive`
+
+---
+
 ### `@timeless/timeless` — 框架核心
 
-**组合**：`inner-reactive` + `inner-primitive` + `ui-primitive` + `inner-kit`（导出为 `kit` 命名空间）+ `inner-vm`（导出为 `ui` 命名空间）
+**组合**：`lite` + `ui-primitive` + `inner-kit`（导出为 `kit` 命名空间）+ `inner-vm`（导出为 `ui` 命名空间）
 
 **给用户的一站式导入**：
 ```ts
@@ -285,7 +299,7 @@ import { kit } from "@timeless/timeless";
 const HistoryCore = kit.HistoryCore;
 ```
 
-**依赖**：`inner-reactive`、`inner-primitive`、`ui-primitive`、`inner-kit`、`inner-vm`
+**依赖**：`lite`、`ui-primitive`、`inner-kit`、`inner-vm`
 
 ---
 
@@ -540,7 +554,8 @@ import { render, View, Text, ref } from "@timeless/vanillalite";
   biz  providers  solidjs/vue   vanillakit
 
  ============== timeless (barrel) ==============
- timeless = inner-reactive + inner-primitive + inner-vm(as ui)
+ lite = inner-reactive + inner-primitive
+ timeless = lite + inner-vm(as ui) + inner-kit + ui-primitive
         │
    ┌────┼────────────┬──────────────┬──────────┐
    ▼    ▼            ▼              ▼          ▼
@@ -556,6 +571,7 @@ import { render, View, Text, ref } from "@timeless/vanillalite";
 
 | 你想要…… | 安装这些包 |
 |----------|-----------|
+| 平台无关轻量核心 | `lite` |
 | 最简 Web 应用 | `timeless` + `timeless-dom` |
 | Web 应用 + 业务套件 | `timeless` + `timeless-dom` + `provider-web` |
 | 带样式的 Web 应用 | `shadcn`（含以上所有） |

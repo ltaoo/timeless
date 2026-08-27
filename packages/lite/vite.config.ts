@@ -1,6 +1,7 @@
 import fs from "fs";
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import dtsPlugin from "vite-plugin-dts";
 
 import pkg from "./package.json";
 
@@ -9,7 +10,7 @@ import { bundle_analysis_plugin } from "../../scripts/vite-plugin-bundle-analysi
 
 function resolve_package_source_aliases() {
   return {
-    name: "timeless-lite-resolve-package-source-aliases",
+    name: "lite-resolve-package-source-aliases",
     enforce: "pre" as const,
     resolveId(source: string, importer?: string) {
       if (!importer || !source.startsWith("@/")) return null;
@@ -59,11 +60,15 @@ export default defineConfig({
     },
   },
   build: {
-    emptyOutDir: false,
     lib: {
-      entry: resolve(__dirname, "src/core.ts"),
-      formats: ["umd"],
-      fileName: () => "timeless.lite.umd.min.js",
+      entry: resolve(__dirname, "src/index.ts"),
+      formats: ["es", "cjs", "umd"],
+      fileName: (format) => {
+        if (format === "es") return "index.esm.js";
+        if (format === "cjs") return "index.js";
+        if (format === "umd") return "timeless.lite.umd.min.js";
+        return `index.${format}.js`;
+      },
       name: buildLibName("timeless"),
     },
     minify: isProd ? "terser" : false,
@@ -89,8 +94,15 @@ export default defineConfig({
     bundle_analysis_plugin({
       package_name: pkg.name,
       package_root: __dirname,
-      report_filename: "bundle-analysis-lite.json",
       workspace_root: resolve(__dirname, "../.."),
+    }),
+    dtsPlugin({
+      insertTypesEntry: true,
+      rollupTypes: false,
+      aliasesExclude: [/^@timeless\//],
+      compilerOptions: {
+        noCheck: true,
+      },
     }),
   ],
 });

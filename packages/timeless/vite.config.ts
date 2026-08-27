@@ -50,6 +50,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@timeless/lite": resolve(__dirname, "../lite/src/index.ts"),
       "@timeless/inner-base": resolve(__dirname, "../base/src/index.ts"),
       "@timeless/inner-icons": resolve(__dirname, "../icons/src/index.ts"),
       "@timeless/inner-primitive": resolve(

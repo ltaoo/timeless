@@ -566,6 +566,18 @@ importers:
         specifier: workspace:*
         version: link:../ui-vm
 
+  packages/lite:
+    dependencies:
+      '@timeless/inner-primitive':
+        specifier: workspace:^
+        version: link:../primitive
+      '@timeless/inner-reactive':
+        specifier: workspace:^
+        version: link:../reactive
+      tailwindcss:
+        specifier: ^3.0.0 || ^4.0.0
+        version: 4.2.2
+
   packages/primitive:
     dependencies:
       '@timeless/inner-base':
@@ -729,18 +741,15 @@ importers:
       '@timeless/inner-kit':
         specifier: workspace:^
         version: link:../kit
-      '@timeless/inner-primitive':
-        specifier: workspace:^
-        version: link:../primitive
-      '@timeless/inner-reactive':
-        specifier: workspace:^
-        version: link:../reactive
       '@timeless/inner-utils':
         specifier: workspace:^
         version: link:../utils
       '@timeless/inner-vm':
         specifier: workspace:^
         version: link:../ui-vm
+      '@timeless/lite':
+        specifier: workspace:^
+        version: link:../lite
       '@timeless/ui-primitive':
         specifier: workspace:^
         version: link:../ui-primitive

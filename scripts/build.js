@@ -19,6 +19,7 @@ const BUILD_ORDER = [
   "reactive",
   "utils",
   "primitive",
+  "lite",
   "ui-vm",
   "kit",
   "icons",
@@ -33,7 +34,7 @@ const BUILD_ORDER = [
 // Browser distribution consumed by wx_channels_download and the web demos.
 const ARTIFACTS = [
   ["timeless", "timeless.umd.min.js", "bundle-analysis.json"],
-  ["timeless", "timeless.lite.umd.min.js", "bundle-analysis-lite.json"],
+  ["lite", "timeless.lite.umd.min.js", "bundle-analysis.json"],
   ["utils", "timeless.utils.umd.min.js", "bundle-analysis.json"],
   ["timeless-dom", "timeless.dom.umd.min.js"],
   ["provider-web", "timeless.web.umd.min.js"],

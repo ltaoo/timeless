@@ -1,5 +1,5 @@
 {
-  "name": "@timeless/timeless",
+  "name": "@timeless/lite",
   "version": "0.31.5",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -16,12 +16,8 @@
     "tailwindcss": "^3.0.0 || ^4.0.0"
   },
   "dependencies": {
-    "@timeless/lite": "workspace:^",
-    "@timeless/inner-icons": "workspace:^",
-    "@timeless/inner-kit": "workspace:^",
-    "@timeless/inner-utils": "workspace:^",
-    "@timeless/ui-primitive": "workspace:^",
-    "@timeless/inner-vm": "workspace:^"
+    "@timeless/inner-primitive": "workspace:^",
+    "@timeless/inner-reactive": "workspace:^"
   },
   "exports": {
     ".": {
