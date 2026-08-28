@@ -810,6 +810,22 @@ declare module "packages/primitive/src/reactive/match" {
         destroy(): void;
     };
 }
+declare module "packages/primitive/src/reactive/keep-alive" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { TimelessElement, ViewChildren } from "@/content/type";
+    import { ViewProps } from "@/content/view";
+    type KeepAliveCondition = DerivedRef<boolean | null | undefined> | Ref<boolean | null | undefined> | boolean;
+    export type KeepAliveProps = ViewProps & {
+        when: KeepAliveCondition;
+    };
+    /**
+     * Keeps a subtree mounted while toggling its activation.
+     *
+     * Unlike Show, inactive children are moved into the host's detached cache,
+     * preserving host nodes, component state, form values, and scroll positions.
+     */
+    export function KeepAlive(props: KeepAliveProps, children?: ViewChildren): TimelessElement;
+}
 declare module "packages/primitive/src/content/error-boundary-context" {
     import { TimelessElement } from "@/content/type";
     export type ErrorBoundaryHandler = {
@@ -4941,6 +4957,8 @@ declare module "packages/primitive/src/vnode/view" {
         insertChildren(children: (TimelessElement | null)[]): void;
         get$children(): any[];
         removeChildren(): void;
+        /** Activate or detach this host node's rendered child subtree. */
+        setChildrenActive?(active: boolean): void;
         setupEventListener(events: any): void;
         teardownEventListener(events: any): void;
         /** Sync internal tracking after HMR patch inserts a child */
@@ -5118,6 +5136,7 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/reactive/for";
     export * from "packages/primitive/src/reactive/show";
     export * from "packages/primitive/src/reactive/match";
+    export * from "packages/primitive/src/reactive/keep-alive";
     export * from "packages/primitive/src/content/error-boundary";
     export * from "packages/primitive/src/content/fragment";
     export { createContext, provide, use, Scope, get_owner as getOwner, run_with_owner as runWithOwner, } from "packages/primitive/src/context/context";
@@ -24085,6 +24104,7 @@ declare const Fragment: typeof import("@timeless/timeless").Fragment;
 declare const Grid: typeof import("@timeless/timeless").Grid;
 declare const Icon: typeof import("@timeless/timeless").Icon;
 declare const Img: typeof import("@timeless/timeless").Img;
+declare const KeepAlive: typeof import("@timeless/timeless").KeepAlive;
 declare const LazyView: typeof import("@timeless/timeless").LazyView;
 declare const ListView: typeof import("@timeless/timeless").ListView;
 declare const ListenerManager: typeof import("@timeless/timeless").ListenerManager;

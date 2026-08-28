@@ -17,6 +17,7 @@ export const globals = {
   Grid: "readonly",
   Icon: "readonly",
   Img: "readonly",
+  KeepAlive: "readonly",
   LazyView: "readonly",
   ListView: "readonly",
   ListenerManager: "readonly",

@@ -3,6 +3,7 @@ console.log("primitive.version " + __Version);
 export * from "./reactive/for";
 export * from "./reactive/show";
 export * from "./reactive/match";
+export * from "./reactive/keep-alive";
 export * from "./content/error-boundary";
 export * from "./content/fragment";
 export {

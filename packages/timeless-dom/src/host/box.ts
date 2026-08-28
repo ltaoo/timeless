@@ -25,6 +25,8 @@ export function HostElement(props: {
   /** Timeless 子列表 */
   let child_elements: (TimelessElement | null)[] = [];
   let _events: any = null;
+  let $inactive_fragment: DocumentFragment | null = null;
+  let $inactive_scroll: [Element, number, number][] = [];
 
   // console.log("create box");
 
@@ -377,6 +379,39 @@ export function HostElement(props: {
     getChildren() {
       return child_nodes;
     },
+    setChildrenActive(active: boolean) {
+      if (!$elm || $elm.nodeType !== 1) return;
+      if (active) {
+        if ($inactive_fragment) {
+          $elm.appendChild($inactive_fragment);
+          $inactive_fragment = null;
+        }
+        $elm.hidden = false;
+        for (const [element, left, top] of $inactive_scroll) {
+          element.scrollLeft = left;
+          element.scrollTop = top;
+        }
+        $inactive_scroll.length = 0;
+        return;
+      }
+      if ($inactive_fragment) return;
+      $inactive_scroll.length = 0;
+      // ponytail: scan once on deactivation; track scroll events only if large pages make this measurable.
+      for (const element of [$elm, ...$elm.querySelectorAll("*")]) {
+        if (element.scrollLeft || element.scrollTop) {
+          $inactive_scroll.push([
+            element,
+            element.scrollLeft,
+            element.scrollTop,
+          ]);
+        }
+      }
+      $elm.hidden = true;
+      $inactive_fragment = document.createDocumentFragment();
+      while ($elm.firstChild) {
+        $inactive_fragment.appendChild($elm.firstChild);
+      }
+    },
     buildChildren(children?: (TimelessElement | null)[]) {
       const child_elements: (TimelessElement | null)[] = [];
       const child_host_nodes: any[] = [];
@@ -703,6 +738,8 @@ export function HostElement(props: {
     },
     destroy() {
       $elm = null;
+      $inactive_fragment = null;
+      $inactive_scroll.length = 0;
       $children.length = 0;
       child_nodes.length = 0;
       child_elements.length = 0;

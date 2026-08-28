@@ -476,6 +476,8 @@ importers:
         specifier: workspace:*
         version: link:../timeless
 
+  packages/analytics: {}
+
   packages/base:
     dependencies:
       mitt:

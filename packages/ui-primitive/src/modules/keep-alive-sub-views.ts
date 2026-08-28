@@ -1,4 +1,4 @@
-import { ref, refobj, refarr, computed } from "../core";
+import { refobj, refarr, computed } from "../core";
 import {
   MountedEvent,
   View,
@@ -6,6 +6,7 @@ import {
   TimelessComponent,
   TimelessElement,
   LazyView,
+  KeepAlive,
   For,
   ListenerManager,
 } from "../core";
@@ -39,13 +40,18 @@ export function KeepAliveSubViews(props: {
   onUnmounted?: () => void;
 }) {
   const subviews = refarr(props.view.subViews as SubView[]);
-  const cur_subview = refobj(props.view.curView as SubView);
   const listener$ = ListenerManager();
   const NotFoundPageView = (() => {
     if (props.NotFound) {
       return props.NotFound();
     }
-    return View({ class: "not-found" }, ["Not Found"]);
+    return View(
+      {
+        class: "not-found",
+        attributes: { n: "keep-alive-sub-view-not-found" },
+      },
+      ["Not Found"],
+    );
   })();
 
   return For({
@@ -54,22 +60,7 @@ export function KeepAliveSubViews(props: {
     onMounted(event) {
       // console.log("the For Mounted in KeepAliveSubViews", event);
       listener$.append([
-        props.view.onCurViewChange((view: SubView) => {
-          cur_subview.as(view);
-        }),
-        // props.view.onSubViewAppended((v: SubView) => {
-        //   // console.log(
-        //   //   "[KeepAliveSubViews] onSubViewAppended",
-        //   //   v,
-        //   //   subviews.length,
-        //   // );
-        //   subviews.push(v);
-        // }),
-        // props.view.onSubViewRemoved((v: SubView) => {
-        //   subviews.remove(v);
-        // }),
         props.view.onSubViewsChange((views: SubView[]) => {
-          console.log("[KeepAliveSubViews]onSubViewAppended", views.length);
           subviews.as(views);
         }),
       ]);
@@ -84,20 +75,49 @@ export function KeepAliveSubViews(props: {
       if (!PageView) {
         return NotFoundPageView;
       }
-      return View(
+      const presence_state = refobj(subview.$presence.state);
+      const presence_listener$ = ListenerManager([presence_state]);
+      const animation = subview.animation || {};
+
+      presence_listener$.add(
+        subview.$presence.onStateChange((state: Record<string, boolean>) => {
+          presence_state.as(state);
+        }),
+      );
+
+      return KeepAlive(
         {
+          when: computed(presence_state, (state) => {
+            return (
+              state.mounted && (state.visible || state.enter || state.exit)
+            );
+          }),
+          class: computed(presence_state, (state) => {
+            return [
+              "route-view",
+              state.enter ? animation.in : "",
+              state.exit ? animation.out : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+          }),
           style: {
             "z-index": computed(idx, (t) => t + 1),
-            position: "relative",
-            width: "100%",
-            height: "100%",
-            display: computed(cur_subview, (t) => {
-              return t && t.id === subview.id ? "block" : "none";
-            }),
+            position: "absolute",
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            overflow: "auto",
+            "overflow-anchor": "none",
           },
+          attributes: { n: "keep-alive-sub-view" },
           dataset: {
             name: subview.name,
             pathname: subview.pathname,
+          },
+          onUnmounted() {
+            presence_listener$.destroy();
           },
         },
         [
@@ -108,12 +128,6 @@ export function KeepAliveSubViews(props: {
             },
             PageView,
           ),
-          // withErrorBoundary(
-          //   () =>
-          //     ,
-          //   subview.name,
-          //   props.ErrorFallback,
-          // ),
         ],
       );
     },

@@ -79,6 +79,8 @@ export type VNodeView<HostElm = any> = {
   insertChildren(children: (TimelessElement | null)[]): void;
   get$children(): any[];
   removeChildren(): void;
+  /** Activate or detach this host node's rendered child subtree. */
+  setChildrenActive?(active: boolean): void;
   setupEventListener(events: any): void;
   teardownEventListener(events: any): void;
   /** Sync internal tracking after HMR patch inserts a child */
