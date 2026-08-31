@@ -4,6 +4,14 @@ export { ApplicationModel } from "./app";
 export type { ThemeTypes, OrientationTypes, KeyboardEvent } from "./app/types";
 export { ClipboardModel } from "./clipboard";
 export { StorageCore } from "./storage";
+export {
+  HLSPlayerCore,
+  type HLSPlayerMountOptions,
+  type HLSPlayerReason,
+  type HLSPlayerSession,
+  type HLSPlayerState,
+  type HLSPlayerStatus,
+} from "./hls-player";
 // export {} from "./system";
 export { HistoryCore } from "./history";
 export { NavigatorCore } from "./navigator";

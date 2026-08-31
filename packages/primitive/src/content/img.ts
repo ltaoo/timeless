@@ -166,6 +166,12 @@ export function Img(props: ImgProps) {
           state.src = props.src;
         }
       }
+      if (onLoad) {
+        (events as any).onLoad = onLoad;
+      }
+      if (onError) {
+        (events as any).onError = onError;
+      }
     },
   };
 

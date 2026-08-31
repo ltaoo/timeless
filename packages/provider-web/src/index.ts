@@ -2,6 +2,10 @@ export { connect as provide_app } from "./app";
 export { connect as provide_clipboard } from "./clipboard";
 export { connect as provide_http_client } from "./http_client";
 export { connect as provide_history } from "./history";
+export {
+  connect as provide_hls_player,
+  type HLSPlayerProviderOptions,
+} from "./hls-player";
 export { connect as provide_socket_client } from "./socket";
 export type { WebSocketProviderOptions } from "./socket";
 export { connect as provide_ui_image } from "./ui/image";
