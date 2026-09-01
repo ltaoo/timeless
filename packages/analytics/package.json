@@ -1,6 +1,6 @@
 {
   "name": "@timeless/analytics",
-  "version": "0.32.1",
+  "version": "0.33.0",
   "description": "Zero-dependency browser autocapture SDK",
   "main": "dist/index.cjs",
   "module": "dist/analytics.esm.js",

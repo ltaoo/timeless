@@ -176,6 +176,7 @@ export function Img(props: ImgProps) {
   };
 
   methods.subscribe_props();
+  box$.methods.add_event();
 
   return {
     t: "img",

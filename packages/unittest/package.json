@@ -1,6 +1,6 @@
 {
   "name": "@timeless/unittest",
-  "version": "0.32.1",
+  "version": "0.33.0",
   "private": true,
   "description": "Cross-component integration tests for Timeless headless UI — asserts VM state without DOM",
   "main": "src/index.ts",

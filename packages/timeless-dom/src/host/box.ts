@@ -11,6 +11,76 @@ let _batch_mode = false;
 let _pending_mounted: (() => void)[] = [];
 let _raf_scheduled = false;
 
+type ExposureRegistration = {
+  observer: IntersectionObserver;
+  handler: (entry: IntersectionObserverEntry) => void;
+};
+
+let _exposure_observer: IntersectionObserver | undefined;
+let _exposure_target_count = 0;
+const _exposure_registrations = new WeakMap<Element, ExposureRegistration>();
+
+function release_exposure(
+  target: Element,
+  registration: ExposureRegistration,
+) {
+  if (_exposure_registrations.get(target) !== registration) {
+    return;
+  }
+  _exposure_registrations.delete(target);
+  registration.observer.unobserve(target);
+  _exposure_target_count -= 1;
+  if (
+    _exposure_target_count === 0 &&
+    _exposure_observer === registration.observer
+  ) {
+    registration.observer.disconnect();
+    _exposure_observer = undefined;
+  }
+}
+
+function get_exposure_observer() {
+  if (typeof IntersectionObserver !== "function") {
+    return undefined;
+  }
+  if (!_exposure_observer) {
+    _exposure_observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) {
+          continue;
+        }
+        const target = entry.target;
+        const registration = _exposure_registrations.get(target);
+        if (!registration) {
+          continue;
+        }
+        release_exposure(target, registration);
+        registration.handler(entry);
+      }
+    });
+  }
+  return _exposure_observer;
+}
+
+function observe_exposure(
+  target: any,
+  handler: (entry: IntersectionObserverEntry) => void,
+) {
+  if (!target || target.nodeType !== 1) {
+    return null;
+  }
+  const observer = get_exposure_observer();
+  if (!observer) {
+    return null;
+  }
+  const element = target as Element;
+  const registration: ExposureRegistration = { observer, handler };
+  _exposure_registrations.set(element, registration);
+  _exposure_target_count += 1;
+  observer.observe(element);
+  return () => release_exposure(element, registration);
+}
+
 export function HostElement(props: {
   t: string;
   $elm: null | any;
@@ -25,8 +95,14 @@ export function HostElement(props: {
   /** Timeless 子列表 */
   let child_elements: (TimelessElement | null)[] = [];
   let _events: any = null;
+  let _exposure_cleanup: (() => void) | null = null;
   let $inactive_fragment: DocumentFragment | null = null;
   let $inactive_scroll: [Element, number, number][] = [];
+
+  const cleanup_exposure = () => {
+    _exposure_cleanup?.();
+    _exposure_cleanup = null;
+  };
 
   // console.log("create box");
 
@@ -172,6 +248,7 @@ export function HostElement(props: {
       $elm.removeEventListener(type, handler, options);
     },
     setupEventListener(events: any) {
+      cleanup_exposure();
       if (!events || !$elm || $elm.nodeType === 3) {
         return;
       }
@@ -238,8 +315,15 @@ export function HostElement(props: {
       if (events.onWheel) {
         $elm.addEventListener("wheel", events.onWheel);
       }
+      if (events.onExpose) {
+        _exposure_cleanup = observe_exposure($elm, (entry) => {
+          _exposure_cleanup = null;
+          events.onExpose(entry);
+        });
+      }
     },
     teardownEventListener(events: any) {
+      cleanup_exposure();
       if (!events || !$elm || $elm.nodeType === 3) {
         return;
       }
@@ -737,6 +821,7 @@ export function HostElement(props: {
       return $elm.parentElement;
     },
     destroy() {
+      cleanup_exposure();
       $elm = null;
       $inactive_fragment = null;
       $inactive_scroll.length = 0;

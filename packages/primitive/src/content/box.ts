@@ -69,6 +69,8 @@ export type BoxProps = {
 /** Event handlers supported by Box */
 export type BoxEvents = Partial<{
   onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+  /** Called once when the element enters the viewport. */
+  onExpose?: (entry: IntersectionObserverEntry) => void;
   beforeUnmounted?: () => void;
   onUnmounted?: () => void;
   onClick?: (e: MouseEvent) => void;
@@ -334,6 +336,9 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       }
     },
     add_event() {
+      if (props.onExpose) {
+        events.onExpose = props.onExpose;
+      }
       if (props.onClick) {
         events.onClick = props.onClick;
       }
