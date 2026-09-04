@@ -37,9 +37,11 @@ import { DOMScrollView } from "@/host/scroll-view";
 import { DOMTabView, DOMTabPane } from "@/host/tab-view";
 import { DOMStyle } from "@/host/style";
 import { DOMListView } from "@/host/list-view";
+import { DOMListViewV2 } from "@/host/list-view-v2";
 import { DOMListItemView } from "@/host/list-item-view";
 import { DOMSwitch } from "@/host/switch";
 import { DOMWindow } from "@/host/window";
+import { DOMTable, isDOMTableElementType } from "@/host/table";
 import {
   DOMSVG,
   DOMG,
@@ -71,6 +73,11 @@ export function buildAndRender(elm: TimelessElement): {
 }
 
 export function build(elm: TimelessElement): VNodeView<any> {
+  if (isDOMTableElementType(elm.t)) {
+    const table$ = DOMTable({ build, elm });
+    elm.$elm = table$;
+    return table$;
+  }
   if (elm.t === "view") {
     const view$ = DOMView({ build, elm });
     elm.$elm = view$;
@@ -133,6 +140,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
   }
   if (elm.t === "list-view") {
     const listview$ = DOMListView({ build, elm });
+    elm.$elm = listview$;
+    return listview$;
+  }
+  if (elm.t === "list-view-v2") {
+    const listview$ = DOMListViewV2({ build, elm });
     elm.$elm = listview$;
     return listview$;
   }

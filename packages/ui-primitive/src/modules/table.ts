@@ -1,69 +1,55 @@
-import { View, ViewProps, ViewChildren } from "../core";
+import {
+  Table as CoreTable,
+  TableBody as CoreTableBody,
+  TableCaption as CoreTableCaption,
+  TableCell as CoreTableCell,
+  TableCellProps,
+  TableFooter as CoreTableFooter,
+  TableHead as CoreTableHead,
+  TableHeader as CoreTableHeader,
+  TableRow as CoreTableRow,
+  ViewProps,
+  ViewChildren,
+} from "../core";
 
 export function Table(props: ViewProps, children?: ViewChildren) {
-  return View(
+  const { dataset, ...rest } = props;
+  return CoreTable(
     {
-      as: "table",
       dataset: {
         table: "",
+        ...(dataset || {}),
       },
-      ...props,
+      ...rest,
     },
     children,
   );
 }
 
 export function TableHeader(props: ViewProps, children?: ViewChildren) {
-  return View(
-    {
-      as: "thead",
-      ...props,
-      // "data-table-header": "",
-    },
-    children,
-  );
+  return CoreTableHeader(props, children);
+}
+
+export function TableCaption(props: ViewProps, children?: ViewChildren) {
+  return CoreTableCaption(props, children);
 }
 
 export function TableBody(props: ViewProps, children?: ViewChildren) {
-  return View(
-    {
-      as: "tbody",
-      ...props,
-      // "data-table-body": "",
-    },
-    children,
-  );
+  return CoreTableBody(props, children);
+}
+
+export function TableFooter(props: ViewProps, children?: ViewChildren) {
+  return CoreTableFooter(props, children);
 }
 
 export function TableRow(props: ViewProps, children?: ViewChildren) {
-  return View(
-    {
-      as: "tr",
-      ...props,
-      // "data-table-row": "",
-    },
-    children,
-  );
+  return CoreTableRow(props, children);
 }
 
-export function TableHead(props: ViewProps, children?: ViewChildren) {
-  return View(
-    {
-      as: "th",
-      ...props,
-      // "data-table-head": "",
-    },
-    children,
-  );
+export function TableHead(props: TableCellProps, children?: ViewChildren) {
+  return CoreTableHead(props, children);
 }
 
-export function TableCell(props: ViewProps, children?: ViewChildren) {
-  return View(
-    {
-      as: "td",
-      ...props,
-      // "data-table-cell": "",
-    },
-    children,
-  );
+export function TableCell(props: TableCellProps, children?: ViewChildren) {
+  return CoreTableCell(props, children);
 }

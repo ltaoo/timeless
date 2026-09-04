@@ -16,6 +16,7 @@ type TextareaState = {
   rendered: boolean;
   style: RawViewStyleProperties;
   styleSet?: string[];
+  attributes: Record<string, string | number | boolean | undefined>;
   id?: string;
   name?: string;
   value: string;
@@ -70,6 +71,7 @@ export function Textarea(props: TextareaProps) {
     disabled: false,
     style: {},
     styleSet: [],
+    attributes: {},
   };
   const events = {
     onInput,
@@ -308,8 +310,10 @@ export function Textarea(props: TextareaProps) {
           }
           const vv = attributes[k];
           if (isRef(vv)) {
+            state.attributes[k] = vv.value;
             const unsub = vv.subscribe({
               onChange(v: any) {
+                state.attributes[k] = v;
                 methods.applyAttr(k, v);
               },
             });
@@ -317,6 +321,7 @@ export function Textarea(props: TextareaProps) {
             methods.applyAttr(k, vv.value);
             return;
           }
+          state.attributes[k] = vv;
           methods.applyAttr(k, vv);
         });
       }

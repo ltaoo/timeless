@@ -32,6 +32,7 @@ export function DOMLabel(props: {
       return true;
     },
     render() {
+      common$.methods.applyState(props.elm.state, { initial: true });
       if (props.elm.state.for) {
         common$.methods.setAttribute("for", props.elm.state.for);
       }

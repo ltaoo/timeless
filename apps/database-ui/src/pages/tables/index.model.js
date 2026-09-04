@@ -717,3 +717,94 @@ export function getRowKey(columns) {
   }
   return columns.length > 0 ? columns[0].name : "id";
 }
+
+export function createTablesPageModel(props = {}) {
+  var panels_ = refarr([]);
+  var current_panel_ = ref(null);
+  var search_text_ = ref("");
+  var visible_tables_ = computed(search_text_, function (query) {
+    var normalized_query = query.trim().toLowerCase();
+    return normalized_query
+      ? MOCK_TABLES.filter(function (table) {
+          return table.name.toLowerCase().includes(normalized_query);
+        })
+      : MOCK_TABLES;
+  });
+
+  function findPanel(name) {
+    return panels_.value.find(function (panel) {
+      return panel.name === name;
+    });
+  }
+
+  function openTable(name) {
+    var panel = findPanel(name);
+    if (!panel) {
+      var table = MOCK_TABLES.find(function (item) {
+        return item.name === name;
+      });
+      if (!table) return;
+
+      panel = {
+        name: table.name,
+        columns: table.columns,
+        data: refarr(
+          generateMockRows(
+            table.name,
+            table.name === "tags" || table.name === "posts" ? 5000 : 10,
+          ),
+        ),
+      };
+      panels_.push(panel);
+    }
+    current_panel_.as(panel.name);
+  }
+
+  function closeTable(name) {
+    var index = panels_.value.findIndex(function (panel) {
+      return panel.name === name;
+    });
+    if (index === -1) return;
+
+    panels_.remove(index);
+    if (current_panel_.value !== name) return;
+
+    var next_index = Math.min(index, panels_.value.length - 1);
+    current_panel_.as(
+      next_index === -1 ? null : panels_.value[next_index].name,
+    );
+  }
+
+  return {
+    state: {
+      panels: panels_,
+      currentPanel: current_panel_,
+      searchText: search_text_,
+      visibleTables: visible_tables_,
+    },
+    methods: {
+      openTable: openTable,
+      closeTable: closeTable,
+      switchTable: function (name) {
+        if (findPanel(name)) current_panel_.as(name);
+      },
+      setSearchText: function (value) {
+        search_text_.as(value);
+      },
+      onQueryChange: function (value) {
+        if (props.onFilter) props.onFilter({ column: null, value: value });
+      },
+      onSortChange: function (sort) {
+        if (!props.onSort) return;
+        props.onSort(
+          sort
+            ? { column: sort.key, direction: sort.direction }
+            : { column: null, direction: null },
+        );
+      },
+    },
+    destroy: function () {
+      visible_tables_.destroy();
+    },
+  };
+}

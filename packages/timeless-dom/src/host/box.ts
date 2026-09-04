@@ -550,8 +550,9 @@ export function HostElement(props: {
       child_nodes = r.child_nodes;
       const handle_inserted_elements_mounted = () => {
         for (const child of inserted_elements) {
-          if (child?.onMounted) {
-            child.onMounted({ target: child.$elm });
+          const target = child?.$elm;
+          if (target && child.onMounted) {
+            child.onMounted({ target });
           }
         }
       };
@@ -657,7 +658,8 @@ export function HostElement(props: {
         const elements = [...inserted_elements];
         _pending_mounted.push(() => {
           for (const child of elements) {
-            if (child.onMounted) child.onMounted({ target: child.$elm });
+            const target = child.$elm;
+            if (target && child.onMounted) child.onMounted({ target });
           }
         });
       } else {

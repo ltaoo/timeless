@@ -1,6 +1,7 @@
 import { VNodeView, type TimelessElement } from "@timeless/timeless";
 
 import { resetPortalCounter } from "@/host/portal";
+import { isDOMTableElementType } from "@/host/table";
 
 import { render } from "./index";
 import { build } from "./build";
@@ -92,6 +93,20 @@ export function hydrate_node(
   // if (!$elm) {
   //   return null;
   // }
+  if (isDOMTableElementType(vnode.t)) {
+    if ($elm.nodeType === 3) return null;
+    const table$ = build(vnode);
+    vnode.$elm = table$;
+    table$.hydrate(vnode, $elm, opt);
+    return table$;
+  }
+  if (vnode.t === "list-view-v2") {
+    if ($elm.nodeType === 3) return null;
+    const listview$ = build(vnode);
+    vnode.$elm = listview$;
+    listview$.hydrate(vnode, $elm, opt);
+    return listview$;
+  }
   if (vnode.t === "view") {
     if ($elm.nodeType === 3) {
       return null;

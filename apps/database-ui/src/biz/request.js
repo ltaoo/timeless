@@ -1,9 +1,9 @@
-export const request = Timeless.request_factory({
+export const request = Timeless.kit.request_factory({
   headers: { "Content-Type": "application/json" },
 });
 
 const API_BASE = "http://127.0.0.1:3001";
-const apiRequest = Timeless.request_factory({
+const apiRequest = Timeless.kit.request_factory({
   baseURL: API_BASE,
   headers: { "Content-Type": "application/json" },
 });

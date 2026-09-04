@@ -120,7 +120,11 @@ describe("HostElement child lifecycle", () => {
     const host = HostElement({
       t: "match",
       $elm: anchor,
-      build: (element) => vnode_by_element.get(element)!,
+      build: (element) => {
+        const vnode = vnode_by_element.get(element)!;
+        element.$elm = vnode;
+        return vnode;
+      },
     });
 
     host.methods.insertChildren([old_admin.element]);
@@ -138,5 +142,25 @@ describe("HostElement child lifecycle", () => {
     expect(new_admin.element.onMounted).toHaveBeenCalledOnce();
     expect(new_admin.element.onUnmounted).not.toHaveBeenCalled();
     expect(parent.children).toEqual([new_admin.host_node, anchor]);
+  });
+
+  it("skips a deferred mount after the child was destroyed", () => {
+    const parent = create_parent();
+    const child = create_element("stale");
+    const host = HostElement({
+      t: "view",
+      $elm: null,
+      build: (element) => {
+        element.$elm = child.vnode;
+        return child.vnode;
+      },
+    });
+
+    host.methods.set$elm(parent as any);
+    host.methods.insertChildren([child.element]);
+    child.element.$elm = null;
+    vi.runAllTimers();
+
+    expect(child.element.onMounted).not.toHaveBeenCalled();
   });
 });

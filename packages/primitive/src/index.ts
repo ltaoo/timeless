@@ -39,8 +39,11 @@ export * from "./floating/toaster";
 export * from "./floating/dropdown-menu";
 export * from "./floating/context-menu";
 export * from "./content/list-view";
+export * from "./content/list-view-v2";
 export * from "./content/icon";
 export * from "./content/aspect-ratio";
+export * from "./content/table";
+export * from "./content/tablev2";
 
 export * from "./content/type";
 

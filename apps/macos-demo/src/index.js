@@ -1,5 +1,6 @@
 import {
   View,
+  For,
   ref,
   computed,
   Img,
@@ -16,10 +17,8 @@ import {
   AspectRatio,
   Text,
   SplitView,
-  SplitPane,
   ScrollView,
   TabView,
-  TabPane,
 } from "@timeless/timeless";
 import { render, TimelessNativeVersion } from "@timeless/timeless-native";
 
@@ -64,7 +63,7 @@ function SidebarContent() {
 
 function MainContent() {
   const count_ = ref(0);
-  const activeTab = ref(0);
+  const active_tab_ = ref("home");
 
   return View(
     {
@@ -90,27 +89,36 @@ function MainContent() {
       ),
       TabView(
         {
-          activeIndex: activeTab,
-          onChange(idx) {
-            activeTab.set(idx);
-          },
+          tab: active_tab_,
+          panels: [
+            {
+              tab: "home",
+              label: "Home",
+              content: [
+                View({}, ["Counter: ", count_]),
+                View({}, [TimelessNativeVersion]),
+              ],
+            },
+            {
+              tab: "documents",
+              label: "Documents",
+              content: [
+                View({}, ["Document list here"]),
+                ...Array.from({ length: 10 }, (_, i) =>
+                  View({ style: { padding: "8px" } }, [`Document ${i + 1}`]),
+                ),
+              ],
+            },
+            {
+              tab: "settings",
+              label: "Settings",
+              content: [
+                View({}, ["Settings panel"]),
+                Button({}, ["Reset Counter"]),
+              ],
+            },
+          ],
         },
-        [
-          TabPane({ label: "Home" }, [
-            View({}, ["Counter: ", count_]),
-            View({}, [TimelessNativeVersion]),
-          ]),
-          TabPane({ label: "Documents" }, [
-            View({}, ["Document list here"]),
-            ...Array.from({ length: 10 }, (_, i) =>
-              View({ style: { padding: "8px" } }, [`Document ${i + 1}`]),
-            ),
-          ]),
-          TabPane({ label: "Settings" }, [
-            View({}, ["Settings panel"]),
-            Button({}, ["Reset Counter"]),
-          ]),
-        ],
       ),
     ],
   );
@@ -145,41 +153,47 @@ function ApplicationView() {
   return SplitView(
     {
       direction: "horizontal",
-      defaultSizes: [280, "flex"],
       style: { width: "100%", height: "100%" },
-    },
-    [
-      SplitPane(
+      panels: [
         {
           size: 280,
           style: { background: "#fff" },
+          content: [ScrollView({}, [SidebarContent()])],
         },
-        [ScrollView({}, [SidebarContent()])],
-      ),
-      SplitView(
         {
-          direction: "vertical",
-          defaultSizes: ["flex", 280],
-          style: { flex: 1 },
+          size: "auto",
+          style: {},
+          content: [
+            SplitView({
+              direction: "vertical",
+              panels: [
+                {
+                  size: "auto",
+                  style: {},
+                  content: [
+                    ScrollView(
+                      {
+                        vertical: "auto",
+                        style: { flex: 1 },
+                      },
+                      [MainContent()],
+                    ),
+                  ],
+                },
+                {
+                  size: 280,
+                  style: {
+                    background: "#f9f9f9",
+                    "border-top": "1px solid #ddd",
+                  },
+                  content: [FooterContent()],
+                },
+              ],
+            }),
+          ],
         },
-        [
-          ScrollView(
-            {
-              vertical: "auto",
-              style: { flex: 1 },
-            },
-            [MainContent()],
-          ),
-          SplitPane(
-            {
-              size: 280,
-              style: { background: "#f9f9f9", "border-top": "1px solid #ddd" },
-            },
-            [FooterContent()],
-          ),
-        ],
-      ),
-    ],
+      ],
+    },
   );
 }
 

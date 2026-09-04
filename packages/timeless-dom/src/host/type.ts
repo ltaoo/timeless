@@ -28,6 +28,7 @@ import { DOMSelect, DOMSelectOption, DOMSelectOptionGroup } from "./select";
 import { DOMLink } from "./link";
 import { DOMWebview } from "./webview";
 import { DOMListView } from "./list-view";
+import { DOMListViewV2 } from "./list-view-v2";
 import { DOMListItemView } from "./list-item-view";
 
 export type DOMHostNode =
@@ -48,6 +49,7 @@ export type DOMHostNode =
   | DOMTextarea
   | DOMFilePicker
   | DOMListView
+  | DOMListViewV2
   | DOMListItemView
   | DOMNumberInput
   | DOMCheckbox

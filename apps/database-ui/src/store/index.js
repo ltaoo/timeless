@@ -5,10 +5,10 @@ import NotFoundPageView from "@/pages/notfound/index.js";
 import HomeLayoutView from "@/pages/home/layout.js";
 import HomeIndexPageView from "@/pages/home/index.js";
 
-ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
-InputPrimitive.setInputProvider(Timeless.web);
-TextareaPrimitive.setTextareaProvider(Timeless.web);
-Timeless.NavigatorCore.prefix = "/";
+Timeless.ui.ScrollViewPrimitive.setScrollViewProvider(Timeless.web);
+Timeless.ui.InputPrimitive.setInputProvider(Timeless.web);
+Timeless.ui.TextareaPrimitive.setTextareaProvider(Timeless.web);
+Timeless.kit.NavigatorCore.prefix = "/";
 
 const routes_configure = /** @type {const} */ ({
   home_layout: {
@@ -17,7 +17,7 @@ const routes_configure = /** @type {const} */ ({
     component: HomeLayoutView,
     children: {
       index: {
-        default: true,
+        is_default: true,
         title: "首页",
         pathname: "/home/index",
         component: HomeIndexPageView,
@@ -52,7 +52,7 @@ const routes_configure = /** @type {const} */ ({
   },
 });
 
-const router = Timeless.buildRoutes(routes_configure);
+const router = Timeless.kit.buildRoutes(routes_configure);
 
 const routes = router.routes;
 export const views = router.views;
@@ -88,7 +88,7 @@ const DEFAULT_CACHE_VALUES = {
 };
 const key = "timeless";
 const e = globalThis.localStorage.getItem(key);
-export const storage$ = new Timeless.StorageCore({
+export const storage$ = new Timeless.kit.StorageCore({
   key,
   defaultValues: DEFAULT_CACHE_VALUES,
   values: (() => {
@@ -100,7 +100,7 @@ export const storage$ = new Timeless.StorageCore({
   client: globalThis.localStorage,
 });
 // HttpClient
-export const client$ = new Timeless.HttpClientCore({
+export const client$ = new Timeless.kit.HttpClientCore({
   headers: {
     "Content-Type": "application/json",
   },
@@ -157,8 +157,8 @@ export const user$ = (() => {
 })();
 client$.appendHeaders({ Authorization: user$.token });
 Timeless.web.provide_http_client(client$);
-export const router$ = new Timeless.NavigatorCore();
-export const view$ = new Timeless.RouteViewCore({
+export const router$ = new Timeless.kit.NavigatorCore();
+export const view$ = new Timeless.kit.RouteViewCore({
   name: "root",
   pathname: "/",
   title: "ROOT",
@@ -167,7 +167,7 @@ export const view$ = new Timeless.RouteViewCore({
   views: [],
 });
 view$.isRoot = true;
-export const history$ = new Timeless.HistoryCore({
+export const history$ = new Timeless.kit.HistoryCore({
   view: view$,
   router: router$,
   routes,
@@ -177,8 +177,8 @@ export const history$ = new Timeless.HistoryCore({
 });
 Timeless.web.provide_history(history$);
 
-const clipboard = Timeless.ClipboardModel();
-export const app = new Timeless.ApplicationModel({
+const clipboard = Timeless.kit.ClipboardModel();
+export const app = new Timeless.kit.ApplicationModel({
   clipboard,
   storage: storage$,
   async beforeReady() {
@@ -235,7 +235,7 @@ history$.onRouteChange(({ reason, view, href, ignore }) => {
 });
 history$.onClickLink(({ href, target }) => {
   const hrefText = String(href || "");
-  const { pathname, query } = Timeless.NavigatorCore.parse(hrefText);
+  const { pathname, query } = Timeless.kit.NavigatorCore.parse(hrefText);
   const route = router.routesWithPathname[pathname];
   if (!route) {
     app.tip?.({ text: ["没有匹配的页面"] });

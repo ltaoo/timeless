@@ -218,7 +218,7 @@ function ApplicationRootView() {
         },
       },
       () => [
-        StandardSubViews({
+        Timeless.ui.StandardSubViews({
           view: root_view$,
           views,
           history: history$,
