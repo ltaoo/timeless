@@ -100,6 +100,13 @@ export function hydrate_node(
     table$.hydrate(vnode, $elm, opt);
     return table$;
   }
+  if (vnode.t === "swiper" || vnode.t === "swiper-item") {
+    if ($elm.nodeType === 3) return null;
+    const swiper$ = build(vnode);
+    vnode.$elm = swiper$;
+    swiper$.hydrate(vnode, $elm, opt);
+    return swiper$;
+  }
   if (vnode.t === "list-view-v2") {
     if ($elm.nodeType === 3) return null;
     const listview$ = build(vnode);

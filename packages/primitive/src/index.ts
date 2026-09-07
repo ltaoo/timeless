@@ -54,6 +54,7 @@ export * from "./layout/row";
 export * from "./layout/column";
 export * from "./layout/split";
 export * from "./layout/scroll";
+export * from "./layout/swiper";
 export * from "./layout/window";
 export * from "./layout/tab";
 

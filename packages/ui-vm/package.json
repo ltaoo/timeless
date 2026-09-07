@@ -267,6 +267,11 @@
       "import": "./dist/step/index.esm.js",
       "require": "./dist/step/index.js"
     },
+    "./swiper": {
+      "types": "./dist/swiper/index.d.ts",
+      "import": "./dist/swiper/index.esm.js",
+      "require": "./dist/swiper/index.js"
+    },
     "./switch": {
       "types": "./dist/switch/index.d.ts",
       "import": "./dist/switch/index.esm.js",

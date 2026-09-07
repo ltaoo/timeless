@@ -72,6 +72,7 @@ export * from "./dynamic-content";
 export * from "./element";
 export * from "./simple-select";
 export * from "./switch";
+export * from "./swiper";
 export * from "./toggle";
 export * from "./tree-select";
 export * from "./tag-select";

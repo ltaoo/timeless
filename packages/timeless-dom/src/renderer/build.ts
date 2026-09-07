@@ -41,6 +41,7 @@ import { DOMListViewV2 } from "@/host/list-view-v2";
 import { DOMListItemView } from "@/host/list-item-view";
 import { DOMSwitch } from "@/host/switch";
 import { DOMWindow } from "@/host/window";
+import { DOMSwiper, DOMSwiperItem } from "@/host/swiper";
 import { DOMTable, isDOMTableElementType } from "@/host/table";
 import {
   DOMSVG,
@@ -77,6 +78,16 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const table$ = DOMTable({ build, elm });
     elm.$elm = table$;
     return table$;
+  }
+  if (elm.t === "swiper") {
+    const swiper$ = DOMSwiper({ build, elm: elm as any });
+    elm.$elm = swiper$;
+    return swiper$;
+  }
+  if (elm.t === "swiper-item") {
+    const swiper_item$ = DOMSwiperItem({ build, elm });
+    elm.$elm = swiper_item$;
+    return swiper_item$;
   }
   if (elm.t === "view") {
     const view$ = DOMView({ build, elm });

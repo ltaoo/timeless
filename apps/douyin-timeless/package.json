@@ -1,0 +1,19 @@
+{
+  "name": "@timeless/douyin-timeless",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A mobile Douyin experience built with Timeless view and model pairs",
+  "scripts": {
+    "sync:timeless": "node scripts/sync-timeless.mjs",
+    "predev": "pnpm sync:timeless",
+    "dev": "vite dev --host 0.0.0.0",
+    "prebuild": "pnpm sync:timeless",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "devDependencies": {
+    "@timeless/inner-types": "workspace:*",
+    "vite": "^8.0.0-beta.16"
+  }
+}
