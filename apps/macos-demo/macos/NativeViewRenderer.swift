@@ -19,6 +19,7 @@ class NativeViewRenderer {
 
     /// The last container width used for layout (needed for relayout).
     private(set) var lastContainerWidth: CGFloat = 0
+    private(set) var lastContainerHeight: CGFloat = 0
 
     /// The root NSView produced by the last `render` call.
     private(set) var rootView: NSView?
@@ -30,10 +31,15 @@ class NativeViewRenderer {
     // MARK: - Public API
 
     /// Build an NSView tree from a NativeNode, laid out with Yoga at the given width.
-    func render(_ node: NativeNode, containerWidth: CGFloat) -> NSView? {
+    func render(_ node: NativeNode, containerWidth: CGFloat, containerHeight: CGFloat) -> NSView? {
         lastContainerWidth = containerWidth
+        lastContainerHeight = containerHeight
         let yogaRoot = YogaLayoutEngine.buildYogaTree(from: node)
-        YogaLayoutEngine.calculateLayout(yogaRoot, width: Float(containerWidth))
+        YogaLayoutEngine.calculateLayout(
+            yogaRoot,
+            width: Float(containerWidth),
+            height: Float(containerHeight)
+        )
         let view = buildNSView(node: node, yogaNode: yogaRoot)
         YogaLayoutEngine.freeTree(yogaRoot)
         rootView = view
@@ -47,10 +53,15 @@ class NativeViewRenderer {
               let rootJSValue = bridge.rootElmJSValue,
               let rootNode = bridge.parseNode(rootJSValue),
               let rootView = rootView,
-              lastContainerWidth > 0 else { return }
+              lastContainerWidth > 0,
+              lastContainerHeight > 0 else { return }
 
         let yogaRoot = YogaLayoutEngine.buildYogaTree(from: rootNode)
-        YogaLayoutEngine.calculateLayout(yogaRoot, width: Float(lastContainerWidth))
+        YogaLayoutEngine.calculateLayout(
+            yogaRoot,
+            width: Float(lastContainerWidth),
+            height: Float(lastContainerHeight)
+        )
         updateFrames(view: rootView, yogaNode: yogaRoot)
         YogaLayoutEngine.freeTree(yogaRoot)
 
@@ -358,11 +369,13 @@ class NativeViewRenderer {
             
             // Set initial positions after all subviews are added
             if childViews.count >= 2 {
-                let totalWidth = frame.width
-                if defaultSizes.count >= 1 {
-                    let firstWidth = totalWidth * CGFloat(defaultSizes[0]) / 100
-                    splitView.setPosition(firstWidth, ofDividerAt: 0)
-                }
+                let total = direction == "horizontal" ? frame.width : frame.height
+                let firstSize = defaultSizes.first ?? 0
+                let lastSize = defaultSizes.last ?? 0
+                let position = firstSize > 0
+                    ? min(firstSize, total)
+                    : max(0, total - lastSize)
+                splitView.setPosition(position, ofDividerAt: 0)
             }
             
             // Store min/max constraints via associated object

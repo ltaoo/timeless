@@ -66,6 +66,7 @@ import plus from "./plus";
 import radioTower from "./radio-tower";
 import refreshCcw from "./refresh-ccw";
 import refreshCw from "./refresh-cw";
+import robotArm from "./robot-arm";
 import rotateCcw from "./rotate-ccw";
 import rss from "./rss";
 import save from "./save";
@@ -156,6 +157,7 @@ export const iconRegistry = {
   "radio-tower": radioTower,
   "refresh-ccw": refreshCcw,
   "refresh-cw": refreshCw,
+  "robot-arm": robotArm,
   "rotate-ccw": rotateCcw,
   "rss": rss,
   "save": save,

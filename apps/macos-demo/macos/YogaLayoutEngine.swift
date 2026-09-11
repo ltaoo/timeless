@@ -29,6 +29,25 @@ enum YogaLayoutEngine {
             YGNodeInsertChild(yogaNode, childYoga, index)
         }
 
+        if case .splitView(let direction, let sizes, _, _, _, _, _) = node {
+            for (index, child) in children.enumerated() {
+                guard let childYoga = YGNodeGetChild(yogaNode, index) else { continue }
+                let size = index < sizes.count ? sizes[index] : 0
+                if size > 0 {
+                    YGNodeStyleSetFlexGrow(childYoga, 0)
+                    YGNodeStyleSetFlexShrink(childYoga, 0)
+                    if direction == "horizontal" {
+                        YGNodeStyleSetWidth(childYoga, Float(size))
+                    } else {
+                        YGNodeStyleSetHeight(childYoga, Float(size))
+                    }
+                } else {
+                    YGNodeStyleSetFlexGrow(childYoga, 1)
+                    YGNodeStyleSetFlexShrink(childYoga, 1)
+                }
+            }
+        }
+
         // Row children default to flex-grow:1 so they share space equally
         if case .row = node {
             for i in 0..<children.count {
@@ -55,8 +74,8 @@ enum YogaLayoutEngine {
     }
 
     /// Run Yoga layout calculation.
-    static func calculateLayout(_ root: YGNodeRef, width: Float) {
-        YGNodeCalculateLayout(root, width, Float.nan, .LTR)
+    static func calculateLayout(_ root: YGNodeRef, width: Float, height: Float = Float.nan) {
+        YGNodeCalculateLayout(root, width, height, .LTR)
     }
 
     /// Recursively free all Yoga nodes and their associated contexts.
@@ -166,16 +185,8 @@ enum YogaLayoutEngine {
                 }
             }
 
-        case .splitPane(let size, let minSize, let maxSize, _, _, _, _):
-            YGNodeStyleSetFlexGrow(yogaNode, Float(size) / 100)
-            if minSize > 0 {
-                YGNodeStyleSetMinWidth(yogaNode, Float(minSize))
-                YGNodeStyleSetMinHeight(yogaNode, Float(minSize))
-            }
-            if maxSize > 0 && maxSize < 100 {
-                YGNodeStyleSetMaxWidth(yogaNode, Float(maxSize))
-                YGNodeStyleSetMaxHeight(yogaNode, Float(maxSize))
-            }
+        case .splitPane:
+            break
 
         case .scrollView(_, _, _, _):
             YGNodeStyleSetFlexGrow(yogaNode, 1)

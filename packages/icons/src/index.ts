@@ -68,6 +68,7 @@ import plus from "./asn/plus";
 import radioTower from "./asn/radio-tower";
 import refreshCcw from "./asn/refresh-ccw";
 import refreshCw from "./asn/refresh-cw";
+import robotArm from "./asn/robot-arm";
 import rotateCcw from "./asn/rotate-ccw";
 import rss from "./asn/rss";
 import save from "./asn/save";
@@ -158,6 +159,7 @@ export const iconRegistry = {
   "radio-tower": radioTower,
   "refresh-ccw": refreshCcw,
   "refresh-cw": refreshCw,
+  "robot-arm": robotArm,
   "rotate-ccw": rotateCcw,
   "rss": rss,
   "save": save,

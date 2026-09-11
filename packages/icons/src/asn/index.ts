@@ -66,6 +66,7 @@ export { default as Plus } from "./plus";
 export { default as RadioTower } from "./radio-tower";
 export { default as RefreshCcw } from "./refresh-ccw";
 export { default as RefreshCw } from "./refresh-cw";
+export { default as RobotArm } from "./robot-arm";
 export { default as RotateCcw } from "./rotate-ccw";
 export { default as Rss } from "./rss";
 export { default as Save } from "./save";

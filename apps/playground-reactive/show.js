@@ -9,7 +9,7 @@
  * - 支持 onMounted、beforeUnmounted 和 onUnmounted 生命周期。
  */
 (function () {
-  const { ref, refarr, computed, View, Button, For, Show } = Timeless;
+  const { ref, refarr, computed, View, Button, For, Show, Fragment } = Timeless;
 
   function create_breadcrumb_picker_model() {
     const all_paths = [
@@ -507,6 +507,281 @@
           "每个非首项前用 Show 渲染“/”。点击面包屑会回到该层，也可以直接切换到第 n 个 path。",
           [BreadcrumbExampleView(model.picker)],
         ),
+
+        ExampleSection(
+          "9. Fragment + Show + For：Memo 列表搜索",
+          "Fragment 嵌套 Show 与 For，实现前端搜索过滤。输入关键词实时过滤标题、内容和标签。",
+          [MemoListExampleView()],
+        ),
+      ],
+    );
+  }
+
+  function MemoListExampleView() {
+    const { Input } = Timeless;
+
+    const MOCK_MEMOS = [
+      {
+        id: 1,
+        title: "项目周会纪要",
+        content: "讨论了 Q3 产品路线图和技术债务清理计划",
+        tag: "工作",
+      },
+      {
+        id: 2,
+        title: "读书笔记：深入理解计算机系统",
+        content: "第三章 程序的机器级表示，汇编与反汇编",
+        tag: "学习",
+      },
+      {
+        id: 3,
+        title: "健身计划",
+        content: "每周三次力量训练，两次有氧运动",
+        tag: "生活",
+      },
+      {
+        id: 4,
+        title: "React 性能优化",
+        content: "useMemo、useCallback、React.memo 的正确使用场景",
+        tag: "技术",
+      },
+      {
+        id: 5,
+        title: "旅行清单：京都",
+        content: "岚山竹林、伏见稻荷、金阁寺、鸭川散步",
+        tag: "生活",
+      },
+      {
+        id: 6,
+        title: "API 设计规范",
+        content: "RESTful 命名约定、版本控制、错误码统一格式",
+        tag: "技术",
+      },
+      {
+        id: 7,
+        title: "周末菜谱",
+        content: "番茄牛腩、清蒸鲈鱼、蒜蓉西兰花",
+        tag: "生活",
+      },
+      {
+        id: 8,
+        title: "面试准备",
+        content: "算法复习：二叉树遍历、动态规划、图的最短路径",
+        tag: "工作",
+      },
+      {
+        id: 9,
+        title: "Timeless 框架学习",
+        content: "响应式原语 ref/computed、虚拟节点 Show/For/Fragment",
+        tag: "技术",
+      },
+      {
+        id: 10,
+        title: "年度目标回顾",
+        content: "已完成 6/10 个目标，需要加速推进剩余项目",
+        tag: "工作",
+      },
+    ];
+
+    const loading_ = ref(false);
+    const filtered_arr_ = refarr(MOCK_MEMOS);
+    const empty_ = ref(false);
+    const count_ = ref(`${MOCK_MEMOS.length} / ${MOCK_MEMOS.length}`);
+    const has_more_ = ref(true);
+
+    // simulate async search with ~2s delay
+    function search_memos(kw) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          let results;
+          if (!kw || !kw.trim()) {
+            results = MOCK_MEMOS;
+          } else {
+            const lower = kw.toLowerCase();
+            results = MOCK_MEMOS.filter(
+              (m) =>
+                m.title.toLowerCase().includes(lower) ||
+                m.content.toLowerCase().includes(lower) ||
+                m.tag.toLowerCase().includes(lower),
+            );
+          }
+          resolve(results);
+        }, 2000);
+      });
+    }
+
+    // debounced search triggered from onInput
+    let debounce_timer = null;
+    let search_id = 0;
+    function on_keyword_change(kw) {
+      if (debounce_timer) clearTimeout(debounce_timer);
+      loading_.as(true);
+      debounce_timer = setTimeout(() => {
+        const id = ++search_id;
+        search_memos(kw).then((results) => {
+          if (id !== search_id) return;
+          filtered_arr_.as(results);
+          empty_.as(results.length === 0);
+          count_.as(`${results.length} / ${MOCK_MEMOS.length}`);
+          loading_.as(false);
+        });
+      }, 300);
+    }
+
+    function MemoItem(memo) {
+      return View(
+        {
+          style: {
+            display: "flex",
+            "flex-direction": "column",
+            gap: "4px",
+            padding: "10px 12px",
+            "border-radius": "8px",
+            background: "var(--BG-0)",
+            border: "1px solid var(--FG-5)",
+          },
+        },
+        [
+          View(
+            {
+              style: {
+                display: "flex",
+                "justify-content": "space-between",
+                "align-items": "center",
+              },
+            },
+            [
+              View({ style: { "font-weight": "600", "font-size": "14px" } }, [
+                memo.title,
+              ]),
+              View(
+                {
+                  style: {
+                    "font-size": "11px",
+                    padding: "2px 8px",
+                    "border-radius": "9999px",
+                    background: "var(--BG-1)",
+                    color: "var(--FG-1)",
+                  },
+                },
+                [memo.tag],
+              ),
+            ],
+          ),
+          View(
+            {
+              style: {
+                "font-size": "13px",
+                color: "var(--FG-1)",
+                "line-height": "1.5",
+              },
+            },
+            [memo.content],
+          ),
+        ],
+      );
+    }
+
+    return View(
+      {
+        style: {
+          display: "flex",
+          "flex-direction": "column",
+          gap: "12px",
+        },
+      },
+      [
+        View(
+          {
+            style: {
+              display: "flex",
+              gap: "8px",
+              "align-items": "center",
+            },
+          },
+          [
+            Input({
+              placeholder: "搜索 memo（标题、内容或标签）…",
+              style: {
+                flex: "1",
+                padding: "8px 12px",
+                "border-radius": "8px",
+                border: "1px solid var(--FG-3)",
+                background: "var(--BG-1)",
+                color: "var(--foreground)",
+                "font-size": "14px",
+                outline: "none",
+              },
+              onInput(e) {
+                on_keyword_change(e.target.value);
+              },
+            }),
+            View(
+              {
+                style: {
+                  "font-size": "13px",
+                  color: "var(--FG-1)",
+                  "white-space": "nowrap",
+                },
+              },
+              [count_],
+            ),
+          ],
+        ),
+        ResultBox([
+          Fragment({}, [
+            Show({
+              when: empty_,
+              ok() {
+                return View(
+                  {
+                    style: {
+                      padding: "24px",
+                      "text-align": "center",
+                      color: "var(--FG-1)",
+                      "font-size": "14px",
+                    },
+                  },
+                  ["没有匹配的 memo"],
+                );
+              },
+              else() {
+                return Fragment({}, [
+                  For({
+                    each: filtered_arr_,
+                    render(memo) {
+                      return MemoItem(memo);
+                    },
+                  }),
+                ]);
+              },
+            }),
+            Show({
+              when: has_more_,
+              ok() {
+                return View(
+                  {
+                    style: {
+                      padding: "16px 24px",
+                      "text-align": "center",
+                      color: "var(--FG-1)",
+                      "font-size": "14px",
+                      cursor: "pointer",
+                    },
+                    onClick() {
+                      on_keyword_change("");
+                    },
+                  },
+                  [
+                    computed(loading_, (t) => {
+                      return t ? "正在加载..." : "加载更多";
+                    }),
+                  ],
+                );
+              },
+            }),
+          ]),
+        ]),
       ],
     );
   }

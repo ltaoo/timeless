@@ -132,9 +132,14 @@ class RootViewController: NSViewController {
         guard let rootNode = rootNode, let scroll = scrollView else { return }
 
         let containerWidth = scroll.contentSize.width
-        guard containerWidth > 0 else { return }
+        let containerHeight = scroll.contentSize.height
+        guard containerWidth > 0, containerHeight > 0 else { return }
 
-        guard let rendered = renderer.render(rootNode, containerWidth: containerWidth) else { return }
+        guard let rendered = renderer.render(
+            rootNode,
+            containerWidth: containerWidth,
+            containerHeight: containerHeight
+        ) else { return }
 
         // Replace existing document view content
         let docView = FlippedView(frame: NSRect(

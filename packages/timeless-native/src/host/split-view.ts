@@ -86,6 +86,10 @@ export function NativeSplitView(props: {
       methods.set$elm($elm);
       methods.applyState(props.elm.state, { initial: true });
 
+      const panels = (props.elm.children || []).filter(
+        (child) => child?.t === "split-pane",
+      );
+
       $elm.style["display"] = "flex";
       $elm.style["flex-direction"] =
         props.elm.state.direction === "horizontal" ? "row" : "column";
@@ -93,18 +97,14 @@ export function NativeSplitView(props: {
       if (props.elm.state.direction) {
         $elm.direction = props.elm.state.direction;
       }
-      if (props.elm.state.sizes) {
-        $elm.defaultSizes = props.elm.state.sizes;
-      }
-      if (props.elm.state.minSizes) {
-        $elm.minSizes = props.elm.state.minSizes;
-      }
-      if (props.elm.state.maxSizes) {
-        $elm.maxSizes = props.elm.state.maxSizes;
-      }
+      $elm.defaultSizes = panels.map((panel) =>
+        typeof panel?.state.size === "number" ? panel.state.size : 0,
+      );
+      $elm.minSizes = panels.map((panel) => panel?.state.minSize || 0);
+      $elm.maxSizes = panels.map((panel) => panel?.state.maxSize || 0);
 
-      if (props.elm.children) {
-        methods.render(props.elm.children);
+      if (panels.length) {
+        methods.render(panels);
       }
       methods.setupEventListener(props.elm.events);
 
@@ -220,11 +220,11 @@ export function NativeSplitPane(props: {
       methods.set$elm($elm);
       methods.applyState(props.elm.state, { initial: true });
 
-      $elm.style["flex"] = `${(props.elm.state.size || 50) / 100}`;
+      const size =
+        typeof props.elm.state.size === "number" ? props.elm.state.size : 0;
+      $elm.style["flex"] = size > 0 ? `0 0 ${size}px` : "1";
 
-      if (props.elm.state.size !== undefined) {
-        $elm.size = props.elm.state.size;
-      }
+      $elm.size = size;
       if (props.elm.state.minSize !== undefined) {
         $elm.minSize = props.elm.state.minSize;
       }
