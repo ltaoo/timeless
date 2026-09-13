@@ -179,6 +179,15 @@ importers:
         specifier: ^8.0.0-beta.16
         version: 8.0.0-beta.16(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(less@4.6.7)(terser@5.46.0)(yaml@2.8.3)
 
+  apps/douyin-timeless:
+    devDependencies:
+      '@timeless/inner-types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      vite:
+        specifier: ^8.0.0-beta.16
+        version: 8.0.0-beta.16(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(less@4.6.7)(terser@5.46.0)(yaml@2.8.3)
+
   apps/js-heap-size: {}
 
   apps/macos-demo:

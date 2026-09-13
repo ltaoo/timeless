@@ -5,6 +5,8 @@ import arrowDownToLine from "./asn/arrow-down-to-line";
 import arrowLeft from "./asn/arrow-left";
 import arrowRight from "./asn/arrow-right";
 import bolt from "./asn/bolt";
+import bookUser from "./asn/book-user";
+import box from "./asn/box";
 import braces from "./asn/braces";
 import calendar from "./asn/calendar";
 import check from "./asn/check";
@@ -26,6 +28,7 @@ import download from "./asn/download";
 import ellipsisVertical from "./asn/ellipsis-vertical";
 import ellipsis from "./asn/ellipsis";
 import externalLink from "./asn/external-link";
+import eye from "./asn/eye";
 import fileBox from "./asn/file-box";
 import fileCode from "./asn/file-code";
 import fileImage from "./asn/file-image";
@@ -46,6 +49,7 @@ import funnel from "./asn/funnel";
 import gauge from "./asn/gauge";
 import gitBranch from "./asn/git-branch";
 import gitFork from "./asn/git-fork";
+import globe from "./asn/globe";
 import grid3x3 from "./asn/grid-3x3";
 import hardDriveDownload from "./asn/hard-drive-download";
 import hardDrive from "./asn/hard-drive";
@@ -57,12 +61,17 @@ import library from "./asn/library";
 import listFilter from "./asn/list-filter";
 import loaderCircle from "./asn/loader-circle";
 import loader from "./asn/loader";
+import maximize from "./asn/maximize";
 import menu from "./asn/menu";
+import messageCircle from "./asn/message-circle";
 import messageSquareMore from "./asn/message-square-more";
+import minus from "./asn/minus";
 import moon from "./asn/moon";
 import music from "./asn/music";
 import panelLeft from "./asn/panel-left";
+import paperclip from "./asn/paperclip";
 import pause from "./asn/pause";
+import penLine from "./asn/pen-line";
 import play from "./asn/play";
 import plus from "./asn/plus";
 import radioTower from "./asn/radio-tower";
@@ -77,6 +86,7 @@ import search from "./asn/search";
 import server from "./asn/server";
 import settings from "./asn/settings";
 import squareArrowDown from "./asn/square-arrow-down";
+import squarePen from "./asn/square-pen";
 import square from "./asn/square";
 import sun from "./asn/sun";
 import table from "./asn/table";
@@ -96,6 +106,8 @@ export const iconRegistry = {
   "arrow-left": arrowLeft,
   "arrow-right": arrowRight,
   "bolt": bolt,
+  "book-user": bookUser,
+  "box": box,
   "braces": braces,
   "calendar": calendar,
   "check": check,
@@ -117,6 +129,7 @@ export const iconRegistry = {
   "ellipsis-vertical": ellipsisVertical,
   "ellipsis": ellipsis,
   "external-link": externalLink,
+  "eye": eye,
   "file-box": fileBox,
   "file-code": fileCode,
   "file-image": fileImage,
@@ -137,6 +150,7 @@ export const iconRegistry = {
   "gauge": gauge,
   "git-branch": gitBranch,
   "git-fork": gitFork,
+  "globe": globe,
   "grid-3x3": grid3x3,
   "hard-drive-download": hardDriveDownload,
   "hard-drive": hardDrive,
@@ -148,12 +162,17 @@ export const iconRegistry = {
   "list-filter": listFilter,
   "loader-circle": loaderCircle,
   "loader": loader,
+  "maximize": maximize,
   "menu": menu,
+  "message-circle": messageCircle,
   "message-square-more": messageSquareMore,
+  "minus": minus,
   "moon": moon,
   "music": music,
   "panel-left": panelLeft,
+  "paperclip": paperclip,
   "pause": pause,
+  "pen-line": penLine,
   "play": play,
   "plus": plus,
   "radio-tower": radioTower,
@@ -168,6 +187,7 @@ export const iconRegistry = {
   "server": server,
   "settings": settings,
   "square-arrow-down": squareArrowDown,
+  "square-pen": squarePen,
   "square": square,
   "sun": sun,
   "table": table,

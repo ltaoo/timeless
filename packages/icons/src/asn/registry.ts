@@ -3,6 +3,8 @@ import arrowDownToLine from "./arrow-down-to-line";
 import arrowLeft from "./arrow-left";
 import arrowRight from "./arrow-right";
 import bolt from "./bolt";
+import bookUser from "./book-user";
+import box from "./box";
 import braces from "./braces";
 import calendar from "./calendar";
 import check from "./check";
@@ -24,6 +26,7 @@ import download from "./download";
 import ellipsisVertical from "./ellipsis-vertical";
 import ellipsis from "./ellipsis";
 import externalLink from "./external-link";
+import eye from "./eye";
 import fileBox from "./file-box";
 import fileCode from "./file-code";
 import fileImage from "./file-image";
@@ -44,6 +47,7 @@ import funnel from "./funnel";
 import gauge from "./gauge";
 import gitBranch from "./git-branch";
 import gitFork from "./git-fork";
+import globe from "./globe";
 import grid3x3 from "./grid-3x3";
 import hardDriveDownload from "./hard-drive-download";
 import hardDrive from "./hard-drive";
@@ -55,12 +59,17 @@ import library from "./library";
 import listFilter from "./list-filter";
 import loaderCircle from "./loader-circle";
 import loader from "./loader";
+import maximize from "./maximize";
 import menu from "./menu";
+import messageCircle from "./message-circle";
 import messageSquareMore from "./message-square-more";
+import minus from "./minus";
 import moon from "./moon";
 import music from "./music";
 import panelLeft from "./panel-left";
+import paperclip from "./paperclip";
 import pause from "./pause";
+import penLine from "./pen-line";
 import play from "./play";
 import plus from "./plus";
 import radioTower from "./radio-tower";
@@ -75,6 +84,7 @@ import search from "./search";
 import server from "./server";
 import settings from "./settings";
 import squareArrowDown from "./square-arrow-down";
+import squarePen from "./square-pen";
 import square from "./square";
 import sun from "./sun";
 import table from "./table";
@@ -94,6 +104,8 @@ export const iconRegistry = {
   "arrow-left": arrowLeft,
   "arrow-right": arrowRight,
   "bolt": bolt,
+  "book-user": bookUser,
+  "box": box,
   "braces": braces,
   "calendar": calendar,
   "check": check,
@@ -115,6 +127,7 @@ export const iconRegistry = {
   "ellipsis-vertical": ellipsisVertical,
   "ellipsis": ellipsis,
   "external-link": externalLink,
+  "eye": eye,
   "file-box": fileBox,
   "file-code": fileCode,
   "file-image": fileImage,
@@ -135,6 +148,7 @@ export const iconRegistry = {
   "gauge": gauge,
   "git-branch": gitBranch,
   "git-fork": gitFork,
+  "globe": globe,
   "grid-3x3": grid3x3,
   "hard-drive-download": hardDriveDownload,
   "hard-drive": hardDrive,
@@ -146,12 +160,17 @@ export const iconRegistry = {
   "list-filter": listFilter,
   "loader-circle": loaderCircle,
   "loader": loader,
+  "maximize": maximize,
   "menu": menu,
+  "message-circle": messageCircle,
   "message-square-more": messageSquareMore,
+  "minus": minus,
   "moon": moon,
   "music": music,
   "panel-left": panelLeft,
+  "paperclip": paperclip,
   "pause": pause,
+  "pen-line": penLine,
   "play": play,
   "plus": plus,
   "radio-tower": radioTower,
@@ -166,6 +185,7 @@ export const iconRegistry = {
   "server": server,
   "settings": settings,
   "square-arrow-down": squareArrowDown,
+  "square-pen": squarePen,
   "square": square,
   "sun": sun,
   "table": table,
