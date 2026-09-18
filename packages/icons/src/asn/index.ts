@@ -4,6 +4,7 @@ export { default as ArrowLeft } from "./arrow-left";
 export { default as ArrowRight } from "./arrow-right";
 export { default as Bolt } from "./bolt";
 export { default as BookUser } from "./book-user";
+export { default as Bot } from "./bot";
 export { default as Box } from "./box";
 export { default as Braces } from "./braces";
 export { default as Calendar } from "./calendar";

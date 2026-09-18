@@ -105,6 +105,10 @@ class UmdSmokeTestModel {
       full_timeless.vm.getPopperPlatform() === full_timeless.DOM.platform,
       "DOM did not configure the full Timeless VM Popper platform",
     );
+    this.assert(
+      typeof full_timeless.Window === "function",
+      "full Timeless is missing Window",
+    );
 
     return {
       lite_exports: Object.keys(timeless).filter((key) => key !== "utils")

@@ -4,6 +4,7 @@ import arrowLeft from "./arrow-left";
 import arrowRight from "./arrow-right";
 import bolt from "./bolt";
 import bookUser from "./book-user";
+import bot from "./bot";
 import box from "./box";
 import braces from "./braces";
 import calendar from "./calendar";
@@ -105,6 +106,7 @@ export const iconRegistry = {
   "arrow-right": arrowRight,
   "bolt": bolt,
   "book-user": bookUser,
+  "bot": bot,
   "box": box,
   "braces": braces,
   "calendar": calendar,

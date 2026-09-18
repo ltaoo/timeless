@@ -22,8 +22,9 @@
  * </View>
  * ```
  */
-import { MountedEvent } from "@/event/index";
+import { MountedEvent, PointerInfo } from "@/event/index";
 import { Logger } from "@/util/logger";
+import { createPointerTracker } from "@/util/pointer";
 
 import { destroyElement, isElement, TimelessElement, ViewChildren } from "./type";
 import { Box, BoxProps } from "./box";
@@ -31,7 +32,7 @@ import { Box, BoxProps } from "./box";
 const logger = Logger({ prefix: "primitive", scope: "content/view" });
 
 /** Props for View component */
-export type ViewProps = BoxProps & {
+export type ViewProps = Omit<BoxProps, "onPointerDown" | "onPointerUp"> & {
   /** Element ID */
   id?: string;
   /** Unique key for list rendering */
@@ -40,6 +41,17 @@ export type ViewProps = BoxProps & {
   as?: string;
   /** Whether element is draggable */
   draggable?: boolean;
+  /**
+   * 指针按下；`info` 提供按下位置与累计位移。
+   *
+   * View 一定派发 `info`；声明为可选是为了让 ViewProps 仍能赋给 BoxProps
+   * （Box 只挂原生事件，没有 info），这样各组件透传 props 不受影响。
+   */
+  onPointerDown?: (event: PointerEvent, info?: PointerInfo) => void;
+  /** 按下后指针移动（可移出元素）；`info` 提供位移距离与方向 */
+  onPointerMove?: (event: PointerEvent, info?: PointerInfo) => void;
+  /** 指针抬起；`info` 为本次拖动的最终位移 */
+  onPointerUp?: (event: PointerEvent, info?: PointerInfo) => void;
 };
 
 /** Internal state for View */
@@ -56,13 +68,22 @@ export function View(
   props: ViewProps = {},
   children?: ViewChildren,
 ): TimelessElement<ViewState> {
-  const { ...rest } = props;
+  // 指针事件由 tracker 派发，不交给 Box（Box 只认识单参数的原生事件）。
+  const { onPointerDown, onPointerMove, onPointerUp, ...rest } = props;
 
   let $elm: any = null;
   let box$ = Box(rest, {});
 
   const state = box$.state;
   const events = box$.events;
+
+  // 指针事件（含位移信息）由 tracker 统一派发；仅在消费方使用指针事件时才创建。
+  const pointer_ = createPointerTracker({
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+  });
+  const has_pointer = Boolean(onPointerDown || onPointerMove || onPointerUp);
 
   // Track mount-cycle cleanups separately from ref subscriptions.
   // Ref subscriptions (style, class, attrs, dataset) must persist
@@ -74,6 +95,7 @@ export function View(
     // but keep ref subscriptions alive — the VNode outlives its DOM.
     _mount_cleanups.forEach((fn) => fn());
     _mount_cleanups.length = 0;
+    pointer_.dispose();
     // Clear $elm on both view and box without destroying ref subscriptions
     box$.methods.set$elm(null);
     if (rest.onUnmounted) {
@@ -95,6 +117,11 @@ export function View(
 
   methods.subscribe_props();
   box$.methods.add_event();
+  if (has_pointer) {
+    // 按下改由 tracker 接管（附带位移信息）；抬起 / 取消走全局监听
+    events.onPointerDown = pointer_.handleDown;
+    events.onPointerUp = undefined;
+  }
   box$.methods.build_children(children);
 
   return {
