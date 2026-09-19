@@ -135,6 +135,42 @@ describe("StorageCore", () => {
       vi.advanceTimersByTime(150);
       expect(handler).toHaveBeenCalled();
     });
+
+    it("同一防抖窗口内不同 key 的写入不互相丢弃", () => {
+      const storage = new StorageCore<TestStorage>({
+        key: "test-key",
+        values: defaultValues,
+        defaultValues,
+        client: mockClient,
+      });
+      storage.set("theme", "dark");
+      storage.set("language", "en-US");
+      vi.advanceTimersByTime(150);
+      expect(storage.values.theme).toBe("dark");
+      expect(storage.values.language).toBe("en-US");
+      expect(mockClient.setItem).toHaveBeenLastCalledWith(
+        "test-key",
+        expect.stringContaining('"theme":"dark"'),
+      );
+      expect(mockClient.setItem).toHaveBeenLastCalledWith(
+        "test-key",
+        expect.stringContaining('"language":"en-US"'),
+      );
+    });
+
+    it("赋值后立即可读，落盘仍防抖", () => {
+      const storage = new StorageCore<TestStorage>({
+        key: "test-key",
+        values: defaultValues,
+        defaultValues,
+        client: mockClient,
+      });
+      storage.set("theme", "dark");
+      expect(storage.get("theme")).toBe("dark");
+      expect(mockClient.setItem).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(150);
+      expect(mockClient.setItem).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("merge 方法", () => {

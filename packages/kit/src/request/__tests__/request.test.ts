@@ -247,4 +247,92 @@ describe("RequestCore", () => {
       expect(typeof unlisten).toBe("function");
     });
   });
+
+  describe("request.put / request.del", () => {
+    it("put 生成 PUT payload 并透传 extra", () => {
+      const signal = new AbortController().signal;
+      const payload = request.put(
+        "/api/a",
+        { a: 1 },
+        { headers: { "X-Test": "1" }, cache: "no-store", signal, keepalive: true },
+      );
+      expect(payload.method).toBe("PUT");
+      expect(payload.url).toBe("/api/a");
+      expect(payload.body).toEqual({ a: 1 });
+      expect(payload.headers).toEqual({ "X-Test": "1" });
+      expect(payload.cache).toBe("no-store");
+      expect(payload.signal).toBe(signal);
+      expect(payload.keepalive).toBe(true);
+    });
+
+    it("del 不带 body", () => {
+      const payload = request.del("/api/a", { cache: "no-store" });
+      expect(payload.method).toBe("DELETE");
+      expect(payload.url).toBe("/api/a");
+      expect(payload.body).toBeUndefined();
+      expect(payload.cache).toBe("no-store");
+    });
+
+    it("get 也透传 cache/signal/keepalive", () => {
+      const signal = new AbortController().signal;
+      const payload = request.get("/api/a", undefined, {
+        cache: "no-store",
+        signal,
+        keepalive: true,
+      });
+      expect(payload.cache).toBe("no-store");
+      expect(payload.signal).toBe(signal);
+      expect(payload.keepalive).toBe(true);
+    });
+  });
+
+  describe("execute 分派", () => {
+    it("PUT 分派到 client.put 并透传 extra", async () => {
+      const signal = new AbortController().signal;
+      mockClient.put = vi.fn().mockResolvedValue(Result.Ok({ ok: 1 }));
+      const req = new RequestCore(
+        (body: any) =>
+          request.put("/api/a", body, { cache: "no-store", signal, keepalive: true }),
+        { client: mockClient },
+      );
+      await req.run({ a: 1 });
+      expect(mockClient.put).toHaveBeenCalledWith(
+        "/api/a",
+        { a: 1 },
+        expect.objectContaining({ cache: "no-store", signal, keepalive: true }),
+      );
+    });
+
+    it("DELETE 分派到 client.del（不带 body）", async () => {
+      mockClient.del = vi.fn().mockResolvedValue(Result.Ok({ ok: 2 }));
+      const req = new RequestCore(
+        (id: string) => request.del(`/api/b?id=${id}`, { cache: "no-store" }),
+        { client: mockClient },
+      );
+      await req.run("1");
+      expect(mockClient.del).toHaveBeenCalledWith(
+        "/api/b?id=1",
+        expect.objectContaining({ cache: "no-store" }),
+      );
+    });
+  });
+
+  describe("dedupe 开关", () => {
+    it("dedupe: false 时并发 run 各打一次上游", async () => {
+      let resolveRequest!: (value: ReturnType<typeof Result.Ok>) => void;
+      const pending = new Promise<ReturnType<typeof Result.Ok>>((resolve) => {
+        resolveRequest = resolve;
+      });
+      mockClient.post = vi.fn().mockReturnValue(pending);
+      const req = new RequestCore((body: any) => request.post("/api/a", body), {
+        client: mockClient,
+        dedupe: false,
+      });
+      const first = req.run({ a: 1 });
+      const second = req.run({ a: 2 });
+      resolveRequest(Result.Ok({ ok: 1 }));
+      await Promise.all([first, second]);
+      expect(mockClient.post).toHaveBeenCalledTimes(2);
+    });
+  });
 });

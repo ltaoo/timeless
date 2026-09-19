@@ -61,16 +61,23 @@ export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<
     }
     return v as T[K];
   }
-  set = debounce(100, <K extends keyof T>(key: K, values: T[K]) => {
-    // console.log("cache set", key, values);
-    const nextValues = {
+  set = ((key: keyof T, value: unknown) => {
+    // console.log("cache set", key, value);
+    // 内存里的 values 立即生效（读后写一致）；只有落盘与事件通知防抖。
+    this.values = {
       ...this.values,
-      [key]: values,
+      [key]: value,
     };
-    this.values = nextValues;
+    this.persist();
+  }) as (key: keyof T, value: unknown) => void;
+  /**
+   * 落盘 + 通知，防抖只为合并密集写入。落盘时读的是 `this.values` 的最新快照，
+   * 所以同一个窗口内对不同 key 的多次 `set` 不会互相丢弃（旧实现把早先那次整个丢掉）。
+   */
+  private persist = debounce(100, () => {
     this.client.setItem(this.key, JSON.stringify(this.values));
     this.emit(Events.StateChange, { ...this.state });
-  }) as (key: keyof T, value: unknown) => void;
+  });
   merge = <K extends keyof T>(
     key: K,
     values: Partial<T[K]>,

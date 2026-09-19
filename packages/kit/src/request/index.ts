@@ -55,6 +55,11 @@ type RequestProps<F extends FetchFunction, P> = {
   client?: HttpClientCore;
   loading?: boolean;
   delay?: null | number;
+  /**
+   * 在途去重，默认 true（与历史行为一致）。写路径、可能重入的读要显式关掉：
+   * 去重会把 body 不同的一次写静默吞掉，也会让重入的读拿到外层那个还在跑的 promise。
+   */
+  dedupe?: boolean;
   // defaultResponse?: any;
   defaultResponse?: P;
   // fetch: F;
@@ -108,6 +113,8 @@ export class RequestCore<
   /** 处于请求中的 promise */
   // pending: Promise<UnpackedRequestPayload<ReturnType<F>>> | null = null;
   pending: Promise<Result<P>> | null = null;
+  /** 是否对在途请求去重（默认 true）。false 时既不读也不写 `pending`。 */
+  dedupe = true;
   /** 调用 run 方法暂存的参数 */
   args: Parameters<F> = [] as any;
   /** 请求的响应 */
@@ -132,6 +139,7 @@ export class RequestCore<
       _name,
       client,
       delay,
+      dedupe,
       defaultResponse,
       loading,
       // fetch,
@@ -146,6 +154,9 @@ export class RequestCore<
     this.service = fn;
     this.process = process;
     this.client = client;
+    if (dedupe !== undefined) {
+      this.dedupe = dedupe;
+    }
     // this.method = method;
     if (delay !== undefined) {
       this.delay = delay;
@@ -196,11 +207,13 @@ export class RequestCore<
     if (!this.client) {
       return Result.Err("缺少 client");
     }
-    if (this.pending !== null) {
+    if (this.dedupe && this.pending !== null) {
       return this.pending;
     }
     const task = this.execute(args);
-    this.pending = task;
+    if (this.dedupe) {
+      this.pending = task;
+    }
     try {
       return await task;
     } finally {
@@ -231,28 +244,40 @@ export class RequestCore<
         query,
         body,
         headers,
+        cache,
+        signal,
+        keepalive,
         process,
       } = this.service(...(args as unknown as any[]));
       // console.log('[DOMAIN]request/index - after = this.service()', headers);
       if (process) {
         payloadProcess = process;
       }
+      const extra = {
+        id: this.id,
+        headers,
+        cache,
+        signal,
+        keepalive,
+      };
       if (method === "GET") {
         // const [query, extra = {}] = args;
-        const r = this.client.get<P>(url, query, {
-          id: this.id,
-          headers,
-        });
+        const r = this.client.get<P>(url, query, extra);
         return Result.Ok(r) as Result<Promise<Result<P>>>;
         // return Result.Ok(r);
       }
       if (method === "POST") {
         // const [body, extra = {}] = args;
-        const r = this.client.post<P>(url, body, {
-          id: this.id,
-          headers,
-        });
+        const r = this.client.post<P>(url, body, extra);
         // return Result.Ok(r);
+        return Result.Ok(r) as Result<Promise<Result<P>>>;
+      }
+      if (method === "PUT") {
+        const r = this.client.put<P>(url, body, extra);
+        return Result.Ok(r) as Result<Promise<Result<P>>>;
+      }
+      if (method === "DELETE") {
+        const r = this.client.del<P>(url, extra);
         return Result.Ok(r) as Result<Promise<Result<P>>>;
       }
       return Result.Err(`未知的 method '${method}'`);

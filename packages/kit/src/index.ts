@@ -46,5 +46,5 @@ export type {
 } from "./route_view/utils";
 export { ListCore } from "./list";
 export { RequestCore, type RequestPayload } from "./request";
-export { request_factory } from "./request/utils";
+export { request, request_factory } from "./request/utils";
 // export * from "./multiple";
