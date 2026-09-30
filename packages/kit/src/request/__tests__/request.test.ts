@@ -336,3 +336,23 @@ describe("RequestCore", () => {
     });
   });
 });
+
+
+it("PATCH 从 factory 经 RequestCore 到 fetch，并触发状态回调", async () => {
+  const client = new HttpClientCore();
+  client.fetch = vi.fn().mockResolvedValue({ ok: true, data: { saved: true } });
+  const onStateChange = vi.fn();
+  const api = request_factory({ headers: { "X-Test": "1" } });
+  const req = new RequestCore(
+    () => api.patch("/api/settings", { enabled: true }, { cache: "no-store" }),
+    { client, onStateChange },
+  );
+  expect((await req.run()).data).toEqual({ saved: true });
+  expect(client.fetch).toHaveBeenCalledWith(expect.objectContaining({
+    method: "PATCH", url: "/api/settings", data: { enabled: true },
+    cache: "no-store", headers: { "X-Test": "1" },
+  }));
+  expect(onStateChange).toHaveBeenLastCalledWith(expect.objectContaining({
+    loading: false, response: { saved: true },
+  }));
+});

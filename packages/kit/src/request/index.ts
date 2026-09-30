@@ -70,6 +70,7 @@ type RequestProps<F extends FetchFunction, P> = {
   onCanceled?: () => void;
   beforeRequest?: () => void;
   onLoading?: (loading: boolean) => void;
+  onStateChange?: (state: RequestState<UnpackedResult<P>>) => void;
 };
 
 let handler: null | ((v: RequestCore<any>) => void) = null;
@@ -149,6 +150,7 @@ export class RequestCore<
       onCompleted,
       onCanceled,
       onLoading,
+      onStateChange,
       beforeRequest,
     } = props;
     this.service = fn;
@@ -184,6 +186,9 @@ export class RequestCore<
     }
     if (onLoading) {
       this.onLoadingChange(onLoading);
+    }
+    if (onStateChange) {
+      this.onStateChange(onStateChange);
     }
     if (beforeRequest) {
       this.beforeRequest(beforeRequest);
@@ -274,6 +279,10 @@ export class RequestCore<
       }
       if (method === "PUT") {
         const r = this.client.put<P>(url, body, extra);
+        return Result.Ok(r) as Result<Promise<Result<P>>>;
+      }
+      if (method === "PATCH") {
+        const r = this.client.patch<P>(url, body, extra);
         return Result.Ok(r) as Result<Promise<Result<P>>>;
       }
       if (method === "DELETE") {

@@ -148,6 +148,13 @@ export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
   ): Promise<Result<T>> {
     return this.send<T>("PUT", endpoint, body, extra);
   }
+  async patch<T>(
+    endpoint: unknown,
+    body?: JSONObject | FormData,
+    extra: HttpClientSendExtra = {},
+  ): Promise<Result<T>> {
+    return this.send<T>("PATCH", endpoint, body, extra);
+  }
   /** DELETE 不带 body（与 findrss 的 `request.del(path, options)` 对应）。 */
   async del<T>(
     endpoint: unknown,

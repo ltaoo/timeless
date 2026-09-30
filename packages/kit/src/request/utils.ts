@@ -8,7 +8,7 @@ import { Unpacked } from "@timeless/inner-types";
 export type RequestPayload<T> = {
   hostname?: string;
   url: string;
-  method: "POST" | "GET" | "DELETE" | "PUT";
+  method: "POST" | "GET" | "DELETE" | "PUT" | "PATCH";
   query?: any;
   params?: any;
   body?: any;
@@ -111,6 +111,9 @@ export const request = {
       signal,
       keepalive,
     } as RequestPayload<T>;
+  },
+  patch<T>(url: unknown, body?: any, extra: RequestExtra = {}) {
+    return { ...request.put<T>(url, body, extra), method: "PATCH" } as RequestPayload<T>;
   },
   /** DELETE **不带 body**（与 findrss 的 `request.del(url, extra)` 对应）。 */
   del<T>(url: unknown, extra: RequestExtra = {}) {
@@ -273,6 +276,15 @@ export function request_factory(
         process: opt.process,
       };
       return result;
+    },
+    patch<T>(...args: Parameters<typeof request.patch>) {
+      const payload = request.patch<T>(...args);
+      return {
+        ...payload,
+        hostname: _hostname,
+        headers: { ...payload.headers, ..._headers },
+        process: opt.process,
+      };
     },
     del<T>(...args: Parameters<typeof request.del>) {
       const payload = request.del<T>(...args);
