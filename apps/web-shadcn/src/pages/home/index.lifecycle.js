@@ -210,7 +210,7 @@ export default function LifecycleView(props) {
   };
 
   const { routes, views, defaultRouteName } =
-    Timeless.buildRoutes(routesConfigure);
+    Timeless.kit.buildRoutes(routesConfigure);
 
   /** @typedef {keyof typeof routes} PageKey */
 
@@ -223,8 +223,8 @@ export default function LifecycleView(props) {
     { key: "pagee", label: "页面 E", name: "root.pagee" },
   ];
 
-  const router$ = new Timeless.NavigatorCore();
-  const rootview$ = new Timeless.RouteViewCore({
+  const router$ = new Timeless.kit.NavigatorCore();
+  const rootview$ = new Timeless.kit.RouteViewCore({
     name: "root",
     pathname: "/",
     title: "Lifecycle Demo",
@@ -234,7 +234,7 @@ export default function LifecycleView(props) {
   });
   rootview$.isRoot = true;
 
-  const subhistory$ = new Timeless.HistoryCore({
+  const subhistory$ = new Timeless.kit.HistoryCore({
     view: rootview$,
     router: router$,
     routes,
@@ -315,7 +315,7 @@ export default function LifecycleView(props) {
                   class: "relative border rounded-lg p-4 dark:border-zinc-800",
                 },
                 [
-                  StandardSubViews({
+                  Timeless.ui.StandardSubViews({
                     view: rootview$,
                     views,
                     history: subhistory$,

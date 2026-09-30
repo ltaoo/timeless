@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Fluent 2 · Separator（.fl-separator）
+   Fluent 的分隔线用 --stroke2（细分隔），1px 宽 / 高。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-separator {
+  flex-shrink: 0;
+  border: 0;
+  background-color: var(--stroke2);
+}
+
+[data-tt-style="fluent"] .fl-separator--horizontal {
+  display: block;
+  width: 100%;
+  height: var(--strokeWidthThin);
+  margin: 0;
+}
+
+[data-tt-style="fluent"] .fl-separator--vertical {
+  display: block;
+  width: var(--strokeWidthThin);
+  height: 100%;
+  align-self: stretch;
+  margin: 0;
+}
+
+[data-tt-style="fluent"] .fl-separator.is-disabled,
+[data-tt-style="fluent"] .fl-separator[data-disabled="true"] {
+  opacity: 0.5;
+}

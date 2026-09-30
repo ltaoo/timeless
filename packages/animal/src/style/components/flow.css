@@ -1,0 +1,373 @@
+/* ==========================================================================
+   Animal Island · Flow（.animal-flow）
+   --------------------------------------------------------------------------
+   结构由 modules/flow.ts 产出：
+     .animal-flow                             ← 画布根（滚轮缩放 / 空白处 pan）
+       .animal-flow__background               ← 点阵 / 网格，颜色走 --border
+       .animal-flow__canvas                   ← translate + scale 层
+         .animal-flow__edges > svg > .animal-flow__edge-hit + .animal-flow__edge
+         .animal-flow__node                   ← 绝对定位，left/top 由 state 下发
+           .animal-flow__node-actions > .animal-flow__action
+           .animal-flow__node-body > .animal-flow__node-label / .animal-flow__node-desc
+           .animal-flow__handle.is-source / .is-target
+       .animal-flow__controls > .animal-flow__control
+       .animal-flow__minimap > .animal-flow__minimap-node
+
+   Animal Island 视觉：
+     · 画布是奶油纸底（--background），节点是羊皮纸卡片 + 2px --border 描边 +
+       --radius-lg + 柔和高度阴影（--shadow-sm）
+     · 选中/拖拽：描边转薄荷青 --primary，并加一圈薄荷浅色光晕（--accent）
+     · 状态色用 --*-subtle 浅底 + 同名前景；running 走合成层透明度脉冲
+     · 连接点（handle）是薄荷青圆点；控件/小地图是羊皮纸浮层
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-flow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background: var(--background);
+}
+
+[data-tt-style="animal"] .animal-flow__background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-flow__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* --- 边 ------------------------------------------------------------------- */
+
+[data-tt-style="animal"] .animal-flow__edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 20px 粗的透明命中路径：边太细点不中，靠它把可点区域撑开。 */
+[data-tt-style="animal"] .animal-flow__edge-hit {
+  fill: none;
+  stroke: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+[data-tt-style="animal"] .animal-flow__edge {
+  fill: none;
+  pointer-events: none;
+  stroke: var(--border-strong);
+}
+
+[data-tt-style="animal"] .animal-flow__edge.is-selected {
+  stroke: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-flow__connecting-path {
+  fill: none;
+  stroke: var(--primary);
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+/* 流动虚线：`stroke-dasharray` 是固定值（静态规则里），动画只推
+   `stroke-dashoffset`（合成友好）。 */
+[data-tt-style="animal"] .animal-flow__edge.is-animated {
+  stroke: var(--primary);
+  stroke-dasharray: 6 4;
+  animation: animal-flow-dash 0.6s linear infinite;
+}
+
+/* --- 节点 ----------------------------------------------------------------- */
+
+[data-tt-style="animal"] .animal-flow__node {
+  position: absolute;
+  box-sizing: border-box;
+  min-width: 68px;
+  color: var(--foreground);
+  cursor: move;
+  background: var(--card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  user-select: none;
+  transition: box-shadow var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-flow__node.is-dragging {
+  box-shadow: var(--shadow-lg);
+}
+
+[data-tt-style="animal"] .animal-flow__node.is-selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--accent), var(--shadow-sm);
+}
+
+[data-tt-style="animal"] .animal-flow__node.is-pending {
+  border-color: var(--border);
+}
+
+[data-tt-style="animal"] .animal-flow__node.is-running {
+  color: var(--warning-subtle-foreground);
+  background: var(--warning-subtle);
+  border-color: var(--warning);
+  animation: animal-flow-pulse 1.6s ease-in-out infinite;
+}
+
+[data-tt-style="animal"] .animal-flow__node.is-completed {
+  color: var(--success-subtle-foreground);
+  background: var(--success-subtle);
+  border-color: var(--success);
+}
+
+[data-tt-style="animal"] .animal-flow__node.is-failed {
+  color: var(--destructive-subtle-foreground);
+  background: var(--destructive-subtle);
+  border-color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-flow__node.is-skipped {
+  color: var(--info-subtle-foreground);
+  background: var(--info-subtle);
+  border-color: var(--info);
+}
+
+[data-tt-style="animal"] .animal-flow__node.is-disabled {
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="animal"] .animal-flow__node-body {
+  padding: var(--spacer-sm) var(--spacer);
+}
+
+[data-tt-style="animal"] .animal-flow__node-label {
+  font-size: var(--font-size);
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+[data-tt-style="animal"] .animal-flow__node-desc {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+/* --- 节点悬浮动作条 -------------------------------------------------------- */
+
+[data-tt-style="animal"] .animal-flow__node-actions {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-xs);
+  padding: var(--spacer-xs) 6px;
+  margin-bottom: var(--spacer-xs);
+  color: var(--popover-foreground);
+  white-space: nowrap;
+  background: var(--popover);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+
+[data-tt-style="animal"] .animal-flow__action {
+  padding: 2px var(--spacer-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--foreground);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-flow__action:hover {
+  color: var(--accent-foreground);
+  background: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-flow__action:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+
+[data-tt-style="animal"] .animal-flow__action.is-danger {
+  color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-flow__action.is-danger:hover {
+  color: var(--destructive-subtle-foreground);
+  background: var(--destructive-subtle);
+}
+
+/* --- 连接点 --------------------------------------------------------------- */
+
+[data-tt-style="animal"] .animal-flow__handle {
+  position: absolute;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  background: var(--card);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+  transition: transform var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-flow__handle.is-source {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-flow__handle.is-target {
+  background: var(--accent);
+  border-color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-flow__handle:hover {
+  cursor: crosshair;
+  transform: translate(-50%, -50%) scale(1.25);
+}
+
+[data-tt-style="animal"] .animal-flow__handle.is-disabled {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  background: var(--surface-disabled);
+  border-color: var(--border-subtle);
+}
+
+[data-tt-style="animal"] .animal-flow__handle.is-disabled:hover {
+  transform: translate(-50%, -50%);
+}
+
+/* --- 缩放控件 / 小地图 ----------------------------------------------------- */
+
+[data-tt-style="animal"] .animal-flow__controls {
+  position: absolute;
+  bottom: var(--spacer-lg);
+  left: var(--spacer-lg);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-xs);
+  padding: var(--spacer-xs);
+  background: var(--card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+[data-tt-style="animal"] .animal-flow__control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  color: var(--foreground);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-flow__control:hover {
+  color: var(--accent-foreground);
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+
+[data-tt-style="animal"] .animal-flow__control:active {
+  background: var(--secondary);
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-flow__control:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+
+[data-tt-style="animal"] .animal-flow__minimap {
+  position: absolute;
+  right: var(--spacer-lg);
+  bottom: var(--spacer-lg);
+  z-index: 50;
+  box-sizing: border-box;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+[data-tt-style="animal"] .animal-flow__minimap-node {
+  position: absolute;
+  background: var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="animal"] .animal-flow__minimap-node.is-selected {
+  background: var(--primary);
+}
+
+/* keyframes 不能作用域化（@keyframes 没有选择器），只能按库前缀命名。 */
+@keyframes animal-flow-dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+@keyframes animal-flow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-flow__node,
+  [data-tt-style="animal"] .animal-flow__handle,
+  [data-tt-style="animal"] .animal-flow__action,
+  [data-tt-style="animal"] .animal-flow__control {
+    transition: none;
+  }
+
+  /* 悬浮/按压的位移与放大也一并关掉 */
+  [data-tt-style="animal"] .animal-flow__control:hover,
+  [data-tt-style="animal"] .animal-flow__control:active {
+    transform: none;
+  }
+
+  [data-tt-style="animal"] .animal-flow__handle:hover {
+    transform: translate(-50%, -50%);
+  }
+
+  [data-tt-style="animal"] .animal-flow__edge.is-animated,
+  [data-tt-style="animal"] .animal-flow__node.is-running {
+    animation: none;
+  }
+}

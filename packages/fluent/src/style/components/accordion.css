@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Fluent 2 · Accordion
+   --------------------------------------------------------------------------
+   结构：.fl-accordion > .fl-accordion__item(.is-open)
+          > .fl-accordion__header > .fl-accordion__trigger(.is-open)
+          > .fl-accordion__panel > .fl-accordion__body
+   特征：1px --stroke2 分隔，展开态标题字重 600。
+
+   展开态用 .is-open 类名（加在 __item / __trigger 上）：
+   1) Content 会强制替换 class，无法动态加类；
+   2) dataset 的响应式更新目前会写错属性名（写成裸的 state 而不是 data-state）。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-accordion {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: var(--strokeWidthThin) solid var(--stroke2);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+[data-tt-style="fluent"] .fl-accordion__item {
+  color: var(--foreground);
+  background-color: var(--surface-1);
+}
+
+[data-tt-style="fluent"] .fl-accordion__item + .fl-accordion__item {
+  border-top: var(--strokeWidthThin) solid var(--stroke2);
+}
+
+[data-tt-style="fluent"] .fl-accordion__header {
+  margin: 0;
+}
+
+[data-tt-style="fluent"] .fl-accordion__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightRegular);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground-2);
+  text-align: left;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-accordion__trigger:hover {
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-accordion__trigger.is-open {
+  color: var(--foreground);
+  font-weight: var(--fontWeightSemibold);
+}
+
+[data-tt-style="fluent"] .fl-accordion__trigger:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+  z-index: 3;
+}
+
+[data-tt-style="fluent"] .fl-accordion__chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  order: 1;
+  margin-left: auto;
+  color: var(--foreground-3);
+  transition: transform var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-accordion__trigger.is-open .fl-accordion__chevron {
+  transform: rotate(180deg);
+}
+
+[data-tt-style="fluent"] .fl-accordion__item:not(.is-open) .fl-accordion__panel {
+  display: none;
+}
+
+[data-tt-style="fluent"] .fl-accordion__item.is-open .fl-accordion__panel {
+  display: block;
+}
+
+[data-tt-style="fluent"] .fl-accordion__body {
+  padding: 0 16px 16px;
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-accordion__trigger,
+  [data-tt-style="fluent"] .fl-accordion__chevron {
+    transition: none;
+  }
+}

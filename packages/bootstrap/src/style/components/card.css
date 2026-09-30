@@ -1,0 +1,70 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Card
+   上游特征：1px 边框、无阴影、header/footer 用极浅底色。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .card {
+  --card-spacer-y: var(--spacer);
+  --card-spacer-x: var(--spacer);
+  --card-cap-padding-y: var(--spacer-sm);
+  --card-cap-padding-x: var(--spacer);
+  --card-cap-bg: rgba(33, 37, 41, 0.03);
+  --card-inner-radius: calc(var(--radius) - var(--bs-border-width));
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: var(--card);
+  background-clip: border-box;
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius);
+}
+
+[data-tt-style="bootstrap"].dark .card,
+[data-tt-style="bootstrap"][data-theme="dark"] .card,
+.dark [data-tt-style="bootstrap"] .card,
+[data-theme="dark"] [data-tt-style="bootstrap"] .card {
+  --card-cap-bg: rgba(255, 255, 255, 0.03);
+}
+
+[data-tt-style="bootstrap"] .card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: var(--card-cap-padding-y) var(--card-cap-padding-x);
+  color: var(--card-foreground);
+  background-color: var(--card-cap-bg);
+  border-bottom: var(--bs-border-width) solid var(--border);
+  border-radius: var(--card-inner-radius) var(--card-inner-radius) 0 0;
+}
+
+[data-tt-style="bootstrap"] .card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--bs-heading-color);
+}
+
+[data-tt-style="bootstrap"] .card-description {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .card-content {
+  flex: 1 1 auto;
+  padding: var(--card-spacer-y) var(--card-spacer-x);
+  color: var(--card-foreground);
+}
+
+[data-tt-style="bootstrap"] .card-footer {
+  display: flex;
+  align-items: center;
+  padding: var(--card-cap-padding-y) var(--card-cap-padding-x);
+  background-color: var(--card-cap-bg);
+  border-top: var(--bs-border-width) solid var(--border);
+  border-radius: 0 0 var(--card-inner-radius) var(--card-inner-radius);
+}

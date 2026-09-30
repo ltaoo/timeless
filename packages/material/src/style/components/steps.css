@@ -1,0 +1,105 @@
+/* ==========================================================================
+   Material 3 · Steps
+   结构：.m3-steps > .m3-steps__list > .m3-steps__item
+         > .m3-steps__indicator + .m3-steps__text(__title/__description)
+         + .m3-steps__connector
+   状态：.is-completed / .is-current / .is-upcoming
+
+   M3：current 用 --primary-container 底 + --primary-container-foreground 字；
+   completed 用 --primary 实心 + --primary-foreground 字；
+   upcoming 用 --surface-container-high 底 + --outline-variant 描边。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-steps {
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="material"] .m3-steps__list {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+[data-tt-style="material"] .m3-steps__item {
+  position: relative;
+  display: flex;
+  flex: 1 1 0%;
+  align-items: flex-start;
+  gap: var(--spacer-sm);
+}
+
+[data-tt-style="material"] .m3-steps__indicator {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted-foreground);
+  background-color: var(--surface-container-high);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-pill);
+  transition:
+    color var(--duration-short) var(--easing-standard),
+    background-color var(--duration-short) var(--easing-standard),
+    border-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-steps__item.is-completed .m3-steps__indicator {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-steps__item.is-current .m3-steps__indicator {
+  color: var(--primary-container-foreground);
+  background-color: var(--primary-container);
+  border-color: var(--primary-container);
+}
+
+[data-tt-style="material"] .m3-steps__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: 0.25rem;
+}
+
+[data-tt-style="material"] .m3-steps__title {
+  font-size: var(--font-size);
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-steps__item.is-current .m3-steps__title {
+  color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-steps__description {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-steps__connector {
+  flex: 1 1 auto;
+  align-self: flex-start;
+  height: 2px;
+  min-width: 1rem;
+  margin: calc(1rem - 1px) var(--spacer-sm) 0;
+  background-color: var(--outline-variant);
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-steps__connector.is-completed {
+  background-color: var(--primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-steps__indicator,
+  [data-tt-style="material"] .m3-steps__connector {
+    transition: none;
+  }
+}

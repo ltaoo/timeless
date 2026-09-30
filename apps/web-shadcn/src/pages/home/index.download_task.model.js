@@ -1,9 +1,9 @@
 export const API_HOSTNAME = "http://100.78.198.69:2022";
-const client = new Timeless.HttpClientCore({
+const client = new Timeless.kit.HttpClientCore({
   hostname: API_HOSTNAME,
 });
 Timeless.web.provide_http_client(client);
-const request = Timeless.request_factory({
+const request = Timeless.kit.request_factory({
   hostnames: {
     dev: API_HOSTNAME,
     prod: API_HOSTNAME,
@@ -56,7 +56,7 @@ export function DownloadTaskViewModel(props) {
   }
 
   const services = {
-    list: new Timeless.RequestCore(
+    list: new Timeless.kit.RequestCore(
       (params) => request.get("/api/task/list", params),
       {
         client,
@@ -77,24 +77,24 @@ export function DownloadTaskViewModel(props) {
         },
       },
     ),
-    delete: new Timeless.RequestCore(
+    delete: new Timeless.kit.RequestCore(
       (id) => request.post("/api/task/delete", { id }),
       { client },
     ),
-    pause: new Timeless.RequestCore(
+    pause: new Timeless.kit.RequestCore(
       (id) => request.post("/api/task/pause", { id }),
       { client },
     ),
-    resume: new Timeless.RequestCore(
+    resume: new Timeless.kit.RequestCore(
       (id) => request.post("/api/task/resume", { id }),
       { client },
     ),
-    clear: new Timeless.RequestCore(() => request.post("/api/task/clear"), {
+    clear: new Timeless.kit.RequestCore(() => request.post("/api/task/clear"), {
       client,
     }),
   };
 
-  const list$ = new Timeless.ListCore(services.list, {
+  const list$ = new Timeless.kit.ListCore(services.list, {
     pageSize: PAGE_SIZE,
   });
 

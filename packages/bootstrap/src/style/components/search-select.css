@@ -1,0 +1,25 @@
+/* ==========================================================================
+   Bootstrap 5.3 · SearchSelect
+   触发器复用 .form-select 的盒子指标，内部换成 .select-search 输入框；
+   输入框 / 图标 / 下拉面板的样式由 select.css 提供（同名类），
+   这里只补充搜索场景特有的差异。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .form-select.select-trigger {
+  cursor: text;
+}
+
+[data-tt-style="bootstrap"] .form-select.select-trigger .select-search {
+  min-width: 0;
+}
+
+/* 面板宽度通过 inline style 的 min-width 与触发器对齐（见 modules/search-select.ts） */
+
+[data-tt-style="bootstrap"] .form-select.select-trigger.is-disabled {
+  cursor: not-allowed;
+}
+
+[data-tt-style="bootstrap"] .form-select.select-trigger.is-disabled .select-search {
+  cursor: not-allowed;
+  pointer-events: none;
+}

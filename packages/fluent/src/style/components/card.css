@@ -1,0 +1,61 @@
+/* ==========================================================================
+   Fluent 2 · Card（.fl-card）
+   --------------------------------------------------------------------------
+   · --surface-1 底 + 1px --stroke2 描边 + 4px 圆角 + --shadow-4
+   · hover 换 --surface-1-hover + --shadow-8（Fluent 卡片的抬升语义）
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-card {
+  --card-padding: 12px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--card-foreground);
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-4);
+  transition: background-color var(--duration-normal) var(--easing-standard),
+    box-shadow var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-card:hover {
+  background-color: var(--surface-1-hover);
+  box-shadow: var(--shadow-8);
+}
+
+[data-tt-style="fluent"] .fl-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--card-padding) var(--card-padding) 0;
+}
+
+[data-tt-style="fluent"] .fl-card__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--fontWeightSemibold);
+  line-height: var(--lineHeightBase400);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-card__description {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-card__content {
+  flex: 1 1 auto;
+  padding: var(--card-padding);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 var(--card-padding) var(--card-padding);
+}

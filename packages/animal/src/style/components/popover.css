@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Animal Island · Popover（.animal-popover）
+   --------------------------------------------------------------------------
+   结构：.animal-popover > __arrow / __header / __body
+   箭头是 45° 旋转的小方块（0.5rem），贴在被锚定元素那一侧的对边
+   （.is-top / .is-bottom / .is-left / .is-right 由 popper-shared 计算，
+   旋转与偏移由内联 style 给出）。
+
+   上游视觉（浮层统一语言）：
+     · 底 --popover（奶油纸），字 --popover-foreground（暖棕）
+     · 2px（--border-width）--border 描边，圆角 --radius-lg（24px）
+     · 柔和海拔阴影 --shadow-lg，**不**用像素堆叠立体阴影
+     · 进场 zoom-in（scale(0.92) + 透明度 0），关键帧 animal-popover-in
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-popover {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 20rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  outline: 0;
+}
+
+[data-tt-style="animal"] .animal-popover__header {
+  padding: var(--spacer-sm) var(--spacer-lg);
+  margin: 0;
+  font-size: var(--font-size);
+  font-weight: 700;
+  color: var(--foreground);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+[data-tt-style="animal"] .animal-popover__body {
+  padding: var(--spacer-lg);
+  line-height: var(--line-height);
+  color: var(--popover-foreground);
+}
+
+/* 浮层内若含可聚焦控件，沿用统一的黄色焦点环 */
+[data-tt-style="animal"] .animal-popover a:focus-visible,
+[data-tt-style="animal"] .animal-popover button:focus-visible,
+[data-tt-style="animal"] .animal-popover [tabindex]:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- 箭头 --- */
+[data-tt-style="animal"] .animal-popover__arrow {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--popover);
+  border: var(--border-width) solid var(--border);
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-popover__arrow.is-top {
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="animal"] .animal-popover__arrow.is-bottom {
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+
+[data-tt-style="animal"] .animal-popover__arrow.is-left {
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+
+[data-tt-style="animal"] .animal-popover__arrow.is-right {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+/* --- 动画 --- */
+[data-tt-style="animal"] .animal-popover.is-enter {
+  animation: animal-popover-in var(--duration-normal) var(--easing-standard) both;
+}
+
+[data-tt-style="animal"] .animal-popover.is-exit {
+  animation: animal-popover-out var(--duration-fast) var(--easing-standard) both;
+}
+
+@keyframes animal-popover-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes animal-popover-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-popover.is-enter,
+  [data-tt-style="animal"] .animal-popover.is-exit {
+    animation: none;
+  }
+}

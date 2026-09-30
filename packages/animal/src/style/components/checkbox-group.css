@@ -1,0 +1,57 @@
+/* ==========================================================================
+   Animal Island · CheckboxGroup（.animal-checkbox-group）
+   --------------------------------------------------------------------------
+   结构：.animal-checkbox-group > .animal-checkbox-group__item（= .animal-check 行）
+   纵向默认，--horizontal 时横向并允许换行。
+
+   Animal Island 视觉：
+     · 组内行用圆角块承载 hover / active 的薄荷浅底反馈
+     · focus-within 给整行黄色描边（--ring），永不用蓝色
+     · 禁用行降不透明度并禁指针
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-sm);
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="animal"] .animal-checkbox-group--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--spacer-lg);
+}
+
+[data-tt-style="animal"] .animal-checkbox-group__item {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-checkbox-group__item:hover {
+  background-color: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+[data-tt-style="animal"] .animal-checkbox-group__item:active {
+  background-color: color-mix(in srgb, var(--primary) 13%, transparent);
+}
+
+[data-tt-style="animal"] .animal-checkbox-group__item:focus-within {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-checkbox-group__item.is-disabled,
+[data-tt-style="animal"] .animal-checkbox-group__item[data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-checkbox-group__item {
+    transition: none;
+  }
+}

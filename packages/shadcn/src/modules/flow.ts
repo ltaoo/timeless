@@ -220,7 +220,7 @@ export function FlowNodeView(props: FlowNodeViewProps) {
   const source_handlers_ = refarr([]);
   const execution_ = refobj(node$.execution);
 
-  node$.onStateChange((v) => {
+  const off_state = node$.onStateChange((v) => {
     state_.as(v);
     source_handlers_.as(
       node$.handles
@@ -237,6 +237,8 @@ export function FlowNodeView(props: FlowNodeViewProps) {
   const handleAction = (action: string, e: MouseEvent) => {
     e.stopPropagation();
     if (action === "rerun") {
+      // 字符串字面量对不上字符串枚举成员（TS 的枚举是标称的），只能显式放行；
+      // `FlowCanvasModel.onNodeRerun` 是它的订阅入口。
       node$.canvas$.emit("NodeRerun" as any, { node: node$ });
     } else if (action === "detail") {
       node$.canvas$.emit("NodeDetail" as any, { node: node$ });
@@ -335,6 +337,11 @@ export function FlowNodeView(props: FlowNodeViewProps) {
             height: rect.height,
           },
         });
+      },
+      onUnmounted() {
+        off_state();
+        cancelHide();
+        rest.onUnmounted?.();
       },
     },
     [
@@ -436,7 +443,7 @@ export function FlowEdgeView(
 
   const state_ = refobj(store.state);
 
-  store.onStateChange((v) => {
+  const off_state = store.onStateChange((v) => {
     state_.as(v);
   });
 
@@ -445,41 +452,44 @@ export function FlowEdgeView(
     store.toggle();
   };
 
-  return SVG.G({}, [
-    SVG.Path(
-      {
-        d: computed(state_, (t) => t.d),
-        class:
-          "fill-none stroke-transparent pointer-events-auto cursor-pointer",
-        style: { "stroke-width": 20 },
-        onClick: handleClick,
+  return SVG.G(
+    {
+      onUnmounted() {
+        off_state();
+        rest.onUnmounted?.();
       },
-      [],
-    ),
-    SVG.Path(
-      {
-        d: computed(state_, (t) => t.d),
-        class: classNames([
-          "fill-none pointer-events-none",
-          computed(state_, (t) => {
-            if (t.selected) {
-              return "stroke-blue-500 dark:stroke-blue-400";
-            }
-            return "stroke-gray-400 dark:stroke-gray-600";
-          }),
-          computed(state_, (t) => {
-            if (t.animated) {
-              return "animate-dash";
-            }
-            return null;
-          }),
-          cls,
-        ]),
-        style: { strokeWidth: computed(state_, (t) => (t.selected ? 3 : 2)) },
-      },
-      [],
-    ),
-  ]);
+    },
+    [
+      SVG.Path(
+        {
+          d: computed(state_, (t) => t.d),
+          class:
+            "fill-none stroke-transparent pointer-events-auto cursor-pointer",
+          style: { "stroke-width": 20 },
+          onClick: handleClick,
+        },
+        [],
+      ),
+      SVG.Path(
+        {
+          d: computed(state_, (t) => t.d),
+          class: classNames([
+            "flow-edge fill-none pointer-events-none",
+            computed(state_, (t) => {
+              if (t.selected) {
+                return "stroke-blue-500 dark:stroke-blue-400";
+              }
+              return "stroke-gray-400 dark:stroke-gray-600";
+            }),
+            computed(state_, (t) => (t.animated ? "is-animated" : null)),
+            cls,
+          ]),
+          style: { "stroke-width": computed(state_, (t) => (t.selected ? 3 : 2)) },
+        },
+        [],
+      ),
+    ],
+  );
 }
 
 function FlowConnectingLine(props: ViewProps & { store: vm.FlowCanvasModel }) {
@@ -501,7 +511,7 @@ function FlowConnectingLine(props: ViewProps & { store: vm.FlowCanvasModel }) {
           d: path_,
           class:
             "fill-none stroke-gray-400 dark:stroke-gray-600 pointer-events-none",
-          style: { strokeWidth: 2 },
+          style: { "stroke-width": 2 },
         },
         [],
       );
@@ -728,15 +738,15 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
   const nodes_ = refarr(store.nodes.slice());
   const edges_ = refarr(store.edges.slice());
 
-  store.onNodesChange((v) => {
+  const off_nodes = store.onNodesChange((v) => {
     nodes_.as(v);
   });
-  store.onEdgesChange((v) => {
+  const off_edges = store.onEdgesChange((v) => {
     edges_.as(v);
   });
 
   const viewport_ = refobj({ ...store.viewport });
-  store.onViewportChange((v) => {
+  const off_viewport = store.onViewportChange((v) => {
     viewport_.as(v);
   });
 
@@ -746,6 +756,9 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
   let hasPanned = false;
   let $canvas: HTMLElement | null = null;
   let $root: HTMLElement | null = null;
+  let onWheel: ((e: WheelEvent) => void) | null = null;
+  let onDragMove: ((e: MouseEvent) => void) | null = null;
+  let onDragUp: (() => void) | null = null;
 
   const updateCanvasTransform = () => {
     if (!$canvas) return;
@@ -753,7 +766,7 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
     $canvas.style.transform = `translate(${v.x}px, ${v.y}px) scale(${v.zoom})`;
   };
 
-  store.onViewportChange(() => {
+  const off_viewport_transform = store.onViewportChange(() => {
     updateCanvasTransform();
   });
 
@@ -770,37 +783,46 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
       onMounted(event) {
         $root = event.target.get$elm();
 
-        $root.addEventListener(
-          "wheel",
-          function (e: WheelEvent) {
-            e.preventDefault();
+        onWheel = function (e: WheelEvent) {
+          e.preventDefault();
 
-            const rect = $root!.getBoundingClientRect();
-            const cursorX = e.clientX - rect.left;
-            const cursorY = e.clientY - rect.top;
+          const rect = $root!.getBoundingClientRect();
+          const cursorX = e.clientX - rect.left;
+          const cursorY = e.clientY - rect.top;
 
-            const v = store.viewport;
-            const oldZoom = v.zoom;
+          const v = store.viewport;
+          const oldZoom = v.zoom;
 
-            // Trackpad pinch fires with ctrlKey=true and small deltaY;
-            // mouse wheel fires with larger deltaY. Both should zoom.
-            const zoomSensitivity = e.ctrlKey ? 0.01 : 0.001;
-            const factor = 1 - e.deltaY * zoomSensitivity;
-            const newZoom = Math.min(
-              Math.max(oldZoom * factor, minZoom),
-              maxZoom,
-            );
+          // Trackpad pinch fires with ctrlKey=true and small deltaY;
+          // mouse wheel fires with larger deltaY. Both should zoom.
+          const zoomSensitivity = e.ctrlKey ? 0.01 : 0.001;
+          const factor = 1 - e.deltaY * zoomSensitivity;
+          const newZoom = Math.min(Math.max(oldZoom * factor, minZoom), maxZoom);
 
-            // Zoom toward cursor: keep the world point under the cursor fixed
-            const worldX = (cursorX - v.x) / oldZoom;
-            const worldY = (cursorY - v.y) / oldZoom;
-            const newX = cursorX - worldX * newZoom;
-            const newY = cursorY - worldY * newZoom;
+          // Zoom toward cursor: keep the world point under the cursor fixed
+          const worldX = (cursorX - v.x) / oldZoom;
+          const worldY = (cursorY - v.y) / oldZoom;
+          const newX = cursorX - worldX * newZoom;
+          const newY = cursorY - worldY * newZoom;
 
-            store.setViewport({ x: newX, y: newY, zoom: newZoom });
-          },
-          { passive: false },
-        );
+          store.setViewport({ x: newX, y: newY, zoom: newZoom });
+        };
+
+        $root.addEventListener("wheel", onWheel, { passive: false });
+      },
+      onUnmounted() {
+        off_nodes();
+        off_edges();
+        off_viewport();
+        off_viewport_transform();
+        if ($root && onWheel) $root.removeEventListener("wheel", onWheel);
+        if (onDragMove) document.removeEventListener("mousemove", onDragMove);
+        if (onDragUp) document.removeEventListener("mouseup", onDragUp);
+        onWheel = null;
+        onDragMove = null;
+        onDragUp = null;
+        document.body.style.cursor = "";
+        rest.onUnmounted?.();
       },
       onMouseDown(e: MouseEvent) {
         if (e.button !== 0) return;
@@ -817,16 +839,18 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
 
         if ($root) document.body.style.cursor = "grabbing";
 
-        const handleMove = (moveEvent: MouseEvent) => {
+        onDragMove = (moveEvent: MouseEvent) => {
           hasPanned = true;
           const nx = moveEvent.clientX - panStartX;
           const ny = moveEvent.clientY - panStartY;
           store.setViewport({ x: nx, y: ny });
         };
 
-        const handleUp = () => {
-          document.removeEventListener("mousemove", handleMove);
-          document.removeEventListener("mouseup", handleUp);
+        onDragUp = () => {
+          if (onDragMove) document.removeEventListener("mousemove", onDragMove);
+          if (onDragUp) document.removeEventListener("mouseup", onDragUp);
+          onDragMove = null;
+          onDragUp = null;
 
           if ($root) document.body.style.cursor = "";
 
@@ -837,8 +861,8 @@ export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren) {
           hasPanned = false;
         };
 
-        document.addEventListener("mousemove", handleMove);
-        document.addEventListener("mouseup", handleUp);
+        document.addEventListener("mousemove", onDragMove);
+        document.addEventListener("mouseup", onDragUp);
       },
     },
     [

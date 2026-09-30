@@ -265,12 +265,14 @@ export default function FlowExamplePage() {
         source: "input",
         target: "request",
         type: "bezier",
+        animated: true,
       },
       {
         id: "e-request-parse",
         source: "request",
         target: "parse",
         type: "bezier",
+        animated: true,
       },
       {
         id: "e-parse-img",

@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Fluent 2 · Label（.fl-label）
+   Fluent 的 Label 字重为 semibold、字号 14px，无额外外边距（由容器 gap 控制）。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-label {
+  display: inline-block;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--label-size);
+  font-weight: var(--fontWeightSemibold);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground);
+  user-select: none;
+}
+
+[data-tt-style="fluent"] .fl-label.is-disabled,
+[data-tt-style="fluent"] .fl-label[data-disabled="true"],
+[data-tt-style="fluent"] .fl-label[aria-disabled="true"] {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-label.is-invalid {
+  color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-label .fl-label__required {
+  margin-left: 2px;
+  color: var(--destructive);
+}

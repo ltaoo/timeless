@@ -1,0 +1,42 @@
+/* ==========================================================================
+   Bootstrap 5.3 · ScrollArea（.scroll-area）
+   上游用 .overflow-auto 工具类；这里补一层细滚动条样式。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .scroll-area {
+  position: relative;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted-foreground) 40%, transparent)
+    transparent;
+}
+
+[data-tt-style="bootstrap"] .scroll-area::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+[data-tt-style="bootstrap"] .scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-tt-style="bootstrap"] .scroll-area::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--muted-foreground) 40%, transparent);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="bootstrap"] .scroll-area::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--muted-foreground) 60%, transparent);
+}
+
+[data-tt-style="bootstrap"] .scroll-area::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+[data-tt-style="bootstrap"] .scroll-area.is-disabled,
+[data-tt-style="bootstrap"] .scroll-area[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}

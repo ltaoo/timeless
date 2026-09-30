@@ -1,0 +1,29 @@
+/* ==========================================================================
+   Bootstrap 5.3 · AspectRatio（.ratio）
+   上游的 .ratio 依赖 .ratio-16x9 之类的固定比例类；这里改为运行期内联
+   padding-bottom 驱动，外层只需相对定位。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .ratio {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="bootstrap"] .ratio-inner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+[data-tt-style="bootstrap"] .ratio-inner > img,
+[data-tt-style="bootstrap"] .ratio-inner > video,
+[data-tt-style="bootstrap"] .ratio-inner > iframe,
+[data-tt-style="bootstrap"] .ratio-inner > canvas,
+[data-tt-style="bootstrap"] .ratio-inner > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -1,0 +1,105 @@
+import { ui, vm } from "@timeless/timeless";
+import { Icon, classNames, computed, refobj } from "@timeless/timeless";
+import { View, ViewProps, ViewChildren } from "@timeless/timeless";
+import { SelectPanel } from "./select-shared";
+
+/**
+ * SearchSelect · Material 3
+ *
+ * 触发器沿用 .m3-select 的盒子指标，内部换成 .m3-select__search 输入框
+ * （复用 select.css 里的类），下拉面板同样是 .m3-select__content。
+ *
+ * 与 Select 的区别：触发区固定渲染搜索框，展开时把触发器注册为 popper 的
+ * reference，使面板宽度与触发器对齐。
+ */
+export function SearchSelect<T>(
+  props: ViewProps & {
+    store: vm.SelectCore<T>;
+  },
+  _children?: ViewChildren,
+) {
+  const { store, class: cls, ...rest } = props;
+
+  const state_ = refobj(store.state);
+  store.onStateChange((next) => {
+    state_.as(next);
+  });
+
+  const entries_ = computed(state_, (t: any) => t.options);
+
+  return ui.SelectPrimitive.Root({ store }, [
+    View(
+      {
+        class: classNames([
+          "m3-select",
+          "m3-select--search",
+          computed(state_, (s) => (s.open || s.focused ? "is-focused" : "")),
+          computed(state_, (s) => (s.disabled ? "is-disabled" : "")),
+          computed(state_, (s) => (s.open ? "is-open" : "")),
+          cls,
+        ]),
+        onMounted(el) {
+          if (
+            !el ||
+            typeof el !== "object" ||
+            !("getBoundingClientRect" in el)
+          ) {
+            return;
+          }
+          const elm = el as unknown as HTMLElement;
+          store.popper$.setReference(
+            {
+              $el: elm,
+              getRect() {
+                return elm.getBoundingClientRect();
+              },
+            },
+            { force: true },
+          );
+        },
+        onPointerDown(e) {
+          const target = e.target as any;
+          if (target && target.tagName === "INPUT") {
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          if (!store.open && !store.disabled) {
+            store.show();
+          }
+        },
+      },
+      [
+        ui.SelectPrimitive.Search({ store, class: "m3-select__search" }),
+        ui.SelectPrimitive.Icon(
+          {
+            store,
+            class: classNames([
+              "m3-select__icon",
+              computed(state_, (s) => (s.open ? "is-open" : "")),
+            ]),
+          },
+          [Icon({ name: "chevron-down", size: 16 })],
+        ),
+      ],
+    ),
+    ui.SelectPrimitive.Content(
+      {
+        ...rest,
+        store,
+        class: "m3-select__content",
+        style: computed(state_, () => {
+          const width = store.reference?.width || 0;
+          return width > 0 ? { "min-width": `${width}px` } : {};
+        }),
+      },
+      [
+        SelectPanel({
+          store,
+          entries: entries_,
+          loading: computed(state_, (t: any) => !!t.loading),
+        }),
+      ],
+    ),
+  ]);
+}

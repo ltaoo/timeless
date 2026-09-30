@@ -1,5 +1,3 @@
-import "./download-panel.css";
-
 export function Popover(props, children) {
   const { store, content, ...content_props } = props;
 

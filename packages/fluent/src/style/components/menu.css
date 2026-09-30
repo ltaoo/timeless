@@ -1,0 +1,27 @@
+/* ==========================================================================
+   Fluent 2 · Menu（常驻菜单）
+   --------------------------------------------------------------------------
+   menu.ts 渲染的是「一直在页面上」的 .fl-menu，因此不能像 DropdownMenu
+   那样被 popper 定位（否则会脱离文档流盖在触发元素上）。
+   这里把 .fl-menu 的基础外观还原成普通块级盒子，并加上 .fl-menu--static
+   的定位修正。条目/分组/分隔线的样式由 dropdown-menu.css 提供。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-menu--static {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  width: auto;
+  min-width: 12rem;
+  max-height: min(20rem, 60vh);
+  overflow: visible;
+  box-shadow: var(--shadow-4);
+}
+
+/* 常驻菜单里的子菜单浮层仍然需要滚动与浮层阴影 */
+[data-tt-style="fluent"] .fl-menu--static .fl-menu--submenu {
+  max-height: min(20rem, 60vh);
+  overflow: hidden auto;
+  box-shadow: var(--shadow-16);
+}

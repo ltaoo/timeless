@@ -4,6 +4,11 @@ import { Button, ref, Show, View } from "@timeless/timeless";
 import { renderToString } from "../index";
 
 describe("renderToString", () => {
+  it("renders the declared tag and rejects malformed tag names", () => {
+    expect(renderToString(View({ as: "dialog" }, ["Gallery"]))).toBe("<dialog>Gallery</dialog>");
+    expect(renderToString(View({ as: 'div><script' }))).toBe("<div></div>");
+    expect(renderToString(View({ as: "input" }))).toBe("<input>");
+  });
   it("should render a simple View with text", () => {
     const element = View({}, ["Hello World"]);
     const result = renderToString(element);

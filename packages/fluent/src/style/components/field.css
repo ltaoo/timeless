@@ -1,0 +1,105 @@
+/* ==========================================================================
+   Fluent 2 · Field（.fl-field 家族）
+   --------------------------------------------------------------------------
+   把 label / description / error / 分组抽成一组布局类，结构与
+   @timeless/shadcn 的 field.ts 对齐；错误态用 --destructive。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-field--horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+[data-tt-style="fluent"] .fl-field[data-invalid="true"] .fl-field__label,
+[data-tt-style="fluent"] .fl-field[data-invalid] .fl-field__label {
+  color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-field__label {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--fontWeightSemibold);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground);
+  user-select: none;
+}
+
+[data-tt-style="fluent"] .fl-field__label.is-normal {
+  font-weight: var(--fontWeightRegular);
+}
+
+[data-tt-style="fluent"] .fl-field__label.is-invalid,
+[data-tt-style="fluent"] .fl-field__inline-label.is-invalid {
+  color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-field__inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="fluent"] .fl-field__label.is-disabled,
+[data-tt-style="fluent"] .fl-field__inline-label.is-disabled {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-field__description,
+[data-tt-style="fluent"] .fl-field__help {
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-field__error {
+  font-size: var(--font-size-sm);
+  color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-field__group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-field__set {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+[data-tt-style="fluent"] .fl-field__legend {
+  margin: 0 0 4px;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightSemibold);
+  line-height: var(--lineHeightBase400);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-field__separator[data-orientation="horizontal"] {
+  margin: 12px 0;
+}
+
+[data-tt-style="fluent"] .fl-field__separator[data-orientation="vertical"] {
+  margin: 0 12px;
+}

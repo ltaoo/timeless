@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Fluent 2 — Timeless 语义别名（第二层）
+   --------------------------------------------------------------------------
+   组件代码只读这一层（--primary / --background / --border / --radius …），
+   不直接读 --colorNeutral* / --colorBrand*。与 bootstrap / material 的别名表
+   保持同名，这样三套库的模块代码形状一致，只有 CSS 值不同。
+
+   除通用别名外，Fluent 额外暴露 neutral stroke / brand background / shadow
+   档位这几组专有语义，供组件表达 Fluent 的 1px stroke + 分级阴影。
+   ========================================================================== */
+
+[data-tt-style="fluent"] {
+  /* --- 表面与文字 --- */
+  --background: var(--colorNeutralBackground1);
+  --foreground: var(--colorNeutralForeground1);
+  --card: var(--colorNeutralBackground1);
+  --card-foreground: var(--colorNeutralForeground1);
+  --popover: var(--colorNeutralBackground1);
+  --popover-foreground: var(--colorNeutralForeground1);
+
+  /* --- 主 / 次操作 --- */
+  --primary: var(--colorBrandBackground);
+  --primary-foreground: var(--colorNeutralForegroundOnBrand);
+  --primary-hover: var(--colorBrandBackgroundHover);
+  --primary-pressed: var(--colorBrandBackgroundPressed);
+  --primary-foreground-hover: var(--colorBrandForeground1);
+  --secondary: var(--colorNeutralBackground3);
+  --secondary-foreground: var(--colorNeutralForeground1);
+
+  /* --- 弱化 / 强调 --- */
+  --muted: var(--colorNeutralBackground3);
+  --muted-foreground: var(--colorNeutralForeground3);
+  --accent: var(--colorNeutralBackground1Hover);
+  --accent-foreground: var(--colorNeutralForeground1);
+
+  /* --- 语义状态色 --- */
+  --destructive: var(--colorStatusDangerBackground3);
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: var(--colorStatusDangerBackground1);
+  --destructive-subtle-foreground: var(--colorStatusDangerForeground1);
+  --success: var(--colorStatusSuccessBackground3);
+  --success-foreground: #ffffff;
+  --success-subtle: var(--colorStatusSuccessBackground1);
+  --success-subtle-foreground: var(--colorStatusSuccessForeground1);
+  --warning: var(--colorStatusWarningBackground3);
+  --warning-foreground: #ffffff;
+  --warning-subtle: var(--colorStatusWarningBackground1);
+  --warning-subtle-foreground: var(--colorStatusWarningForeground1);
+  --info: var(--colorBrandBackground2);
+  --info-foreground: var(--colorBrandForeground1);
+  --info-subtle: var(--colorBrandBackground2);
+  --info-subtle-foreground: var(--colorBrandForeground2);
+
+  /* --- 边框 / 输入 / 焦点 --- */
+  --border: var(--colorNeutralStroke1);
+  --border-subtle: var(--colorNeutralStroke2);
+  --input: var(--colorNeutralStrokeAccessible);
+  --ring: var(--colorNeutralStrokeAccessibleSelected);
+  --ring-width: var(--focusRingWidth);
+  --ring-color: var(--focusRingColor);
+  --ring-offset: var(--focusRingOffset);
+
+  /* --- Fluent 专有：中性描边 / 品牌 / 复合品牌 --- */
+  --stroke1: var(--colorNeutralStroke1);
+  --stroke1-hover: var(--colorNeutralStroke1Hover);
+  --stroke1-pressed: var(--colorNeutralStroke1Pressed);
+  --stroke2: var(--colorNeutralStroke2);
+  --stroke3: var(--colorNeutralStroke3);
+  --stroke-accessible: var(--colorNeutralStrokeAccessible);
+  --stroke-disabled: var(--colorNeutralStrokeDisabled);
+  --brand-fill: var(--colorBrandBackground);
+  --brand-fill-hover: var(--colorBrandBackgroundHover);
+  --brand-fill-pressed: var(--colorBrandBackgroundPressed);
+  --brand-fill-selected: var(--colorBrandBackgroundSelected);
+  --brand-stroke: var(--colorBrandStroke1);
+  --compound-brand: var(--colorCompoundBrandBackground);
+  --compound-brand-hover: var(--colorCompoundBrandBackgroundHover);
+  --compound-brand-pressed: var(--colorCompoundBrandBackgroundPressed);
+
+  /* --- 表面层级（Fluent 用 background1/2/3 表达层级） --- */
+  --surface-1: var(--colorNeutralBackground1);
+  --surface-1-hover: var(--colorNeutralBackground1Hover);
+  --surface-1-pressed: var(--colorNeutralBackground1Pressed);
+  --surface-2: var(--colorNeutralBackground2);
+  --surface-3: var(--colorNeutralBackground3);
+  --surface-4: var(--colorNeutralBackground4);
+  --surface-5: var(--colorNeutralBackground5);
+  --surface-disabled: var(--colorNeutralBackgroundDisabled);
+  --surface-inverted: var(--colorNeutralBackgroundInverted);
+  --foreground-2: var(--colorNeutralForeground2);
+  --foreground-3: var(--colorNeutralForeground3);
+  --foreground-4: var(--colorNeutralForeground4);
+  --foreground-disabled: var(--colorNeutralForegroundDisabled);
+
+  /* --- 圆角 --- */
+  --radius: var(--borderRadiusMedium);
+  --radius-none: var(--borderRadiusNone);
+  --radius-sm: var(--borderRadiusSmall);
+  --radius-md: var(--borderRadiusMedium);
+  --radius-lg: var(--borderRadiusLarge);
+  --radius-xl: var(--borderRadiusXLarge);
+  --radius-pill: var(--borderRadiusCircular);
+
+  /* --- 阴影（Fluent 分级 shadow2/4/8/16/28/64） --- */
+  --shadow-sm: var(--shadow2);
+  --shadow: var(--shadow4);
+  --shadow-lg: var(--shadow8);
+  --shadow-2: var(--shadow2);
+  --shadow-4: var(--shadow4);
+  --shadow-8: var(--shadow8);
+  --shadow-16: var(--shadow16);
+  --shadow-28: var(--shadow28);
+  --shadow-64: var(--shadow64);
+
+  /* --- 动效 --- */
+  --easing-standard: var(--curveEasyEase);
+  --easing-decelerate: var(--curveDecelerateMid);
+  --easing-accelerate: var(--curveAccelerateMid);
+  --duration-faster: var(--durationFaster);
+  --duration-fast: var(--durationFast);
+  --duration-normal: var(--durationNormal);
+  --duration-slow: var(--durationSlow);
+
+  /* --- 状态 --- */
+  --disabled-opacity: 1;
+  --disabled-foreground: var(--colorNeutralForegroundDisabled);
+
+  /* --- 字体 --- */
+  --font-sans: var(--fontFamilyBase);
+  --font-mono: var(--fontFamilyMonospace);
+  --font-size: var(--fontSizeBase300);
+  --font-size-sm: var(--fontSizeBase200);
+  --font-size-xs: var(--fontSizeBase100);
+  --font-size-lg: var(--fontSizeBase400);
+  --line-height: var(--lineHeightBase300);
+  --label-size: var(--fontSizeBase300);
+  --title-size: var(--fontSizeBase500);
+
+  /* --- 间距与控件尺寸 --- */
+  --spacer: 12px;
+  --spacer-sm: 8px;
+  --spacer-lg: 16px;
+  --control-height: var(--controlHeightMedium);
+  --control-height-sm: var(--controlHeightSmall);
+  --control-height-lg: var(--controlHeightLarge);
+}

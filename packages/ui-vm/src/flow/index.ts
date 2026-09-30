@@ -68,6 +68,7 @@ enum Events {
   NodeDrag = "NodeDrag",
   NodeDragStop = "NodeDragStop",
   EdgeClick = "EdgeClick",
+  NodeRerun = "NodeRerun",
   SelectionChange = "SelectionChange",
   ViewportChange = "ViewportChange",
   StateChange = "StateChange",
@@ -86,6 +87,7 @@ type TheTypesOfEvents = {
   };
   [Events.NodeDragStop]: { node: FlowNodeModel };
   [Events.EdgeClick]: { edge: FlowEdgeModel; event: MouseEvent };
+  [Events.NodeRerun]: { node: FlowNodeModel };
   [Events.SelectionChange]: {
     nodes: FlowNodeModel[];
     edges: FlowEdgeModel[];
@@ -663,7 +665,9 @@ export class FlowCanvasModel extends BaseDomain<TheTypesOfEvents> {
     }
   }
 
-  onNodeRerun() {}
+  onNodeRerun(handler: Handler<TheTypesOfEvents[Events.NodeRerun]>) {
+    return this.on(Events.NodeRerun, handler);
+  }
   onConnect(handler: Handler<TheTypesOfEvents[Events.Connect]>) {
     return this.on(Events.Connect, handler);
   }

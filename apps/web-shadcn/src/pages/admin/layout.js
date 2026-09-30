@@ -60,7 +60,7 @@ function AdminTabBar({ tabs, activeKey, navigateToTab, getTabTitle }) {
  * @returns
  */
 export default function AdminLayoutView(props) {
-  const sidemenu$ = Timeless.RouteMenusModel({
+  const sidemenu$ = Timeless.kit.RouteMenusModel({
     view: props.view,
     history: props.history,
     menus: [
@@ -208,7 +208,7 @@ export default function AdminLayoutView(props) {
                 ],
                 headerClass: "bg-white dark:bg-zinc-950",
               },
-              [KeepAliveSubViews(props)],
+              [Timeless.ui.KeepAliveSubViews(props)],
             ),
           ],
         },

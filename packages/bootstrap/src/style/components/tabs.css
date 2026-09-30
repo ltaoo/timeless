@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Tabs
+   结构：.tabs > .nav.nav-tabs > .nav-link（.active）
+               + .tab-content > .tab-pane（.active）
+   注意 headless 的 Tab 渲染成原生 <button>，需要抹掉浏览器默认按钮样式。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+[data-tt-style="bootstrap"] .nav {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+}
+
+[data-tt-style="bootstrap"] .nav-tabs {
+  border-bottom: var(--bs-border-width) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .nav-link {
+  display: block;
+  padding: 0.5rem 1rem;
+  margin-bottom: calc(var(--bs-border-width) * -1);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  background-color: transparent;
+  border: var(--bs-border-width) solid transparent;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .nav-link:hover {
+  color: var(--foreground);
+  border-color: transparent transparent var(--border);
+}
+
+[data-tt-style="bootstrap"] .nav-link:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .nav-link.active {
+  color: var(--foreground);
+  background-color: var(--background);
+  border-color: var(--border) var(--border) var(--background);
+}
+
+[data-tt-style="bootstrap"] .nav-link[disabled],
+[data-tt-style="bootstrap"] .nav-link.is-disabled {
+  color: var(--muted-foreground);
+  pointer-events: none;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="bootstrap"] .tab-content {
+  flex: 1 1 auto;
+  padding: 1rem 0;
+}
+
+[data-tt-style="bootstrap"] .tab-pane {
+  display: none;
+}
+
+[data-tt-style="bootstrap"] .tab-pane.active {
+  display: block;
+}

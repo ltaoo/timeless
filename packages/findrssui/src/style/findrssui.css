@@ -1,0 +1,283 @@
+/* FindRSS UI theme: adjust these variables to retune the whole component set. */
+:root {
+  --frui-brand-ink: #edf2ff;
+  --frui-brand-orange: #ff641a;
+  --frui-color-canvas: #070a12;
+  --frui-color-surface: #101729;
+  --frui-color-surface-raised: #16203b;
+  --frui-color-surface-hover: #202e51;
+  --frui-color-text: var(--frui-brand-ink);
+  --frui-color-muted: #9ca9c6;
+  --frui-color-border: #35446f;
+  --frui-color-border-strong: #6687e8;
+  --frui-color-primary: var(--frui-brand-orange);
+  --frui-color-on-primary: #20130d;
+  --frui-color-focus: #ff9a68;
+  --frui-color-success: #b8f0d7;
+  --frui-color-success-bg: rgba(22, 75, 61, .32);
+  --frui-color-warning: #ffd9a3;
+  --frui-color-warning-bg: rgba(92, 63, 16, .5);
+  --frui-color-danger: #ffbdc6;
+  --frui-color-danger-bg: rgba(90, 24, 38, .62);
+  --frui-color-skeleton: #0d1426;
+  --frui-color-border-soft: rgba(132, 154, 216, .12);
+  --frui-color-overlay: rgba(4, 8, 17, .66);
+  --frui-space-1: 4px;
+  --frui-space-2: 8px;
+  --frui-space-3: 12px;
+  --frui-space-4: 16px;
+  --frui-space-5: 20px;
+  --frui-space-6: 24px;
+  --frui-radius-sm: 8px;
+  --frui-radius-control: 10px;
+  --frui-radius-card: 16px;
+  --frui-radius-pill: 999px;
+  --frui-control-height: 42px;
+  --frui-control-height-sm: 32px;
+  --frui-control-height-lg: 50px;
+  --frui-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --frui-font-size: 13px;
+  --frui-font-size-sm: 12px;
+  --frui-font-size-lg: 15px;
+  --frui-shadow-card: 0 16px 48px rgba(0, 0, 0, .24);
+  --frui-motion-fast: 160ms ease;
+}
+
+.frui-button, .frui-input { box-sizing: border-box; font: inherit; }
+.frui-input-root, .frui-textarea-root { flex: 1; width: 100%; min-width: 0; }
+
+/* ===== Button ===== */
+/* inline-flex 是必需的：loading spinner 与图标槽要内联在文字左侧，而不是块级换行到上方。 */
+.frui-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--frui-space-2); min-height: var(--frui-control-height); border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-control); padding: 0 var(--frui-space-4); background: var(--frui-color-surface-raised); color: var(--frui-color-text); font-family: var(--frui-font-family); font-size: var(--frui-font-size); cursor: pointer; transition: background var(--frui-motion-fast), border-color var(--frui-motion-fast), transform var(--frui-motion-fast); }
+.frui-button:hover { border-color: var(--frui-color-border-strong); background: var(--frui-color-surface-hover); }
+.frui-button:active { transform: translateY(1px); }
+.frui-button:disabled { cursor: not-allowed; opacity: .6; }
+.frui-button:focus-visible, .frui-input:focus-visible { outline: 2px solid var(--frui-color-focus); outline-offset: 2px; }
+.frui-button-primary { border-color: var(--frui-color-primary); background: var(--frui-color-primary); color: var(--frui-color-on-primary); font-weight: 700; }
+.frui-button-primary:hover { border-color: var(--frui-color-primary); filter: brightness(1.08); }
+.frui-button-quiet { border-color: transparent; background: transparent; }
+.frui-button-danger { border-color: var(--frui-color-danger); background: transparent; color: var(--frui-color-danger); }
+.frui-button-danger:hover { border-color: var(--frui-color-danger); background: var(--frui-color-danger-bg); }
+.frui-button-ghost { border-color: transparent; background: transparent; }
+.frui-button-ghost:hover { border-color: transparent; background: var(--frui-color-surface-hover); }
+.frui-button-link { min-height: auto; border-color: transparent; padding: 0; background: transparent; color: var(--frui-color-primary); font-weight: 650; }
+.frui-button-link:hover { border-color: transparent; background: transparent; text-decoration: underline; }
+.frui-button-link:active { transform: none; }
+/* 尺寸阶梯：三档对称，都走 token。 */
+.frui-button-default { min-height: var(--frui-control-height); padding: 0 var(--frui-space-4); font-size: var(--frui-font-size); }
+.frui-button-small { min-height: var(--frui-control-height-sm); padding: 0 var(--frui-space-3); font-size: var(--frui-font-size-sm); }
+.frui-button-large { min-height: var(--frui-control-height-lg); padding: 0 var(--frui-space-5); font-size: var(--frui-font-size-lg); }
+.frui-button-icon { display: inline-flex; flex: none; }
+.frui-button-loading { display: inline-flex; align-items: center; }
+/* href 形态（asChild 的等价物）：<a> 没有 disabled，只能用 aria-disabled + pointer-events。 */
+a.frui-button { text-decoration: none; }
+a.frui-button[aria-disabled="true"] { pointer-events: none; opacity: .6; }
+.frui-spinner { width: 14px; height: 14px; flex: none; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: frui-spin .8s linear infinite; }
+@keyframes frui-spin { to { transform: rotate(360deg); } }
+
+/* ===== Input / Textarea ===== */
+.frui-input { width: 100%; min-height: var(--frui-control-height); border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-control); padding: 0 var(--frui-space-3); background: var(--frui-color-canvas); color: var(--frui-color-text); font-family: var(--frui-font-family); font-size: var(--frui-font-size); }
+.frui-input::placeholder { color: var(--frui-color-muted); }
+.frui-textarea { min-height: 80px; resize: vertical; }
+.frui-textarea-auto { resize: none; overflow: hidden; }
+.frui-textarea-count { color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); text-align: right; }
+/* size：控件高度 / 字号一起换档。 */
+.frui-input-small { min-height: var(--frui-control-height-sm); padding: 0 var(--frui-space-2); font-size: var(--frui-font-size-sm); }
+.frui-input-large { min-height: var(--frui-control-height-lg); padding: 0 var(--frui-space-4); font-size: var(--frui-font-size-lg); }
+.frui-input-root-small .frui-input { min-height: var(--frui-control-height-sm); font-size: var(--frui-font-size-sm); }
+.frui-input-root-large .frui-input { min-height: var(--frui-control-height-lg); font-size: var(--frui-font-size-lg); }
+/* status：只改描边与焦点环的颜色，不改尺寸。 */
+.frui-input-root-error .frui-input { border-color: var(--frui-color-danger); }
+.frui-input-root-error .frui-input:focus-visible { outline-color: var(--frui-color-danger); }
+.frui-input-root-warning .frui-input { border-color: var(--frui-color-warning); }
+.frui-input-root-warning .frui-input:focus-visible { outline-color: var(--frui-color-warning); }
+/* 带前后缀 / addon 时，边框上移到 root，输入框本体退化成裸输入。 */
+.frui-input-root-affixed { display: flex; align-items: center; gap: var(--frui-space-1); width: 100%; min-height: var(--frui-control-height); border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-control); padding: 0 var(--frui-space-2); background: var(--frui-color-canvas); }
+.frui-input-root-affixed:focus-within { border-color: var(--frui-color-border-strong); outline: 2px solid var(--frui-color-focus); outline-offset: 2px; }
+.frui-input-root-affixed.frui-input-root-error { border-color: var(--frui-color-danger); }
+.frui-input-root-affixed.frui-input-root-error:focus-within { outline-color: var(--frui-color-danger); }
+.frui-input-root-affixed.frui-input-root-warning { border-color: var(--frui-color-warning); }
+.frui-input-root-affixed.frui-input-root-warning:focus-within { outline-color: var(--frui-color-warning); }
+.frui-input-root-affixed.frui-input-small { min-height: var(--frui-control-height-sm); }
+.frui-input-root-affixed.frui-input-large { min-height: var(--frui-control-height-lg); }
+.frui-input-bare { flex: 1; min-width: 0; min-height: auto; border: 0; border-radius: 0; padding: 0; background: transparent; }
+.frui-input-bare:focus-visible { outline: none; }
+.frui-input-affix { flex: none; color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+.frui-input-addon { flex: none; border-radius: var(--frui-radius-sm); padding: var(--frui-space-1) var(--frui-space-2); background: var(--frui-color-surface-raised); box-shadow: inset 0 0 0 1px var(--frui-color-border); color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+/* label / help / 计数：只在用到时才包一层 field，不改变现有调用的 DOM 结构。 */
+.frui-field { display: grid; gap: var(--frui-space-1); min-width: 0; }
+.frui-field-label { color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+.frui-field-help { color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+.frui-field-help-error { color: var(--frui-color-danger); }
+.frui-field-count { color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); text-align: right; }
+
+/* ===== Card ===== */
+.frui-card { overflow: hidden; border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-card); background: var(--frui-color-surface); color: var(--frui-color-text); box-shadow: var(--frui-shadow-card); }
+.frui-card-media { display: block; width: 100%; }
+.frui-card-media > * { display: block; width: 100%; }
+.frui-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--frui-space-3); padding: var(--frui-space-4) var(--frui-space-5) 0; }
+.frui-card-titles { display: grid; gap: var(--frui-space-1); min-width: 0; }
+.frui-card-title { font-size: var(--frui-font-size-lg); font-weight: 700; }
+.frui-card-description { color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+.frui-card-extra { flex: none; }
+.frui-card-body { padding: var(--frui-space-5); }
+.frui-card-footer { border-top: 1px solid var(--frui-color-border); padding: var(--frui-space-3) var(--frui-space-5); color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+
+/* ===== Badge ===== */
+/* tone 只覆写这三个局部变量；variant 再覆写用法。tone × variant 正交，规则数不膨胀。 */
+.frui-badge { display: inline-flex; align-items: center; min-height: 24px; border: 1px solid var(--frui-badge-border, var(--frui-color-border)); border-radius: var(--frui-radius-pill); padding: 0 var(--frui-space-2); background: var(--frui-badge-bg, var(--frui-color-surface-raised)); color: var(--frui-badge-color, var(--frui-color-muted)); font: 600 11px/1 var(--frui-font-family); }
+.frui-badge-neutral { --frui-badge-color: var(--frui-color-muted); --frui-badge-bg: var(--frui-color-surface-raised); }
+.frui-badge-brand { --frui-badge-color: var(--frui-color-primary); --frui-badge-bg: color-mix(in srgb, var(--frui-color-primary) 14%, transparent); --frui-badge-border: color-mix(in srgb, var(--frui-color-primary) 45%, transparent); }
+.frui-badge-success { --frui-badge-color: var(--frui-color-success); --frui-badge-bg: var(--frui-color-success-bg); --frui-badge-border: color-mix(in srgb, var(--frui-color-success) 40%, transparent); }
+.frui-badge-warning { --frui-badge-color: var(--frui-color-warning); --frui-badge-bg: var(--frui-color-warning-bg); --frui-badge-border: color-mix(in srgb, var(--frui-color-warning) 40%, transparent); }
+.frui-badge-danger { --frui-badge-color: var(--frui-color-danger); --frui-badge-bg: var(--frui-color-danger-bg); --frui-badge-border: color-mix(in srgb, var(--frui-color-danger) 40%, transparent); }
+.frui-badge-solid { border-color: transparent; background: var(--frui-badge-color, var(--frui-color-surface-raised)); color: var(--frui-color-canvas); }
+.frui-badge-outline { border-color: color-mix(in srgb, currentColor 55%, transparent); background: transparent; }
+.frui-badge-count { justify-content: center; min-width: 20px; padding: 0 6px; }
+.frui-badge-dot { width: 8px; height: 8px; min-height: 8px; border: 0; padding: 0; background: var(--frui-badge-color, var(--frui-color-primary)); }
+
+/* ===== Tree ===== */
+/* .frui-tree-row > .frui-tree-guide[data-tree-guide]   ← 祖先缩进槽的竖线 */
+.frui-tree-scroll { position: relative; max-height: 360px; overflow: auto; }
+.frui-tree-row { position: relative; display: flex; align-items: center; gap: var(--frui-space-1); box-sizing: border-box; width: 100%; height: 46px; border: 1px solid transparent; border-radius: var(--frui-radius-sm); padding-right: var(--frui-space-1); color: var(--frui-color-muted); font: var(--frui-font-size-sm)/1.4 var(--frui-font-family); cursor: pointer; user-select: none; }
+.frui-tree-row:hover { border-color: var(--frui-color-border); background: var(--frui-color-surface-raised); color: var(--frui-color-text); }
+.frui-tree-row.selected { border-color: var(--frui-color-border-strong); background: var(--frui-color-surface-hover); color: var(--frui-color-text); }
+.frui-tree-row.disabled { cursor: not-allowed; opacity: .55; }
+/* 被拖起的原位影子：跟手浮层已经代表它了。 */
+.frui-tree-row.is-lifted { opacity: .4; }
+/* 落点是「移入本目录」。 */
+.frui-tree-row.is-drop-into { border-color: var(--frui-color-border-strong); background: var(--frui-color-surface-hover); }
+/* 落点指示线（before / after 二选一）。
+   top/bottom 取 -1px 与 .frui-tree-guide 同一套理由：本行 46px 且带 1px 透明 border。 */
+.frui-tree-line { position: absolute; left: 0; right: 0; height: 2px; border-radius: 1px; background: var(--frui-color-primary); opacity: 0; pointer-events: none; transform-origin: left center; }
+.frui-tree-line[data-tree-line="before"] { top: -1px; }
+.frui-tree-line[data-tree-line="after"] { bottom: -1px; }
+.frui-tree-line.is-before, .frui-tree-line.is-after { opacity: 1; animation: frui-tree-line-in .12s ease-out; }
+/* 跟手浮层：内容是**被拖行的整行快照**（TreeRoot 的 ghostRow 模式，见
+   TreePrimitive.Ghost），所以外层只做定位与命中穿透 —— 任何内边距 / 边框 / 底色 /
+   阴影都会让它与原行不一样。宽高由 primitive 内联（= 起拖时那一行的 rect）。
+   z-index 要高于本库既有的 dropdown 401 / toast 500。
+   pointer-events: none 是必须的：否则浮层会挡住下面的行，命中测试与折叠箭头全废。 */
+.frui-tree-ghost { position: fixed; top: 0; left: 0; z-index: 1200; pointer-events: none; will-change: transform; }
+/* 紧凑卡片（ghostRow: false）才用到的槽位；本库默认走快照，留着是为了仍然满足
+   §4.6 的槽位契约。 */
+.frui-tree-ghost-title { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* keyframes 不能作用域化，按库前缀命名（本库此前只有 frui-spin）。 */
+@keyframes frui-tree-line-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .frui-tree-line.is-before, .frui-tree-line.is-after { animation: none; } }
+/* 祖先缩进槽里的一段竖线：left 由 TreePrimitive 按层算好（内联 style）。
+   top/bottom 取 -1px 而不是 0：本行有 1px 透明 border，取 0 的话线在 padding box 里
+   两端各收 1px，相邻两行的线之间会留下 2px 断口，连不成一条。
+   （四套作用域库的行没有 border，所以它们用 0；这是本库唯一的差异，别照抄过去。）
+   颜色用常规描边色：四套作用域库也是各自最普通的那支 border token（--border /
+   --stroke2 / --outline-variant），--frui-color-border-soft 只有 12% 不透明度，
+   在 #070a12 上几乎看不见。
+   pointer-events: none 是必须的 —— 否则会拦住折叠箭头与拖拽命中测试。 */
+.frui-tree-guide { position: absolute; top: -1px; bottom: -1px; width: 1px; background: var(--frui-color-border); pointer-events: none; }
+.frui-tree-caret { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 18px; height: 28px; border-radius: 6px; color: var(--frui-color-muted); }
+.frui-tree-caret:hover { background: var(--frui-color-surface-hover); color: var(--frui-color-text); }
+.frui-tree-caret-icon { pointer-events: none; }
+.frui-tree-icon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 18px; }
+.frui-tree-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.frui-tree-meta { display: flex; flex: none; align-items: center; gap: 2px; color: var(--frui-color-muted); font-variant-numeric: tabular-nums; }
+.frui-tree-empty { padding: var(--frui-space-4); color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); text-align: center; }
+.frui-tree-hint { padding-top: var(--frui-space-1); color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+
+/* ===== Alert ===== */
+.frui-alert { display: grid; gap: var(--frui-space-1); position: relative; border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-control); padding: var(--frui-space-3) var(--frui-space-4); background: var(--frui-color-surface); color: var(--frui-color-text); font: var(--frui-font-size)/1.5 var(--frui-font-family); }
+.frui-alert-info { border-color: var(--frui-color-border); color: var(--frui-color-muted); }
+.frui-alert-success { border-color: color-mix(in srgb, var(--frui-color-success) 40%, transparent); background: var(--frui-color-success-bg); color: var(--frui-color-success); }
+.frui-alert-warning { border-color: color-mix(in srgb, var(--frui-color-warning) 40%, transparent); background: var(--frui-color-warning-bg); color: var(--frui-color-warning); }
+.frui-alert-danger { border-color: color-mix(in srgb, var(--frui-color-danger) 40%, transparent); background: var(--frui-color-danger-bg); color: var(--frui-color-danger); }
+.frui-alert-title { font-weight: 700; }
+.frui-alert-description { opacity: .92; }
+.frui-alert-closable { padding-right: var(--frui-space-6); }
+.frui-alert-close { position: absolute; top: var(--frui-space-2); right: var(--frui-space-2); border-radius: var(--frui-radius-sm); padding: 2px 6px; color: inherit; line-height: 1; opacity: .7; cursor: pointer; }
+.frui-alert-close:hover { opacity: 1; background: color-mix(in srgb, currentColor 14%, transparent); }
+.frui-alert-close:focus-visible { outline: 2px solid var(--frui-color-focus); outline-offset: 2px; }
+
+/* ===== Separator ===== */
+.frui-separator { height: 1px; border: 0; background: var(--frui-color-border); }
+.frui-separator-vertical { width: 1px; height: auto; align-self: stretch; }
+.frui-separator-labeled { display: flex; align-items: center; gap: var(--frui-space-3); height: auto; background: none; }
+.frui-separator-line { flex: 1; height: 1px; background: var(--frui-color-border); }
+.frui-separator-label { color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+
+/* ===== Checkbox / Radio ===== */
+.frui-choice { display: inline-flex; align-items: center; gap: var(--frui-space-2); color: var(--frui-color-text); font: var(--frui-font-size)/1.4 var(--frui-font-family); cursor: pointer; user-select: none; }
+.frui-choice[aria-disabled="true"] { cursor: not-allowed; opacity: .6; }
+.frui-choice-input { box-sizing: border-box; flex: none; width: 18px; height: 18px; margin: 0; appearance: none; border: 1px solid var(--frui-color-border); background: var(--frui-color-surface-raised); cursor: inherit; transition: background var(--frui-motion-fast), border-color var(--frui-motion-fast); }
+.frui-choice-input:not(:disabled):hover { border-color: var(--frui-color-border-strong); }
+.frui-choice-input:focus-visible { outline: 2px solid var(--frui-color-focus); outline-offset: 2px; }
+.frui-choice-input:checked { border-color: var(--frui-color-primary); background: var(--frui-color-primary); }
+.frui-checkbox-input { position: relative; border-radius: 5px; }
+.frui-checkbox-input:checked::after { position: absolute; top: 2px; left: 5px; width: 4px; height: 8px; transform: rotate(45deg); border: solid var(--frui-color-on-primary); border-width: 0 2px 2px 0; content: ""; }
+.frui-radio-input { border-radius: 50%; }
+.frui-radio-input:checked { box-shadow: inset 0 0 0 4px var(--frui-color-surface-raised); }
+.frui-choice-label { overflow-wrap: anywhere; }
+
+/* ===== Switch ===== */
+/* 选中/禁用一律读 `aria-checked` / `aria-disabled`：这两个属性由组件用字符串写，
+   挂载与 patch 都正确（`data-checked` 只在挂载期写一次、之后不再更新，见 Switch 注释）。 */
+.frui-switch { position: relative; display: inline-flex; align-items: center; flex: none; width: 40px; height: 22px; border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-pill); padding: 0; background: var(--frui-color-surface-raised); cursor: pointer; transition: background var(--frui-motion-fast), border-color var(--frui-motion-fast); }
+.frui-switch[aria-checked="true"] { border-color: var(--frui-color-primary); background: var(--frui-color-primary); }
+.frui-switch[aria-disabled="true"] { cursor: not-allowed; opacity: .6; }
+.frui-switch:focus-visible { outline: 2px solid var(--frui-color-focus); outline-offset: 2px; }
+.frui-switch-thumb { position: absolute; top: 50%; left: 2px; width: 16px; height: 16px; transform: translateY(-50%); border-radius: 50%; background: var(--frui-color-text); transition: left var(--frui-motion-fast), background var(--frui-motion-fast); }
+.frui-switch[aria-checked="true"] .frui-switch-thumb { left: calc(100% - 18px); background: var(--frui-color-on-primary); }
+.frui-switch-small { width: 32px; height: 18px; }
+.frui-switch-small .frui-switch-thumb { width: 12px; height: 12px; }
+.frui-switch-small[aria-checked="true"] .frui-switch-thumb { left: calc(100% - 14px); }
+.frui-switch-label { color: var(--frui-color-text); font-size: var(--frui-font-size); }
+
+/* ===== Avatar ===== */
+.frui-avatar { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 32px; height: 32px; overflow: hidden; border-radius: 50%; background: hsl(var(--frui-avatar-hue, 220) 45% 22%); color: var(--frui-color-text); font-family: var(--frui-font-family); font-weight: 700; font-size: var(--frui-font-size-sm); text-transform: uppercase; user-select: none; }
+.frui-avatar-square { border-radius: var(--frui-radius-sm); }
+.frui-avatar-sm { width: 24px; height: 24px; font-size: 11px; }
+.frui-avatar-lg { width: 44px; height: 44px; font-size: var(--frui-font-size-lg); }
+.frui-avatar-image { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+
+/* ===== Tabs ===== */
+.frui-tabs { display: grid; gap: var(--frui-space-3); }
+.frui-tabs-list { display: flex; align-items: center; gap: var(--frui-space-4); border-bottom: 1px solid var(--frui-color-border); }
+.frui-tabs-tab { position: relative; padding: var(--frui-space-2) 2px; color: var(--frui-color-muted); font-family: var(--frui-font-family); font-size: var(--frui-font-size); cursor: pointer; }
+.frui-tabs-tab:hover { color: var(--frui-color-text); }
+.frui-tabs-tab:focus-visible { outline: 2px solid var(--frui-color-focus); outline-offset: 2px; }
+.frui-tabs-tab-active { color: var(--frui-color-text); font-weight: 650; }
+.frui-tabs-tab-active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; border-radius: 2px; background: var(--frui-color-primary); content: ""; }
+.frui-tabs-panel { color: var(--frui-color-text); font: var(--frui-font-size)/1.6 var(--frui-font-family); }
+
+/* ===== Dialog ===== */
+/* 遮罩与内容是兄弟节点（DialogPrimitive.Root = Fragment[Overlay, Content]），所以居中只能由
+   内容自己用 fixed + translate 完成，grid/flex 居中在兄弟关系下无从生效。 */
+.frui-dialog-overlay { position: fixed; inset: 0; z-index: 300; background: var(--frui-color-overlay); }
+.frui-dialog-content { position: fixed; top: 50%; left: 50%; z-index: 301; width: min(480px, calc(100vw - 32px)); max-height: 85vh; overflow: auto; transform: translate(-50%, -50%); border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-card); padding: var(--frui-space-5); background: var(--frui-color-surface); color: var(--frui-color-text); box-shadow: var(--frui-shadow-card); }
+.frui-dialog-content:focus { outline: 2px solid var(--frui-color-focus); outline-offset: 3px; }
+.frui-dialog-header { margin-bottom: var(--frui-space-3); padding-right: var(--frui-space-5); }
+.frui-dialog-title { font-size: var(--frui-font-size-lg); font-weight: 700; }
+.frui-dialog-description { margin-top: var(--frui-space-1); color: var(--frui-color-muted); font-size: var(--frui-font-size-sm); }
+.frui-dialog-close { position: absolute; top: var(--frui-space-3); right: var(--frui-space-3); border-radius: var(--frui-radius-sm); padding: 4px 8px; color: var(--frui-color-muted); line-height: 1; cursor: pointer; }
+.frui-dialog-close:hover { background: var(--frui-color-surface-hover); color: var(--frui-color-text); }
+.frui-dialog-close:focus-visible { outline: 2px solid var(--frui-color-focus); outline-offset: 2px; }
+.frui-dialog-footer { display: flex; justify-content: flex-end; gap: var(--frui-space-2); margin-top: var(--frui-space-5); }
+
+/* ===== DropdownMenu ===== */
+.frui-dropdown-trigger { display: inline-flex; }
+.frui-dropdown-mask { position: fixed; inset: 0; z-index: 400; }
+.frui-dropdown-menu { position: fixed; z-index: 401; min-width: 160px; border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-control); padding: var(--frui-space-1); background: var(--frui-color-surface-raised); box-shadow: var(--frui-shadow-card); }
+.frui-dropdown-item { display: flex; align-items: center; gap: var(--frui-space-2); width: 100%; border-radius: var(--frui-radius-sm); padding: var(--frui-space-2) var(--frui-space-3); color: var(--frui-color-text); font-family: var(--frui-font-family); font-size: var(--frui-font-size); text-align: left; cursor: pointer; }
+.frui-dropdown-item:hover { background: var(--frui-color-surface-hover); }
+.frui-dropdown-item:focus-visible { outline: 2px solid var(--frui-color-focus); outline-offset: -2px; }
+.frui-dropdown-item-disabled { cursor: not-allowed; opacity: .5; }
+.frui-dropdown-item-danger { color: var(--frui-color-danger); }
+.frui-dropdown-separator { height: 1px; margin: var(--frui-space-1) 0; background: var(--frui-color-border); }
+
+/* ===== Toast ===== */
+.frui-toast-viewport { position: fixed; right: var(--frui-space-5); bottom: var(--frui-space-5); z-index: 500; display: grid; gap: var(--frui-space-2); width: min(360px, calc(100vw - 40px)); }
+.frui-toast { display: flex; align-items: flex-start; gap: var(--frui-space-3); border: 1px solid var(--frui-color-border); border-radius: var(--frui-radius-control); padding: var(--frui-space-3) var(--frui-space-4); background: var(--frui-color-surface-raised); color: var(--frui-color-text); box-shadow: var(--frui-shadow-card); font: var(--frui-font-size)/1.5 var(--frui-font-family); }
+.frui-toast-success { border-color: color-mix(in srgb, var(--frui-color-success) 40%, transparent); background: var(--frui-color-success-bg); color: var(--frui-color-success); }
+.frui-toast-error { border-color: color-mix(in srgb, var(--frui-color-danger) 40%, transparent); background: var(--frui-color-danger-bg); color: var(--frui-color-danger); }
+.frui-toast-warning { border-color: color-mix(in srgb, var(--frui-color-warning) 40%, transparent); background: var(--frui-color-warning-bg); color: var(--frui-color-warning); }
+.frui-toast-message { flex: 1; min-width: 0; }
+.frui-toast-close { flex: none; border-radius: var(--frui-radius-sm); padding: 0 4px; color: inherit; line-height: 1.4; opacity: .7; cursor: pointer; }
+.frui-toast-close:hover { opacity: 1; }

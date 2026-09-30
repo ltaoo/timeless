@@ -1,0 +1,39 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Toast
+   类名沿用上游：.toast / .toast-header / .toast-body。
+   headless 的 ToastCore 没有 state，容器只负责外观，显隐由调用方决定。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .toast {
+  display: flex;
+  flex-direction: column;
+  width: 22rem;
+  max-width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  pointer-events: auto;
+  background-color: var(--background);
+  background-clip: padding-box;
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+[data-tt-style="bootstrap"] .toast-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  padding: 0.5rem 0.75rem;
+  color: var(--muted-foreground);
+  background-color: var(--accent);
+  background-clip: padding-box;
+  border-bottom: var(--bs-border-width) solid var(--border);
+  border-top-left-radius: calc(var(--radius) - 1px);
+  border-top-right-radius: calc(var(--radius) - 1px);
+}
+
+[data-tt-style="bootstrap"] .toast-body {
+  padding: 0.75rem;
+  word-wrap: break-word;
+}

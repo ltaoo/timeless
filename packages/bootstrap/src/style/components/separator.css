@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Separator（.separator）
+   上游用 <hr> 或 .border 工具类，这里补一个方向感明确的独立分隔线。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .separator {
+  flex-shrink: 0;
+  border: 0;
+  background-color: var(--border);
+}
+
+[data-tt-style="bootstrap"] .separator-horizontal {
+  display: block;
+  width: 100%;
+  height: var(--bs-border-width);
+  margin: 0;
+}
+
+[data-tt-style="bootstrap"] .separator-vertical {
+  display: block;
+  width: var(--bs-border-width);
+  height: 100%;
+  align-self: stretch;
+  margin: 0;
+}
+
+[data-tt-style="bootstrap"] .separator.is-disabled,
+[data-tt-style="bootstrap"] .separator[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+}

@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Material 3 · CheckboxGroup
+   纵向堆叠（默认）或横向换行；行级布局与标签见 checkbox.css。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="material"] .m3-checkbox-group--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+[data-tt-style="material"] .m3-checkbox-group__item {
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="material"] .m3-checkbox-group__item:focus-within {
+  outline: 2px solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+[data-tt-style="material"] .m3-checkbox-group__item.is-disabled {
+  opacity: var(--disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-checkbox-group__item {
+    transition: none;
+  }
+}

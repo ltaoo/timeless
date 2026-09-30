@@ -1,0 +1,20 @@
+/* ==========================================================================
+   Material 3 · Affix（.m3-affix）
+   --------------------------------------------------------------------------
+   固定态 .is-fixed 的 position/top/z-index 由模块按 offsetTop 以内联 style 下发；
+   这里只负责过渡曲线与浮动时的抬升观感（--elevation-3 + 圆角 + 表面色），
+   过渡用 --easing-standard / --duration-medium，接近 M3 的标准缓动。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-affix {
+  transition:
+    box-shadow var(--duration-medium) var(--easing-standard),
+    background-color var(--duration-medium) var(--easing-standard),
+    border-radius var(--duration-medium) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-affix.is-fixed {
+  background-color: var(--surface-container-high);
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: var(--elevation-3);
+}

@@ -1,0 +1,124 @@
+/* ==========================================================================
+   Material 3 · Accordion
+   结构：.m3-accordion > .m3-accordion__item(.is-open)
+         > .m3-accordion__header > .m3-accordion__trigger(.is-open)
+         > .m3-accordion__content > .m3-accordion__body
+
+   展开态用 .is-open 类名（同时挂在 item / trigger 上），原因见 modules/accordion.ts：
+   1) Content 会强制替换 class，无法动态加类；
+   2) dataset 的响应式更新目前会写错属性名（写成裸 state 而不是 data-state）。
+
+   M3：item 底色 --surface-container-low；展开态标题用 --primary；
+   展开/收起用 M3 的 --easing-emphasized + --duration-medium。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-accordion {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--surface-container-low);
+  border-radius: var(--radius-md);
+}
+
+[data-tt-style="material"] .m3-accordion__item {
+  color: var(--foreground);
+  background-color: var(--surface-container-low);
+}
+
+[data-tt-style="material"] .m3-accordion__item + .m3-accordion__item {
+  border-top: 1px solid var(--outline-variant);
+}
+
+[data-tt-style="material"] .m3-accordion__header {
+  margin: 0;
+}
+
+[data-tt-style="material"] .m3-accordion__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-family: var(--font-sans);
+  font-size: var(--title-size);
+  font-weight: 500;
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: left;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  transition:
+    color var(--duration-short) var(--easing-standard),
+    background-color var(--duration-short) var(--easing-standard);
+}
+
+/* state layer：hover / focus 统一叠一层 currentColor */
+[data-tt-style="material"] .m3-accordion__trigger::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-accordion__trigger:hover::before {
+  opacity: var(--state-hover);
+}
+
+[data-tt-style="material"] .m3-accordion__trigger:active::before {
+  opacity: var(--state-pressed);
+}
+
+[data-tt-style="material"] .m3-accordion__trigger:focus-visible {
+  outline: 0;
+  box-shadow: inset 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="material"] .m3-accordion__trigger.is-open {
+  color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-accordion__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  order: 1;
+  margin-left: auto;
+  color: var(--muted-foreground);
+  transition: transform var(--duration-medium) var(--easing-emphasized);
+}
+
+[data-tt-style="material"] .m3-accordion__trigger.is-open .m3-accordion__icon {
+  color: var(--primary);
+  transform: rotate(180deg);
+}
+
+/* Content 类名固定为字符串，展开态只能由祖先的 .is-open 推导 */
+[data-tt-style="material"] .m3-accordion__item:not(.is-open) .m3-accordion__content {
+  display: none;
+}
+
+[data-tt-style="material"] .m3-accordion__item.is-open .m3-accordion__content {
+  display: block;
+}
+
+[data-tt-style="material"] .m3-accordion__body {
+  padding: 0 1.25rem 1rem;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height);
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-accordion__trigger,
+  [data-tt-style="material"] .m3-accordion__trigger::before,
+  [data-tt-style="material"] .m3-accordion__icon {
+    transition: none;
+  }
+}

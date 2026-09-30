@@ -1,0 +1,47 @@
+/* ==========================================================================
+   Material 3 · Tooltip
+   结构：.m3-tooltip > .m3-tooltip__arrow / .m3-tooltip__inner
+   M3 配色：--inverse-surface 底 + --inverse-surface-foreground 字，4px 圆角。
+
+   注意：headless 的 tooltip 是全局单例，模块侧拿不到它的 popper 状态，
+   因此无法像 popover 那样按 placement 计算箭头方向。这里按默认的 side="top"
+   把箭头固定居中放在气泡下沿（对应被锚定元素在上方的情形）。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-tooltip {
+  --m3-tooltip-bg: var(--inverse-surface);
+  --m3-tooltip-color: var(--inverse-surface-foreground);
+  z-index: 1080;
+  display: block;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: start;
+  letter-spacing: 0.02em;
+  white-space: normal;
+  opacity: 1;
+  pointer-events: none;
+}
+
+[data-tt-style="material"] .m3-tooltip__inner {
+  max-width: 12.5rem;
+  padding: 0.375rem 0.5rem;
+  color: var(--m3-tooltip-color);
+  text-align: center;
+  background-color: var(--m3-tooltip-bg);
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="material"] .m3-tooltip__arrow {
+  position: absolute;
+  left: 50%;
+  bottom: -0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--m3-tooltip-bg);
+  transform: translateX(-50%) rotate(45deg);
+  pointer-events: none;
+}

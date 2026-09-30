@@ -1,0 +1,119 @@
+/* ==========================================================================
+   Animal Island · NumberInput（.animal-number-input）
+   --------------------------------------------------------------------------
+   结构：.animal-number-input（定位容器）
+         ├─ .animal-control（真正的输入框，样式由 input.css 提供）
+         └─ .animal-number-input__controls > __step--up / __step--down
+
+   Animal Island 视觉：
+     · 输入框复用 pill 圆角 + --border-width-input 描边，右侧叠一层 32px 宽的
+       上下步进按钮，用 2px --border 竖线把两者分开
+     · 步进键奶油纸底（--input-bg），hover 换薄荷青浅底（--accent），
+       active 下压 translateY(1px)
+     · 焦点是黄色描边，永不用蓝色
+     · 错误态由 module 的 .is-invalid / [data-invalid] 表达，描边换 --destructive
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-number-input {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* 给右侧步进键让位 */
+[data-tt-style="animal"] .animal-number-input .animal-control {
+  padding-right: 40px;
+}
+
+[data-tt-style="animal"] .animal-number-input__controls {
+  position: absolute;
+  top: var(--border-width-input);
+  right: var(--border-width-input);
+  bottom: var(--border-width-input);
+  display: flex;
+  flex-direction: column;
+  width: 32px;
+  overflow: hidden;
+  border-left: var(--border-width) solid var(--border);
+  border-top-right-radius: var(--pill-radius);
+  border-bottom-right-radius: var(--pill-radius);
+}
+
+[data-tt-style="animal"] .animal-number-input__step {
+  flex: 1 1 0%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  background-color: var(--input-bg-rest);
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-number-input__step:hover:not([data-disabled="true"]):not(
+    [aria-disabled="true"]
+  ):not(.is-disabled) {
+  color: var(--accent-foreground);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-number-input__step:active:not([data-disabled="true"]):not(
+    [aria-disabled="true"]
+  ):not(.is-disabled) {
+  color: var(--secondary-foreground);
+  background-color: var(--secondary);
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-number-input__step:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -2px;
+}
+
+/* 步进键之间的分隔线 */
+[data-tt-style="animal"] .animal-number-input__step--up {
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+[data-tt-style="animal"] .animal-number-input__step[data-disabled="true"],
+[data-tt-style="animal"] .animal-number-input__step[aria-disabled="true"],
+[data-tt-style="animal"] .animal-number-input__step.is-disabled {
+  color: var(--foreground-disabled);
+  background-color: var(--input-bg-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="animal"] .animal-number-input.is-disabled,
+[data-tt-style="animal"] .animal-number-input[data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+/* --- 非法态：输入框与分隔线一起染红 --- */
+[data-tt-style="animal"] .animal-number-input.is-invalid .animal-control,
+[data-tt-style="animal"] .animal-number-input[data-invalid="true"] .animal-control,
+[data-tt-style="animal"] .animal-number-input.is-invalid .animal-control.is-invalid {
+  border-color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-number-input.is-invalid .animal-number-input__controls,
+[data-tt-style="animal"]
+  .animal-number-input[data-invalid="true"]
+  .animal-number-input__controls {
+  border-left-color: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-number-input__step {
+    transition: none;
+  }
+
+  [data-tt-style="animal"] .animal-number-input__step:active {
+    transform: none;
+  }
+}

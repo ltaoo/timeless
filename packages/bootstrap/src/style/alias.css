@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Bootstrap 5.3 — Timeless 语义别名（第二层）
+   --------------------------------------------------------------------------
+   组件代码只读这一层（--primary / --background / --border / --radius …），
+   不直接读 --bs-*。好处：
+     · 换 Bootstrap 版本只动 tokens.css；
+     · 三套作用域库的模块代码形状一致；
+     · 应用覆盖主题只需要动这一层。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] {
+  /* --- 表面与文字 --- */
+  --background: var(--bs-body-bg);
+  --foreground: var(--bs-body-color);
+  --card: var(--bs-body-bg);
+  --card-foreground: var(--bs-body-color);
+  --popover: var(--bs-body-bg);
+  --popover-foreground: var(--bs-body-color);
+
+  /* --- 主 / 次操作 --- */
+  --primary: var(--bs-primary);
+  --primary-foreground: #fff;
+  --secondary: var(--bs-secondary);
+  --secondary-foreground: #fff;
+
+  /* --- 弱化 / 强调 --- */
+  --muted: var(--bs-secondary-bg);
+  --muted-foreground: var(--bs-secondary-color);
+  --accent: var(--bs-tertiary-bg);
+  --accent-foreground: var(--bs-emphasis-color);
+
+  /* --- 语义状态色 --- */
+  --destructive: var(--bs-danger);
+  --destructive-foreground: #fff;
+  --success: var(--bs-success);
+  --success-foreground: #fff;
+  --warning: var(--bs-warning);
+  --warning-foreground: #000;
+  --info: var(--bs-info);
+  --info-foreground: #000;
+
+  /* --- 边框 / 输入 / 焦点 --- */
+  --border: var(--bs-border-color);
+  --input: var(--bs-border-color);
+  --ring: var(--bs-primary);
+  --ring-width: var(--bs-focus-ring-width);
+  --ring-color: var(--bs-focus-ring-color);
+
+  /* --- 形状 --- */
+  --radius: var(--bs-border-radius);
+  --radius-sm: var(--bs-border-radius-sm);
+  --radius-lg: var(--bs-border-radius-lg);
+  --radius-pill: var(--bs-border-radius-pill);
+
+  /* --- 阴影 --- */
+  --shadow-sm: var(--bs-box-shadow-sm);
+  --shadow: var(--bs-box-shadow);
+  --shadow-lg: var(--bs-box-shadow-lg);
+  --shadow-inset: var(--bs-box-shadow-inset);
+
+  /* --- 状态 --- */
+  --disabled-opacity: var(--bs-disabled-opacity);
+
+  /* --- 字体 --- */
+  --font-sans: var(--bs-font-sans-serif);
+  --font-mono: var(--bs-font-monospace);
+  --font-size: var(--bs-body-font-size);
+  --font-size-sm: 0.875rem;
+  --font-size-xs: 0.75rem;
+  --line-height: var(--bs-body-line-height);
+
+  /* --- 间距基准（Bootstrap spacer = 1rem） --- */
+  --spacer: 1rem;
+  --spacer-sm: 0.5rem;
+  --spacer-lg: 1.5rem;
+  --control-height: 2.375rem;
+  --control-height-sm: 1.9375rem;
+  --control-height-lg: 3rem;
+}

@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Kbd（.kbd / .kbd-group）
+   上游只对 <kbd> 元素打了基础样式，这里补上独立类名，便于与图标混排。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0.1rem 0.35rem;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  background-color: var(--muted);
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  user-select: none;
+}
+
+[data-tt-style="bootstrap"] .kbd-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .kbd {
+    transition: none;
+  }
+}

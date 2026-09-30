@@ -1,0 +1,70 @@
+/* ==========================================================================
+   Material 3 · Badge
+   pill 形小标签；默认 --primary-container 填充，各变体落到对应 *-container 色对。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  padding: 0.25em 0.625em;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--primary-container-foreground);
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  background-color: var(--primary-container);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="material"] .m3-badge--secondary {
+  color: var(--secondary-container-foreground);
+  background-color: var(--secondary-container);
+}
+
+[data-tt-style="material"] .m3-badge--tertiary {
+  color: var(--md-sys-color-on-tertiary-container);
+  background-color: var(--md-sys-color-tertiary-container);
+}
+
+[data-tt-style="material"] .m3-badge--outline {
+  color: var(--foreground);
+  background-color: transparent;
+  border-color: var(--outline);
+}
+
+[data-tt-style="material"] .m3-badge--destructive {
+  color: var(--destructive-container-foreground);
+  background-color: var(--destructive-container);
+}
+
+[data-tt-style="material"] .m3-badge--success {
+  color: var(--success);
+  background-color: var(--success-container);
+}
+
+[data-tt-style="material"] .m3-badge--warning {
+  color: var(--warning);
+  background-color: var(--warning-container);
+}
+
+[data-tt-style="material"] .m3-badge--info {
+  color: var(--info);
+  background-color: var(--info-container);
+}
+
+[data-tt-style="material"] .m3-badge.is-disabled,
+[data-tt-style="material"] .m3-badge[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-badge {
+    transition: none;
+  }
+}

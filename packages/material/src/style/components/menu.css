@@ -1,0 +1,26 @@
+/* ==========================================================================
+   Material 3 · Menu（常驻菜单）
+   menu.ts 渲染的是「一直在页面上」的 .m3-menu，因此不能像 DropdownMenu 那样
+   被 popper 定位（否则会脱离文档流盖在触发元素上）。这里把 .m3-menu 的基础外观
+   还原成普通块级盒子，并加上 .m3-menu--static 的定位修正。
+   条目/分组/分隔线的样式由 dropdown-menu.css 提供。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-menu--static {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  width: auto;
+  min-width: 12rem;
+  max-height: calc(var(--spacer) * 20);
+  overflow: visible;
+  box-shadow: var(--elevation-1);
+}
+
+/* 常驻菜单里的子菜单浮层仍然需要滚动与浮层阴影 */
+[data-tt-style="material"] .m3-menu--static .m3-menu--submenu {
+  max-height: calc(var(--spacer) * 20);
+  overflow: hidden auto;
+  box-shadow: var(--elevation-2);
+}

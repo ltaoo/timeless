@@ -1,0 +1,110 @@
+/* ==========================================================================
+   Animal Island · Table（.animal-table）
+   --------------------------------------------------------------------------
+   根节点 .animal-table，其余部位沿用原生语义标签（thead / tbody / tr / th / td），
+   通过后代选择器作用域化。
+
+   Animal Island 视觉：
+     · 整表是一枚羊皮纸卡片：2px --border 描边 + 大圆角，行分割线用浅描边
+       --border-subtle
+     · 表头是米色带（--secondary），表头文字用 --muted-foreground，字重 700
+     · 表头是薄荷青语义：hover 时文字转 --primary（可排序表头的提示）
+     · 行 hover 用薄荷浅底（--accent）
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-table {
+  width: 100%;
+  margin-bottom: var(--spacer);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--foreground);
+  vertical-align: top;
+  border-color: var(--border);
+  border-collapse: separate;
+  border-spacing: 0;
+  caption-side: bottom;
+  background-color: var(--card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+[data-tt-style="animal"] .animal-table > :not(caption) > * > * {
+  padding: 10px 14px;
+  background-color: transparent;
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+[data-tt-style="animal"] .animal-table > thead > tr > * {
+  background-color: var(--secondary);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+[data-tt-style="animal"] .animal-table > thead > tr > th {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  text-align: left;
+  white-space: nowrap;
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+/* 可排序表头 / 普通表头 hover：给出薄荷青提示 */
+[data-tt-style="animal"] .animal-table > thead > tr > th[aria-sort] {
+  color: var(--primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="animal"] .animal-table > thead > tr > th:hover {
+  color: var(--primary);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-table > thead > tr > th:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -2px;
+}
+
+[data-tt-style="animal"] .animal-table > tbody > tr:hover > * {
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-table > tbody > tr:active > * {
+  background-color: var(--secondary);
+}
+
+[data-tt-style="animal"] .animal-table > tbody > tr:focus-within > * {
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-table > tbody > tr:last-child > * {
+  border-bottom-color: transparent;
+}
+
+/* 禁用 / 非法行表达 */
+[data-tt-style="animal"] .animal-table > tbody > tr.is-disabled,
+[data-tt-style="animal"] .animal-table > tbody > tr[aria-disabled="true"] {
+  color: var(--foreground-disabled);
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-table > tbody > tr[aria-invalid="true"] > * {
+  color: var(--destructive-subtle-foreground);
+  border-bottom-color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-table > caption {
+  padding: 10px 14px;
+  color: var(--muted-foreground);
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-table > thead > tr > th {
+    transition: none;
+  }
+}

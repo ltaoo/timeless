@@ -1,0 +1,83 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Switch（.form-switch）
+   轨道 2em x 1em、滑块 1em 圆形；选中时轨道填充 --primary。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .form-switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 2em;
+  height: 1em;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  border: var(--bs-border-width) solid transparent;
+  border-radius: var(--radius-pill);
+  background-color: var(--muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .form-switch:hover {
+  background-color: color-mix(in srgb, var(--muted) 80%, var(--foreground));
+}
+
+[data-tt-style="bootstrap"] .form-switch:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .form-switch:active {
+  box-shadow: var(--shadow-inset);
+}
+
+[data-tt-style="bootstrap"] .form-switch[data-checked],
+[data-tt-style="bootstrap"] .form-switch.is-checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .form-switch[data-checked]:hover,
+[data-tt-style="bootstrap"] .form-switch.is-checked:hover {
+  background-color: color-mix(in srgb, var(--primary) 85%, black);
+}
+
+[data-tt-style="bootstrap"] .form-switch[data-checked]:focus-visible,
+[data-tt-style="bootstrap"] .form-switch.is-checked:focus-visible {
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .form-switch[disabled],
+[data-tt-style="bootstrap"] .form-switch[data-disabled],
+[data-tt-style="bootstrap"] .form-switch.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+[data-tt-style="bootstrap"] .form-switch-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: var(--shadow-sm);
+  transform: translateX(0);
+  transition: transform 0.15s ease-in-out;
+  pointer-events: none;
+}
+
+[data-tt-style="bootstrap"] .form-switch[data-checked] .form-switch-thumb,
+[data-tt-style="bootstrap"] .form-switch.is-checked .form-switch-thumb {
+  transform: translateX(1em);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .form-switch,
+  [data-tt-style="bootstrap"] .form-switch-thumb {
+    transition: none;
+  }
+}

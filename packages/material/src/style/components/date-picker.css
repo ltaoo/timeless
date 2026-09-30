@@ -1,0 +1,276 @@
+/* ==========================================================================
+   Material 3 · DatePicker（触发器 .m3-datepicker + 面板 .m3-datepicker__content）
+   --------------------------------------------------------------------------
+   触发器沿用 outlined 输入框的盒子指标（--control-height + 1px --outline）；
+   浮层走「日期选择器」规格：--surface-container-high + --elevation-3 +
+   --radius-xl（28px），进场 --easing-emphasized / --duration-medium。
+   day cell 是 40px 正圆，hover / pressed 走 state layer（::before），
+   选中 .is-active 填 --primary，今天 .is-today 用 1px --primary 描边。
+   ========================================================================== */
+
+/* --- 触发器 --- */
+[data-tt-style="material"] .m3-datepicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: left;
+  background-color: transparent;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-datepicker:hover {
+  border-color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-datepicker:focus-within,
+[data-tt-style="material"] .m3-datepicker.is-open {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+[data-tt-style="material"] .m3-datepicker.is-disabled,
+[data-tt-style="material"] .m3-datepicker[data-disabled] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="material"] .m3-datepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="material"] .m3-datepicker__value.is-placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-datepicker__icon,
+[data-tt-style="material"] .m3-datepicker__clear {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="material"] .m3-datepicker__icon {
+  transition:
+    color var(--duration-short) var(--easing-standard),
+    transform var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-datepicker__icon.is-open {
+  color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-datepicker__clear {
+  cursor: pointer;
+}
+
+[data-tt-style="material"] .m3-datepicker__clear:hover {
+  color: var(--foreground);
+}
+
+/* --- 浮层 --- */
+[data-tt-style="material"] .m3-datepicker__content {
+  padding: 1rem;
+  color: var(--foreground);
+  background-color: var(--surface-container-high);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-3);
+  outline: none;
+}
+
+[data-tt-style="material"] .m3-datepicker__calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 17.5rem;
+}
+
+[data-tt-style="material"] .m3-datepicker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.25rem 0.5rem;
+}
+
+[data-tt-style="material"] .m3-datepicker__title {
+  flex: 1 1 auto;
+  font-size: var(--label-size);
+  font-weight: 600;
+  color: var(--foreground);
+  text-align: center;
+}
+
+[data-tt-style="material"] .m3-datepicker__nav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-datepicker__nav:hover {
+  background-color: color-mix(in srgb, var(--foreground) var(--state-hover), transparent);
+}
+
+[data-tt-style="material"] .m3-datepicker__nav:active {
+  background-color: color-mix(in srgb, var(--foreground) var(--state-pressed), transparent);
+}
+
+/* --- 星期表头 --- */
+[data-tt-style="material"] .m3-datepicker__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+[data-tt-style="material"] .m3-datepicker__weekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+/* --- 日期网格 --- */
+[data-tt-style="material"] .m3-datepicker__grid {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-tt-style="material"] .m3-datepicker__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+[data-tt-style="material"] .m3-datepicker__cell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0 auto;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  isolation: isolate;
+  transition:
+    color var(--duration-short) var(--easing-standard),
+    background-color var(--duration-short) var(--easing-standard);
+}
+
+/* state layer：hover / pressed 铺在文字下方 */
+[data-tt-style="material"] .m3-datepicker__cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--foreground);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-datepicker__cell:hover::before {
+  opacity: var(--state-hover);
+}
+
+[data-tt-style="material"] .m3-datepicker__cell:active::before,
+[data-tt-style="material"] .m3-datepicker__cell:focus-visible::before {
+  opacity: var(--state-pressed);
+}
+
+[data-tt-style="material"] .m3-datepicker__cell.is-outside {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-datepicker__cell.is-today {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+[data-tt-style="material"] .m3-datepicker__cell.is-active,
+[data-tt-style="material"] .m3-datepicker__cell.is-active:hover {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-datepicker__cell.is-active::before {
+  opacity: 0;
+}
+
+[data-tt-style="material"] .m3-datepicker__cell:disabled,
+[data-tt-style="material"] .m3-datepicker__cell.is-disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+/* --- 进出场 --- */
+[data-tt-style="material"] .m3-datepicker__content.is-enter {
+  animation: m3-datepicker-in var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-datepicker__content.is-exit {
+  animation: m3-datepicker-out var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-datepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes m3-datepicker-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}

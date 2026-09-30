@@ -1,0 +1,66 @@
+/* ==========================================================================
+   Fluent 2 — 作用域内的基础 / 重置
+   --------------------------------------------------------------------------
+   禁止事项（见 THEME_PACKAGE_GUIDE.md 第 4.5 节）：
+     ❌ html { }        ❌ body { }        ❌ #root { }
+     ❌ * { }           ❌ 无作用域的 @keyframes 重名
+   下面所有规则都带 [data-tt-style="fluent"]，因此只在本库子树内生效。
+   ========================================================================== */
+
+/* 作用域根：应用在 <html> 或任意包裹元素上设置本属性来启用 Fluent 风格 */
+[data-tt-style="fluent"] {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background-color: var(--background);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 作用域内重置（只在本库子树内生效） */
+[data-tt-style="fluent"] *,
+[data-tt-style="fluent"] *::before,
+[data-tt-style="fluent"] *::after {
+  box-sizing: border-box;
+}
+
+[data-tt-style="fluent"] a {
+  color: var(--colorBrandForegroundLink);
+  text-decoration: none;
+}
+
+[data-tt-style="fluent"] a:hover {
+  color: var(--colorBrandForegroundLinkHover);
+  text-decoration: underline;
+}
+
+[data-tt-style="fluent"] img,
+[data-tt-style="fluent"] svg {
+  vertical-align: middle;
+}
+
+/* 统一禁用态外观。组件可以用 .is-disabled / [disabled] / [data-disabled] 表达。 */
+[data-tt-style="fluent"] [disabled],
+[data-tt-style="fluent"] [data-disabled="true"],
+[data-tt-style="fluent"] .is-disabled {
+  pointer-events: none;
+}
+
+/* Fluent 的焦点指示：外圈 1px 白 + 内圈 2px 黑（此处用 outline 表达） */
+[data-tt-style="fluent"] :focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+/* 全局减少动效偏好（作用域内） */
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] *,
+  [data-tt-style="fluent"] *::before,
+  [data-tt-style="fluent"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

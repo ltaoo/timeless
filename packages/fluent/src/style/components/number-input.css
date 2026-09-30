@@ -1,0 +1,93 @@
+/* ==========================================================================
+   Fluent 2 · NumberInput
+   --------------------------------------------------------------------------
+   输入框复用 .fl-control，右侧叠一层 32px 宽的上下步进按钮，
+   用 1px --stroke1 与输入框分隔，圆角跟随外层 4px。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-number-input {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-number-input .fl-control {
+  padding-right: 36px;
+}
+
+[data-tt-style="fluent"] .fl-number-input__controls {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  display: flex;
+  flex-direction: column;
+  width: 32px;
+  overflow: hidden;
+  border-left: var(--strokeWidthThin) solid var(--stroke1);
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+
+[data-tt-style="fluent"] .fl-number-input__step {
+  flex: 1 1 0%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: var(--surface-1);
+  color: var(--foreground-3);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-number-input__step:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+[data-tt-style="fluent"] .fl-number-input__step:active {
+  background-color: var(--surface-1-pressed);
+}
+
+[data-tt-style="fluent"] .fl-number-input__step:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -1px;
+}
+
+[data-tt-style="fluent"] .fl-number-input__step--up {
+  border-bottom: var(--strokeWidthThin) solid var(--stroke1);
+}
+
+[data-tt-style="fluent"] .fl-number-input__step[aria-disabled="true"],
+[data-tt-style="fluent"] .fl-number-input__step[data-disabled],
+[data-tt-style="fluent"] .fl-number-input__step.is-disabled {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-number-input[data-disabled],
+[data-tt-style="fluent"] .fl-number-input.is-disabled {
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-number-input.is-invalid .fl-control,
+[data-tt-style="fluent"] .fl-number-input[data-invalid="true"] .fl-control {
+  border-color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-number-input.is-invalid .fl-number-input__controls,
+[data-tt-style="fluent"]
+  .fl-number-input[data-invalid="true"]
+  .fl-number-input__controls {
+  border-left-color: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-number-input__step {
+    transition: none;
+  }
+}

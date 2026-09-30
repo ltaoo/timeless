@@ -1,10 +1,10 @@
 import { ui } from "@timeless/timeless";
-import { computed, ref } from "@timeless/timeless";
+import { computed, isRef, ref, Ref } from "@timeless/timeless";
 import { ViewProps } from "@timeless/timeless";
 
 export function Slider(
   props: ViewProps & {
-    value?: number;
+    value?: number | Ref<number>;
     min?: number;
     max?: number;
     step?: number;
@@ -14,7 +14,10 @@ export function Slider(
 ) {
   const { disabled, value, min, max, step, onChange, ...rest } = props;
 
-  const valueRef = ref(value ?? min ?? 0);
+  // 外部传 Ref 就用它本身（primitive 会订阅），重置类操作才能推动滑块。
+  const valueRef: Ref<number> = isRef(value)
+    ? (value as Ref<number>)
+    : ref(value ?? min ?? 0);
   const pct = computed(valueRef, (d) => {
     const _min = min ?? 0;
     const _max = max ?? 100;
@@ -24,7 +27,7 @@ export function Slider(
 
   return ui.SliderPrimitive.Root(
     {
-      value,
+      value: valueRef,
       min,
       max,
       step,

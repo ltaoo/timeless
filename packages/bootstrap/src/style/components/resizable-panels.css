@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Bootstrap 5.3 · ResizablePanels
+   Bootstrap 没有分割面板，用 .resizable-panels / .resizable-panel /
+   .resizable-handle 命名空间，视觉上沿用 Bootstrap 的 border 与 focus ring。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .resizable-panels {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+[data-tt-style="bootstrap"] .resizable-panels.is-horizontal {
+  flex-direction: row;
+}
+
+[data-tt-style="bootstrap"] .resizable-panels.is-vertical {
+  flex-direction: column;
+}
+
+[data-tt-style="bootstrap"] .resizable-panel {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+[data-tt-style="bootstrap"] .resizable-handle {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--border);
+  transition: background-color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .resizable-handle.is-horizontal {
+  width: 1px;
+  cursor: col-resize;
+}
+
+[data-tt-style="bootstrap"] .resizable-handle.is-vertical {
+  height: 1px;
+  width: 100%;
+  cursor: row-resize;
+}
+
+/* 扩大命中区域（视觉仍是 1px 细线） */
+[data-tt-style="bootstrap"] .resizable-handle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+[data-tt-style="bootstrap"] .resizable-handle.is-horizontal::after {
+  left: -0.25rem;
+  right: -0.25rem;
+}
+
+[data-tt-style="bootstrap"] .resizable-handle.is-vertical::after {
+  top: -0.25rem;
+  bottom: -0.25rem;
+}
+
+[data-tt-style="bootstrap"] .resizable-handle:hover,
+[data-tt-style="bootstrap"] .resizable-handle[data-dragging="true"] {
+  background-color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .resizable-handle:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .resizable-handle-grip {
+  z-index: 10;
+  display: flex;
+  flex-shrink: 0;
+  width: 0.25rem;
+  height: 1.5rem;
+  background-color: var(--border);
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="bootstrap"] .resizable-handle.is-vertical .resizable-handle-grip {
+  width: 1.5rem;
+  height: 0.25rem;
+}

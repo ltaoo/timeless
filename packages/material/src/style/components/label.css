@@ -1,0 +1,42 @@
+/* ==========================================================================
+   Material 3 · Label（.m3-label）
+   M3 的表单标签用 label-medium / on-surface-variant；聚焦时转 --primary。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-label {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: var(--label-size);
+  font-weight: 500;
+  line-height: var(--line-height);
+  color: var(--muted-foreground);
+  transition: color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-label:focus-within,
+[data-tt-style="material"] .m3-label.is-focused {
+  color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-label.is-disabled,
+[data-tt-style="material"] .m3-label[data-disabled="true"],
+[data-tt-style="material"] .m3-label[aria-disabled="true"] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="material"] .m3-label.is-invalid {
+  color: var(--destructive);
+}
+
+[data-tt-style="material"] .m3-label .m3-label__required {
+  margin-left: 0.125rem;
+  color: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-label {
+    transition: none;
+  }
+}

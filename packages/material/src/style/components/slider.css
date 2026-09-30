@@ -1,0 +1,75 @@
+/* ==========================================================================
+   Material 3 · Slider
+   轨道 4px、thumb 20px 圆形（--primary），hover / 拖动时 thumb 外扩一圈
+   state layer（box-shadow 扩散），已选区用 --primary 填充。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 0;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+[data-tt-style="material"] .m3-slider__track {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  flex-grow: 1;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background-color: var(--surface-container-highest);
+}
+
+[data-tt-style="material"] .m3-slider__range {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary);
+  transition: width 0.1s linear;
+}
+
+[data-tt-style="material"] .m3-slider__thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary);
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-slider:hover .m3-slider__thumb,
+[data-tt-style="material"] .m3-slider:active .m3-slider__thumb,
+[data-tt-style="material"] .m3-slider__thumb:focus-visible {
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--primary) var(--state-hover), transparent);
+}
+
+[data-tt-style="material"] .m3-slider:disabled,
+[data-tt-style="material"] .m3-slider[data-disabled="true"],
+[data-tt-style="material"] .m3-slider.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+[data-tt-style="material"] .m3-slider.is-disabled .m3-slider__range,
+[data-tt-style="material"] .m3-slider.is-disabled .m3-slider__thumb {
+  background-color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-slider.is-invalid .m3-slider__range,
+[data-tt-style="material"] .m3-slider.is-invalid .m3-slider__thumb,
+[data-tt-style="material"] .m3-slider[aria-invalid="true"] .m3-slider__range,
+[data-tt-style="material"] .m3-slider[aria-invalid="true"] .m3-slider__thumb {
+  background-color: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-slider__range,
+  [data-tt-style="material"] .m3-slider__thumb {
+    transition: none;
+  }
+}

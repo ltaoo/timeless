@@ -1,0 +1,217 @@
+/* ==========================================================================
+   Animal Island · Dialog（.animal-dialog 系列）
+   --------------------------------------------------------------------------
+   结构：.animal-dialog__scrim + .animal-dialog > .animal-dialog__positioner
+         > .animal-dialog__surface > __header(__title + __close) / __body / __footer
+
+   上游视觉（浮层统一语言）：
+     · 面板是奶油纸 —— 底 --popover（rgb(247,243,223)），字 --popover-foreground
+       （暖棕）；标题用更深的 --foreground
+     · 描边 2px（--border-width）--border，是最显眼的特征，不是 Fluent 的 1px
+     · 圆角 --radius-lg（24px），阴影用**柔和海拔** --shadow-lg；
+       像素堆叠立体阴影只留给 primary 按钮，**不**用在这里
+     · scrim 不用独立 --mask 别名，用
+       color-mix(in srgb, var(--foreground) 35%, transparent) 派生，保持 token 化
+     · 进出场 zoom-in（scale(0.92) + 透明度 0），关键帧前缀 animal-
+   ========================================================================== */
+
+/* --- 遮罩 --- */
+[data-tt-style="animal"] .animal-dialog__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background-color: color-mix(in srgb, var(--foreground) 35%, transparent);
+}
+
+/* --- 全屏定位层（承载 z-index，不画底） --- */
+[data-tt-style="animal"] .animal-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1051;
+  overflow: hidden auto;
+  outline: 0;
+}
+
+[data-tt-style="animal"] .animal-dialog__positioner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-height: 100%;
+  max-width: 40rem;
+  padding: var(--spacer-xl);
+  margin: 0 auto;
+}
+
+/* --- 对话框盒子（DismissableLayer 挂在 Content 上，必须是这个盒子） --- */
+[data-tt-style="animal"] .animal-dialog__surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  outline: 0;
+}
+
+[data-tt-style="animal"] .animal-dialog__header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: var(--spacer-xl) var(--spacer-xl) var(--spacer);
+}
+
+[data-tt-style="animal"] .animal-dialog__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: var(--line-height);
+  color: var(--foreground);
+}
+
+/* 无标题时关闭按钮也要贴右 */
+[data-tt-style="animal"] .animal-dialog__header .animal-dialog__close {
+  margin-left: auto;
+}
+
+[data-tt-style="animal"] .animal-dialog__close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-dialog__close:hover {
+  color: var(--accent-foreground);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-dialog__close:active {
+  color: var(--primary-pressed);
+  background-color: color-mix(in srgb, var(--accent) 88%, var(--foreground));
+}
+
+[data-tt-style="animal"] .animal-dialog__close:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-dialog__close[disabled],
+[data-tt-style="animal"] .animal-dialog__close[data-disabled="true"],
+[data-tt-style="animal"] .animal-dialog__close.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-dialog__body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 0 var(--spacer-xl) var(--spacer-lg);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--popover-foreground);
+}
+
+[data-tt-style="animal"] .animal-dialog__footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: var(--spacer) var(--spacer-xl) var(--spacer-xl);
+}
+
+[data-tt-style="animal"] .animal-dialog__footer .animal-btn {
+  margin: 0;
+}
+
+/* --- 动画：is-enter / is-exit（供 Presence 的 animationend 使用） --- */
+[data-tt-style="animal"] .animal-dialog__scrim.is-enter {
+  animation: animal-dialog-scrim-in var(--duration-normal) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-dialog__scrim.is-exit {
+  animation: animal-dialog-scrim-out var(--duration-fast) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-dialog__positioner.is-enter {
+  animation: animal-dialog-in var(--duration-slow) var(--easing-standard) both;
+}
+
+[data-tt-style="animal"] .animal-dialog__positioner.is-exit {
+  animation: animal-dialog-out var(--duration-fast) var(--easing-standard) both;
+}
+
+@keyframes animal-dialog-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes animal-dialog-scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes animal-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes animal-dialog-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-dialog__close {
+    transition: none;
+  }
+
+  [data-tt-style="animal"] .animal-dialog__scrim.is-enter,
+  [data-tt-style="animal"] .animal-dialog__scrim.is-exit,
+  [data-tt-style="animal"] .animal-dialog__positioner.is-enter,
+  [data-tt-style="animal"] .animal-dialog__positioner.is-exit {
+    animation: none;
+  }
+}

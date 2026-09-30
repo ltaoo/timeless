@@ -1,0 +1,703 @@
+/**
+ * @file 数据录入（表单类）区块。
+ *
+ * 每个导出函数 = 左侧菜单的一个条目：函数名里的 Section 标题就是
+ * components/index.js 里 sectionId() 的输入，也是 pages/home/categories.js
+ * 里 anchor 的来源 —— 三处同名，不手写字面量。
+ *
+ * store 一律建在函数内部：分类页被 keep-alive 保活，模块级 store 会在多次
+ * 往返访问之间串状态。
+ */
+import { Section, Item } from "@/components/index.js";
+export function InputSection() {
+  const platform = getPlatform();
+
+  return Section("Input", [
+    View({ class: "w-full" }, [
+      Select({
+        store: new Timeless.vm.SelectCore({
+          defaultValue: "apple",
+          platform,
+          options: [
+            new Timeless.vm.SelectItemCore({
+              value: "apple",
+              label: "苹果",
+            }),
+            new Timeless.vm.SelectItemCore({
+              value: "banana",
+              label: "香蕉",
+            }),
+            new Timeless.vm.SelectItemCore({
+              value: "orange",
+              label: "橙子",
+            }),
+          ],
+        }),
+      }),
+    ]),
+
+    Item("Default", [
+      Flex({ direction: "col", gap: "4px" }, [
+        Input({
+          id: "input_default_1",
+          store: new Timeless.vm.InputCore({
+            defaultValue: "",
+            placeholder: "Type something...",
+            allowClear: false,
+          }),
+        }),
+        Input({
+          id: "input_default_2",
+          store: new Timeless.vm.InputCore({
+            defaultValue: "",
+            placeholder: "Type something...",
+            // allowClear: false,
+          }),
+        }),
+      ]),
+    ]),
+  ]);
+}
+
+export function FileInputSection() {
+  return Section("FileInput", [
+    Item("Default", [
+      FileInput({
+        store: new Timeless.vm.FilePickerCore({
+          accept: "image/*",
+          defaultValue: null,
+          onChange(e) {
+            console.log("File selected:", e);
+          },
+        }),
+      }),
+    ]),
+    Item("Multiple", [
+      FileInput({
+        store: new Timeless.vm.FilePickerCore({
+          accept: "*/*",
+          multiple: true,
+          onChange(e) {
+            console.log("Files selected:", e);
+          },
+        }),
+      }),
+    ]),
+  ]);
+}
+
+export function FileDropZoneSection() {
+  return Section("FileDropZone", [
+    Item("Default", [
+      FileDropZone({
+        store: new Timeless.vm.FilePickerCore({
+          accept: "image/*",
+          onChange(e) {
+            console.log("File dropped:", e);
+          },
+        }),
+      }),
+    ]),
+    Item("Multiple", [
+      FileDropZone({
+        store: new Timeless.vm.FilePickerCore({
+          accept: ".pdf,.doc,.docx",
+          multiple: true,
+          onChange(e) {
+            console.log("Files dropped:", e);
+          },
+        }),
+        tip: "拖拽文件到此处，或点击选择",
+      }),
+    ]),
+    Item("Custom Content", [
+      FileDropZone({
+        store: new Timeless.vm.FilePickerCore({
+          multiple: true,
+          onChange(e) {
+            console.log("Files dropped:", e);
+          },
+        }),
+        tip: "支持所有文件类型",
+        class: "w-full",
+      }),
+    ]),
+  ]);
+}
+
+export function NumberInputSection() {
+  return Section("NumberInput", [
+    Item("Default", [
+      NumberInput({
+        store: new Timeless.vm.NumberInputCore({
+          placeholder: "请输入数字",
+        }),
+      }),
+    ]),
+    Item("With Min/Max", [
+      NumberInput({
+        store: new Timeless.vm.NumberInputCore({
+          placeholder: "0-100",
+          min: 0,
+          max: 100,
+        }),
+      }),
+    ]),
+    Item("With Step", [
+      NumberInput({
+        store: new Timeless.vm.NumberInputCore({
+          placeholder: "步长为5",
+          step: 5,
+          defaultValue: 10,
+        }),
+      }),
+    ]),
+    Item("With Precision", [
+      NumberInput({
+        store: new Timeless.vm.NumberInputCore({
+          placeholder: "保留2位小数",
+          precision: 2,
+          step: 0.01,
+          defaultValue: 3.14,
+        }),
+      }),
+    ]),
+    Item("Without Controls", [
+      NumberInput({
+        store: new Timeless.vm.NumberInputCore({
+          placeholder: "无控制按钮",
+        }),
+        showControls: false,
+      }),
+    ]),
+  ]);
+}
+
+export function TextareaSection() {
+  return Section("Textarea", [
+    Item("Default", [
+      Textarea({
+        store: new Timeless.vm.InputCore({
+          defaultValue: "",
+          placeholder: "Enter your message...",
+          onChange(e) {
+            console.log(e);
+          },
+        }),
+      }),
+    ]),
+  ]);
+}
+
+export function LabelSection() {
+  return Section("Label", [
+    Item("With Input", [
+      View({ class: "space-y-2 w-full" }, [
+        Label({}, ["Email"]),
+        Input({
+          store: new Timeless.vm.InputCore({
+            defaultValue: "",
+            placeholder: "email@example.com",
+          }),
+        }),
+      ]),
+    ]),
+  ]);
+}
+
+export function SelectSection(view$) {
+  const platform = getPlatform();
+
+  const search_select$ = new Timeless.vm.SelectCore({
+    view$,
+    defaultValue: null,
+    placeholder: "输入关键词搜索",
+    options: [],
+    platform,
+    search: new Timeless.vm.InputCore({
+      defaultValue: "",
+      placeholder: "输入水果名...",
+    }),
+  });
+
+  return Section("Select", [
+    Item("Scrollable (100 options)", [
+      Select({
+        store: new Timeless.vm.SelectCore({
+          // defaultValue: null,
+          defaultValue: "option_88",
+          platform,
+          placeholder: "从 100 个选项中选择",
+          options: Array.from({ length: 100 }, (_, i) => {
+            return new Timeless.vm.SelectItemCore({
+              value: `option_${i + 1}`,
+              label: `选项 ${i + 1}`,
+            });
+          }),
+        }),
+      }),
+    ]),
+    Item("Search Remote", [
+      View({ class: "space-y-2 w-[240px]" }, [
+        Select({
+          store: search_select$,
+        }),
+      ]),
+    ]),
+  ]);
+}
+
+export function CascaderSection() {
+  return Section("Cascader", [
+    Item("Default", [
+      Cascader({
+        store: new Timeless.vm.CascaderCore({
+          placeholder: "请选择地区",
+          options: [
+            {
+              value: "zhejiang",
+              label: "浙江",
+              children: [
+                {
+                  value: "hangzhou",
+                  label: "杭州",
+                  children: [
+                    { value: "xihu", label: "西湖区" },
+                    { value: "binjiang", label: "滨江区" },
+                  ],
+                },
+                {
+                  value: "ningbo",
+                  label: "宁波",
+                  children: [
+                    { value: "haishu", label: "海曙区" },
+                    { value: "jiangbei", label: "江北区" },
+                  ],
+                },
+              ],
+            },
+            {
+              value: "jiangsu",
+              label: "江苏",
+              children: [
+                {
+                  value: "nanjing",
+                  label: "南京",
+                  children: [
+                    { value: "xuanwu", label: "玄武区" },
+                    { value: "qinhuai", label: "秦淮区" },
+                  ],
+                },
+                {
+                  value: "suzhou",
+                  label: "苏州",
+                  children: [
+                    { value: "gusu", label: "姑苏区" },
+                    { value: "wuzhong", label: "吴中区" },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      }),
+    ]),
+    Item("With Search", [
+      Cascader({
+        store: new Timeless.vm.CascaderCore({
+          placeholder: "搜索地区",
+          search: true,
+          searchPlaceholder: "输入关键词搜索...",
+          options: [
+            {
+              value: "zhejiang",
+              label: "浙江",
+              children: [
+                {
+                  value: "hangzhou",
+                  label: "杭州",
+                  children: [
+                    { value: "xihu", label: "西湖区" },
+                    { value: "binjiang", label: "滨江区" },
+                  ],
+                },
+                {
+                  value: "ningbo",
+                  label: "宁波",
+                  children: [
+                    { value: "haishu", label: "海曙区" },
+                    { value: "jiangbei", label: "江北区" },
+                  ],
+                },
+              ],
+            },
+            {
+              value: "jiangsu",
+              label: "江苏",
+              children: [
+                {
+                  value: "nanjing",
+                  label: "南京",
+                  children: [
+                    { value: "xuanwu", label: "玄武区" },
+                    { value: "qinhuai", label: "秦淮区" },
+                  ],
+                },
+                {
+                  value: "suzhou",
+                  label: "苏州",
+                  children: [
+                    { value: "gusu", label: "姑苏区" },
+                    { value: "wuzhong", label: "吴中区" },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      }),
+    ]),
+    Item("With Default Value", [
+      Cascader({
+        store: new Timeless.vm.CascaderCore({
+          placeholder: "请选择地区",
+          defaultValue: ["zhejiang", "hangzhou", "xihu"],
+          options: [
+            {
+              value: "zhejiang",
+              label: "浙江",
+              children: [
+                {
+                  value: "hangzhou",
+                  label: "杭州",
+                  children: [
+                    { value: "xihu", label: "西湖区" },
+                    { value: "binjiang", label: "滨江区" },
+                  ],
+                },
+                {
+                  value: "ningbo",
+                  label: "宁波",
+                  children: [
+                    { value: "haishu", label: "海曙区" },
+                    { value: "jiangbei", label: "江北区" },
+                  ],
+                },
+              ],
+            },
+            {
+              value: "jiangsu",
+              label: "江苏",
+              children: [
+                {
+                  value: "nanjing",
+                  label: "南京",
+                  children: [
+                    { value: "xuanwu", label: "玄武区" },
+                    { value: "qinhuai", label: "秦淮区" },
+                  ],
+                },
+                {
+                  value: "suzhou",
+                  label: "苏州",
+                  children: [
+                    { value: "gusu", label: "姑苏区" },
+                    { value: "wuzhong", label: "吴中区" },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      }),
+    ]),
+  ]);
+}
+
+export function DatePickerSection() {
+  return Section("DatePicker", [
+    Item("Default", [
+      DatePicker({
+        store: Timeless.vm.DatePickerCore({ today: new Date() }),
+        placeholder: "选择日期",
+      }),
+    ]),
+  ]);
+}
+
+export function DateRangePickerSection() {
+  return Section("DateRangePicker", [
+    Item("Default", [
+      DateRangePicker({
+        store: Timeless.vm.DateRangePickerCore({ today: new Date() }),
+        placeholder: "选择日期范围",
+      }),
+    ]),
+  ]);
+}
+
+export function TimePickerSection() {
+  return Section("TimePicker", [
+    Item("Default", [
+      TimePicker({
+        store: Timeless.vm.TimePickerCore({}),
+        placeholder: "选择时间",
+      }),
+    ]),
+    Item("With Seconds", [
+      TimePicker({
+        store: Timeless.vm.TimePickerCore({ showSeconds: true }),
+        placeholder: "选择时间（含秒）",
+      }),
+    ]),
+    Item("With Default Value", [
+      TimePicker({
+        store: Timeless.vm.TimePickerCore({
+          defaultValue: { hour: 9, minute: 30 },
+        }),
+        placeholder: "选择时间",
+      }),
+    ]),
+  ]);
+}
+
+export function DateTimePickerSection() {
+  return Section("DateTimePicker", [
+    Item("Default", [
+      DateTimePicker({
+        date: Timeless.vm.DatePickerCore({ today: new Date() }),
+        time: Timeless.vm.TimePickerCore({}),
+        placeholder: "选择日期时间",
+      }),
+    ]),
+    Item("With Seconds", [
+      DateTimePicker({
+        date: Timeless.vm.DatePickerCore({ today: new Date() }),
+        time: Timeless.vm.TimePickerCore({ showSeconds: true }),
+        placeholder: "选择日期时间（含秒）",
+      }),
+    ]),
+  ]);
+}
+
+export function CheckboxSection() {
+  return Section("Checkbox", [
+    Item("Default", [
+      Checkbox({ store: new Timeless.vm.CheckboxCore({}) }),
+    ]),
+    Item("With Label", [
+      View({ class: "flex items-center gap-2" }, [
+        Checkbox({
+          id: "checkbox_with_label1",
+          store: new Timeless.vm.CheckboxCore({ checked: true }),
+        }),
+        Label({ for: "checkbox_with_label1", class: "text-sm" }, [
+          "Accept terms and conditions",
+        ]),
+      ]),
+    ]),
+  ]);
+}
+
+export function CheckboxGroupSection() {
+  return Section("CheckboxGroup", [
+    Item("Vertical (Default)", [
+      CheckboxGroup({
+        store: new Timeless.vm.CheckboxGroupCore({
+          options: [
+            { value: "apple", label: "苹果" },
+            { value: "banana", label: "香蕉" },
+            { value: "orange", label: "橙子" },
+            { value: "grape", label: "葡萄" },
+          ],
+        }),
+      }),
+    ]),
+    Item("Horizontal", [
+      CheckboxGroup({
+        store: new Timeless.vm.CheckboxGroupCore({
+          options: [
+            { value: "react", label: "React" },
+            { value: "vue", label: "Vue" },
+            { value: "angular", label: "Angular" },
+            { value: "svelte", label: "Svelte" },
+          ],
+        }),
+        direction: "horizontal",
+      }),
+    ]),
+  ]);
+}
+
+export function RadioGroupSection() {
+  return Section("RadioGroup", [
+    Item("Vertical (Default)", [
+      RadioGroup({
+        store: new Timeless.vm.RadioGroupCore({
+          options: [
+            { value: "apple", label: "苹果" },
+            { value: "banana", label: "香蕉" },
+            { value: "orange", label: "橙子" },
+            { value: "grape", label: "葡萄" },
+          ],
+        }),
+      }),
+    ]),
+    Item("Horizontal", [
+      RadioGroup({
+        store: new Timeless.vm.RadioGroupCore({
+          options: [
+            { value: "react", label: "React" },
+            { value: "vue", label: "Vue" },
+            { value: "angular", label: "Angular" },
+            { value: "svelte", label: "Svelte" },
+          ],
+        }),
+        direction: "horizontal",
+      }),
+    ]),
+    Item("With Default Value", [
+      RadioGroup({
+        store: new Timeless.vm.RadioGroupCore({
+          value: "vue",
+          options: [
+            { value: "react", label: "React" },
+            { value: "vue", label: "Vue" },
+            { value: "angular", label: "Angular" },
+          ],
+        }),
+      }),
+    ]),
+  ]);
+}
+
+export function SwitchSection() {
+  return Section("Switch", [
+    Item("Default", [
+      Switch({ store: Timeless.vm.SwitchCore({ defaultValue: true }) }),
+    ]),
+  ]);
+}
+
+export function SliderSection() {
+  return Section("Slider", [
+    Item("Default", [Slider({ value: ref(50), min: 0, max: 100 })]),
+  ]);
+}
+
+export function DialogFormSection() {
+  return Section("Dialog Form", [
+    Item("Form in Dialog", [
+      (() => {
+        const platform = getPlatform();
+
+        const nameField$ = new Timeless.vm.SingleFieldCore({
+          label: "Name",
+          name: "name",
+          input: new Timeless.vm.InputCore({
+            defaultValue: "",
+            placeholder: "Enter your name",
+          }),
+          rules: [{ required: true, message: "Name is required" }],
+        });
+
+        const emailField$ = new Timeless.vm.SingleFieldCore({
+          label: "Email",
+          name: "email",
+          input: new Timeless.vm.InputCore({
+            defaultValue: "",
+            placeholder: "Enter your email",
+          }),
+          rules: [
+            { required: true, message: "Email is required" },
+            { type: "email", message: "Invalid email format" },
+          ],
+        });
+
+        const roleField$ = new Timeless.vm.SingleFieldCore({
+          label: "Role",
+          name: "role",
+          input: new Timeless.vm.SelectCore({
+            defaultValue: "admin",
+            placeholder: "Select a role",
+            platform,
+            options: [
+              new Timeless.vm.SelectItemCore({
+                value: "admin",
+                label: "Admin",
+              }),
+              new Timeless.vm.SelectItemCore({
+                value: "editor",
+                label: "Editor",
+              }),
+              new Timeless.vm.SelectItemCore({
+                value: "viewer",
+                label: "Viewer",
+              }),
+            ],
+          }),
+          rules: [{ required: true, message: "Role is required" }],
+        });
+
+        const bioField$ = new Timeless.vm.SingleFieldCore({
+          label: "Bio",
+          name: "bio",
+          input: new Timeless.vm.InputCore({
+            defaultValue: "",
+            placeholder: "Tell us about yourself",
+          }),
+        });
+
+        const form$ = new Timeless.vm.ObjectFieldCore({
+          fields: {
+            name: nameField$,
+            email: emailField$,
+            role: roleField$,
+            bio: bioField$,
+          },
+        });
+
+        const dialog$ = new Timeless.vm.DialogCore({
+          title: "User Form",
+          footer: true,
+          async onOk() {
+            const r = await form$.validate();
+            if (r.error) return;
+            dialog$.okBtn.setLoading(true);
+            setTimeout(() => {
+              dialog$.okBtn.setLoading(false);
+              dialog$.hide();
+              console.log("Form submitted:", r.data);
+            }, 1000);
+          },
+        });
+
+        return View({}, [
+          Button({
+            store: new Timeless.vm.ButtonCore({
+              onClick() {
+                dialog$.show();
+              },
+            }),
+          }, ["Open Form Dialog"]),
+          Dialog({ store: dialog$ }, () => [
+            View({ class: "space-y-4" }, [
+              Field({ store: nameField$ }, [
+                Input({ id: nameField$.name, store: nameField$.input }),
+              ]),
+              Field({ store: emailField$ }, [
+                Input({ id: emailField$.name, store: emailField$.input }),
+              ]),
+              Field({ store: roleField$ }, [
+                Select({ store: roleField$.input }),
+              ]),
+              Field({ store: bioField$ }, [
+                Textarea({ store: bioField$.input }),
+              ]),
+            ]),
+          ]),
+        ]);
+      })(),
+    ]),
+  ]);
+}

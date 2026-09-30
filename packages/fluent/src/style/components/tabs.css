@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Fluent 2 · Tabs
+   --------------------------------------------------------------------------
+   结构：.fl-tabs > .fl-tabs__list > .fl-tabs__tab（.is-active）
+             + .fl-tabs__content > .fl-tabs__panel
+   特征：动画下划线 pill —— 当前项底部 2px --compound-brand 圆角指示条，带
+        transition；hover 用 --surface-1-hover。
+   注意 headless 的 Tab 渲染成原生 <button>，需要抹掉浏览器默认按钮样式。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-tabs__list {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+  border-bottom: var(--strokeWidthThin) solid var(--stroke2);
+}
+
+[data-tt-style="fluent"] .fl-tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightRegular);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground-3);
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+/* 底部 2px 圆角指示条：宽度从 0 过渡到 100%，形成 pill 动画 */
+[data-tt-style="fluent"] .fl-tabs__tab::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 0;
+  height: 2px;
+  transform: translateX(-50%);
+  background-color: var(--compound-brand);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-normal) var(--easing-decelerate);
+}
+
+[data-tt-style="fluent"] .fl-tabs__tab:hover {
+  color: var(--foreground);
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-tabs__tab:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+}
+
+[data-tt-style="fluent"] .fl-tabs__tab.is-active {
+  color: var(--foreground);
+  font-weight: var(--fontWeightSemibold);
+}
+
+[data-tt-style="fluent"] .fl-tabs__tab.is-active::after {
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-tabs__tab[disabled],
+[data-tt-style="fluent"] .fl-tabs__tab.is-disabled {
+  color: var(--foreground-disabled);
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-tabs__content {
+  flex: 1 1 auto;
+  padding: 12px 0;
+}
+
+[data-tt-style="fluent"] .fl-tabs__panel {
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground-2);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-tabs__tab,
+  [data-tt-style="fluent"] .fl-tabs__tab::after {
+    transition: none;
+  }
+}

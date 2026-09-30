@@ -1,0 +1,13 @@
+/* ==========================================================================
+   Bootstrap 5.3 · ContextMenu
+   Bootstrap 没有 context-menu 专属样式层，右键菜单与 DropdownMenu 共用
+   .dropdown-menu 命名空间（条目/分组/分隔线/子菜单的样式见 dropdown-menu.css）。
+   这里只补充右键菜单特有的尺寸与定位细节。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .context-menu-content {
+  min-width: 11rem;
+  /* 右键触发点通常贴着内容，菜单不要被视口裁切 */
+  max-height: min(20rem, 60vh);
+  overflow: hidden auto;
+}

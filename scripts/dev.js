@@ -1,30 +1,22 @@
 const fs = require("fs");
 const path = require("path");
-const http = require("http");
-const url = require("url");
 const { spawn } = require("child_process");
+const {
+  startStaticServer,
+  normalizePrefix,
+} = require("./lib/static-server");
 
 const rootDir = path.resolve(__dirname, "..");
 const packagesDir = path.join(rootDir, "packages");
-// const playgroundDir = path.join(rootDir, "apps/js-heap-size");
-// const playgroundDir = path.join(rootDir, "apps/web-stress-test");
-// const playgroundDir = path.join(rootDir, "apps/web-vanilla");
-const playgroundDir = path.join(rootDir, "apps/web-shadcn");
-// const playgroundDir = path.join(rootDir, "apps/web-primitive");
-// const playgroundDir = path.join(rootDir, "apps/web-weui");
-// const playgroundDir = path.join(rootDir, "apps/database-ui");
-// const playgroundDir = path.join(rootDir, "apps/ssr-demo");
-// const playgroundDir = path.join(rootDir, "apps/download-task-list");
-// const playgroundDir = path.join(rootDir, "apps/reactive-playground");
+
+// Playground app selection. Defaults to web-shadcn; override with
+// `pnpm dev --app=web-bootstrap` (or web-material / web-fluent / web-weui …).
+const appArg = process.argv.slice(2).find((arg) => arg.startsWith("--app="));
+const playgroundApp = appArg ? appArg.split("=").slice(1).join("=") : "web-shadcn";
+const playgroundDir = path.join(rootDir, "apps", playgroundApp);
 const serverRoot = playgroundDir;
 const AssetServerPrefix = "/";
-const NormalizedAssetServerPrefix = (() => {
-  const raw = String(AssetServerPrefix || "").trim();
-  if (!raw || raw === "/") return "/";
-  const withLeadingSlash = raw.startsWith("/") ? raw : `/${raw}`;
-  const withoutTrailingSlashes = withLeadingSlash.replace(/\/+$/, "");
-  return withoutTrailingSlashes || "/";
-})();
+const NormalizedAssetServerPrefix = normalizePrefix(AssetServerPrefix);
 
 // Read version from first build target's package.json
 const version = JSON.parse(
@@ -50,6 +42,26 @@ const artifacts = [
     pkg: "weui",
     src: "packages/weui/dist/timeless.weui.umd.min.js",
     dest: "timeless.weui.umd.min.js",
+  },
+  {
+    pkg: "bootstrap",
+    src: "packages/bootstrap/dist/timeless.bootstrap.umd.min.js",
+    dest: "timeless.bootstrap.umd.min.js",
+  },
+  {
+    pkg: "material",
+    src: "packages/material/dist/timeless.material.umd.min.js",
+    dest: "timeless.material.umd.min.js",
+  },
+  {
+    pkg: "fluent",
+    src: "packages/fluent/dist/timeless.fluent.umd.min.js",
+    dest: "timeless.fluent.umd.min.js",
+  },
+  {
+    pkg: "animal",
+    src: "packages/animal/dist/timeless.animal.umd.min.js",
+    dest: "timeless.animal.umd.min.js",
   },
   {
     pkg: "timeless-dom",
@@ -84,7 +96,15 @@ const buildRelations = {
   // shadcn: ["timeless"],
   // icons: ["timeless"],
   primitive: ["timeless"],
-  timeless: ["shadcn", "weui", "timeless-dom"],
+  timeless: [
+    "shadcn",
+    "weui",
+    "bootstrap",
+    "material",
+    "fluent",
+    "animal",
+    "timeless-dom",
+  ],
 };
 
 let buildQueue = null;
@@ -110,6 +130,19 @@ function copyArtifacts() {
     "timeless.shadcn.css",
     "timeless.weui.umd.min.js",
     "timeless.weui.css",
+    "timeless.bootstrap.umd.min.js",
+    "timeless.bootstrap.css",
+    "timeless.material.umd.min.js",
+    "timeless.material.css",
+    "timeless.fluent.umd.min.js",
+    "timeless.fluent.css",
+    "timeless.animal.umd.min.js",
+    "timeless.animal.css",
+    // animal 的 webfont（两族各一个可变字体）。**必须列在这里**：copyArtifacts
+    // 会删除 dist/timeless/<ver>/ 与 public/timeless/<ver>/ 里所有不在白名单的
+    // 文件，漏了会表现为「本地打开没字体、重新构建又好一阵」。
+    "animal-nunito.woff2",
+    "animal-noto.woff2",
     "timeless.web.umd.min.js",
   ]);
   for (const dir of [distDir, publicDir]) {
@@ -123,15 +156,26 @@ function copyArtifacts() {
     }
   }
 
-  // Also copy CSS files from each package's dist/
-  const cssFiles = [];
-  const cssWhitelist = new Set(["shadcn", "weui"]);
+  // Also copy CSS files (and their sibling webfonts) from each package's dist/
+  const assetFiles = [];
+  const cssWhitelist = new Set([
+    "shadcn",
+    "weui",
+    "bootstrap",
+    "material",
+    "fluent",
+    "animal",
+  ]);
+  // animal 的 CSS 用 url("./animal-*.woff2") 相对引用同层平铺的字体子集。
+  // 只拷 .css 不拷 .woff2，画廊里就会「样式对、字体错（掉到系统字体）」，
+  // 而且因为 keepFiles 白名单拦住删除，现象只在浏览器里看得出来。
+  const cssAssetExts = [".css", ".woff2"];
   for (const pkg of cssWhitelist) {
     const pkgDist = path.join(packagesDir, pkg, "dist");
     if (!fs.existsSync(pkgDist)) continue;
     fs.readdirSync(pkgDist)
-      .filter((f) => f.endsWith(".css"))
-      .forEach((f) => cssFiles.push({ src: path.join(pkgDist, f), dest: f }));
+      .filter((f) => cssAssetExts.some((ext) => f.endsWith(ext)))
+      .forEach((f) => assetFiles.push({ src: path.join(pkgDist, f), dest: f }));
   }
 
   // Copy JS artifacts
@@ -150,16 +194,16 @@ function copyArtifacts() {
     }
   });
 
-  // Copy CSS files
-  cssFiles.forEach(({ src, dest }) => {
+  // Copy CSS + webfont files
+  assetFiles.forEach(({ src, dest }) => {
     try {
       fs.copyFileSync(src, path.join(distDir, dest));
       fs.copyFileSync(src, path.join(publicDir, dest));
       console.log(
-        `Copied CSS ${dest} -> dist/timeless/${version}/ & public/timeless/${version}/`,
+        `Copied asset ${dest} -> dist/timeless/${version}/ & public/timeless/${version}/`,
       );
     } catch (e) {
-      console.error(`Failed to copy CSS ${dest}:`, e.message);
+      console.error(`Failed to copy asset ${dest}:`, e.message);
     }
   });
 }
@@ -347,113 +391,9 @@ function startServer() {
   const portArg = process.argv.find((arg) => arg.startsWith("--port="));
   const port = portArg ? parseInt(portArg.split("=")[1], 10) : 3000;
 
-  const mimeTypes = {
-    ".html": "text/html",
-    ".js": "text/javascript",
-    ".css": "text/css",
-    ".json": "application/json",
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".gif": "image/gif",
-    ".svg": "image/svg+xml",
-    ".ico": "image/x-icon",
-    ".wav": "audio/wav",
-    ".mp4": "video/mp4",
-    ".woff": "application/font-woff",
-    ".ttf": "application/font-ttf",
-    ".eot": "application/vnd.ms-fontobject",
-    ".otf": "application/font-otf",
-    ".wasm": "application/wasm",
-  };
-
-  const server = http.createServer((req, res) => {
-    const parsedUrl = url.parse(req.url);
-
-    const prefix = NormalizedAssetServerPrefix;
-    const requestPath = parsedUrl.pathname || "/";
-
-    if (prefix !== "/") {
-      if (requestPath === "/") {
-        res.writeHead(302, { Location: `${prefix}/` });
-        res.end();
-        return;
-      }
-
-      if (requestPath === prefix) {
-        res.writeHead(302, { Location: `${prefix}/` });
-        res.end();
-        return;
-      }
-    }
-
-    let relativePath = requestPath;
-    if (prefix !== "/") {
-      if (relativePath === prefix) {
-        relativePath = "";
-      } else if (relativePath.startsWith(`${prefix}/`)) {
-        relativePath = relativePath.slice(prefix.length);
-      } else {
-        res.statusCode = 404;
-        res.end(`Not found (Path must start with ${prefix})`);
-        return;
-      }
-    }
-
-    relativePath = relativePath.replace(/^\/+/, "");
-    let pathname = path.normalize(path.join(serverRoot, relativePath));
-    if (!pathname.startsWith(serverRoot)) {
-      res.statusCode = 403;
-      res.end("Forbidden");
-      return;
-    }
-
-    fs.stat(pathname, (err, stats) => {
-      if (err) {
-        // File not found
-        // If it has no extension or is .html, fallback to index.html for SPA routing
-        const ext = path.parse(pathname).ext;
-        if (!ext || ext === ".html") {
-          const indexPath = path.join(serverRoot, "index.html");
-          fs.readFile(indexPath, (readErr, data) => {
-            if (readErr) {
-              res.statusCode = 404;
-              res.end(`File ${parsedUrl.pathname} not found!`);
-            } else {
-              res.setHeader("Content-type", "text/html");
-              res.setHeader("Access-Control-Allow-Origin", "*");
-              res.end(data);
-            }
-          });
-          return;
-        }
-
-        res.statusCode = 404;
-        res.end(`File ${parsedUrl.pathname} not found!`);
-        return;
-      }
-
-      if (stats.isDirectory()) {
-        pathname = path.join(pathname, "index.html");
-      }
-
-      fs.readFile(pathname, (err, data) => {
-        if (err) {
-          res.statusCode = 404;
-          res.end(`File ${parsedUrl.pathname} not found!`);
-        } else {
-          const ext = path.parse(pathname).ext;
-          res.setHeader("Content-type", mimeTypes[ext] || "text/plain");
-          // Add CORS headers for dev convenience
-          res.setHeader("Access-Control-Allow-Origin", "*");
-          res.end(data);
-        }
-      });
-    });
-  });
-
-  server.listen(port, () => {
-    console.log(`\nStatic server listening on port ${port}`);
-    console.log(`Root: ${serverRoot}`);
-    console.log(`Url: http://127.0.0.1:${port}${NormalizedAssetServerPrefix}/`);
+  startStaticServer({
+    root: serverRoot,
+    prefix: NormalizedAssetServerPrefix,
+    port,
   });
 }

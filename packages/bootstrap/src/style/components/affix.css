@@ -1,0 +1,19 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Affix（.affix）
+   固定时由 store 决定 position/top（内联 style），这里只负责过渡与固定态的
+   视觉（阴影、层级由内联 z-index 提供）。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .affix {
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+[data-tt-style="bootstrap"] .affix.is-fixed {
+  box-shadow: var(--shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .affix {
+    transition: none;
+  }
+}

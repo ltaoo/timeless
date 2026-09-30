@@ -1,0 +1,102 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Checkbox（.form-check / .form-check-input / .form-check-label）
+   选中态沿用 Bootstrap 做法：primary 填充 + 内联 SVG 勾，不依赖额外子节点。
+   注：headless 层用 <button> 承载可点击盒子，因此以 [data-checked] / .is-checked
+   取代原生 :checked。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="bootstrap"] .form-check-input {
+  --form-check-bg: var(--background);
+  --form-check-border: var(--input);
+
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size);
+  vertical-align: top;
+  appearance: none;
+  background-color: var(--form-check-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: var(--bs-border-width) solid var(--form-check-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .form-check-input:hover {
+  --form-check-border: color-mix(in srgb, var(--primary) 60%, var(--input));
+}
+
+[data-tt-style="bootstrap"] .form-check-input:focus-visible {
+  --form-check-border: color-mix(in srgb, var(--primary) 60%, var(--input));
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .form-check-input:active {
+  box-shadow: var(--shadow-inset);
+}
+
+[data-tt-style="bootstrap"] .form-check-input[data-checked],
+[data-tt-style="bootstrap"] .form-check-input.is-checked {
+  --form-check-bg: var(--primary);
+  --form-check-border: var(--primary);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+
+[data-tt-style="bootstrap"] .form-check-input[data-checked]:focus-visible,
+[data-tt-style="bootstrap"] .form-check-input.is-checked:focus-visible {
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .form-check-input[disabled],
+[data-tt-style="bootstrap"] .form-check-input[data-disabled],
+[data-tt-style="bootstrap"] .form-check-input.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+[data-tt-style="bootstrap"] .form-check-input.is-invalid,
+[data-tt-style="bootstrap"] .form-check-input[aria-invalid="true"] {
+  --form-check-border: var(--bs-form-invalid-border-color);
+}
+
+[data-tt-style="bootstrap"] .form-check-input.is-invalid:focus-visible {
+  box-shadow: 0 0 0 var(--ring-width) rgba(220, 53, 69, 0.25);
+}
+
+[data-tt-style="bootstrap"] .form-check-label {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="bootstrap"] .form-check-label.is-disabled,
+[data-tt-style="bootstrap"] .form-check-label[data-disabled="true"] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .form-check-input {
+    transition: none;
+  }
+}

@@ -51,3 +51,6 @@ export { KeepAliveSubViews } from "./modules/keep-alive-sub-views";
 export { StandardSubViews } from "./modules/standard-sub-views";
 export * as ErrorBoundaryPrimitive from "./modules/error-boundary";
 export * as FlowPrimitive from "./modules/flow";
+export * as TreePrimitive from "./modules/tree";
+
+export * as GalleryPrimitive from "./modules/gallery";

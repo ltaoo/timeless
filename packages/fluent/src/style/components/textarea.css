@@ -1,0 +1,85 @@
+/* ==========================================================================
+   Fluent 2 · Textarea（.fl-textarea）
+   --------------------------------------------------------------------------
+   复用 input.css 的 .fl-control 盒子（描边 / 圆角 / 聚焦下划线），
+   只把高度改为自适应，并把 clear / loading 定位改到右上角。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-textarea {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-textarea__field {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] textarea.fl-control {
+  height: auto;
+  min-height: calc(var(--control-height) * 2);
+  padding: 6px 10px;
+  line-height: 20px;
+  resize: vertical;
+}
+
+[data-tt-style="fluent"] .fl-textarea__clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--foreground-3);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-textarea__clear:hover {
+  background: var(--surface-4);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-textarea__clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-textarea__loading {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 14px;
+  height: 14px;
+}
+
+[data-tt-style="fluent"] .fl-textarea__loading-inner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--foreground-3);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: fl-spin 1s linear infinite;
+}
+
+[data-tt-style="fluent"] .fl-textarea__count {
+  align-self: flex-end;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-textarea__loading-inner {
+    animation: none;
+  }
+}

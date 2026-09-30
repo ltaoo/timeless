@@ -1,0 +1,41 @@
+/* ==========================================================================
+   Fluent 2 · ScrollArea（.fl-scroll-area）
+   细滚动条：thumb 用 --stroke1，hover 加深到 --stroke-accessible。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-scroll-area {
+  position: relative;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--stroke1) transparent;
+}
+
+[data-tt-style="fluent"] .fl-scroll-area::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-tt-style="fluent"] .fl-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-tt-style="fluent"] .fl-scroll-area::-webkit-scrollbar-thumb {
+  background-color: var(--stroke1);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="fluent"] .fl-scroll-area::-webkit-scrollbar-thumb:hover {
+  background-color: var(--stroke-accessible);
+}
+
+[data-tt-style="fluent"] .fl-scroll-area::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+[data-tt-style="fluent"] .fl-scroll-area.is-disabled,
+[data-tt-style="fluent"] .fl-scroll-area[data-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}

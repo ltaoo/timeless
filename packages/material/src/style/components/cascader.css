@@ -1,0 +1,284 @@
+/* ==========================================================================
+   Material 3 · Cascader
+   --------------------------------------------------------------------------
+   触发器 .m3-cascader 与 select 同规格；浮层 28px 圆角 + --elevation-3。
+   浮层里可选搜索框（.m3-cascader__search / __results / __result / __path），
+   下面是逐级展开的面板 .m3-cascader__panels（每级一列 .m3-cascader__panel）。
+   选项 .m3-cascader__item 是普通 div（非 button），hover / focus 走 state layer，
+   已选 .is-active 用 --secondary-container 底。
+   ========================================================================== */
+
+/* --- 触发器 --- */
+[data-tt-style="material"] .m3-cascader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: left;
+  background-color: transparent;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-cascader:hover {
+  border-color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-cascader:focus-within,
+[data-tt-style="material"] .m3-cascader.is-open {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+[data-tt-style="material"] .m3-cascader.is-disabled,
+[data-tt-style="material"] .m3-cascader[data-disabled] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="material"] .m3-cascader__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="material"] .m3-cascader__value.is-placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-cascader__icon,
+[data-tt-style="material"] .m3-cascader__clear {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-cascader__icon {
+  transition: transform var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-cascader__icon.is-open {
+  transform: rotate(180deg);
+}
+
+[data-tt-style="material"] .m3-cascader__clear {
+  cursor: pointer;
+  transition: color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-cascader__clear:hover {
+  color: var(--foreground);
+}
+
+/* --- 浮层 --- */
+[data-tt-style="material"] .m3-cascader__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 12rem;
+  padding: 0.5rem;
+  color: var(--foreground);
+  background-color: var(--surface-container-high);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-3);
+  outline: none;
+}
+
+/* --- 搜索 --- */
+[data-tt-style="material"] .m3-cascader__search {
+  width: 100%;
+  height: var(--control-height-sm);
+  padding: 0 0.75rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  background-color: transparent;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-cascader__search::placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-cascader__search:focus {
+  border-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-cascader__results {
+  display: flex;
+  flex-direction: column;
+  max-height: 15rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+[data-tt-style="material"] .m3-cascader__result {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-cascader__result:hover {
+  background-color: color-mix(in srgb, var(--foreground) var(--state-hover), transparent);
+}
+
+[data-tt-style="material"] .m3-cascader__path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- 多级面板 --- */
+[data-tt-style="material"] .m3-cascader__panels {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+[data-tt-style="material"] .m3-cascader__panels.is-hidden {
+  display: none;
+}
+
+[data-tt-style="material"] .m3-cascader__panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 9rem;
+  min-height: 12rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 0.25rem;
+  border-radius: var(--radius);
+}
+
+[data-tt-style="material"] .m3-cascader__panel + .m3-cascader__panel {
+  border-left: 1px solid var(--outline-variant);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+[data-tt-style="material"] .m3-cascader__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.375rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  isolation: isolate;
+  transition:
+    color var(--duration-short) var(--easing-standard),
+    background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-cascader__item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--foreground);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-cascader__item:hover::before,
+[data-tt-style="material"] .m3-cascader__item.is-focused::before {
+  opacity: var(--state-hover);
+}
+
+[data-tt-style="material"] .m3-cascader__item.is-active,
+[data-tt-style="material"] .m3-cascader__item.is-active:hover {
+  color: var(--secondary-container-foreground);
+}
+
+[data-tt-style="material"] .m3-cascader__item.is-active::before {
+  background-color: var(--secondary-container);
+  opacity: 1;
+}
+
+[data-tt-style="material"] .m3-cascader__item.is-disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="material"] .m3-cascader__item-text {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="material"] .m3-cascader__item-arrow {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-cascader__item.is-active .m3-cascader__item-arrow {
+  color: var(--secondary-container-foreground);
+}
+
+/* --- 进出场 --- */
+[data-tt-style="material"] .m3-cascader__content.is-enter {
+  animation: m3-cascader-in var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-cascader__content.is-exit {
+  animation: m3-cascader-out var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-cascader-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes m3-cascader-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}

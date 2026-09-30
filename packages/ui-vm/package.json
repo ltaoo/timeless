@@ -1,6 +1,6 @@
 {
   "name": "@timeless/inner-vm",
-  "version": "0.33.1",
+  "version": "0.34.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -151,6 +151,11 @@
       "types": "./dist/formv2/index.d.ts",
       "import": "./dist/formv2/index.esm.js",
       "require": "./dist/formv2/index.js"
+    },
+    "./gallery": {
+      "types": "./dist/gallery/index.d.ts",
+      "import": "./dist/gallery/index.esm.js",
+      "require": "./dist/gallery/index.js"
     },
     "./image": {
       "types": "./dist/image/index.d.ts",

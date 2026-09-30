@@ -1,0 +1,157 @@
+/* ==========================================================================
+   Material 3 · Input / Textarea（.m3-input 家族）
+   两种形态：
+     outlined（默认）—— 1px --outline 描边；聚焦变 2px --primary（用 inset 阴影
+       叠加，避免 1px ↔ 2px 造成的布局抖动）。
+     filled         —— --surface-container-highest 填充 + 底部 1px 指示线；
+       聚焦指示线变 2px --primary。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-input-root {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="material"] .m3-input {
+  display: block;
+  width: 100%;
+  height: var(--control-height);
+  padding: 0 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 400;
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background-clip: padding-box;
+  appearance: none;
+  outline: 0;
+  transition:
+    background-color var(--duration-short) var(--easing-standard),
+    border-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+
+/* --- outlined --- */
+[data-tt-style="material"] .m3-input--outlined {
+  background-color: transparent;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="material"] .m3-input--outlined:hover {
+  border-color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-input--outlined:focus,
+[data-tt-style="material"] .m3-input--outlined:focus-visible,
+[data-tt-style="material"] .m3-input--outlined.is-focused {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+/* --- filled --- */
+[data-tt-style="material"] .m3-input--filled {
+  background-color: var(--surface-container-highest);
+  border: 0;
+  border-bottom: 1px solid var(--on-surface-variant, var(--foreground));
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+[data-tt-style="material"] .m3-input--filled:hover {
+  border-bottom-color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-input--filled:focus,
+[data-tt-style="material"] .m3-input--filled:focus-visible,
+[data-tt-style="material"] .m3-input--filled.is-focused {
+  border-bottom: 2px solid var(--primary);
+}
+
+/* --- 状态 --- */
+[data-tt-style="material"] .m3-input:disabled,
+[data-tt-style="material"] .m3-input[data-disabled="true"],
+[data-tt-style="material"] .m3-input.is-disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="material"] .m3-input.is-invalid,
+[data-tt-style="material"] .m3-input[aria-invalid="true"],
+[data-tt-style="material"] .m3-input[data-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+[data-tt-style="material"] .m3-input.is-invalid:focus,
+[data-tt-style="material"] .m3-input.is-invalid.is-focused,
+[data-tt-style="material"] .m3-input[aria-invalid="true"]:focus {
+  box-shadow: inset 0 0 0 1px var(--destructive);
+}
+
+/* --- affix 让位 --- */
+[data-tt-style="material"] .m3-input.has-affix {
+  padding-right: 2.75rem;
+}
+
+/* --- 清除按钮 --- */
+[data-tt-style="material"] .m3-input__clear {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+[data-tt-style="material"] .m3-input__clear:hover {
+  color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-input__clear:focus-visible {
+  outline: 2px solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+/* --- 加载 --- */
+[data-tt-style="material"] .m3-input__loading {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  width: 1em;
+  height: 1em;
+  margin-top: -0.5em;
+}
+
+[data-tt-style="material"] .m3-input__spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid var(--muted-foreground);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: m3-spin 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-input {
+    transition: none;
+  }
+
+  [data-tt-style="material"] .m3-input__spinner {
+    animation: none;
+  }
+}

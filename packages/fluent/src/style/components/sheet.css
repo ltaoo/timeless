@@ -1,0 +1,250 @@
+/* ==========================================================================
+   Fluent 2 · Sheet（Drawer / Panel，.fl-sheet 系列）
+   --------------------------------------------------------------------------
+   结构：.fl-sheet__scrim + .fl-sheet.[fl-sheet--left|right|top|bottom]
+         > .fl-sheet__header(__title + __close) / .fl-sheet__body
+   特征：--surface-1 底 + 1.5px --stroke1 描边 + --shadow-64。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-sheet__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background-color: var(--surface-inverted);
+  opacity: 0.4;
+}
+
+[data-tt-style="fluent"] .fl-sheet {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  color: var(--foreground);
+  background-color: var(--surface-1);
+  background-clip: padding-box;
+  box-shadow: var(--shadow-64);
+  outline: 0;
+}
+
+[data-tt-style="fluent"] .fl-sheet--left {
+  top: 0;
+  left: 0;
+  width: 25rem;
+  height: 100%;
+  border-right: 1.5px solid var(--stroke1);
+}
+
+[data-tt-style="fluent"] .fl-sheet--right {
+  top: 0;
+  right: 0;
+  width: 25rem;
+  height: 100%;
+  border-left: 1.5px solid var(--stroke1);
+}
+
+[data-tt-style="fluent"] .fl-sheet--top {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 20rem;
+  border-bottom: 1.5px solid var(--stroke1);
+}
+
+[data-tt-style="fluent"] .fl-sheet--bottom {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 20rem;
+  border-top: 1.5px solid var(--stroke1);
+}
+
+[data-tt-style="fluent"] .fl-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+[data-tt-style="fluent"] .fl-sheet__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: var(--fontWeightSemibold);
+  line-height: var(--lineHeightBase400);
+  color: var(--foreground);
+}
+
+/* 无标题时关闭按钮也要贴右 */
+[data-tt-style="fluent"] .fl-sheet__header .fl-sheet__close {
+  margin-left: auto;
+}
+
+[data-tt-style="fluent"] .fl-sheet__close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--foreground-3);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-sheet__close:hover {
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-sheet__close:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-sheet__body {
+  flex-grow: 1;
+  padding: 1.25rem;
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground-2);
+  overflow-y: auto;
+}
+
+/* --- 动画 --- */
+[data-tt-style="fluent"] .fl-sheet__scrim.is-enter {
+  animation: fl-sheet-scrim-in var(--duration-normal) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet__scrim.is-exit {
+  animation: fl-sheet-scrim-out var(--duration-fast) var(--easing-accelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet--left.is-enter {
+  animation: fl-sheet-in-left var(--duration-slow) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet--left.is-exit {
+  animation: fl-sheet-out-left var(--duration-normal) var(--easing-accelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet--right.is-enter {
+  animation: fl-sheet-in-right var(--duration-slow) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet--right.is-exit {
+  animation: fl-sheet-out-right var(--duration-normal) var(--easing-accelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet--top.is-enter {
+  animation: fl-sheet-in-top var(--duration-slow) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet--top.is-exit {
+  animation: fl-sheet-out-top var(--duration-normal) var(--easing-accelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet--bottom.is-enter {
+  animation: fl-sheet-in-bottom var(--duration-slow) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-sheet--bottom.is-exit {
+  animation: fl-sheet-out-bottom var(--duration-normal) var(--easing-accelerate) both;
+}
+
+@keyframes fl-sheet-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.4;
+  }
+}
+
+@keyframes fl-sheet-scrim-out {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fl-sheet-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fl-sheet-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes fl-sheet-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fl-sheet-out-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fl-sheet-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fl-sheet-out-top {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes fl-sheet-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fl-sheet-out-bottom {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-sheet__close {
+    transition: none;
+  }
+}

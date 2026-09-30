@@ -40,7 +40,7 @@ export default function OverlayView() {
   }
 
   // Mock HttpClient
-  const client$ = new Timeless.HttpClientCore({});
+  const client$ = new Timeless.kit.HttpClientCore({});
   // @ts-ignore
   client$.fetch = async (options) => {
     console.log("index.debug.js - client$.fetch", options);
@@ -59,8 +59,8 @@ export default function OverlayView() {
       },
     };
   };
-  const list$ = new Timeless.ListCore(
-    new Timeless.RequestCore(fetchDownloadList, {
+  const list$ = new Timeless.kit.ListCore(
+    new Timeless.kit.RequestCore(fetchDownloadList, {
       process(tmp) {
         console.log("index.debug.js - client$.fetch", tmp);
         if (tmp.error) {

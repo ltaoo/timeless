@@ -1,0 +1,190 @@
+/* ==========================================================================
+   animal-island-ui — Timeless 语义别名（第二层）
+   --------------------------------------------------------------------------
+   组件代码只读这一层（--background / --primary / --border / --radius …），
+   不直接读 --animal-*。别名与 bootstrap / material / fluent 同名，这样四套库的
+   模块代码形状一致，只有 CSS 值不同。
+
+   库专有别名（--surface-* / --pill-radius / --shadow-btn/input/switch /
+   --focus-yellow / --palette-* / --tile-radius）在 THEME_DESIGN.md 登记。
+
+   ⚠️ 本库**没有暗色块**：上游设计系统未提供暗色主题，这里只声明一套亮色值。
+   ========================================================================== */
+
+[data-tt-style="animal"] {
+  /* --- 表面与文字 --- */
+  --background: var(--animal-bg-color);
+  --foreground: var(--animal-text-color);
+  --card: var(--animal-bg-content);
+  --card-foreground: var(--animal-text-body);
+  --popover: var(--animal-bg-content);
+  --popover-foreground: var(--animal-text-body);
+
+  /* --- 主 / 次操作 --- */
+  /* 主色 = 薄荷青（品牌色）。注意上游的 `.btn-primary` **不是**青色实心按钮，
+     而是奶油纸底 + 3D 立体阴影，所以按钮专有的那一组 alias 见下方 --btn-*。 */
+  --primary: var(--animal-primary-color);
+  --primary-foreground: #ffffff;
+  --primary-hover: var(--animal-primary-color-hover);
+  --primary-pressed: var(--animal-primary-color-active);
+
+  --secondary: var(--animal-bg-color-secondary);
+  --secondary-foreground: var(--animal-text-color);
+
+  /* --- 弱化 / 强调 --- */
+  --muted: var(--animal-bg-color-secondary);
+  --muted-foreground: var(--animal-text-color-secondary);
+  --accent: var(--animal-primary-color-bg);
+  --accent-foreground: var(--animal-primary-color);
+
+  /* --- 语义状态色 --- */
+  --destructive: var(--animal-error-color);
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: color-mix(
+    in srgb,
+    var(--animal-error-color) 12%,
+    var(--animal-bg-color)
+  );
+  --destructive-subtle-foreground: var(--animal-error-color-active);
+
+  --success: var(--animal-success-color);
+  --success-foreground: #ffffff;
+  --success-subtle: color-mix(
+    in srgb,
+    var(--animal-success-color) 14%,
+    var(--animal-bg-color)
+  );
+  --success-subtle-foreground: var(--animal-success-color-active);
+
+  --warning: var(--animal-warning-color);
+  --warning-foreground: var(--animal-text-body);
+  --warning-subtle: color-mix(
+    in srgb,
+    var(--animal-warning-color) 16%,
+    var(--animal-bg-color)
+  );
+  --warning-subtle-foreground: var(--animal-warning-color-active);
+
+  /* 上游没有 info 色；薄荷青是语义上最近的「信息 / 品牌」色。 */
+  --info: var(--animal-primary-color);
+  --info-foreground: #ffffff;
+  --info-subtle: var(--animal-primary-color-bg);
+  --info-subtle-foreground: var(--animal-primary-color-active);
+
+  /* --- 边框 / 输入 / 焦点 --- */
+  --border: var(--animal-border-color);
+  --border-subtle: var(--animal-border-color-light);
+  --border-strong: var(--animal-border-color-hover);
+  --input: var(--animal-border-input);
+  --ring: var(--animal-focus-yellow);
+  --ring-width: 2px;
+  /* 上游硬指标：焦点永远是黄色，永不用蓝色。 */
+  --focus-yellow: var(--animal-focus-yellow);
+  --focus-yellow-d: var(--animal-focus-yellow-d);
+
+  /* --- 立体阴影三色（本风格最有辨识度的部分） --- */
+  --shadow-btn: var(--animal-shadow-btn);
+  --shadow-input: var(--animal-shadow-input);
+  --shadow-switch: var(--animal-shadow-switch);
+
+  /* --- 描边宽度 --- */
+  --border-width: var(--animal-border-width);
+  --border-width-input: 2.5px;
+  --border-width-input-lg: 3px;
+
+  /* --- 专有表面层级 --- */
+  --surface-1: var(--animal-bg-color);
+  --surface-2: var(--animal-bg-color-secondary);
+  --surface-3: var(--animal-bg-content);
+  --surface-disabled: var(--animal-bg-color-disabled);
+  --foreground-disabled: var(--animal-text-color-disabled);
+  --disabled-opacity: 0.5;
+
+  /* --- 按钮专有（上游 .btn-primary 的奶油纸底 + 堆叠阴影） --- */
+  --btn-primary-bg: var(--animal-bg-color);
+  --btn-primary-fg: var(--animal-text-color);
+  --btn-primary-shadow: var(--animal-shadow-btn);
+
+  /* --- 输入专有 --- */
+  --input-bg: var(--animal-bg-input);
+  --input-bg-disabled: var(--animal-bg-input-disabled);
+  --input-bg-rest: rgb(250, 248, 243);
+
+  /* --- 卡片专有 --- */
+  --tile-radius: 20px;
+  --tile-dashed-bg: rgb(250, 248, 242);
+  --tile-dashed-border: #e8dcc8;
+  --tile-hover-border: #d4c4a8;
+  --pattern-dot: rgba(196, 184, 158, 0.15);
+  --pattern-dot-soft: rgba(196, 184, 158, 0.1);
+
+  /* --- 岛屿色板（上游 Card `color` prop 的取值） --- */
+  --palette-default: var(--animal-bg-content);
+  --palette-default-fg: var(--animal-text-body);
+  --palette-app-pink: #f8a6b2;
+  --palette-app-pink-fg: #ffffff;
+  --palette-purple: #b77dee;
+  --palette-purple-fg: #ffffff;
+  --palette-app-blue: #889df0;
+  --palette-app-blue-fg: #ffffff;
+  --palette-app-yellow: #f7cd67;
+  --palette-app-yellow-fg: #725d42;
+  --palette-app-orange: #e59266;
+  --palette-app-orange-fg: #ffffff;
+  --palette-app-teal: #82d5bb;
+  --palette-app-teal-fg: #ffffff;
+  --palette-app-green: #8ac68a;
+  --palette-app-green-fg: #ffffff;
+  --palette-app-red: #fc736d;
+  --palette-app-red-fg: #ffffff;
+  --palette-lime-green: #d1da49;
+  --palette-lime-green-fg: #3d5a1a;
+  --palette-yellow-green: #ecdf52;
+  --palette-yellow-green-fg: #725d42;
+  --palette-brown: #9a835a;
+  --palette-brown-fg: #ffffff;
+  --palette-warm-peach-pink: #e18c6f;
+  --palette-warm-peach-pink-fg: #ffffff;
+
+  /* --- 圆角 --- */
+  --radius: var(--animal-border-radius-base);
+  --radius-sm: var(--animal-border-radius-sm);
+  --radius-md: var(--animal-border-radius-base);
+  --radius-lg: var(--animal-border-radius-lg);
+  --radius-pill: var(--animal-radius-pill);
+  --pill-radius: var(--animal-radius-pill);
+
+  /* --- 阴影（柔和高度阴影，不是按钮的堆叠阴影） --- */
+  --shadow-sm: var(--animal-shadow-sm);
+  --shadow: var(--animal-shadow-base);
+  --shadow-lg: var(--animal-shadow-lg);
+
+  /* --- 动效 --- */
+  --easing-standard: var(--animal-motion-ease);
+  --duration-fast: var(--animal-motion-duration-fast);
+  --duration-normal: var(--animal-motion-duration-base);
+  --duration-slow: var(--animal-motion-duration-slow);
+
+  /* --- 字体 --- */
+  --font-sans: var(--animal-font-family);
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --font-size: var(--animal-font-size-base);
+  --font-size-sm: var(--animal-font-size-sm);
+  --font-size-lg: var(--animal-font-size-lg);
+  --line-height: var(--animal-line-height-base);
+
+  /* --- 间距与控件尺寸 --- */
+  --spacer: var(--animal-spacing-md);
+  --spacer-xs: var(--animal-spacing-xs);
+  --spacer-sm: var(--animal-spacing-sm);
+  --spacer-lg: var(--animal-spacing-lg);
+  --spacer-xl: var(--animal-spacing-xl);
+  --control-height: var(--animal-height-base);
+  --control-height-sm: var(--animal-height-sm);
+  --control-height-lg: var(--animal-height-lg);
+
+  /* 树行高独立于控件高度：ListViewV2 的 itemHeight 是渲染器入参，
+     必须与 CSS 里的行高数值一致，所以给它一个专有 token。 */
+  --tree-row-height: 40px;
+}

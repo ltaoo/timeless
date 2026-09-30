@@ -1,0 +1,282 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Tree（.tree）
+   --------------------------------------------------------------------------
+   结构由 ui.TreePrimitive 产出：
+     .tree                                  ← 指针会话挂在这里（稳定祖先）
+       .tree__scroll                        ← 虚拟列表视口（ListViewV2）
+         div[data-list-view-item]           ← 宿主绝对定位 + translateY
+           .tree__row                       ← 本文件负责行内一切
+             .tree__guide[data-tree-guide]  ← 层级引导竖线（祖先缩进槽）
+             .tree__line[data-tree-line]    ← before / after 落点指示线
+             .tree__caret > .tree__caret-icon
+             .tree__icon  .tree__title  .tree__meta
+             .tree__checkbox > .tree__checkbox-box > .tree__checkbox-indicator
+       .tree__empty  .tree__hint
+     .tree__ghost                           ← Portal 到 body 的跟手浮层
+
+   行高单独取 32px，不吃 --control-height-sm（1.9375rem = 31px 是表单控件口径，
+   和树行的视觉密度对不上）。落成 --tree-row-height 是因为 ListViewV2 的
+   itemHeight 是渲染器入参 —— 两边必须一致，否则首屏估算高度会跳。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .tree {
+  --tree-row-height: 32px;
+  --tree-row-radius: var(--radius-sm);
+
+  display: block;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+}
+
+[data-tt-style="bootstrap"] .tree__scroll {
+  position: relative;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.25rem;
+  background: var(--background);
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* --- 行 ------------------------------------------------------------------ */
+
+[data-tt-style="bootstrap"] .tree__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-sizing: border-box;
+  height: var(--tree-row-height);
+  padding-right: 0.5rem;
+  border-radius: var(--tree-row-radius);
+  color: var(--foreground);
+  user-select: none;
+  cursor: default;
+  transition: background-color 0.12s ease-in-out, color 0.12s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .tree__row:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+[data-tt-style="bootstrap"] .tree__row.is-selected {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* 被拖起的原位影子：跟手浮层已经代表它了。 */
+[data-tt-style="bootstrap"] .tree__row.is-lifted {
+  opacity: 0.4;
+}
+
+/* 落点是「移入本目录」。 */
+[data-tt-style="bootstrap"] .tree__row.is-drop-into {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+[data-tt-style="bootstrap"] .tree__row.is-disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+/* --- 层级引导线 ----------------------------------------------------------- */
+
+/* 祖先缩进槽里的一段竖线：位置（left）由 primitive 按层算好。
+   pointer-events: none 是必须的 —— 否则会拦住折叠箭头与拖拽命中测试。 */
+[data-tt-style="bootstrap"] .tree__guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+  pointer-events: none;
+}
+
+/* --- 落点指示线 ----------------------------------------------------------- */
+
+[data-tt-style="bootstrap"] .tree__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--primary);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: left center;
+}
+
+[data-tt-style="bootstrap"] .tree__line[data-tree-line="before"] {
+  top: -1px;
+}
+
+[data-tt-style="bootstrap"] .tree__line[data-tree-line="after"] {
+  bottom: -1px;
+}
+
+[data-tt-style="bootstrap"] .tree__line.is-before,
+[data-tt-style="bootstrap"] .tree__line.is-after {
+  opacity: 1;
+  animation: bs-tree-line-in 0.12s ease-out;
+}
+
+/* --- 折叠箭头 / 图标 / 文本 ------------------------------------------------ */
+
+[data-tt-style="bootstrap"] .tree__caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+[data-tt-style="bootstrap"] .tree__caret:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+[data-tt-style="bootstrap"] .tree__caret-icon {
+  display: block;
+  pointer-events: none;
+}
+
+[data-tt-style="bootstrap"] .tree__icon {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .tree__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--font-size-sm);
+}
+
+[data-tt-style="bootstrap"] .tree__meta {
+  flex: none;
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- 勾选框列 ------------------------------------------------------------- */
+
+[data-tt-style="bootstrap"] .tree__checkbox {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+[data-tt-style="bootstrap"] .tree__checkbox-box {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: var(--bs-border-width) solid var(--input);
+  border-radius: var(--radius-sm);
+  background: var(--background);
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .tree__checkbox:hover .tree__checkbox-box {
+  border-color: color-mix(in srgb, var(--primary) 60%, var(--input));
+}
+
+[data-tt-style="bootstrap"] .tree__checkbox-indicator {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+[data-tt-style="bootstrap"] .tree__checkbox.is-checked .tree__checkbox-box,
+[data-tt-style="bootstrap"] .tree__checkbox.is-indeterminate .tree__checkbox-box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .tree__checkbox.is-checked .tree__checkbox-indicator {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+
+/* 半选：短横线。用类名而不是 indeterminate 属性（响应式 attribute 写不上）。 */
+[data-tt-style="bootstrap"] .tree__checkbox.is-indeterminate .tree__checkbox-indicator {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+}
+
+/* --- 空态 / 提示 ---------------------------------------------------------- */
+
+[data-tt-style="bootstrap"] .tree__empty {
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .tree__hint {
+  padding: 0.25rem 0.5rem 0;
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}
+
+/* --- 跟手浮层 ------------------------------------------------------------- */
+
+[data-tt-style="bootstrap"] .tree__ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 16rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--font-size-sm);
+  pointer-events: none;
+  will-change: transform;
+}
+
+[data-tt-style="bootstrap"] .tree__ghost-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* keyframes 不能作用域化（@keyframes 没有选择器），只能按库前缀命名，
+   否则同页加载多套库时后加载的会覆盖先加载的。 */
+@keyframes bs-tree-line-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .tree__line.is-before,
+  [data-tt-style="bootstrap"] .tree__line.is-after {
+    animation: none;
+  }
+}

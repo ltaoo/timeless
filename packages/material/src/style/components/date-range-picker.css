@@ -1,0 +1,317 @@
+/* ==========================================================================
+   Material 3 · DateRangePicker
+   --------------------------------------------------------------------------
+   触发器 .m3-daterangepicker 与 date-picker 同规格；浮层里左右两个月份面板。
+   区间底带用 cell 的 ::before 画连续的 --primary-container，端点（start/end）
+   是 --primary 实心圆，因此底带只从圆心铺到一侧，圆角落在区间外沿。
+   日期数字放在 .m3-daterangepicker__cell-label 里，hover 走 state layer。
+   ========================================================================== */
+
+/* --- 触发器 --- */
+[data-tt-style="material"] .m3-daterangepicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: left;
+  background-color: transparent;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-daterangepicker:hover {
+  border-color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-daterangepicker:focus-within,
+[data-tt-style="material"] .m3-daterangepicker.is-open {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+[data-tt-style="material"] .m3-daterangepicker.is-disabled,
+[data-tt-style="material"] .m3-daterangepicker[data-disabled] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__value.is-placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  transition: color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__icon.is-open {
+  color: var(--primary);
+}
+
+/* --- 浮层 --- */
+[data-tt-style="material"] .m3-daterangepicker__content {
+  padding: 1rem;
+  color: var(--foreground);
+  background-color: var(--surface-container-high);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-3);
+  outline: none;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__panels {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 17.5rem;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.25rem 0.5rem;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__title {
+  flex: 1 1 auto;
+  font-size: var(--label-size);
+  font-weight: 600;
+  color: var(--foreground);
+  text-align: center;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__nav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__nav:hover {
+  background-color: color-mix(in srgb, var(--foreground) var(--state-hover), transparent);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__nav:active {
+  background-color: color-mix(in srgb, var(--foreground) var(--state-pressed), transparent);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__nav.is-disabled,
+[data-tt-style="material"] .m3-daterangepicker__nav:disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+/* --- 星期表头 --- */
+[data-tt-style="material"] .m3-daterangepicker__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__weekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+/* --- 日期网格 --- */
+[data-tt-style="material"] .m3-daterangepicker__grid {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 2.5rem;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  isolation: isolate;
+}
+
+/* 区间底带（--primary-container），端点只铺半个格子 */
+[data-tt-style="material"] .m3-daterangepicker__cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--primary-container);
+  opacity: 0;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell:first-child::before {
+  border-start-start-radius: var(--radius-pill);
+  border-end-start-radius: var(--radius-pill);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell:last-child::before {
+  border-start-end-radius: var(--radius-pill);
+  border-end-end-radius: var(--radius-pill);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell.is-in-range::before {
+  opacity: 1;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell.is-range-start::before {
+  inset: 0 0 0 50%;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell.is-range-end::before {
+  inset: 0 50% 0 0;
+}
+
+/* 单日选中（起止同一天）不画底带，只留实心圆 */
+[data-tt-style="material"] .m3-daterangepicker__cell.is-range-single::before {
+  opacity: 0;
+}
+
+/* --- 日期数字 --- */
+[data-tt-style="material"] .m3-daterangepicker__cell-label {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-pill);
+  color: inherit;
+  transition:
+    color var(--duration-short) var(--easing-standard),
+    background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell-label::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--foreground);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell:hover .m3-daterangepicker__cell-label::before {
+  opacity: var(--state-hover);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell:active .m3-daterangepicker__cell-label::before {
+  opacity: var(--state-pressed);
+}
+
+/* 端点：实心 --primary 圆 */
+[data-tt-style="material"] .m3-daterangepicker__cell.is-range-start .m3-daterangepicker__cell-label,
+[data-tt-style="material"] .m3-daterangepicker__cell.is-range-end .m3-daterangepicker__cell-label {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell.is-range-start .m3-daterangepicker__cell-label::before,
+[data-tt-style="material"] .m3-daterangepicker__cell.is-range-end .m3-daterangepicker__cell-label::before {
+  opacity: 0;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell.is-outside {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell.is-today:not(.is-range-start):not(.is-range-end) .m3-daterangepicker__cell-label {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+[data-tt-style="material"] .m3-daterangepicker__cell:disabled,
+[data-tt-style="material"] .m3-daterangepicker__cell.is-disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+/* --- 进出场 --- */
+[data-tt-style="material"] .m3-daterangepicker__content.is-enter {
+  animation: m3-daterangepicker-in var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-daterangepicker__content.is-exit {
+  animation: m3-daterangepicker-out var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-daterangepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes m3-daterangepicker-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}

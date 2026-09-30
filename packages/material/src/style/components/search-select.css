@@ -1,0 +1,24 @@
+/* ==========================================================================
+   Material 3 · SearchSelect
+   触发器沿用 .m3-select 的盒子指标（outlined 1px --outline + 4px 圆角），
+   内部换成 .m3-select__search 输入框；输入框 / 图标 / 下拉面板的样式由
+   select.css 提供（同名类），这里只补充搜索场景特有的差异。
+   面板宽度通过 inline style 的 min-width 与触发器对齐（见 modules/search-select.ts）。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-select--search {
+  cursor: text;
+}
+
+[data-tt-style="material"] .m3-select--search .m3-select__search {
+  min-width: 0;
+}
+
+[data-tt-style="material"] .m3-select--search.is-disabled {
+  cursor: not-allowed;
+}
+
+[data-tt-style="material"] .m3-select--search.is-disabled .m3-select__search {
+  cursor: not-allowed;
+  pointer-events: none;
+}

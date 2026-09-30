@@ -1,747 +1,230 @@
-import { Section, Item } from "@/components/index.js";
-import { TaskDeleteConfirmDialog } from "./task-delete-confirm-dialog.js";
-import { ClearTasksConfirmDialog } from "./clear-tasks-confirm-dialog.js";
-import { createDownloadPanelModel } from "./download-panel-model.js";
-import { DownloadPanelPopover } from "./download-panel.js";
+/**
+ * 首页布局：左侧两级菜单（antd 分类 → 组件）+ 右侧分类页。
+ *
+ * 分类页由 keep-alive 保活（KeepAliveSubViews），所以每个分类各自保留滚动位置；
+ * 点某个组件条目若不在当前分类，会先 push 该分类的路由，再由 anchor.js 滚动到区块并高亮。
+ *
+ * ⚠️ SplitView 的根节点是 height:100%、SplitPane 是 overflow:clip，所以外层必须有
+ * 确定高度（.weui-shell），否则整个布局塌成 0。
+ *
+ * 本 app 无 Tailwind / gallery-*，菜单样式全部内联，只用已声明的 --weui-* token，
+ * 因此随 `body[data-weui-theme]` 自动换肤（见 packages/weui/THEME_DESIGN.md §3.4）。
+ */
+import { CATEGORIES, homeRoute } from "./categories.js";
+import { request } from "./anchor.js";
+import { app } from "@/store/index.js";
 
-export default function HomePageView() {
-  const view$ = new Timeless.vm.ScrollViewCore({});
-  const platform = getPlatform();
-  const download_panel$ = createDownloadPanelModel();
+/**
+ * 暗色开关同时驱动两套挂载点：provider-web 的 `app.setTheme` 只写 `<html>`，
+ * 而 weui 的调色板挂在 `<body data-weui-theme>`。
+ */
+function toggleDark() {
+  const cur = app.getTheme ? app.getTheme() : "light";
+  const next = cur === "dark" ? "light" : "dark";
+  app.setTheme(next);
+  document.body.setAttribute("data-weui-theme", next);
+}
 
-  return ScrollView(
+/**
+ * @param {ViewComponentProps} props
+ */
+export default function HomePageView(props) {
+  /** 当前高亮的组件条目（anchor id 或 route name）；isSelected 只认路由名，条目要自己管。 */
+  const activeKey_ = ref(null);
+
+  const sidemenu$ = Timeless.kit.RouteMenusModel({
+    view: props.view,
+    history: props.history,
+    menus: CATEGORIES.map((group) => ({
+      title: group.title,
+      name: homeRoute(group.key),
+    })),
+  });
+
+  const groupClass = (menu) =>
+    computed(sidemenu$.cur, () =>
+      sidemenu$.isSelected(sidemenu$.cur.value, menu)
+        ? groupStyle(true)
+        : groupStyle(false),
+    );
+
+  const itemClass = (item) =>
+    computed(
+      item.route ? sidemenu$.cur : activeKey_,
+      () =>
+        (item.route
+          ? sidemenu$.isActive(item.route)
+          : activeKey_.value === item.anchor)
+          ? itemStyle(true)
+          : itemStyle(false),
+    );
+
+  function selectItem(group, item) {
+    if (item.route) {
+      activeKey_.as(item.route);
+      props.history.push(item.route);
+      return;
+    }
+    activeKey_.as(item.anchor);
+    const menu = { title: group.title, name: homeRoute(group.key) };
+    if (!sidemenu$.isSelected(sidemenu$.cur.value, menu)) {
+      props.history.push(menu.name);
+    }
+    request(item.anchor);
+  }
+
+  return View(
     {
-      store: view$,
       style: {
-        padding: "16px",
         height: "100vh",
-        "overflow-y": "auto",
+        overflow: "hidden",
         background: "var(--weui-BG-1)",
+        color: "var(--weui-FG-0)",
       },
     },
     [
-      // Page Title
-      View(
-        {
-          style: {
-            "font-size": "20px",
-            "font-weight": "700",
-            color: "var(--weui-FG-0)",
-            "margin-bottom": "24px",
-            "padding-left": "4px",
-          },
-        },
-        ["WeUI Components"],
-      ),
-
-      // ===== Button =====
-      Section("Button", [
-        Item("Variants", [
-          Button({ store: new Timeless.vm.ButtonCore({}) }, ["Primary"]),
-          Button(
-            { store: new Timeless.vm.ButtonCore({ variant: "default" }) },
-            ["Default"],
-          ),
-          Button({ store: new Timeless.vm.ButtonCore({ variant: "warn" }) }, [
-            "Warn",
-          ]),
-          Button({ store: new Timeless.vm.ButtonCore({ variant: "text" }) }, [
-            "Text",
-          ]),
-        ]),
-        Item("Sizes", [
-          Button({ store: new Timeless.vm.ButtonCore({ size: "sm" }) }, [
-            "Small",
-          ]),
-          Button({ store: new Timeless.vm.ButtonCore({ size: "md" }) }, [
-            "Medium",
-          ]),
-          Button({ store: new Timeless.vm.ButtonCore({ size: "lg" }) }, [
-            "Large",
-          ]),
-        ]),
-        Item("Loading", [
-          (() => {
-            const store = new Timeless.vm.ButtonCore({
-              onClick: () => {
-                store.setLoading(true);
-                setTimeout(() => store.setLoading(false), 2000);
-              },
-            });
-            return Button({ store }, ["Click to Load"]);
-          })(),
-          (() => {
-            const store = new Timeless.vm.ButtonCore({
-              variant: "default",
-              onClick: () => {
-                store.setLoading(true);
-                setTimeout(() => store.setLoading(false), 2000);
-              },
-            });
-            return Button({ store }, ["Click to Load"]);
-          })(),
-        ]),
-        Item("Disabled", [
-          Button({ store: new Timeless.vm.ButtonCore({ disabled: true }) }, [
-            "Disabled",
-          ]),
-          Button(
-            {
-              store: new Timeless.vm.ButtonCore({
-                variant: "warn",
-                disabled: true,
-              }),
-            },
-            ["Disabled"],
-          ),
-        ]),
-      ]),
-
-      // ===== Badge =====
-      Section("Badge", [
-        Item("Variants", [
-          Badge({}, ["Default"]),
-          Badge({ variant: "secondary" }, ["Secondary"]),
-          Badge({ variant: "outline" }, ["Outline"]),
-          Badge({ variant: "destructive" }, ["Destructive"]),
-        ]),
-      ]),
-
-      // ===== Input =====
-      Section("Input", [
-        Item("Default", [
-          View({ style: { width: "100%" } }, [
-            Input({
-              store: new Timeless.vm.InputCore({
-                defaultValue: "",
-                placeholder: "请输入内容...",
-                allowClear: false,
-              }),
-            }),
-          ]),
-        ]),
-        Item("With Clear", [
-          View({ style: { width: "100%" } }, [
-            Input({
-              store: new Timeless.vm.InputCore({
-                defaultValue: "可清除的输入",
-                placeholder: "请输入...",
-                allowClear: true,
-              }),
-            }),
-          ]),
-        ]),
-        Item("Disabled", [
-          View({ style: { width: "100%" } }, [
-            Input({
-              store: new Timeless.vm.InputCore({
-                defaultValue: "不可编辑",
-                disabled: true,
-              }),
-            }),
-          ]),
-        ]),
-      ]),
-
-      // ===== Textarea =====
-      Section("Textarea", [
-        Item("Default", [
-          View({ style: { width: "100%" } }, [
-            Textarea({
-              store: new Timeless.vm.InputCore({
-                defaultValue: "",
-                placeholder: "请输入多行文本...",
-              }),
-            }),
-          ]),
-        ]),
-      ]),
-
-      // ===== Checkbox =====
-      Section("Checkbox", [
-        Item("Default", [
-          (() => {
-            const store1 = new Timeless.vm.CheckboxCore({});
-            const store2 = new Timeless.vm.CheckboxCore({});
-            const store3 = new Timeless.vm.CheckboxCore({
-              disabled: true,
-            });
-            return Fragment({}, [
-              View(
+      SplitView({
+        panels: [
+          {
+            size: 220,
+            minSize: 180,
+            content() {
+              return View(
                 {
                   style: {
                     display: "flex",
-                    "align-items": "center",
-                    gap: "8px",
-                  },
-                },
-                [Checkbox({ store: store1 }), "已选中"],
-              ),
-              View(
-                {
-                  style: {
-                    display: "flex",
-                    "align-items": "center",
-                    gap: "8px",
-                  },
-                },
-                [Checkbox({ store: store2 }), "未选中"],
-              ),
-              View(
-                {
-                  style: {
-                    display: "flex",
-                    "align-items": "center",
-                    gap: "8px",
-                  },
-                },
-                [Checkbox({ store: store3 }), "禁用"],
-              ),
-            ]);
-          })(),
-        ]),
-      ]),
-
-      // ===== Switch =====
-      Section("Switch", [
-        Item("Default", [
-          (() => {
-            const store1 = Timeless.vm.SwitchCore({
-              defaultValue: true,
-            });
-            const store2 = Timeless.vm.SwitchCore({
-              defaultValue: false,
-            });
-            const store3 = Timeless.vm.SwitchCore({
-              disabled: true,
-              defaultValue: false,
-            });
-            return Fragment({}, [
-              Switch({ store: store1 }),
-              Switch({ store: store2 }),
-              Switch({ store: store3 }),
-            ]);
-          })(),
-        ]),
-      ]),
-
-      // ===== Toggle =====
-      Section("Toggle", [
-        Item("Default", [
-          (() => {
-            const store1 = Timeless.vm.SwitchCore({
-              defaultValue: false,
-            });
-            const store2 = Timeless.vm.SwitchCore({
-              defaultValue: true,
-            });
-            return Fragment({}, [
-              Toggle({ store: store1 }),
-              Toggle({ store: store2 }),
-            ]);
-          })(),
-        ]),
-      ]),
-
-      // ===== Select =====
-      Section("Select", [
-        Item("Basic", [
-          View({ style: { width: "100%", height: "40px" } }, [
-            Select({
-              store: new Timeless.vm.SelectCore({
-                defaultValue: null,
-                placeholder: "请选择水果",
-                platform,
-                options: [
-                  new Timeless.vm.SelectItemCore({
-                    value: "apple",
-                    label: "苹果",
-                  }),
-                  new Timeless.vm.SelectItemCore({
-                    value: "banana",
-                    label: "香蕉",
-                  }),
-                  new Timeless.vm.SelectItemCore({
-                    value: "orange",
-                    label: "橙子",
-                  }),
-                  new Timeless.vm.SelectItemCore({
-                    value: "grape",
-                    label: "葡萄",
-                  }),
-                ],
-              }),
-            }),
-          ]),
-        ]),
-        Item("With Default Value", [
-          View({ style: { width: "100%", height: "40px" } }, [
-            Select({
-              store: new Timeless.vm.SelectCore({
-                defaultValue: "beijing",
-                placeholder: "选择城市",
-                platform,
-                options: [
-                  new Timeless.vm.SelectItemCore({
-                    value: "beijing",
-                    label: "北京",
-                  }),
-                  new Timeless.vm.SelectItemCore({
-                    value: "shanghai",
-                    label: "上海",
-                  }),
-                  new Timeless.vm.SelectItemCore({
-                    value: "guangzhou",
-                    label: "广州",
-                  }),
-                  new Timeless.vm.SelectItemCore({
-                    value: "shenzhen",
-                    label: "深圳",
-                  }),
-                ],
-              }),
-            }),
-          ]),
-        ]),
-      ]),
-
-      // ===== Tabs =====
-      Section("Tabs", [
-        Item("Default", [
-          View({ style: { width: "100%" } }, [
-            Tabs({
-              store: new Timeless.vm.TabHeaderCore({
-                key: "tab-demo",
-                options: [
-                  { value: "tab1", label: "选项一" },
-                  { value: "tab2", label: "选项二" },
-                  { value: "tab3", label: "选项三" },
-                ],
-              }),
-              items: [
-                {
-                  value: "tab1",
-                  label: "选项一",
-                  content: [
-                    View(
-                      {
-                        style: {
-                          padding: "16px",
-                          color: "var(--weui-FG-1)",
-                        },
-                      },
-                      ["这是选项一的内容"],
-                    ),
-                  ],
-                },
-                {
-                  value: "tab2",
-                  label: "选项二",
-                  content: [
-                    View(
-                      {
-                        style: {
-                          padding: "16px",
-                          color: "var(--weui-FG-1)",
-                        },
-                      },
-                      ["这是选项二的内容"],
-                    ),
-                  ],
-                },
-                {
-                  value: "tab3",
-                  label: "选项三",
-                  content: [
-                    View(
-                      {
-                        style: {
-                          padding: "16px",
-                          color: "var(--weui-FG-1)",
-                        },
-                      },
-                      ["这是选项三的内容"],
-                    ),
-                  ],
-                },
-              ],
-            }),
-          ]),
-        ]),
-      ]),
-
-      // ===== Separator =====
-      Section("Separator", [
-        Item("Horizontal", [
-          View({ style: { width: "100%" } }, [Separator({})]),
-        ]),
-        Item("Vertical", [
-          View(
-            {
-              style: {
-                display: "flex",
-                "align-items": "center",
-                height: "24px",
-                gap: "12px",
-              },
-            },
-            ["左边", Separator({ orientation: "vertical" }), "右边"],
-          ),
-        ]),
-      ]),
-
-      // ===== Skeleton =====
-      Section("Skeleton", [
-        Item("Default", [
-          View({ style: { width: "100%" } }, [
-            View(
-              {
-                style: {
-                  display: "flex",
-                  gap: "12px",
-                  "align-items": "center",
-                },
-              },
-              [
-                Skeleton({
-                  style: {
-                    width: "40px",
-                    height: "40px",
-                    "border-radius": "50%",
-                  },
-                }),
-                View({ style: { flex: "1" } }, [
-                  Skeleton({
-                    style: {
-                      width: "60%",
-                      height: "14px",
-                      "margin-bottom": "8px",
-                    },
-                  }),
-                  Skeleton({ style: { width: "80%", height: "14px" } }),
-                ]),
-              ],
-            ),
-          ]),
-        ]),
-      ]),
-
-      // ===== Card =====
-      Section("Card", [
-        Item("Default", [
-          View({ style: { width: "100%" } }, [
-            Card({}, [
-              CardHeader({}, [
-                CardTitle({}, ["卡片标题"]),
-                CardDescription({}, ["这是卡片的描述信息"]),
-              ]),
-              CardContent({}, [
-                View(
-                  {
-                    style: {
-                      "font-size": "var(--weui-FONT-SIZE-SM)",
-                      color: "var(--weui-FG-1)",
-                    },
-                  },
-                  ["这里是卡片的主要内容区域，可以放置任何信息。"],
-                ),
-              ]),
-              CardFooter({}, [
-                Button({ store: new Timeless.vm.ButtonCore({ size: "sm" }) }, [
-                  "操作按钮",
-                ]),
-              ]),
-            ]),
-          ]),
-        ]),
-      ]),
-
-      // ===== Dialog =====
-      Section("Dialog", [
-        Item("Default", [
-          (() => {
-            const dialog$ = new Timeless.vm.DialogCore({
-              title: "确认操作",
-              footer: true,
-              onOk() {
-                dialog$.hide();
-              },
-              onCancel() {
-                dialog$.hide();
-              },
-            });
-            const btn$ = new Timeless.vm.ButtonCore({
-              variant: "primary",
-              onClick() {
-                dialog$.show();
-              },
-            });
-            const checkbox$ = new Timeless.vm.CheckboxCore({});
-            return Fragment({}, [
-              Button({ store: btn$ }, ["打开弹窗"]),
-              Dialog({ store: dialog$ }, [
-                "确定要执行此操作吗？此操作不可撤销。",
-                View(
-                  {
-                    style: {
-                      display: "flex",
-                      "align-items": "center",
-                      gap: "8px",
-                      "margin-top": "12px",
-                    },
-                  },
-                  [Checkbox({ store: checkbox$ }), "记住我的选择"],
-                ),
-              ]),
-            ]);
-          })(),
-        ]),
-        Item("Without Footer", [
-          (() => {
-            const dialog$ = new Timeless.vm.DialogCore({
-              title: "提示",
-              footer: false,
-            });
-            const btn$ = new Timeless.vm.ButtonCore({
-              variant: "default",
-              onClick() {
-                dialog$.show();
-                setTimeout(() => dialog$.hide(), 2000);
-              },
-            });
-            return Fragment({}, [
-              Button({ store: btn$ }, ["自动关闭弹窗"]),
-              Dialog({ store: dialog$ }, ["2秒后自动关闭..."]),
-            ]);
-          })(),
-        ]),
-        Item("With Custom Checkbox", [
-          (() => {
-            const dialog$ = new Timeless.vm.DialogCore({
-              title: "删除下载记录",
-              footer: true,
-              onOk() {
-                dialog$.hide();
-              },
-              onCancel() {
-                dialog$.hide();
-              },
-            });
-            const btn$ = new Timeless.vm.ButtonCore({
-              variant: "warn",
-              onClick() {
-                dialog$.show();
-              },
-            });
-            const store = {
-              state: {
-                delete_delete_files: ref(false),
-              },
-              ui: {
-                deleteConfirmDialog$: dialog$,
-              },
-              methods: {
-                handleClickCheckboxConfirmDeleteFiles() {
-                  const current = store.state.delete_delete_files.value;
-                  store.state.delete_delete_files.as(!current);
-                },
-              },
-            };
-            return Fragment({}, [
-              Button({ store: btn$ }, ["删除记录（含 Checkbox）"]),
-              TaskDeleteConfirmDialog({ store }),
-            ]);
-          })(),
-        ]),
-        Item("Shared State Between Dialogs", [
-          (() => {
-            // Shared ref — same pattern as production code
-            // where ClearTasksConfirmDialog and TaskDeleteConfirmDialog
-            // share delete_delete_files_ ref
-            const sharedDeleteFiles$ = ref(false);
-
-            const deleteDialog$ = new Timeless.vm.DialogCore({
-              title: "删除下载记录",
-              footer: true,
-              onOk() {
-                alert("同时删除已下载的文件: " + sharedDeleteFiles$.value);
-                deleteDialog$.hide();
-              },
-              onCancel() { deleteDialog$.hide(); },
-            });
-            const clearDialog$ = new Timeless.vm.DialogCore({
-              title: "清空下载记录",
-              footer: true,
-              onOk() {
-                alert("同时删除已下载的文件: " + sharedDeleteFiles$.value);
-                clearDialog$.hide();
-              },
-              onCancel() { clearDialog$.hide(); },
-            });
-
-            const sharedStore = {
-              state: {
-                delete_delete_files: sharedDeleteFiles$,
-              },
-              ui: {
-                deleteConfirmDialog$: deleteDialog$,
-                clearConfirmDialog$: clearDialog$,
-              },
-              methods: {
-                handleClickCheckboxConfirmDeleteFiles() {
-                  const current = sharedDeleteFiles$.value;
-                  console.log("[sharedStore] toggle delete_delete_files:", current, "→", !current);
-                  sharedDeleteFiles$.as(!current);
-                  console.log("[sharedStore] after toggle, ref value =", sharedDeleteFiles$.value);
-                },
-              },
-            };
-
-            const openDeleteBtn$ = new Timeless.vm.ButtonCore({
-              variant: "warn",
-              onClick() { deleteDialog$.show(); },
-            });
-            const openClearBtn$ = new Timeless.vm.ButtonCore({
-              variant: "default",
-              onClick() { clearDialog$.show(); },
-            });
-
-            return Fragment({}, [
-              View(
-                {
-                  style: {
-                    display: "flex",
-                    gap: "8px",
-                    "flex-wrap": "wrap",
+                    "flex-direction": "column",
+                    height: "100%",
+                    background: "var(--weui-BG-2)",
+                    "border-right": "1px solid var(--weui-SEPARATOR-1)",
                   },
                 },
                 [
-                  Button({ store: openDeleteBtn$ }, ["删除记录弹窗"]),
-                  Button({ store: openClearBtn$ }, ["清空记录弹窗"]),
+                  View(
+                    {
+                      style: {
+                        padding: "16px 16px 8px",
+                        "font-size": "15px",
+                        "font-weight": "700",
+                        color: "var(--weui-FG-0)",
+                      },
+                    },
+                    ["组件"],
+                  ),
+                  View(
+                    {
+                      style: {
+                        flex: "1",
+                        "overflow-y": "auto",
+                        padding: "0 8px 8px",
+                      },
+                    },
+                    [
+                      For({
+                        each: CATEGORIES,
+                        render(group) {
+                          const menu = {
+                            title: group.title,
+                            name: homeRoute(group.key),
+                          };
+                          // 没有 items 的是独立路由页，与各分类同级（只有标题行可点）。
+                          if (!group.items) {
+                            return View(
+                              {
+                                style: groupClass(menu),
+                                onClick() {
+                                  props.history.push(menu.name);
+                                },
+                              },
+                              [group.title],
+                            );
+                          }
+                          return View({}, [
+                            View(
+                              {
+                                style: groupClass(menu),
+                                onClick() {
+                                  props.history.push(menu.name);
+                                },
+                              },
+                              [group.title],
+                            ),
+                            For({
+                              each: group.items,
+                              render(item) {
+                                return View(
+                                  {
+                                    style: itemClass(item),
+                                    onClick() {
+                                      selectItem(group, item);
+                                    },
+                                  },
+                                  [item.label],
+                                );
+                              },
+                            }),
+                          ]);
+                        },
+                      }),
+                    ],
+                  ),
+                  View(
+                    {
+                      style: {
+                        padding: "8px 12px 12px",
+                        "border-top": "1px solid var(--weui-SEPARATOR-1)",
+                      },
+                    },
+                    [
+                      Button(
+                        {
+                          store: new Timeless.vm.ButtonCore({
+                            variant: "default",
+                            size: "sm",
+                            onClick: toggleDark,
+                          }),
+                        },
+                        ["切换暗色"],
+                      ),
+                    ],
+                  ),
                 ],
-              ),
-              TaskDeleteConfirmDialog({ store: sharedStore }),
-              ClearTasksConfirmDialog({ store: sharedStore }),
-            ]);
-          })(),
-        ]),
-      ]),
-
-      // ===== Sheet =====
-      Section("Sheet", [
-        Item("Sides", [
-          (() => {
-            const sheet_right$ = new Timeless.vm.DialogCore({
-              title: "右侧面板",
-              onOk() {
-                sheet_right$.hide();
-              },
-            });
-            const sheet_bottom$ = new Timeless.vm.DialogCore({
-              title: "底部面板",
-              onOk() {
-                sheet_bottom$.hide();
-              },
-            });
-            const btn_right$ = new Timeless.vm.ButtonCore({
-              variant: "default",
-              onClick() {
-                sheet_right$.show();
-              },
-            });
-            const btn_bottom$ = new Timeless.vm.ButtonCore({
-              variant: "default",
-              onClick() {
-                sheet_bottom$.show();
-              },
-            });
-            return Fragment({}, [
-              Button({ store: btn_right$ }, ["右侧抽屉"]),
-              Button({ store: btn_bottom$ }, ["底部抽屉"]),
-              Sheet({ store: sheet_right$, side: "right" }, [
-                View(
-                  {
-                    style: {
-                      "padding-top": "48px",
-                      color: "var(--weui-FG-1)",
-                    },
-                  },
-                  ["这是右侧抽屉的内容"],
-                ),
-              ]),
-              Sheet({ store: sheet_bottom$, side: "bottom" }, [
-                View(
-                  {
-                    style: {
-                      "min-height": "200px",
-                      "padding-top": "24px",
-                      color: "var(--weui-FG-1)",
-                    },
-                  },
-                  ["这是底部抽屉的内容"],
-                ),
-              ]),
-            ]);
-          })(),
-        ]),
-      ]),
-
-      // ===== Toast =====
-      Section("Toast", [
-        Item("Default", [
-          (() => {
-            const toast$ = new Timeless.vm.ToastCore({});
-            const btn$ = new Timeless.vm.ButtonCore({
-              variant: "default",
-              onClick() {
-                // toast$.show({ text: "操作成功" });
-                // setTimeout(() => toast$.hide(), 2000);
-              },
-            });
-            return Fragment({}, [
-              Button({ store: btn$ }, ["显示 Toast"]),
-              // Toast({ store: toast$ }, [
-              //   View(
-              //     {
-              //       style: {
-              //         display: "flex",
-              //         "flex-direction": "column",
-              //         "align-items": "center",
-              //         gap: "8px",
-              //         padding: "24px",
-              //         "min-width": "120px",
-              //         background: "var(--weui-BG-4)",
-              //         "border-radius": "12px",
-              //         color: "#fff",
-              //       },
-              //     },
-              //     [
-              //       Icon({ name: "check", size: 36 }),
-              //       View(
-              //         {
-              //           style: {
-              //             "font-size": "var(--weui-FONT-SIZE-SM)",
-              //             "text-align": "center",
-              //           },
-              //         },
-              //         ["操作成功"],
-              //       ),
-              //     ],
-              //   ),
-              // ]),
-            ]);
-          })(),
-        ]),
-      ]),
-
-      // ===== Popover + DropdownMenu =====
-      Section("Popover + DropdownMenu", [
-        Item("Download panel", [
-          View({ class: "download-panel-demo" }, [
-            DownloadPanelPopover({ store: download_panel$ }),
-          ]),
-        ]),
-      ]),
+              );
+            },
+          },
+          {
+            size: "auto",
+            content() {
+              return Timeless.ui.KeepAliveSubViews(props);
+            },
+          },
+        ],
+      }),
     ],
   );
+}
+
+/** 分类分组标题（「设计规范」这种无子项的独立路由页也用同一套样式）。 */
+function groupStyle(active) {
+  return {
+    padding: "10px 8px 4px",
+    "font-size": "12px",
+    "font-weight": "600",
+    "letter-spacing": "0.04em",
+    color: active ? "var(--weui-BRAND)" : "var(--weui-FG-2)",
+    cursor: "pointer",
+  };
+}
+
+/** 组内组件条目。 */
+function itemStyle(active) {
+  return {
+    padding: "6px 8px",
+    "font-size": "13px",
+    "line-height": "1.5",
+    "border-radius": "6px",
+    cursor: "pointer",
+    color: active ? "#fff" : "var(--weui-FG-1)",
+    background: active ? "var(--weui-BRAND)" : "transparent",
+  };
 }

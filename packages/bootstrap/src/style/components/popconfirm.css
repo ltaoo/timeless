@@ -1,0 +1,110 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Popconfirm
+   Bootstrap 没有 popconfirm，沿用 .popover 的视觉语言，命名空间换成 .popconfirm：
+   结构：.popconfirm > .popconfirm-arrow / .popconfirm-header / .popconfirm-body
+         / .popconfirm-actions
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .popconfirm {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 20rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  outline: 0;
+}
+
+[data-tt-style="bootstrap"] .popconfirm-header {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size);
+  font-weight: 500;
+  color: var(--popover-foreground);
+  background-color: var(--accent);
+  border-bottom: var(--bs-border-width) solid var(--border);
+  border-top-left-radius: calc(var(--radius-lg) - 1px);
+  border-top-right-radius: calc(var(--radius-lg) - 1px);
+}
+
+[data-tt-style="bootstrap"] .popconfirm-body {
+  padding: 1rem;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .popconfirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0 1rem 1rem;
+}
+
+[data-tt-style="bootstrap"] .popconfirm-actions .btn {
+  margin: 0;
+}
+
+/* --- 箭头（与 popover 同构） --- */
+[data-tt-style="bootstrap"] .popconfirm-arrow {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--popover);
+  border: var(--bs-border-width) solid var(--border);
+  pointer-events: none;
+}
+
+[data-tt-style="bootstrap"] .popconfirm-arrow.is-top {
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="bootstrap"] .popconfirm-arrow.is-bottom {
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+
+[data-tt-style="bootstrap"] .popconfirm-arrow.is-left {
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+
+[data-tt-style="bootstrap"] .popconfirm-arrow.is-right {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+/* --- 动画 --- */
+[data-tt-style="bootstrap"] .popconfirm.is-enter {
+  animation: bs-popconfirm-in 0.15s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .popconfirm.is-exit {
+  animation: bs-popconfirm-out 0.1s ease-in both;
+}
+
+@keyframes bs-popconfirm-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bs-popconfirm-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}

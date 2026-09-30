@@ -1,0 +1,65 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Badge（.badge）
+   药丸形小标签；变体在 .badge 之外追加 .badge-* 修饰类。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  padding: 0.35em 0.65em;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--primary-foreground);
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  background-color: var(--primary);
+  border: var(--bs-border-width) solid transparent;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="bootstrap"] .badge-secondary {
+  color: var(--secondary-foreground);
+  background-color: var(--secondary);
+}
+
+[data-tt-style="bootstrap"] .badge-outline {
+  color: var(--foreground);
+  background-color: transparent;
+  border-color: var(--border);
+}
+
+[data-tt-style="bootstrap"] .badge-destructive {
+  color: var(--destructive-foreground);
+  background-color: var(--destructive);
+}
+
+[data-tt-style="bootstrap"] .badge-success {
+  color: var(--success-foreground);
+  background-color: var(--success);
+}
+
+[data-tt-style="bootstrap"] .badge-warning {
+  color: var(--warning-foreground);
+  background-color: var(--warning);
+}
+
+[data-tt-style="bootstrap"] .badge-info {
+  color: var(--info-foreground);
+  background-color: var(--info);
+}
+
+[data-tt-style="bootstrap"] .badge.is-disabled,
+[data-tt-style="bootstrap"] .badge[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .badge {
+    transition: none;
+  }
+}

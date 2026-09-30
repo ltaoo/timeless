@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Material 3 · Skeleton
+   --surface-container-high 占位块 + 呼吸动画（m3-pulse）。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-skeleton {
+  display: block;
+  background-color: var(--surface-container-high);
+  border-radius: var(--radius-sm);
+  animation: m3-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+[data-tt-style="material"] .m3-skeleton.is-rounded,
+[data-tt-style="material"] .m3-skeleton.m3-skeleton--circle {
+  border-radius: var(--radius-pill);
+}
+
+@keyframes m3-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-skeleton {
+    animation: none;
+  }
+}

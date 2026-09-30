@@ -1,0 +1,61 @@
+/* ==========================================================================
+   Animal Island · AspectRatio（.animal-ratio）
+   --------------------------------------------------------------------------
+   运行期内联 padding-bottom 驱动比例（module 层算 (1/ratio)*100%），
+   外层相对定位 + 内层绝对铺满。
+
+   上游视觉：
+     · 圆角用 --radius-lg（24px）的奶油纸容器感，并允许裁切内部媒体
+     · card 层级来自描边而非海拔，所以默认不套海拔阴影；
+       容器若需要与页面分隔，可自行加 --border 描边（这里给 media 图片
+       一个 2px 描边选项由使用方通过类名叠加）
+     · 纯布局原语，没有 hover / active 反馈；保留 disabled 与 reduced-motion
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-ratio {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+[data-tt-style="animal"] .animal-ratio__inner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 填满容器的媒体元素统一裁切 */
+[data-tt-style="animal"] .animal-ratio__inner > img,
+[data-tt-style="animal"] .animal-ratio__inner > video,
+[data-tt-style="animal"] .animal-ratio__inner > iframe,
+[data-tt-style="animal"] .animal-ratio__inner > canvas,
+[data-tt-style="animal"] .animal-ratio__inner > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 内层若含可聚焦元素，沿用统一的黄色焦点环 */
+[data-tt-style="animal"] .animal-ratio__inner a:focus-visible,
+[data-tt-style="animal"] .animal-ratio__inner button:focus-visible,
+[data-tt-style="animal"] .animal-ratio__inner [tabindex]:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-ratio.is-disabled,
+[data-tt-style="animal"] .animal-ratio[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-ratio,
+  [data-tt-style="animal"] .animal-ratio__inner {
+    transition: none;
+  }
+}

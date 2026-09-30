@@ -6,7 +6,19 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../..");
 
-const PACKAGES: { name: string; entry: string; namespace?: string }[] = [
+const PACKAGES: {
+  name: string;
+  entry: string;
+  namespace?: string;
+  /**
+   * Emit bare global declarations (and eslint globals) for this package's
+   * exports. Set to `false` for scoped style libraries that re-export the same
+   * component names as shadcn/weui — otherwise the later package would silently
+   * override the existing globals. The `Timeless.<namespace>` entry is still
+   * emitted.
+   */
+  globals?: boolean;
+}[] = [
   {
     name: "@timeless/inner-reactive",
     entry: "packages/reactive/src/index.ts",
@@ -46,6 +58,45 @@ const PACKAGES: { name: string; entry: string; namespace?: string }[] = [
     entry: "packages/ui-vm/src/index.ts",
     namespace: "vm",
   },
+  {
+    name: "@timeless/weui",
+    entry: "packages/weui/src/index.ts",
+    namespace: "weui",
+    globals: false,
+  },
+  {
+    name: "@timeless/bootstrap",
+    entry: "packages/bootstrap/src/index.ts",
+    namespace: "bootstrap",
+    globals: false,
+  },
+  {
+    name: "@timeless/material",
+    entry: "packages/material/src/index.ts",
+    namespace: "material",
+    globals: false,
+  },
+  {
+    name: "@timeless/fluent",
+    entry: "packages/fluent/src/index.ts",
+    namespace: "fluent",
+    globals: false,
+  },
+  {
+    name: "@timeless/animal",
+    entry: "packages/animal/src/index.ts",
+    namespace: "animal",
+    globals: false,
+  },
+  {
+    // findrss-reader 自有组件库，从那个仓迁进来（源码在 packages/findrssui）。
+    // 导出名与 shadcn/weui 大量重名（Button / Input / Card …），所以和四个作用域样式库
+    // 一样只做 `Timeless.findrssui` 命名空间，不认领裸全局名。
+    name: "@timeless/findrssui",
+    entry: "packages/findrssui/src/index.ts",
+    namespace: "findrssui",
+    globals: false,
+  },
 ];
 
 const BASE_COMPILER_OPTIONS: ts.CompilerOptions = {
@@ -65,6 +116,12 @@ const BASE_COMPILER_OPTIONS: ts.CompilerOptions = {
     "@timeless/inner-vm": ["packages/ui-vm/src/index.ts"],
     "@timeless/lite": ["packages/lite/src/index.ts"],
     "@timeless/shadcn": ["packages/shadcn/src/index.ts"],
+    "@timeless/weui": ["packages/weui/src/index.ts"],
+    "@timeless/bootstrap": ["packages/bootstrap/src/index.ts"],
+    "@timeless/material": ["packages/material/src/index.ts"],
+    "@timeless/fluent": ["packages/fluent/src/index.ts"],
+    "@timeless/animal": ["packages/animal/src/index.ts"],
+    "@timeless/findrssui": ["packages/findrssui/src/index.ts"],
     "@timeless/timeless": ["packages/timeless/src/index.ts"],
     "@timeless/ui-primitive": ["packages/ui-primitive/src/index.ts"],
   },
@@ -85,6 +142,10 @@ function collectExports(): Map<string, string> {
   const checker = program.getTypeChecker();
 
   for (const pkg of PACKAGES) {
+    // Scoped style libraries share component names with shadcn/weui. Never let
+    // them claim the bare globals — they are reachable via `Timeless.<ns>`.
+    if (pkg.globals === false) continue;
+
     const filePath = path.resolve(ROOT, pkg.entry);
     const sourceFile = program.getSourceFile(filePath);
     if (!sourceFile) {
@@ -251,6 +312,7 @@ function generate() {
     '  Timeless: "readonly",',
   ];
   for (const pkg of PACKAGES) {
+    if (pkg.globals === false) continue;
     const names = byPackage.get(pkg.name);
     if (!names || names.length === 0) continue;
     for (const name of names) {

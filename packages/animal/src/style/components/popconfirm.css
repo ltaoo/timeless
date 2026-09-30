@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Animal Island · Popconfirm
+   --------------------------------------------------------------------------
+   沿用 popover 的浮层语言，命名空间换成 .animal-popconfirm：
+   结构：.animal-popconfirm > __arrow / __header / __body / __actions
+
+   上游视觉：
+     · 底 --popover（奶油纸），标题 --foreground，正文 --popover-foreground
+     · 2px（--border-width）--border 描边，圆角 --radius-lg（24px）
+     · 柔和海拔阴影 --shadow-lg
+     · 底部两个按钮复用 .animal-btn（secondary/primary 已由 button.css 定义），
+       这里只负责排布与间距
+     · 进场 zoom-in，关键帧 animal-popconfirm-in
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-popconfirm {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 20rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  outline: 0;
+}
+
+[data-tt-style="animal"] .animal-popconfirm__header {
+  padding: var(--spacer) var(--spacer-lg) var(--spacer-xs);
+  font-size: var(--font-size);
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+[data-tt-style="animal"] .animal-popconfirm__body {
+  padding: 0 var(--spacer-lg) var(--spacer);
+  line-height: var(--line-height);
+  color: var(--popover-foreground);
+}
+
+[data-tt-style="animal"] .animal-popconfirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0 var(--spacer-lg) var(--spacer-lg);
+}
+
+[data-tt-style="animal"] .animal-popconfirm__actions .animal-btn {
+  margin: 0;
+}
+
+/* 浮层内可聚焦控件沿用统一的黄色焦点环 */
+[data-tt-style="animal"] .animal-popconfirm a:focus-visible,
+[data-tt-style="animal"] .animal-popconfirm button:focus-visible,
+[data-tt-style="animal"] .animal-popconfirm [tabindex]:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- 箭头（与 popover 同构） --- */
+[data-tt-style="animal"] .animal-popconfirm__arrow {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--popover);
+  border: var(--border-width) solid var(--border);
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-popconfirm__arrow.is-top {
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="animal"] .animal-popconfirm__arrow.is-bottom {
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+
+[data-tt-style="animal"] .animal-popconfirm__arrow.is-left {
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+
+[data-tt-style="animal"] .animal-popconfirm__arrow.is-right {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+/* --- 动画 --- */
+[data-tt-style="animal"] .animal-popconfirm.is-enter {
+  animation: animal-popconfirm-in var(--duration-normal) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-popconfirm.is-exit {
+  animation: animal-popconfirm-out var(--duration-fast) var(--easing-standard)
+    both;
+}
+
+@keyframes animal-popconfirm-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes animal-popconfirm-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-popconfirm.is-enter,
+  [data-tt-style="animal"] .animal-popconfirm.is-exit {
+    animation: none;
+  }
+}

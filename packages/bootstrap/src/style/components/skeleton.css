@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Skeleton（.skeleton）
+   上游用 .placeholder + .placeholder-glow，这里统一成一个呼吸动画的占位块。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .skeleton {
+  display: block;
+  background-color: var(--muted);
+  border-radius: var(--radius);
+  animation: bs-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+[data-tt-style="bootstrap"] .skeleton.is-rounded,
+[data-tt-style="bootstrap"] .skeleton.skeleton-circle {
+  border-radius: var(--radius-pill);
+}
+
+@keyframes bs-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .skeleton {
+    animation: none;
+  }
+}

@@ -1,0 +1,80 @@
+/* ==========================================================================
+   Fluent 2 · Alert（.fl-alert）
+   --------------------------------------------------------------------------
+   对应 Fluent 的 MessageBar：1px 描边 + 浅色底 + 4px 圆角。
+   变体使用各自的 subtle 底色与 status border token。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-alert {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground);
+  background-color: var(--surface-2);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius);
+}
+
+[data-tt-style="fluent"] .fl-alert--primary,
+[data-tt-style="fluent"] .fl-alert--info {
+  color: var(--info-subtle-foreground);
+  background-color: var(--info-subtle);
+  border-color: var(--colorBrandStroke2);
+}
+
+[data-tt-style="fluent"] .fl-alert--secondary {
+  color: var(--foreground);
+  background-color: var(--surface-3);
+  border-color: var(--stroke2);
+}
+
+[data-tt-style="fluent"] .fl-alert--success {
+  color: var(--success-subtle-foreground);
+  background-color: var(--success-subtle);
+  border-color: var(--colorStatusSuccessBorder1);
+}
+
+[data-tt-style="fluent"] .fl-alert--warning {
+  color: var(--warning-subtle-foreground);
+  background-color: var(--warning-subtle);
+  border-color: var(--colorStatusWarningBorder1);
+}
+
+[data-tt-style="fluent"] .fl-alert--danger {
+  color: var(--destructive-subtle-foreground);
+  background-color: var(--destructive-subtle);
+  border-color: var(--colorStatusDangerBorder1);
+}
+
+[data-tt-style="fluent"] .fl-alert__title {
+  margin: 0;
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightSemibold);
+}
+
+[data-tt-style="fluent"] .fl-alert__description {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+[data-tt-style="fluent"] .fl-alert__icon {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  display: inline-flex;
+}
+
+[data-tt-style="fluent"] .fl-alert__icon ~ * {
+  padding-left: 20px;
+}
+
+[data-tt-style="fluent"] .fl-alert.is-disabled,
+[data-tt-style="fluent"] .fl-alert[data-disabled="true"] {
+  opacity: 0.5;
+}

@@ -1,4 +1,4 @@
-const client$ = new Timeless.HttpClientCore({});
+const client$ = new Timeless.kit.HttpClientCore({});
 // @ts-ignore
 client$.fetch = async (options) => {
   await new Promise((r) => setTimeout(r, 400));
@@ -32,10 +32,10 @@ client$.fetch = async (options) => {
   };
 };
 
-const request = Timeless.request_factory({
+const request = Timeless.kit.request_factory({
   headers: { "Content-Type": "application/json" },
 });
-const searchSelectOptionsReq = new Timeless.RequestCore(
+const searchSelectOptionsReq = new Timeless.kit.RequestCore(
   (params) => request.get("/api/mock/select/search", params),
   {
     client: client$,

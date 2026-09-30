@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Fluent 2 · Badge（.fl-badge）
+   --------------------------------------------------------------------------
+   20px 高的小药丸；默认用 --brand-fill 实心，
+   状态变体走各自的 subtle 底色（--destructive-subtle / --success-subtle …）。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--fontWeightMedium);
+  line-height: 1;
+  color: var(--colorNeutralForegroundOnBrand);
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  background-color: var(--brand-fill);
+  border: var(--strokeWidthThin) solid transparent;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="fluent"] .fl-badge--secondary {
+  color: var(--foreground);
+  background-color: var(--surface-3);
+}
+
+[data-tt-style="fluent"] .fl-badge--outline {
+  color: var(--foreground);
+  background-color: transparent;
+  border-color: var(--stroke1);
+}
+
+[data-tt-style="fluent"] .fl-badge--danger {
+  color: var(--destructive-subtle-foreground);
+  background-color: var(--destructive-subtle);
+}
+
+[data-tt-style="fluent"] .fl-badge--success {
+  color: var(--success-subtle-foreground);
+  background-color: var(--success-subtle);
+}
+
+[data-tt-style="fluent"] .fl-badge--warning {
+  color: var(--warning-subtle-foreground);
+  background-color: var(--warning-subtle);
+}
+
+[data-tt-style="fluent"] .fl-badge--info {
+  color: var(--info-subtle-foreground);
+  background-color: var(--info-subtle);
+}
+
+[data-tt-style="fluent"] .fl-badge.is-disabled,
+[data-tt-style="fluent"] .fl-badge[data-disabled="true"] {
+  color: var(--foreground-disabled);
+  background-color: var(--surface-disabled);
+}

@@ -1,0 +1,67 @@
+/* ==========================================================================
+   Fluent 2 · Toast
+   --------------------------------------------------------------------------
+   结构：.fl-toast > .fl-toast__header / .fl-toast__body。
+   特征：--surface-1 底 + 1px --stroke2 + --shadow-16，左侧 3px 状态色条用
+        --brand-fill / --destructive / --success。
+   headless 的 ToastCore 没有 state，容器只负责外观，显隐由调用方决定。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-toast {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 22rem;
+  max-width: 100%;
+  padding-left: 3px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  pointer-events: auto;
+  background-color: var(--surface-1);
+  background-clip: padding-box;
+  border: var(--strokeWidthThin) solid var(--stroke2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-16);
+  overflow: hidden;
+}
+
+/* 左侧状态色条 */
+[data-tt-style="fluent"] .fl-toast::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--brand-fill);
+}
+
+[data-tt-style="fluent"] .fl-toast--success::before {
+  background-color: var(--success);
+}
+
+[data-tt-style="fluent"] .fl-toast--warning::before {
+  background-color: var(--warning);
+}
+
+[data-tt-style="fluent"] .fl-toast--danger::before {
+  background-color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-toast__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  padding: 10px 12px 4px;
+  font-weight: var(--fontWeightSemibold);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-toast__body {
+  padding: 0 12px 12px;
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground-2);
+  word-wrap: break-word;
+}

@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Animal Island · Accordion（.animal-accordion）
+   --------------------------------------------------------------------------
+   结构：.animal-accordion > .animal-accordion__item(.is-open)
+          > .animal-accordion__header > .animal-accordion__trigger(.is-open)
+          > .animal-accordion__panel > .animal-accordion__body
+
+   Animal Island 视觉：
+     · 外壳是奶油纸面 + 2px --border 描边 + 大圆角；项与项之间用 2px --border-subtle 分隔
+     · 展开面板用上游招牌动效 `grid-template-rows 0fr → 1fr`，映射成
+       var(--duration-slow) var(--easing-standard)（= 0.35s cubic-bezier(0.4,0,0.2,1)）
+     · 展开态标题转深（--foreground）并加粗到 700，箭头旋转 180°
+     · 展开态用 .is-open 类名（Content 会强制替换 class；dataset 响应式写错属性名）
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-accordion {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+}
+
+[data-tt-style="animal"] .animal-accordion__item {
+  color: var(--foreground);
+  background-color: var(--card);
+}
+
+[data-tt-style="animal"] .animal-accordion__item + .animal-accordion__item {
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+[data-tt-style="animal"] .animal-accordion__header {
+  margin: 0;
+}
+
+[data-tt-style="animal"] .animal-accordion__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 600;
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: left;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-accordion__trigger:hover {
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-accordion__trigger:active {
+  background-color: var(--secondary);
+}
+
+[data-tt-style="animal"] .animal-accordion__trigger.is-open {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+[data-tt-style="animal"] .animal-accordion__trigger:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -2px;
+  z-index: 3;
+}
+
+[data-tt-style="animal"] .animal-accordion__chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  order: 1;
+  margin-left: auto;
+  color: var(--muted-foreground);
+  transition: transform var(--duration-normal) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-accordion__trigger:hover
+  .animal-accordion__chevron {
+  color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-accordion__trigger.is-open
+  .animal-accordion__chevron {
+  color: var(--primary);
+  transform: rotate(180deg);
+}
+
+/* 展开动效：0fr → 1fr 的网格行过渡（上游招牌手感） */
+[data-tt-style="animal"] .animal-accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows var(--duration-slow) var(--easing-standard),
+    visibility 0s linear var(--duration-slow);
+}
+
+[data-tt-style="animal"] .animal-accordion__item.is-open .animal-accordion__panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows var(--duration-slow) var(--easing-standard),
+    visibility 0s linear 0s;
+}
+
+[data-tt-style="animal"] .animal-accordion__item:not(.is-open)
+  .animal-accordion__panel {
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-accordion__body {
+  min-height: 0;
+  padding: 0 16px 16px;
+  overflow: hidden;
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--card-foreground);
+}
+
+/* 禁用项：本体与标题一起降不透明度并禁指针 */
+[data-tt-style="animal"] .animal-accordion__item.is-disabled,
+[data-tt-style="animal"] .animal-accordion__item[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-accordion__trigger,
+  [data-tt-style="animal"] .animal-accordion__chevron,
+  [data-tt-style="animal"] .animal-accordion__panel {
+    transition: none;
+  }
+}

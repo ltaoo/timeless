@@ -1,0 +1,13 @@
+{
+  "name": "@timeless/web-bootstrap",
+  "version": "1.0.0",
+  "description": "Bootstrap 5.3 component gallery for @timeless/bootstrap",
+  "type": "module",
+  "scripts": {
+    "dev": "timeless frontend"
+  },
+  "devDependencies": {
+    "@timeless/cli": "workspace:*",
+    "@timeless/inner-types": "workspace:*"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@timeless/animal",
+  "version": "0.34.0",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./globals.css": "./dist/timeless.animal.css"
+  },
+  "scripts": {
+    "build": "vite build",
+    "docs": "node ../../scripts/docs.js"
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@timeless/timeless": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

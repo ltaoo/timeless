@@ -1,0 +1,39 @@
+/* ==========================================================================
+   Animal Island · Separator（.animal-separator）
+   --------------------------------------------------------------------------
+   结构：.animal-separator--horizontal / --vertical（原语同时挂 data-orientation）。
+
+   Animal Island 视觉：
+     · 不用 1px 细线，改用 2px --border-subtle —— 羊皮纸上的浅色刻痕，
+       与全局 2px 描边语言一致
+     · 纯色条，无边框、无阴影
+     · 也作 FieldSeparator 复用，间距由 field.css 负责
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-separator {
+  flex-shrink: 0;
+  border: 0;
+  background-color: var(--border-subtle);
+}
+
+[data-tt-style="animal"] .animal-separator--horizontal,
+[data-tt-style="animal"] .animal-separator[data-orientation="horizontal"] {
+  display: block;
+  width: 100%;
+  height: var(--border-width);
+  margin: 0;
+}
+
+[data-tt-style="animal"] .animal-separator--vertical,
+[data-tt-style="animal"] .animal-separator[data-orientation="vertical"] {
+  display: block;
+  width: var(--border-width);
+  height: 100%;
+  align-self: stretch;
+  margin: 0;
+}
+
+[data-tt-style="animal"] .animal-separator.is-disabled,
+[data-tt-style="animal"] .animal-separator[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+}

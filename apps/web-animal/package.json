@@ -1,0 +1,13 @@
+{
+  "name": "@timeless/web-animal",
+  "version": "1.0.0",
+  "description": "Animal Island component gallery for @timeless/animal",
+  "type": "module",
+  "scripts": {
+    "dev": "timeless frontend"
+  },
+  "devDependencies": {
+    "@timeless/cli": "workspace:*",
+    "@timeless/inner-types": "workspace:*"
+  }
+}

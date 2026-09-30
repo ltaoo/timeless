@@ -1,0 +1,138 @@
+/* ==========================================================================
+   Animal Island · Toast（.animal-toast）
+   --------------------------------------------------------------------------
+   结构：.animal-toast > .animal-toast__header / .animal-toast__body。
+   变体：--brand（= primary / info）/ --success / --warning / --danger
+        （= destructive；neutral 不加类，见 modules/toast.ts）。
+
+   Animal Island 视觉：
+     · 羊皮纸纸面（--card）+ 2px --border 描边 + 大圆角 + --shadow-lg（浮层层级）
+     · 左侧 4px 状态色条：brand 用薄荷青 --primary，danger 用 --destructive，
+       success / warning 用各自语义色
+     · 入场用 animal-toast-in（淡入 + 上浮），关闭由调用方负责
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-toast {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 22rem;
+  max-width: 100%;
+  padding-left: 4px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  pointer-events: auto;
+  background-color: var(--card);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  animation: animal-toast-in var(--duration-slow) var(--easing-standard) both;
+  transition: box-shadow var(--duration-normal) var(--easing-standard),
+    transform var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-toast:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px 0
+    color-mix(in srgb, var(--foreground) 22%, transparent);
+}
+
+[data-tt-style="animal"] .animal-toast:active {
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-toast:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* 左侧状态色条 */
+[data-tt-style="animal"] .animal-toast::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+  background-color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-toast--brand::before {
+  background-color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-toast--success::before {
+  background-color: var(--success);
+}
+
+[data-tt-style="animal"] .animal-toast--warning::before {
+  background-color: var(--warning);
+}
+
+[data-tt-style="animal"] .animal-toast--danger::before {
+  background-color: var(--destructive);
+}
+
+/* danger 变体描边也染成警示红 */
+[data-tt-style="animal"] .animal-toast--danger {
+  border-color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-toast--danger:focus-visible {
+  outline-color: var(--ring);
+}
+
+/* 非法 / 禁用表达（调用方挂 aria-invalid 或 is-disabled） */
+[data-tt-style="animal"] .animal-toast[aria-invalid="true"] {
+  color: var(--destructive-subtle-foreground);
+  border-color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-toast.is-disabled,
+[data-tt-style="animal"] .animal-toast[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-toast.is-loading {
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-toast__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  padding: 10px 12px 4px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+[data-tt-style="animal"] .animal-toast__body {
+  padding: 0 12px 12px;
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--card-foreground);
+  word-wrap: break-word;
+}
+
+@keyframes animal-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-toast {
+    animation: none;
+    transition: none;
+  }
+}

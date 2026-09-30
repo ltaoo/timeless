@@ -1,0 +1,124 @@
+/* ==========================================================================
+   Fluent 2 · Radio（.fl-radio / .fl-radio-group）
+   --------------------------------------------------------------------------
+   · 20px 圆形；未选中 1px --stroke-accessible，选中 --compound-brand
+   · 选中后中心 8px 白点用 ::after 绘制（复用 checkbox 的 .fl-check 布局）
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-radio {
+  --radio-bg: var(--surface-1);
+  --radio-border: var(--stroke-accessible);
+
+  position: relative;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background-color: var(--radio-bg);
+  border: var(--strokeWidthThin) solid var(--radio-border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-radio::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background-color: var(--colorNeutralForegroundOnBrand);
+  transform: scale(0);
+  transition: transform var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-radio:hover {
+  --radio-border: var(--compound-brand-hover);
+}
+
+[data-tt-style="fluent"] .fl-radio:active {
+  --radio-border: var(--compound-brand-pressed);
+}
+
+[data-tt-style="fluent"] .fl-radio:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-radio[data-checked],
+[data-tt-style="fluent"] .fl-radio.is-checked {
+  --radio-bg: var(--compound-brand);
+  --radio-border: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-radio.is-checked::after {
+  transform: scale(1);
+}
+
+[data-tt-style="fluent"] .fl-radio.is-checked:hover {
+  --radio-bg: var(--compound-brand-hover);
+  --radio-border: var(--compound-brand-hover);
+}
+
+[data-tt-style="fluent"] .fl-radio.is-checked:active {
+  --radio-bg: var(--compound-brand-pressed);
+  --radio-border: var(--compound-brand-pressed);
+}
+
+[data-tt-style="fluent"] .fl-radio[disabled],
+[data-tt-style="fluent"] .fl-radio[data-disabled],
+[data-tt-style="fluent"] .fl-radio.is-disabled {
+  --radio-bg: var(--surface-disabled);
+  --radio-border: var(--stroke-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-radio.is-invalid,
+[data-tt-style="fluent"] .fl-radio[aria-invalid="true"] {
+  --radio-border: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="fluent"] .fl-radio-group--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+[data-tt-style="fluent"] .fl-radio-group__item {
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+[data-tt-style="fluent"] .fl-radio-group__item:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+[data-tt-style="fluent"] .fl-radio-group__item.is-disabled {
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-radio-group__item.is-disabled .fl-check__label {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-radio,
+  [data-tt-style="fluent"] .fl-radio::after {
+    transition: none;
+  }
+}

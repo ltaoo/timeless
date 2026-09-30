@@ -1,0 +1,46 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Table
+   根节点 .table，其余部位用原生语义标签（thead/tbody/tr/th/td），
+   通过后代选择器作用域化，与 Bootstrap 自身的 table 样式策略一致。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .table {
+  width: 100%;
+  margin-bottom: var(--spacer);
+  color: var(--foreground);
+  vertical-align: top;
+  border-color: var(--border);
+  border-collapse: collapse;
+  caption-side: bottom;
+}
+
+[data-tt-style="bootstrap"] .table > :not(caption) > * > * {
+  padding: 0.5rem;
+  background-color: transparent;
+  border-bottom: var(--bs-border-width) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .table > thead {
+  vertical-align: bottom;
+  border-bottom: calc(var(--bs-border-width) * 2) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .table > thead > tr > th {
+  font-weight: 700;
+  color: var(--foreground);
+  text-align: left;
+}
+
+[data-tt-style="bootstrap"] .table > tbody > tr:hover > * {
+  background-color: var(--accent);
+}
+
+[data-tt-style="bootstrap"] .table > tbody > tr:last-child > * {
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="bootstrap"] .table > caption {
+  padding: 0.5rem;
+  color: var(--muted-foreground);
+  text-align: left;
+}

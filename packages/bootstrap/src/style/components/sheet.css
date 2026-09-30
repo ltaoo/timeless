@@ -1,0 +1,223 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Sheet（Offcanvas 系列）
+   结构：.offcanvas-backdrop + .offcanvas.[offcanvas-start|end|top|bottom]
+         > .offcanvas-header > .offcanvas-title / .offcanvas-body + .btn-close
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .offcanvas-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background-color: #000;
+  opacity: 0.5;
+}
+
+[data-tt-style="bootstrap"] .offcanvas {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  color: var(--foreground);
+  background-color: var(--background);
+  background-clip: padding-box;
+  outline: 0;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-start {
+  top: 0;
+  left: 0;
+  width: 25rem;
+  height: 100%;
+  border-right: var(--bs-border-width) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .offcanvas-end {
+  top: 0;
+  right: 0;
+  width: 25rem;
+  height: 100%;
+  border-left: var(--bs-border-width) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .offcanvas-top {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 20rem;
+  border-bottom: var(--bs-border-width) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .offcanvas-bottom {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 20rem;
+  border-top: var(--bs-border-width) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .offcanvas-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: 1rem 1rem 0.5rem;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: var(--line-height);
+}
+
+/* 无标题时 .btn-close 也要贴右 */
+[data-tt-style="bootstrap"] .offcanvas-header .btn-close {
+  margin-left: auto;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-body {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* 关闭按钮（与 dialog.css 中的定义保持一致） */
+[data-tt-style="bootstrap"] .btn-close {
+  box-sizing: content-box;
+  width: 1em;
+  height: 1em;
+  padding: 0.25em;
+  color: var(--foreground);
+  background-color: currentColor;
+  border: 0;
+  border-radius: var(--radius-sm);
+  opacity: 0.5;
+  cursor: pointer;
+  -webkit-mask: var(--tt-close-icon) center / 1em 1em no-repeat;
+  mask: var(--tt-close-icon) center / 1em 1em no-repeat;
+  transition: opacity 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .btn-close:hover,
+[data-tt-style="bootstrap"] .btn-close:focus-visible {
+  opacity: 0.75;
+}
+
+/* --- 动画 --- */
+[data-tt-style="bootstrap"] .offcanvas-backdrop.is-enter {
+  animation: bs-backdrop-in 0.15s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-backdrop.is-exit {
+  animation: bs-backdrop-out 0.15s ease-in both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-start.is-enter {
+  animation: bs-drawer-in-left 0.3s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-start.is-exit {
+  animation: bs-drawer-out-left 0.25s ease-in both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-end.is-enter {
+  animation: bs-drawer-in-right 0.3s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-end.is-exit {
+  animation: bs-drawer-out-right 0.25s ease-in both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-top.is-enter {
+  animation: bs-drawer-in-top 0.3s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-top.is-exit {
+  animation: bs-drawer-out-top 0.25s ease-in both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-bottom.is-enter {
+  animation: bs-drawer-in-bottom 0.3s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .offcanvas-bottom.is-exit {
+  animation: bs-drawer-out-bottom 0.25s ease-in both;
+}
+
+@keyframes bs-drawer-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes bs-drawer-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes bs-drawer-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes bs-drawer-out-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes bs-drawer-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bs-drawer-out-top {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes bs-drawer-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bs-drawer-out-bottom {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .btn-close {
+    transition: none;
+  }
+}

@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Fluent 2 · Slider（.fl-slider）
+   --------------------------------------------------------------------------
+   2px 轨道（--stroke-accessible）、20px 圆形 thumb（--surface-1 底 +
+   1px --stroke-accessible），已选段用 --compound-brand。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+  padding: 0;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+[data-tt-style="fluent"] .fl-slider__track {
+  position: relative;
+  flex-grow: 1;
+  width: 100%;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background-color: var(--stroke-accessible);
+}
+
+[data-tt-style="fluent"] .fl-slider__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--compound-brand);
+  transition: width var(--duration-faster) linear;
+}
+
+[data-tt-style="fluent"] .fl-slider__thumb {
+  width: 20px;
+  height: 20px;
+  border: var(--strokeWidthThin) solid var(--stroke-accessible);
+  border-radius: 50%;
+  background-color: var(--surface-1);
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-slider:hover .fl-slider__thumb {
+  border-color: var(--compound-brand-hover);
+}
+
+[data-tt-style="fluent"] .fl-slider:active .fl-slider__thumb {
+  border-color: var(--compound-brand-pressed);
+}
+
+[data-tt-style="fluent"] .fl-slider__thumb:focus-visible,
+[data-tt-style="fluent"] .fl-slider:focus-visible .fl-slider__thumb {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-slider[disabled],
+[data-tt-style="fluent"] .fl-slider[data-disabled="true"],
+[data-tt-style="fluent"] .fl-slider.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+[data-tt-style="fluent"] .fl-slider[disabled] .fl-slider__thumb,
+[data-tt-style="fluent"] .fl-slider.is-disabled .fl-slider__thumb {
+  border-color: var(--stroke-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-slider.is-invalid .fl-slider__fill,
+[data-tt-style="fluent"] .fl-slider[aria-invalid="true"] .fl-slider__fill {
+  background-color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-slider.is-invalid .fl-slider__thumb,
+[data-tt-style="fluent"] .fl-slider[aria-invalid="true"] .fl-slider__thumb {
+  border-color: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-slider__fill,
+  [data-tt-style="fluent"] .fl-slider__thumb {
+    transition: none;
+  }
+}

@@ -1,0 +1,189 @@
+/* ==========================================================================
+   Animal Island · Checkbox（.animal-checkbox / .animal-check）
+   --------------------------------------------------------------------------
+   .animal-check 是「勾选行」的共享布局类（checkbox-group / radio-group 复用），
+   本文件定义它与 .animal-check__label；.animal-checkbox 是那个可点击的方块。
+
+   结构：.animal-check > [input 隐藏] + button.animal-checkbox + .animal-check__label
+   注：headless 层用 <button> 承载可点击盒子，因此以 [data-checked] / .is-checked
+   取代原生 :checked；勾用 ::after 绘制（模块内部不渲染任何图标）。
+
+   Animal Island 视觉（见 docs/design-system/design-rules.md 第 14 条）：
+     · 26px 方块 + 2px --input 描边 + 12px「重圆角」——不是正圆也不是直角
+       （上游给的圆角族是 12/14/16px；alias 层没有 12px token，故此处取文档值）
+     · 选中：薄荷青实底（--primary）+ 白色勾，配 2px 深青投影模拟按下感
+     · hover 描边转薄荷青并上浮 1px，active 下压 1px
+     · 非法描边转 --destructive；禁用灰底降不透明度
+     · 焦点是黄色描边（--ring），永不用蓝色
+   ========================================================================== */
+
+/* --- 勾选行（checkbox-group / radio-group 共用） --- */
+[data-tt-style="animal"] .animal-check {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  min-height: 26px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* --- 可点击方块 --- */
+[data-tt-style="animal"] .animal-checkbox {
+  --checkbox-bg: var(--surface-1);
+  --checkbox-border: var(--input);
+  --checkbox-mark: var(--primary-foreground);
+
+  position: relative;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background-color: var(--checkbox-bg);
+  border: var(--border-width) solid var(--checkbox-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+/* 勾：两段折线，用旋转的边框模拟 */
+[data-tt-style="animal"] .animal-checkbox::after {
+  content: "";
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  width: 5px;
+  height: 10px;
+  border: solid var(--checkbox-mark);
+  border-width: 0 2.5px 2.5px 0;
+  transform: translate(-50%, -50%) rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+/* --- hover / active --- */
+[data-tt-style="animal"] .animal-checkbox:hover:not(:disabled):not(.is-disabled) {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+[data-tt-style="animal"] .animal-checkbox:active:not(:disabled):not(.is-disabled) {
+  transform: translateY(1px);
+}
+
+/* --- 键盘焦点：黄色描边 --- */
+[data-tt-style="animal"] .animal-checkbox:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- 选中 --- */
+[data-tt-style="animal"] .animal-checkbox[data-checked],
+[data-tt-style="animal"] .animal-checkbox.is-checked {
+  --checkbox-bg: var(--primary);
+  --checkbox-border: var(--primary);
+
+  box-shadow: 0 2px 0 0 var(--primary-pressed);
+}
+
+[data-tt-style="animal"] .animal-checkbox[data-checked]::after,
+[data-tt-style="animal"] .animal-checkbox.is-checked::after {
+  transform: translate(-50%, -50%) rotate(45deg) scale(1);
+}
+
+[data-tt-style="animal"] .animal-checkbox.is-checked:hover:not(:disabled):not(
+    .is-disabled
+  ) {
+  --checkbox-bg: var(--primary-hover);
+  --checkbox-border: var(--primary-hover);
+}
+
+[data-tt-style="animal"] .animal-checkbox.is-checked:active:not(:disabled):not(
+    .is-disabled
+  ) {
+  box-shadow: 0 0 0 0 var(--primary-pressed);
+  transform: translateY(1px);
+}
+
+/* --- 半选（共享 .is-indeterminate 契约，模块本身不输出） --- */
+[data-tt-style="animal"] .animal-checkbox.is-indeterminate {
+  --checkbox-bg: var(--primary);
+  --checkbox-border: var(--primary);
+
+  box-shadow: 0 2px 0 0 var(--primary-pressed);
+}
+
+[data-tt-style="animal"] .animal-checkbox.is-indeterminate::after {
+  width: 12px;
+  height: 0;
+  border-width: 0;
+  border-bottom-width: 2.5px;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* --- 非法 --- */
+[data-tt-style="animal"] .animal-checkbox.is-invalid,
+[data-tt-style="animal"] .animal-checkbox[aria-invalid="true"],
+[data-tt-style="animal"] .animal-checkbox[data-invalid="true"] {
+  --checkbox-border: var(--destructive);
+}
+
+/* --- 禁用（放在选中之后，覆盖选中态） --- */
+[data-tt-style="animal"] .animal-checkbox:disabled,
+[data-tt-style="animal"] .animal-checkbox[disabled],
+[data-tt-style="animal"] .animal-checkbox[data-disabled],
+[data-tt-style="animal"] .animal-checkbox.is-disabled {
+  --checkbox-bg: var(--surface-disabled);
+  --checkbox-border: var(--border-subtle);
+  --checkbox-mark: var(--foreground-disabled);
+
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  box-shadow: none;
+  transform: none;
+  pointer-events: none;
+}
+
+/* 选中且禁用：保留可辨识的薄荷淡底与白勾 */
+[data-tt-style="animal"] .animal-checkbox.is-checked:disabled,
+[data-tt-style="animal"] .animal-checkbox.is-checked.is-disabled,
+[data-tt-style="animal"] .animal-checkbox[data-checked][data-disabled] {
+  --checkbox-bg: color-mix(in srgb, var(--primary) 40%, var(--surface-disabled));
+  --checkbox-border: color-mix(
+    in srgb,
+    var(--primary) 40%,
+    var(--surface-disabled)
+  );
+  --checkbox-mark: var(--surface-1);
+
+  box-shadow: none;
+}
+
+/* --- 伴随文案 --- */
+[data-tt-style="animal"] .animal-check__label {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 500;
+  line-height: var(--line-height);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="animal"] .animal-check__label.is-disabled,
+[data-tt-style="animal"] .animal-check__label[data-disabled="true"] {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-checkbox,
+  [data-tt-style="animal"] .animal-checkbox::after {
+    transition: none;
+  }
+}

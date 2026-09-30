@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Material 3 · Alert
+   用 *-container 色对填充（4px 圆角、无描边）；图标为可选绝对定位子元素。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-alert {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background-color: var(--surface-container-high);
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="material"] .m3-alert--primary {
+  color: var(--primary-container-foreground);
+  background-color: var(--primary-container);
+}
+
+[data-tt-style="material"] .m3-alert--secondary {
+  color: var(--secondary-container-foreground);
+  background-color: var(--secondary-container);
+}
+
+[data-tt-style="material"] .m3-alert--tertiary {
+  color: var(--md-sys-color-on-tertiary-container);
+  background-color: var(--md-sys-color-tertiary-container);
+}
+
+[data-tt-style="material"] .m3-alert--success {
+  color: var(--success);
+  background-color: var(--success-container);
+}
+
+[data-tt-style="material"] .m3-alert--warning {
+  color: var(--warning);
+  background-color: var(--warning-container);
+}
+
+[data-tt-style="material"] .m3-alert--info {
+  color: var(--info);
+  background-color: var(--info-container);
+}
+
+[data-tt-style="material"] .m3-alert--danger {
+  color: var(--destructive-container-foreground);
+  background-color: var(--destructive-container);
+}
+
+[data-tt-style="material"] .m3-alert__title {
+  margin: 0;
+  font-size: var(--font-size);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+[data-tt-style="material"] .m3-alert__description {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+[data-tt-style="material"] .m3-alert__icon {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: inline-flex;
+}
+
+[data-tt-style="material"] .m3-alert__icon ~ * {
+  padding-left: 1.75rem;
+}
+
+[data-tt-style="material"] .m3-alert.is-disabled,
+[data-tt-style="material"] .m3-alert[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-alert {
+    transition: none;
+  }
+}

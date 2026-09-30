@@ -1,0 +1,23 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Waterfall（.waterfall）
+   横向 flex 容器：.waterfall > .waterfall__column > .waterfall__item。
+   item 的绝对定位 top/height 由 WaterfallModel 以内联 style 下发；
+   容器自身不滚动，滚动交给外层 .scroll-view。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .waterfall {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacer-sm);
+  width: 100%;
+}
+
+[data-tt-style="bootstrap"] .waterfall__column {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+[data-tt-style="bootstrap"] .waterfall__item {
+  overflow: hidden;
+}

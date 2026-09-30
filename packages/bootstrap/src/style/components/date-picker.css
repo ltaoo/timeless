@@ -1,0 +1,209 @@
+/* ==========================================================================
+   Bootstrap 5.3 · DatePicker（.datepicker）
+   触发器沿用 .form-control（.datepicker__trigger 补 flex），弹层复用 .popover
+   的表面与进出场动画，内部是 7 列日历网格。
+   结构：.datepicker > .datepicker__header / .datepicker__grid
+        > .datepicker__weekdays + .datepicker__week > .datepicker__cell
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .datepicker__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: var(--control-height);
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-tt-style="bootstrap"] .datepicker__trigger.is-open {
+  border-color: color-mix(in srgb, var(--primary) 50%, white);
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .datepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="bootstrap"] .datepicker__value.is-placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .datepicker__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--muted-foreground);
+  transition: transform 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .datepicker__icon.is-open {
+  transform: rotate(180deg);
+}
+
+[data-tt-style="bootstrap"] .datepicker__clear {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .datepicker__clear:hover {
+  color: var(--foreground);
+}
+
+/* --- 弹层：复用 .popover 的外观，这里放宽宽度并加内边距 --- */
+[data-tt-style="bootstrap"] .datepicker {
+  width: auto;
+  max-width: none;
+  padding: 0.75rem;
+}
+
+[data-tt-style="bootstrap"] .datepicker__calendar {
+  width: 16.5rem;
+}
+
+[data-tt-style="bootstrap"] .datepicker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  margin-bottom: 0.5rem;
+}
+
+[data-tt-style="bootstrap"] .datepicker__title {
+  font-size: var(--font-size);
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+[data-tt-style="bootstrap"] .datepicker__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .datepicker__nav:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+[data-tt-style="bootstrap"] .datepicker__nav:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .datepicker__nav:active {
+  background-color: var(--muted);
+}
+
+[data-tt-style="bootstrap"] .datepicker__nav.is-disabled,
+[data-tt-style="bootstrap"] .datepicker__nav[disabled] {
+  color: color-mix(in srgb, var(--muted-foreground) 50%, transparent);
+  pointer-events: none;
+}
+
+[data-tt-style="bootstrap"] .datepicker__grid {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-tt-style="bootstrap"] .datepicker__weekdays,
+[data-tt-style="bootstrap"] .datepicker__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+[data-tt-style="bootstrap"] .datepicker__weekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2rem;
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2rem;
+  padding: 0;
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.12s ease-in-out, color 0.12s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell:active {
+  background-color: var(--muted);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell.is-outside {
+  color: color-mix(in srgb, var(--muted-foreground) 60%, transparent);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell.is-today {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 500;
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell.is-active,
+[data-tt-style="bootstrap"] .datepicker__cell.is-active:hover {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell[disabled],
+[data-tt-style="bootstrap"] .datepicker__cell.is-disabled {
+  color: var(--muted-foreground);
+  pointer-events: none;
+  opacity: var(--disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .datepicker__icon,
+  [data-tt-style="bootstrap"] .datepicker__nav,
+  [data-tt-style="bootstrap"] .datepicker__clear,
+  [data-tt-style="bootstrap"] .datepicker__cell {
+    transition: none;
+  }
+}

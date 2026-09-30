@@ -1,0 +1,78 @@
+/* ==========================================================================
+   animal-island-ui — 作用域内的基础 / 重置
+   --------------------------------------------------------------------------
+   禁止事项（见 THEME_PACKAGE_GUIDE.md §4.5）：
+     ❌ html { }   ❌ body { }   ❌ #root { }   ❌ 无作用域的 * { }
+     ❌ 无作用域的 @keyframes 重名
+   下面所有规则都带 [data-tt-style="animal"]，因此只在本库子树内生效。
+
+   上游 reset.less 里的 `*` / `body` 规则在这里被改写成作用域版本。
+   ========================================================================== */
+
+/* 作用域根：应用在 <html> 或任意包裹元素上设置本属性来启用本风格 */
+[data-tt-style="animal"] {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background-color: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 作用域内重置（只在本库子树内生效） */
+[data-tt-style="animal"] *,
+[data-tt-style="animal"] *::before,
+[data-tt-style="animal"] *::after {
+  box-sizing: border-box;
+}
+
+/* 上游 reset 的 `[class^='animal-']` 契约：本库自己的类名前缀一律继承字体与正文色。
+   写成后代选择器，避免影响子树里的其它库组件（它们有自己的类前缀）。 */
+[data-tt-style="animal"] [class^="animal-"],
+[data-tt-style="animal"] [class*=" animal-"] {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+}
+
+[data-tt-style="animal"] a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+[data-tt-style="animal"] a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+[data-tt-style="animal"] img,
+[data-tt-style="animal"] svg {
+  vertical-align: middle;
+}
+
+/* 统一禁用态外观。组件可以用 .is-disabled / [disabled] / [data-disabled] 表达。 */
+[data-tt-style="animal"] [disabled],
+[data-tt-style="animal"] [data-disabled="true"],
+[data-tt-style="animal"] .is-disabled {
+  pointer-events: none;
+}
+
+/* 焦点：本风格的硬指标是**黄色描边，永不用蓝色**。 */
+[data-tt-style="animal"] :focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* 全局减少动效偏好（作用域内） */
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] *,
+  [data-tt-style="animal"] *::before,
+  [data-tt-style="animal"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

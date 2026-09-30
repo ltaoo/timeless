@@ -1,0 +1,100 @@
+/* ==========================================================================
+   Material 3 · Popover
+   结构：.m3-popover > .m3-popover__arrow / .m3-popover__header / .m3-popover__body
+   浮层用 --surface-container（--popover）+ --elevation-2，12px 圆角（--radius）。
+   箭头是 45° 旋转的小方块，贴在被锚定元素那一侧的对边
+   （.is-top/.is-bottom/.is-left/.is-right 由 popper-shared 的 makeArrowStyle 计算）。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-popover {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 20rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-2);
+  outline: 0;
+}
+
+[data-tt-style="material"] .m3-popover__header {
+  padding: 0.75rem 1rem;
+  margin: 0;
+  font-size: var(--font-size);
+  font-weight: 500;
+  color: var(--popover-foreground);
+  border-bottom: 1px solid var(--outline-variant);
+  border-top-left-radius: calc(var(--radius) - 1px);
+  border-top-right-radius: calc(var(--radius) - 1px);
+}
+
+[data-tt-style="material"] .m3-popover__body {
+  padding: 1rem;
+  color: var(--muted-foreground);
+}
+
+/* --- 箭头 --- */
+[data-tt-style="material"] .m3-popover__arrow {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--popover);
+  border: 1px solid var(--outline-variant);
+  pointer-events: none;
+}
+
+[data-tt-style="material"] .m3-popover__arrow.is-top {
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="material"] .m3-popover__arrow.is-bottom {
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+
+[data-tt-style="material"] .m3-popover__arrow.is-left {
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+
+[data-tt-style="material"] .m3-popover__arrow.is-right {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+/* --- 动画 --- */
+[data-tt-style="material"] .m3-popover.is-enter {
+  animation: m3-popover-in var(--duration-short) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-popover.is-exit {
+  animation: m3-popover-out var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-popover-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes m3-popover-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}

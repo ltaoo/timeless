@@ -1,0 +1,95 @@
+/* ==========================================================================
+   Animal Island · Avatar（.animal-avatar）
+   --------------------------------------------------------------------------
+   结构：.animal-avatar > .animal-avatar__image（图片层）+ .animal-avatar__fallback（兜底层），
+   两层都铺满同一个圆盒，靠 z-index 分上下 —— 这是「一层图 + 一层垫底」，
+   不是并排的两个 flex 项。
+
+   Animal Island 视觉：
+     · 正圆（--radius-pill）+ 2px --border 描边，像贴在岛上的小圆牌
+     · 尺寸 32 / 40 / 48（--control-height-sm / --control-height / -lg）
+     · 兜底用薄荷青浅底（--accent）配 --accent-foreground 单字
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  color: var(--accent-foreground);
+  background-color: var(--accent);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+  user-select: none;
+}
+
+[data-tt-style="animal"] .animal-avatar--sm {
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  font-size: var(--font-size-sm);
+}
+
+[data-tt-style="animal"] .animal-avatar--default {
+  width: var(--control-height);
+  height: var(--control-height);
+  font-size: var(--font-size);
+}
+
+[data-tt-style="animal"] .animal-avatar--lg {
+  width: var(--control-height-lg);
+  height: var(--control-height-lg);
+  font-size: var(--font-size-lg);
+}
+
+/* position + z-index 把图片抬到垫底层之上：两层都在定位层里，DOM 靠后的
+   __fallback 默认会盖住图片，所以要显式把图抬高一层。 */
+[data-tt-style="animal"] .animal-avatar__image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-pill);
+}
+
+/* 垫底：脱离 flex 流铺满盒子（inset: 0 同时给出尺寸，不用再写 width/height）。
+   留在流里的话它那份 100% 宽会和图片抢宽度，图片被挤扁、圆里还会偏出一块底色。
+   圆角由容器的 overflow: hidden 裁（这里是定位层的 padding box）。 */
+[data-tt-style="animal"] .animal-avatar__fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-foreground);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-avatar:hover {
+  border-color: var(--border-strong);
+}
+
+[data-tt-style="animal"] .animal-avatar:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-avatar.is-disabled,
+[data-tt-style="animal"] .animal-avatar[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-avatar {
+    transition: none;
+  }
+}

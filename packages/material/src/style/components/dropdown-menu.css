@@ -1,0 +1,191 @@
+/* ==========================================================================
+   Material 3 · DropdownMenu / ContextMenu / static Menu
+   三个模块共用同一套类名（见 modules/menu-shared.ts 的 t 常量）：
+     .m3-menu / .m3-menu__item / .m3-menu__separator / .m3-menu__label
+     .m3-menu--submenu / .m3-menu__item-icon / .m3-menu__item-shortcut
+     .m3-menu__item-check / .m3-menu__item-arrow
+   M3 特征：4px 圆角（--radius-sm）+ --elevation-2；条目 hover/pressed 用
+   state layer（::before 叠 currentColor，透明度取 --state-hover / --state-pressed）。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-menu {
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  max-height: var(--m3-menu-max-height, 20rem);
+  overflow: hidden auto;
+  padding: 0.5rem;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  text-align: left;
+  list-style: none;
+  background-color: var(--surface-container);
+  background-clip: padding-box;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--elevation-2);
+  outline: 0;
+}
+
+/* --- 条目 --- */
+[data-tt-style="material"] .m3-menu__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  clear: both;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+/* state layer：hover / pressed / focus 统一叠一层 currentColor */
+[data-tt-style="material"] .m3-menu__item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: currentColor;
+  opacity: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-menu__item:hover::before,
+[data-tt-style="material"] .m3-menu__item.is-focused::before {
+  opacity: var(--state-hover);
+}
+
+[data-tt-style="material"] .m3-menu__item:active::before {
+  opacity: var(--state-pressed);
+}
+
+[data-tt-style="material"] .m3-menu__item:focus-visible {
+  outline: 0;
+  box-shadow: inset 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="material"] .m3-menu__item.is-disabled,
+[data-tt-style="material"] .m3-menu__item[data-disabled],
+[data-tt-style="material"] .m3-menu__item:disabled {
+  color: var(--muted-foreground);
+  pointer-events: none;
+  background-color: transparent;
+  opacity: var(--disabled-opacity);
+}
+
+/* 勾选位 / 图标位 / 快捷键 / 子菜单箭头 */
+[data-tt-style="material"] .m3-menu__item-check {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-menu__item-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-menu__item-shortcut {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-menu__item-arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-menu__item-shortcut + .m3-menu__item-arrow {
+  margin-left: 0.25rem;
+}
+
+/* --- 分组标题 / 分隔线 --- */
+[data-tt-style="material"] .m3-menu__label {
+  display: block;
+  padding: 0.5rem 0.75rem 0.25rem;
+  margin-bottom: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+[data-tt-style="material"] .m3-menu__separator {
+  height: 0;
+  margin: 0.375rem 0;
+  overflow: hidden;
+  border-top: 1px solid var(--outline-variant);
+}
+
+/* --- 子菜单浮层 --- */
+[data-tt-style="material"] .m3-menu--submenu {
+  min-width: 9rem;
+}
+
+/* --- 动画（DropdownMenu / ContextMenu / Menu 的浮层） --- */
+[data-tt-style="material"] .m3-menu.is-enter {
+  animation: m3-menu-in var(--duration-short) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-menu.is-exit {
+  animation: m3-menu-out var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes m3-menu-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-menu__item,
+  [data-tt-style="material"] .m3-menu__item::before {
+    transition: none;
+  }
+}

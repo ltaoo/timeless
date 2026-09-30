@@ -1,0 +1,190 @@
+/* ==========================================================================
+   Fluent 2 · FilePicker
+   --------------------------------------------------------------------------
+   用 .fl-file-dropzone / .fl-file-input 命名空间，视觉上沿用 Fluent 的
+   1px stroke + 4px 圆角（拖拽区用虚线描边）。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-file-dropzone {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+[data-tt-style="fluent"] .fl-file-dropzone__area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-sm);
+  padding: 28px 24px;
+  font-size: var(--font-size);
+  color: var(--foreground-3);
+  text-align: center;
+  background-color: var(--surface-1);
+  border: 1px dashed var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-file-dropzone__area:hover {
+  border-color: var(--stroke1-hover);
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-file-dropzone__area.is-dragging {
+  border-color: var(--compound-brand);
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-file-dropzone__area.is-invalid {
+  border-color: var(--destructive);
+  background-color: var(--destructive-subtle);
+}
+
+[data-tt-style="fluent"] .fl-file-dropzone__area.is-loading {
+  pointer-events: none;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="fluent"] .fl-file-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-sm);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-file-hint__icon {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="fluent"] .fl-file-hint__accept {
+  font-size: var(--font-size-xs);
+  color: var(--foreground-4);
+}
+
+[data-tt-style="fluent"] .fl-file-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-sm);
+  color: var(--destructive-subtle-foreground);
+}
+
+[data-tt-style="fluent"] .fl-file-error__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+}
+
+[data-tt-style="fluent"] .fl-file-error__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-file-error__msg {
+  font-size: var(--font-size-xs);
+}
+
+[data-tt-style="fluent"] .fl-file-value {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  font-size: var(--font-size);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-file-value__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-file-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-file-spinner {
+  display: inline-flex;
+  animation: fl-spin 1s linear infinite;
+}
+
+@keyframes fl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+[data-tt-style="fluent"] .fl-file-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  color: var(--foreground-3);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-file-clear:hover {
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-file-clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+/* --- FileInput（行内紧凑形态） --- */
+[data-tt-style="fluent"] .fl-file-input {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-control.fl-file-input__field {
+  padding-right: 32px;
+}
+
+[data-tt-style="fluent"] .fl-file-input .fl-file-clear,
+[data-tt-style="fluent"] .fl-file-input .fl-file-loading {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-file-dropzone__area,
+  [data-tt-style="fluent"] .fl-file-clear,
+  [data-tt-style="fluent"] .fl-file-spinner {
+    transition: none;
+    animation: none;
+  }
+}

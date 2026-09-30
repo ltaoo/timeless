@@ -1,0 +1,197 @@
+/* ==========================================================================
+   Material 3 · Dialog
+   结构：.m3-dialog__scrim + .m3-dialog > .m3-dialog__container
+         > .m3-dialog__surface
+             > .m3-dialog__header(.m3-dialog__title + .m3-dialog__close)
+             + .m3-dialog__body + .m3-dialog__footer
+   M3 特征：surface 圆角 28px（--radius-xl）；scrim 用 --scrim + 32% 不透明；
+   进出场走 --easing-emphasized + --duration-medium；标题 headline-small。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-dialog__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background-color: var(--scrim);
+  opacity: var(--m3-dialog-scrim-opacity, 0.32);
+}
+
+[data-tt-style="material"] .m3-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1051;
+  display: flex;
+  overflow: hidden auto;
+  outline: 0;
+  pointer-events: none;
+}
+
+[data-tt-style="material"] .m3-dialog__container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  max-width: 100%;
+  min-height: 100%;
+  margin: 1.75rem auto;
+  padding: 1.75rem;
+  pointer-events: auto;
+}
+
+[data-tt-style="material"] .m3-dialog__surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 17.5rem;
+  max-width: 35rem;
+  max-height: calc(100vh - 3.5rem);
+  overflow: hidden;
+  color: var(--surface-foreground);
+  background-color: var(--surface-container-high);
+  background-clip: padding-box;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-3);
+  outline: 0;
+}
+
+[data-tt-style="material"] .m3-dialog__header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: 1.5rem 1.5rem 1rem;
+}
+
+[data-tt-style="material"] .m3-dialog__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: 400;
+  line-height: var(--md-sys-typescale-headline-small-line-height);
+  color: var(--surface-foreground);
+}
+
+/* 无标题时关闭按钮也要贴右 */
+[data-tt-style="material"] .m3-dialog__header .m3-dialog__close {
+  margin-left: auto;
+}
+
+[data-tt-style="material"] .m3-dialog__body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 0 1.5rem 1.5rem;
+  overflow-y: auto;
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-dialog__footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 1.5rem;
+}
+
+/* 关闭按钮：M3 图标按钮（用 mask 表达 X 图标，随 currentColor 适配暗色） */
+[data-tt-style="material"] .m3-dialog__close,
+[data-tt-style="material"] .m3-sheet__close {
+  position: relative;
+  box-sizing: content-box;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  color: var(--on-surface-variant, var(--muted-foreground));
+  background-color: currentColor;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  -webkit-mask: var(--m3-close-icon) center / 1.25rem 1.25rem no-repeat;
+  mask: var(--m3-close-icon) center / 1.25rem 1.25rem no-repeat;
+  transition: color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-dialog__close:hover,
+[data-tt-style="material"] .m3-sheet__close:hover {
+  color: var(--surface-foreground);
+}
+
+[data-tt-style="material"] .m3-dialog__close:focus-visible,
+[data-tt-style="material"] .m3-sheet__close:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="material"] {
+  --m3-close-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e");
+}
+
+/* --- 进退场：M3 缓动 + duration-medium --- */
+[data-tt-style="material"] .m3-dialog__scrim.is-enter {
+  animation: m3-dialog-scrim-in var(--duration-medium) var(--easing-standard) both;
+}
+
+[data-tt-style="material"] .m3-dialog__scrim.is-exit {
+  animation: m3-dialog-scrim-out var(--duration-short) var(--easing-standard) both;
+}
+
+[data-tt-style="material"] .m3-dialog__container.is-enter {
+  animation: m3-dialog-in var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-dialog__container.is-exit {
+  animation: m3-dialog-out var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-dialog-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--m3-dialog-scrim-opacity, 0.32);
+  }
+}
+
+@keyframes m3-dialog-scrim-out {
+  from {
+    opacity: var(--m3-dialog-scrim-opacity, 0.32);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes m3-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes m3-dialog-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-dialog__close,
+  [data-tt-style="material"] .m3-sheet__close {
+    transition: none;
+  }
+}

@@ -1,0 +1,250 @@
+/* ==========================================================================
+   Animal Island · FilePicker（.animal-file-dropzone / .animal-file-input）
+   --------------------------------------------------------------------------
+   类名来自 modules/file-picker.ts：
+     .animal-file-dropzone / .animal-file-dropzone__area（.is-loading / .is-invalid /
+       .is-dragging）/ .animal-visually-hidden
+     .animal-file-hint(__icon / __text / __accept) / .animal-file-error(__name /
+       __text / __msg) / .animal-file-value(__name) / .animal-file-clear /
+     .animal-file-loading / .animal-file-spinner
+     .animal-file-input / .animal-file-input__field
+
+   Animal Island 视觉：
+     · 拖拽区是羊皮纸卡片：2px 虚线描边（dashed），大圆角；hover 描边转深
+     · 拖入（.is-dragging）时描边与图标一起转薄荷青（--primary）+ 薄荷浅底
+     · 非法（.is-invalid）时转警示红；上传中（.is-loading）降不透明度并禁指针
+     · 行内 FileInput 是紧凑输入盒，清除按钮绝对定位在右侧
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-file-dropzone {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="animal"] .animal-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-sm);
+  padding: 28px 24px;
+  font-size: var(--font-size);
+  color: var(--muted-foreground);
+  text-align: center;
+  background-color: var(--tile-dashed-bg);
+  border: var(--border-width) dashed var(--tile-dashed-border);
+  border-radius: var(--tile-radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area:hover {
+  background-color: var(--accent);
+  border-color: var(--tile-hover-border);
+  transform: translateY(-2px);
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area:active {
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area.is-dragging {
+  background-color: var(--accent);
+  border-color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area.is-dragging
+  .animal-file-hint__icon {
+  color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area.is-invalid {
+  background-color: var(--destructive-subtle);
+  border-color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area.is-loading {
+  pointer-events: none;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="animal"] .animal-file-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-sm);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-file-hint__icon {
+  color: var(--muted-foreground);
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-file-dropzone__area:hover
+  .animal-file-hint__icon {
+  color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-file-hint__text {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+[data-tt-style="animal"] .animal-file-hint__accept {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-file-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacer-sm);
+  color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-file-error__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+}
+
+[data-tt-style="animal"] .animal-file-error__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="animal"] .animal-file-error__msg {
+  font-size: var(--font-size-sm);
+  color: var(--destructive-subtle-foreground);
+}
+
+[data-tt-style="animal"] .animal-file-value {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  font-size: var(--font-size);
+  color: var(--foreground);
+}
+
+[data-tt-style="animal"] .animal-file-value__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="animal"] .animal-file-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-file-spinner {
+  display: inline-flex;
+  color: var(--primary);
+  animation: animal-file-spin 1s linear infinite;
+}
+
+@keyframes animal-file-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+[data-tt-style="animal"] .animal-file-clear {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-file-clear:hover {
+  color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-file-clear:active {
+  color: var(--primary-pressed);
+}
+
+[data-tt-style="animal"] .animal-file-clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+
+[data-tt-style="animal"] .animal-file-clear:disabled,
+[data-tt-style="animal"] .animal-file-clear.is-disabled {
+  color: var(--foreground-disabled);
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+/* --- FileInput（行内紧凑形态） --- */
+[data-tt-style="animal"] .animal-file-input {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="animal"] .animal-file-input__field {
+  padding-right: 34px;
+}
+
+[data-tt-style="animal"] .animal-file-input .animal-file-clear,
+[data-tt-style="animal"] .animal-file-input .animal-file-loading {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+}
+
+[data-tt-style="animal"] .animal-file-input[aria-invalid="true"]
+  .animal-file-input__field,
+[data-tt-style="animal"] .animal-file-input.is-invalid
+  .animal-file-input__field {
+  border-color: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-file-dropzone__area,
+  [data-tt-style="animal"] .animal-file-hint__icon,
+  [data-tt-style="animal"] .animal-file-clear {
+    transition: none;
+    transform: none;
+  }
+
+  [data-tt-style="animal"] .animal-file-spinner {
+    animation: none;
+  }
+}

@@ -1,0 +1,97 @@
+/* ==========================================================================
+   Fluent 2 · ResizablePanels
+   --------------------------------------------------------------------------
+   用 .fl-resizable / .fl-resizable__panel / .fl-resizable__handle /
+   __grip 命名空间，视觉上沿用 Fluent 的 1px stroke + 4px 圆角 + 焦点环。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-resizable {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+[data-tt-style="fluent"] .fl-resizable--horizontal {
+  flex-direction: row;
+}
+
+[data-tt-style="fluent"] .fl-resizable--vertical {
+  flex-direction: column;
+}
+
+[data-tt-style="fluent"] .fl-resizable__panel {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+[data-tt-style="fluent"] .fl-resizable__handle {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--stroke2);
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-resizable__handle--horizontal {
+  width: 1px;
+  cursor: col-resize;
+}
+
+[data-tt-style="fluent"] .fl-resizable__handle--vertical {
+  height: 1px;
+  width: 100%;
+  cursor: row-resize;
+}
+
+/* 扩大命中区域（视觉仍是 1px 细线） */
+[data-tt-style="fluent"] .fl-resizable__handle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+[data-tt-style="fluent"] .fl-resizable__handle--horizontal::after {
+  left: -4px;
+  right: -4px;
+}
+
+[data-tt-style="fluent"] .fl-resizable__handle--vertical::after {
+  top: -4px;
+  bottom: -4px;
+}
+
+[data-tt-style="fluent"] .fl-resizable__handle:hover,
+[data-tt-style="fluent"] .fl-resizable__handle[data-dragging="true"] {
+  background-color: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-resizable__handle:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -1px;
+}
+
+[data-tt-style="fluent"] .fl-resizable__grip {
+  z-index: 10;
+  display: flex;
+  flex-shrink: 0;
+  width: 4px;
+  height: 24px;
+  background-color: var(--stroke1);
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="fluent"] .fl-resizable__handle--vertical .fl-resizable__grip {
+  width: 24px;
+  height: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-resizable__handle {
+    transition: none;
+  }
+}

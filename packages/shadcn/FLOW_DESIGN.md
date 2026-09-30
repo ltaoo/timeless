@@ -611,3 +611,89 @@ flow.onConnect((conn) => {
 | 坐标系 | 图坐标系（与视口独立） | 节点 position 始终是图坐标，不受 viewport 影响 |
 | 拖拽实现 | 原生鼠标事件 | 无需额外拖拽库，轻量可控 |
 | Handle 连接检测 | 元素 getBoundingClientRect | 精确，与 React Flow 一致 |
+
+---
+
+## 14. 四库移植 + 三个缺陷修复
+
+Flow 逻辑全在 `packages/ui-vm/src/flow/`（`FlowCanvasModel` / `FlowNodeModel` /
+`FlowEdgeModel`），**渲染层每个样式库各有一份**，因为各库的 DOM 形状、类名、状态色
+体系不同（shadcn 走 Tailwind 内联类，bootstrap / material / fluent 走纯 CSS + 语义别名）。
+
+| 库 | 文件 | 类名 | 边的流动动画 |
+|---|---|---|---|
+| shadcn | `packages/shadcn/src/modules/flow.ts` + `src/index.css` | Tailwind 内联类（`flow-edge` …） | `.is-animated` + `@keyframes sh-flow-dash`（在 `src/index.css`） |
+| bootstrap | `packages/bootstrap/src/modules/flow.ts` + `style/components/flow.css` | `.flow__*` | `@keyframes bs-flow-dash` |
+| material | `packages/material/src/modules/flow.ts` + `style/components/flow.css` | `.m3-flow__*` | `@keyframes m3-flow-dash` |
+| fluent | `packages/fluent/src/modules/flow.ts` + `style/components/flow.css` | `.fl-flow__*` | `@keyframes fl-flow-dash` |
+
+三个作用域库导出同一组名字，与 shadcn 对齐：`FlowCanvasView`、`FlowNodeView`、
+`FlowHandle`、`FlowEdgeView`、`FlowBackground`、`FlowMinimap`、`FlowControls`。
+
+- **几何不重写**：边路径仍由 `FlowEdgeModel.computePath()` 算（straight / step /
+  smoothstep / bezier），渲染层只读 `edge.state.d`；锚点、贝塞尔控制点、穿节点
+  （pass-through）逻辑一份都不用抄。
+- **作用域与暗色**：三库的 CSS 全部在 `[data-tt-style="<lib>"]` 之下，只引用语义别名
+  （`--primary` / `--border` / `--stroke1` / `--outline-variant` …），**不写 `dark:` 分支**
+  —— 暗色是各库 `tokens.css` 里的单点重声明。
+- **`@keyframes` 不能作用域化**（`@keyframes` 没有选择器），所以必须按库前缀命名，
+  否则同页同时加载多套库时后加载的会覆盖先加载的。`check:scope` 覆盖不到这一点，
+  只能靠命名约定 review。
+
+### 修复 1：`animate-dash` 死类
+
+shadcn 原版给可见 path 挂了 `animate-dash` 这个 Tailwind 类，但构建产物 CSS 里
+**0 次出现**、也没有任何 `@keyframes dash*` 定义 —— 也就是说 `animated: true` 的边
+根本不会动。现在改成：
+
+- 类名 `.is-animated`，只有当 `edge.state.animated` 为真时才挂；
+- 每库一份真 keyframes：`@keyframes <prefix>-flow-dash { to { stroke-dashoffset: -10 } }`，
+  `stroke-dasharray` 是固定值（`6 4`），动画只推 `stroke-dashoffset`。
+- shadcn 这一份落在 `packages/shadcn/src/index.css`（`sh-flow-dash`）——它走 Tailwind
+  内联类，`.is-animated` 这种非工具类只能写在手写 CSS 里；同时给
+  `apps/web-shadcn/src/pages/home/index.flow.js` 的两条边加了 `animated: true`，
+  否则画廊里肉眼看不到这条修复。
+
+### 修复 1b：可见 path 的 `strokeWidth` 被 CSSOM 丢掉
+
+`style: { strokeWidth: ... }` 走的是 `viewStyleToCssText()`，它把 style 对象的键
+**原样当 CSS 属性名**写进 `cssText`，多词驼峰键会被 CSSOM 静默丢弃 —— 于是可见边一直是
+默认的 1px（代码本意是 2px，选中 3px），拖拽时的连线同理。改成 kebab-case
+（`"stroke-width"`）后生效。命中用的透明 path 本来就写的 `"stroke-width": 20`，是对的。
+
+### 修复 2：订阅泄漏
+
+原先 shadcn 的 Flow 包装层全程没有 `onUnmounted`：`canvas$.onNodesChange` /
+`onEdgesChange` / `onViewportChange`、节点的 `onStateChange`、边的 `onStateChange`
+都只创建不销毁，反复切换页面会累积监听。现在每个 wrapper 一律补齐：
+
+```ts
+onUnmounted() {
+  off_state();          // 或 off_nodes / off_edges / off_viewport
+  rest.onUnmounted?.();
+}
+```
+
+`FlowCanvasView` 额外负责：`$root.removeEventListener("wheel", onWheel)`、平移用的
+`document` 级 `mousemove` / `mouseup` 解绑、`document.body.style.cursor` 复位。
+
+### 修复 3：`onNodeRerun` 空实现
+
+`packages/ui-vm/src/flow/index.ts` 里的 `onNodeRerun() {}` 是个空函数：节点动作条
+点「重试」会 `canvas$.emit("NodeRerun", …)`，但发出来的事件**没人能订阅**。现在：
+
+- `enum Events` 增加 `NodeRerun = "NodeRerun"`；
+- `type TheTypesOfEvents` 增加 `[Events.NodeRerun]: { node: FlowNodeModel }`；
+- `onNodeRerun(handler)` 走真正的 `this.on(Events.NodeRerun, handler)` 并返回退订函数。
+
+注意：TS 的字符串枚举是**标称**的，字符串字面量对不上枚举成员类型，所以 emit 端
+必须显式放行 —— `node$.canvas$.emit("NodeRerun" as any, { node: node$ })`。
+这是 `Events` 未导出导致的既有约束，不是新引入的坑。
+
+### 已知边界（四库一致，未在本轮修改）
+
+1. **只画连线预览，不落边**：从 handle 拖出会画一条跟随鼠标的预览线（`window.flowConnecting`
+   + `FlowConnectingLine`），松手后清理，但不会真的创建边 —— 落边要自己调 `canvas$.addEdge`。
+2. **拖拽期间不做边缘自动滚动**：画布本身可 pan，节点拖拽不触发 pan。
+3. **`FlowMinimap` 不跟随节点拖拽实时更新**：里面的 `combine(store.nodes, () => …)`
+   只算一次、不订阅任何 ref，所以小地图的方块位置是首帧快照。

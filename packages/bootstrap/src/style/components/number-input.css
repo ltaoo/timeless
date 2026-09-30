@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Bootstrap 5.3 · NumberInput
+   上游没有步进器（依赖原生 type=number），这里用 .input-group 的思路补一层
+   右侧上下步进按钮。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .number-input {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+[data-tt-style="bootstrap"] .number-input .form-control {
+  padding-right: 2.5rem;
+}
+
+[data-tt-style="bootstrap"] .number-input-controls {
+  position: absolute;
+  top: calc(-1 * var(--bs-border-width));
+  right: calc(-1 * var(--bs-border-width));
+  bottom: calc(-1 * var(--bs-border-width));
+  display: flex;
+  flex-direction: column;
+  width: 2rem;
+  border-left: var(--bs-border-width) solid var(--input);
+  overflow: hidden;
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+
+[data-tt-style="bootstrap"] .number-input-step {
+  flex: 1 1 0%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: var(--background);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .number-input-step:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+[data-tt-style="bootstrap"] .number-input-step:active {
+  background-color: color-mix(in srgb, var(--accent) 80%, black);
+}
+
+[data-tt-style="bootstrap"] .number-input-step:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .number-input-step-up {
+  border-bottom: var(--bs-border-width) solid var(--input);
+}
+
+[data-tt-style="bootstrap"] .number-input-step[aria-disabled="true"],
+[data-tt-style="bootstrap"] .number-input-step[data-disabled],
+[data-tt-style="bootstrap"] .number-input-step.is-disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="bootstrap"] .number-input[data-disabled],
+[data-tt-style="bootstrap"] .number-input.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+[data-tt-style="bootstrap"] .number-input.is-invalid .form-control,
+[data-tt-style="bootstrap"] .number-input[data-invalid="true"] .form-control {
+  border-color: var(--bs-form-invalid-border-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .number-input-step {
+    transition: none;
+  }
+}

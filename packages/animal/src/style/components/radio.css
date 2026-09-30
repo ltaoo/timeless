@@ -1,0 +1,184 @@
+/* ==========================================================================
+   Animal Island · Radio（.animal-radio / .animal-radio-group）
+   --------------------------------------------------------------------------
+   结构：.animal-radio-group（或单独使用）
+             > .animal-radio-group__item（= .animal-check 行，见 checkbox.css）
+                 > [input 隐藏] + button.animal-radio + .animal-check__label
+
+   headless 层用 <button> 承载可点击圆点，因此以 [data-checked] / .is-checked
+   取代原生 :checked；标记用 ::after 绘制（模块内部不渲染任何图标）。
+
+   Animal Island 视觉（见 docs/design-system/design-rules.md 第 14 条硬指标）：
+     · Radio 是**重圆角方块**（12px），不是正圆，内部是勾号而非圆点
+     · 未选中 2px --input 描边 + 羊皮纸底；选中薄荷青实底（--primary）+ 白色勾
+     · hover 描边转薄荷青并上浮 1px，active 下压 1px
+     · 非法描边转 --destructive；禁用灰底降不透明度
+     · 焦点是黄色描边（--ring），永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-radio {
+  --radio-bg: var(--surface-1);
+  --radio-border: var(--input);
+  --radio-mark: var(--primary-foreground);
+
+  position: relative;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background-color: var(--radio-bg);
+  border: var(--border-width) solid var(--radio-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+/* 勾号：两段折线，用旋转的边框模拟 */
+[data-tt-style="animal"] .animal-radio::after {
+  content: "";
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  width: 5px;
+  height: 10px;
+  border: solid var(--radio-mark);
+  border-width: 0 2.5px 2.5px 0;
+  transform: translate(-50%, -50%) rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-radio:hover:not(:disabled):not(.is-disabled) {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+[data-tt-style="animal"] .animal-radio:active:not(:disabled):not(.is-disabled) {
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-radio:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- 选中 --- */
+[data-tt-style="animal"] .animal-radio[data-checked],
+[data-tt-style="animal"] .animal-radio.is-checked {
+  --radio-bg: var(--primary);
+  --radio-border: var(--primary);
+
+  box-shadow: 0 2px 0 0 var(--primary-pressed);
+}
+
+[data-tt-style="animal"] .animal-radio[data-checked]::after,
+[data-tt-style="animal"] .animal-radio.is-checked::after {
+  transform: translate(-50%, -50%) rotate(45deg) scale(1);
+}
+
+[data-tt-style="animal"] .animal-radio.is-checked:hover:not(:disabled):not(
+    .is-disabled
+  ) {
+  --radio-bg: var(--primary-hover);
+  --radio-border: var(--primary-hover);
+}
+
+[data-tt-style="animal"] .animal-radio.is-checked:active:not(:disabled):not(
+    .is-disabled
+  ) {
+  box-shadow: 0 0 0 0 var(--primary-pressed);
+  transform: translateY(1px);
+}
+
+/* --- 非法 --- */
+[data-tt-style="animal"] .animal-radio.is-invalid,
+[data-tt-style="animal"] .animal-radio[aria-invalid="true"],
+[data-tt-style="animal"] .animal-radio[data-invalid="true"] {
+  --radio-border: var(--destructive);
+}
+
+/* --- 禁用（放在选中之后，覆盖选中态） --- */
+[data-tt-style="animal"] .animal-radio:disabled,
+[data-tt-style="animal"] .animal-radio[disabled],
+[data-tt-style="animal"] .animal-radio[data-disabled],
+[data-tt-style="animal"] .animal-radio.is-disabled {
+  --radio-bg: var(--surface-disabled);
+  --radio-border: var(--border-subtle);
+  --radio-mark: var(--foreground-disabled);
+
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  box-shadow: none;
+  transform: none;
+  pointer-events: none;
+}
+
+/* 选中且禁用：保留可辨识的薄荷淡底与白勾 */
+[data-tt-style="animal"] .animal-radio.is-checked:disabled,
+[data-tt-style="animal"] .animal-radio.is-checked.is-disabled,
+[data-tt-style="animal"] .animal-radio[data-checked][data-disabled] {
+  --radio-bg: color-mix(in srgb, var(--primary) 40%, var(--surface-disabled));
+  --radio-border: color-mix(
+    in srgb,
+    var(--primary) 40%,
+    var(--surface-disabled)
+  );
+  --radio-mark: var(--surface-1);
+
+  box-shadow: none;
+}
+
+/* --- 单选组 --- */
+[data-tt-style="animal"] .animal-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-sm);
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="animal"] .animal-radio-group--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--spacer-lg);
+}
+
+[data-tt-style="animal"] .animal-radio-group__item {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-radio-group__item:hover {
+  background-color: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+[data-tt-style="animal"] .animal-radio-group__item:active {
+  background-color: color-mix(in srgb, var(--primary) 13%, transparent);
+}
+
+[data-tt-style="animal"] .animal-radio-group__item:focus-within {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-radio-group__item.is-disabled,
+[data-tt-style="animal"] .animal-radio-group__item[data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-radio,
+  [data-tt-style="animal"] .animal-radio::after,
+  [data-tt-style="animal"] .animal-radio-group__item {
+    transition: none;
+  }
+}

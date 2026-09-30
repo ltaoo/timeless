@@ -1,0 +1,280 @@
+/* ==========================================================================
+   Fluent 2 · DateRangePicker（.fl-daterange + 双月浮层）
+   --------------------------------------------------------------------------
+   触发器与 date-picker 同盒子指标；浮层同 surface-1 + 1px --stroke1 +
+   8px 圆角 + --shadow-16。两个月份面板并排，中间用 1px --stroke2 竖分隔。
+
+   区间表达（Fluent 的 RangeCalendar）：
+     · .is-in-range    区间内 —— --brand-fill 的 12% 淡底，左右直角以便连成带
+     · .is-range-start / .is-range-end  端点 —— 内层 __day 用 --compound-brand 实心
+     · .is-single      只选中一天（两端重合）—— 圆角收成完整 4px
+     · .is-today       1px --compound-brand 描边（未选中时）
+     · .is-outside     非当月 —— --foreground-3
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-daterange {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 20px;
+  color: var(--foreground);
+  text-align: left;
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-daterange:hover {
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="fluent"] .fl-daterange.is-open,
+[data-tt-style="fluent"] .fl-daterange:focus-within {
+  border-bottom-color: var(--compound-brand);
+  box-shadow: inset 0 -2px 0 var(--compound-brand);
+  outline: none;
+}
+
+[data-tt-style="fluent"] .fl-daterange__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-daterange__value.is-placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="fluent"] .fl-daterange__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+}
+
+/* --- 浮层 --- */
+[data-tt-style="fluent"] .fl-daterange__content {
+  position: relative;
+  display: inline-block;
+  width: max-content;
+  padding: 12px;
+  color: var(--popover-foreground);
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-16);
+  outline: none;
+  animation: fl-daterange-in var(--duration-normal) var(--easing-decelerate)
+    both;
+}
+
+[data-tt-style="fluent"] .fl-daterange__calendars {
+  display: flex;
+  align-items: flex-start;
+}
+
+[data-tt-style="fluent"] .fl-daterange__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+[data-tt-style="fluent"] .fl-daterange__panel.is-left {
+  padding-right: 20px;
+}
+
+[data-tt-style="fluent"] .fl-daterange__panel.is-right {
+  padding-left: 20px;
+  border-left: var(--strokeWidthThin) solid var(--stroke2);
+}
+
+[data-tt-style="fluent"] .fl-daterange__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+[data-tt-style="fluent"] .fl-daterange__title {
+  flex: 1 1 auto;
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightSemibold);
+  color: var(--foreground);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 翻月按钮：原生 <button>，直接落到元素规则（不走 --btn-* 覆盖） */
+[data-tt-style="fluent"] .fl-daterange__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--foreground-3);
+  background-color: transparent;
+  border: var(--strokeWidthThin) solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard),
+    color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-daterange__nav:hover {
+  color: var(--foreground);
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-daterange__nav:active {
+  background-color: var(--surface-1-pressed);
+}
+
+[data-tt-style="fluent"] .fl-daterange__nav:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-daterange__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-tt-style="fluent"] .fl-daterange__weekdays,
+[data-tt-style="fluent"] .fl-daterange__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+[data-tt-style="fluent"] .fl-daterange__weekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  font-size: var(--font-size-xs);
+  color: var(--foreground-3);
+  user-select: none;
+}
+
+/* 日期格：32px 方形，区间底铺在格子上、端点实心铺在内层 __day 上。
+   primitive 渲染原生 <button>，所以区间底/圆角必须直接写在 cell 上，
+   不能靠 --btn-*（那个只对 .fl-btn 生效）。 */
+[data-tt-style="fluent"] .fl-daterange__cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard),
+    border-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-daterange__cell:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-daterange__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--fontWeightRegular);
+  line-height: 1;
+  color: var(--foreground);
+  border: var(--strokeWidthThin) solid transparent;
+  border-radius: var(--radius);
+  transition: background-color var(--duration-faster) var(--easing-standard),
+    color var(--duration-faster) var(--easing-standard),
+    border-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-daterange__cell.is-outside .fl-daterange__day {
+  color: var(--foreground-3);
+}
+
+/* --- 区间内：12% 品牌淡底，左右直角连成带 --- */
+[data-tt-style="fluent"] .fl-daterange__cell.is-in-range {
+  background-color: color-mix(in srgb, var(--brand-fill) 12%, transparent);
+}
+
+[data-tt-style="fluent"] .fl-daterange__cell.is-in-range:hover {
+  background-color: color-mix(in srgb, var(--brand-fill) 18%, transparent);
+}
+
+/* --- 端点：内层实心 + 外侧圆角 --- */
+[data-tt-style="fluent"] .fl-daterange__day.is-active {
+  color: var(--colorNeutralForegroundOnBrand);
+  font-weight: var(--fontWeightSemibold);
+  background-color: var(--compound-brand);
+  border-color: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-daterange__cell.is-range-start {
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+[data-tt-style="fluent"] .fl-daterange__cell.is-range-end {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+[data-tt-style="fluent"] .fl-daterange__cell.is-single,
+[data-tt-style="fluent"] .fl-daterange__cell.is-range-start.is-range-end {
+  background-color: transparent;
+  border-radius: var(--radius);
+}
+
+/* --- 今天：描边（不覆盖已选中的实心） --- */
+[data-tt-style="fluent"]
+  .fl-daterange__cell.is-today
+  .fl-daterange__day:not(.is-active) {
+  border-color: var(--compound-brand);
+}
+
+@keyframes fl-daterange-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-daterange,
+  [data-tt-style="fluent"] .fl-daterange__content,
+  [data-tt-style="fluent"] .fl-daterange__day {
+    transition: none;
+    animation: none;
+  }
+}

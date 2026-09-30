@@ -1,0 +1,141 @@
+/* ==========================================================================
+   Fluent 2 · Input + 通用控件基类（.fl-control）
+   --------------------------------------------------------------------------
+   .fl-control 是 input / textarea / number-input 共用的 Fluent 输入控件盒子：
+     · 1px --stroke1 描边、4px 圆角（--radius）、32px 高度
+     · hover 换 --stroke1-hover
+     · 聚焦时底部出现 2px --compound-brand 下划线（inset box-shadow，无位移）
+     · 错误态换 --destructive 描边
+   .fl-input 是本组件的定位容器（承载 clear / loading 定位）。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-input {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-control {
+  display: block;
+  width: 100%;
+  height: var(--control-height);
+  min-height: var(--control-height);
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightRegular);
+  line-height: 20px;
+  color: var(--foreground);
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-bottom-color: var(--stroke1);
+  border-radius: var(--radius);
+  outline: none;
+  appearance: none;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-control::placeholder {
+  color: var(--foreground-4);
+  opacity: 1;
+}
+
+[data-tt-style="fluent"] .fl-control:hover:not(.is-disabled):not(:disabled) {
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="fluent"] .fl-control:focus,
+[data-tt-style="fluent"] .fl-control:focus-visible,
+[data-tt-style="fluent"] .fl-control.is-focused {
+  border-color: var(--stroke1);
+  border-bottom-color: var(--compound-brand);
+  box-shadow: inset 0 -2px 0 var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-control:disabled,
+[data-tt-style="fluent"] .fl-control[data-disabled="true"],
+[data-tt-style="fluent"] .fl-control.is-disabled {
+  color: var(--foreground-disabled);
+  background-color: var(--surface-disabled);
+  border-color: var(--stroke-disabled);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+[data-tt-style="fluent"] .fl-control[aria-invalid="true"],
+[data-tt-style="fluent"] .fl-control[data-invalid="true"],
+[data-tt-style="fluent"] .fl-control.is-invalid {
+  border-color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-control.is-invalid:focus,
+[data-tt-style="fluent"] .fl-control.is-invalid.is-focused,
+[data-tt-style="fluent"] .fl-control[aria-invalid="true"]:focus {
+  border-bottom-color: var(--destructive);
+  box-shadow: inset 0 -2px 0 var(--destructive);
+}
+
+/* 右侧有 clear / loading 时给文字让位 */
+[data-tt-style="fluent"] .fl-control.has-affix {
+  padding-right: 30px;
+}
+
+/* --- 清除按钮 --- */
+[data-tt-style="fluent"] .fl-input__clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--foreground-3);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-input__clear:hover {
+  background: var(--surface-4);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-input__clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+/* --- 加载指示 --- */
+[data-tt-style="fluent"] .fl-input__loading {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border: 2px solid var(--foreground-3);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: fl-spin 1s linear infinite;
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-input__loading-inner {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-control,
+  [data-tt-style="fluent"] .fl-input__loading {
+    transition: none;
+    animation: none;
+  }
+}

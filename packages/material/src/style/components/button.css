@@ -1,0 +1,173 @@
+/* ==========================================================================
+   Material 3 · Button
+   五种形态：filled / tonal / outlined / elevated / text。
+   高度 40px、20px 全圆角（--radius-pill）；hover / pressed / focus 统一用
+   state layer（::before 叠一层 currentColor，透明度取自 --state-*）。
+   局部 token：--m3-btn-container / --m3-btn-label / --m3-btn-border。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-btn {
+  --m3-btn-container: var(--primary);
+  --m3-btn-label: var(--primary-foreground);
+  --m3-btn-border: transparent;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: var(--control-height);
+  padding: 0 1.5rem;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--label-size);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--m3-btn-label);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  background-color: var(--m3-btn-container);
+  border: 1px solid var(--m3-btn-border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard),
+    border-color var(--duration-short) var(--easing-standard);
+}
+
+/* --- state layer：盖住整颗按钮（含 label），随交互态改透明度 --- */
+[data-tt-style="material"] .m3-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: currentColor;
+  opacity: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-btn:hover::before {
+  opacity: var(--state-hover);
+}
+
+[data-tt-style="material"] .m3-btn:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring-color);
+}
+
+[data-tt-style="material"] .m3-btn:focus-visible::before {
+  opacity: var(--state-focus);
+}
+
+[data-tt-style="material"] .m3-btn:active::before {
+  opacity: var(--state-pressed);
+}
+
+[data-tt-style="material"] .m3-btn:disabled,
+[data-tt-style="material"] .m3-btn[data-disabled="true"],
+[data-tt-style="material"] .m3-btn.is-disabled {
+  opacity: var(--disabled-opacity);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* --- loading --- */
+[data-tt-style="material"] .m3-btn.is-loading {
+  pointer-events: none;
+}
+
+[data-tt-style="material"] .m3-btn.is-loading::before {
+  opacity: var(--state-hover);
+}
+
+[data-tt-style="material"] .m3-btn .m3-btn__spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: m3-spin 0.9s linear infinite;
+}
+
+@keyframes m3-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- 尺寸 --- */
+[data-tt-style="material"] .m3-btn--sm {
+  height: var(--control-height-sm);
+  padding: 0 1rem;
+  font-size: var(--font-size-sm);
+}
+
+[data-tt-style="material"] .m3-btn--lg {
+  height: var(--control-height-lg);
+  padding: 0 1.5rem;
+  font-size: 1rem;
+}
+
+[data-tt-style="material"] .m3-btn--icon {
+  width: var(--control-height);
+  padding: 0;
+}
+
+/* --- 形态：filled（默认） --- */
+[data-tt-style="material"] .m3-btn--filled {
+  --m3-btn-container: var(--primary);
+  --m3-btn-label: var(--primary-foreground);
+}
+
+/* --- 形态：tonal --- */
+[data-tt-style="material"] .m3-btn--tonal {
+  --m3-btn-container: var(--secondary-container);
+  --m3-btn-label: var(--secondary-container-foreground);
+}
+
+/* --- 形态：outlined --- */
+[data-tt-style="material"] .m3-btn--outlined {
+  --m3-btn-container: transparent;
+  --m3-btn-label: var(--primary);
+  --m3-btn-border: var(--outline);
+}
+
+/* --- 形态：elevated --- */
+[data-tt-style="material"] .m3-btn--elevated {
+  --m3-btn-container: var(--surface-container-low);
+  --m3-btn-label: var(--primary);
+  box-shadow: var(--elevation-1);
+}
+
+[data-tt-style="material"] .m3-btn--elevated:hover {
+  box-shadow: var(--elevation-2);
+}
+
+/* --- 形态：text --- */
+[data-tt-style="material"] .m3-btn--text {
+  --m3-btn-container: transparent;
+  --m3-btn-label: var(--primary);
+}
+
+/* --- 语义：destructive(filled) --- */
+[data-tt-style="material"] .m3-btn--destructive {
+  --m3-btn-container: var(--destructive);
+  --m3-btn-label: var(--destructive-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-btn,
+  [data-tt-style="material"] .m3-btn::before {
+    transition: none;
+  }
+
+  [data-tt-style="material"] .m3-btn .m3-btn__spinner {
+    animation: none;
+  }
+}

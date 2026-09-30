@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Animal Island · Switch（.animal-switch）
+   --------------------------------------------------------------------------
+   结构：button.animal-switch（role="switch"）> .animal-switch__thumb
+
+   headless 层用 <button> 承载开关，因此以 [data-checked] / .is-checked 取代
+   原生 :checked；禁用同时有 [data-disabled] / .is-disabled / [disabled]。
+
+   Animal Island 视觉（见 docs/design-system/design-rules.md 第 7 条硬指标）：
+     · **只有轨道有内阴影**（inset 0 2px 4px）：OFF 用暖棕 15%，
+       ON 用 --shadow-switch（= 成功色 #5a9e1e）的 24% 叠色
+     · 滑块是扁平圆片：2.5px 描边（--border-width-input），**没有外阴影**，
+       垂直居中恒定用 transform: translateY(-50%)
+     · ON 轨道填充成功绿（--success，上游 switch 的招牌色）
+     · hover 上浮 1px、active 下压 1px；禁用灰底无内阴影
+     · 焦点是黄色描边（--ring），永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-switch {
+  --switch-track: var(--surface-2);
+  --switch-border: var(--border);
+  --switch-thumb: var(--surface-1);
+  --switch-thumb-border: var(--border);
+  --switch-shadow: inset 0 2px 4px
+    color-mix(in srgb, var(--card-foreground) 15%, transparent);
+
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background-color: var(--switch-track);
+  border: var(--border-width) solid var(--switch-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--switch-shadow);
+  cursor: pointer;
+  transition: background-color var(--duration-normal) var(--easing-standard),
+    border-color var(--duration-normal) var(--easing-standard),
+    box-shadow var(--duration-normal) var(--easing-standard),
+    transform var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-switch:hover:not(:disabled):not(.is-disabled) {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+[data-tt-style="animal"] .animal-switch:active:not(:disabled):not(.is-disabled) {
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-switch:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- ON：成功绿轨道 + 绿色内阴影 --- */
+[data-tt-style="animal"] .animal-switch[data-checked],
+[data-tt-style="animal"] .animal-switch.is-checked {
+  --switch-track: var(--success);
+  --switch-border: var(--success);
+  --switch-thumb-border: var(--success);
+  --switch-shadow: inset 0 2px 4px
+    color-mix(in srgb, var(--shadow-switch) 24%, transparent);
+}
+
+[data-tt-style="animal"] .animal-switch.is-checked:hover:not(:disabled):not(
+    .is-disabled
+  ) {
+  --switch-track: color-mix(in srgb, var(--success) 88%, white);
+  --switch-border: color-mix(in srgb, var(--success) 88%, white);
+  --switch-thumb-border: color-mix(in srgb, var(--success) 88%, white);
+}
+
+/* --- 禁用（放在 ON 之后，覆盖选中态） --- */
+[data-tt-style="animal"] .animal-switch:disabled,
+[data-tt-style="animal"] .animal-switch[disabled],
+[data-tt-style="animal"] .animal-switch[data-disabled],
+[data-tt-style="animal"] .animal-switch.is-disabled {
+  --switch-track: var(--surface-disabled);
+  --switch-border: var(--border-subtle);
+  --switch-thumb: var(--surface-1);
+  --switch-thumb-border: var(--border-subtle);
+  --switch-shadow: none;
+
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  transform: none;
+  pointer-events: none;
+}
+
+/* --- 扁平滑块：无外阴影，只有 2.5px 描边 --- */
+[data-tt-style="animal"] .animal-switch__thumb {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border: var(--border-width-input) solid var(--switch-thumb-border);
+  border-radius: 50%;
+  background-color: var(--switch-thumb);
+  transform: translate(0, -50%);
+  transition: transform var(--duration-normal) var(--easing-standard),
+    background-color var(--duration-normal) var(--easing-standard),
+    border-color var(--duration-normal) var(--easing-standard);
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-switch[data-checked] .animal-switch__thumb,
+[data-tt-style="animal"] .animal-switch.is-checked .animal-switch__thumb {
+  transform: translate(17px, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-switch,
+  [data-tt-style="animal"] .animal-switch__thumb {
+    transition: none;
+  }
+}

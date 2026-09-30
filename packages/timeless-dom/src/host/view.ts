@@ -36,7 +36,7 @@ export function DOMView(props: {
       return true;
     },
     render() {
-      const $elm = document.createElement("div");
+      const $elm = document.createElement(props.elm.state.as || "div") as HTMLDivElement;
       box$.methods.set$elm($elm);
       box$.methods.applyState(props.elm.state, { initial: true });
       const $fragment = box$.methods.render(props.elm.children);

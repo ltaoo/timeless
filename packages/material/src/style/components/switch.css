@@ -1,0 +1,83 @@
+/* ==========================================================================
+   Material 3 · Switch
+   轨道 52x32、thumb 24px；选中轨道 --primary、thumb --on-primary，
+   且 thumb 放大到 28px（M3 的按压/选中细节）。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 52px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background-color: var(--surface-container-highest);
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-short) var(--easing-standard),
+    border-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-switch:hover {
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--foreground) var(--state-hover), transparent);
+}
+
+[data-tt-style="material"] .m3-switch:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring-color);
+}
+
+[data-tt-style="material"] .m3-switch.is-checked,
+[data-tt-style="material"] .m3-switch[data-checked] {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-switch.is-checked:hover,
+[data-tt-style="material"] .m3-switch[data-checked]:hover {
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) var(--state-hover), transparent);
+}
+
+[data-tt-style="material"] .m3-switch:disabled,
+[data-tt-style="material"] .m3-switch[data-disabled],
+[data-tt-style="material"] .m3-switch.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+[data-tt-style="material"] .m3-switch__thumb {
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--outline);
+  transform: translate(0, -50%);
+  transition:
+    transform var(--duration-medium) var(--easing-emphasized),
+    width var(--duration-medium) var(--easing-emphasized),
+    height var(--duration-medium) var(--easing-emphasized),
+    background-color var(--duration-short) var(--easing-standard);
+  pointer-events: none;
+}
+
+[data-tt-style="material"] .m3-switch.is-checked .m3-switch__thumb,
+[data-tt-style="material"] .m3-switch[data-checked] .m3-switch__thumb {
+  width: 28px;
+  height: 28px;
+  background-color: var(--primary-foreground);
+  transform: translate(14px, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-switch,
+  [data-tt-style="material"] .m3-switch__thumb {
+    transition: none;
+  }
+}

@@ -1,0 +1,54 @@
+/* ==========================================================================
+   Animal Island · Link（.animal-link）
+   --------------------------------------------------------------------------
+   上游硬指标：
+     · 链接文字用薄荷青品牌色 --primary，hover 换 --primary-hover，
+       active 换 --primary-pressed
+     · hover 才出现下划线；active 时下划线保留
+     · 焦点是黄色描边（--ring），永不用蓝色
+     · base.css 已给作用域内的 <a> 兜底，这里是显式类名版本
+
+   圆角只用于焦点轮廓贴合，不做胶囊形（链接是文字，不是控件）。
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+[data-tt-style="animal"] .animal-link:active {
+  color: var(--primary-pressed);
+  text-decoration: underline;
+}
+
+/* 焦点：黄色描边（--ring = --animal-focus-yellow），永不用蓝色 */
+[data-tt-style="animal"] .animal-link:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-link.is-disabled,
+[data-tt-style="animal"] .animal-link[aria-disabled="true"],
+[data-tt-style="animal"] .animal-link[data-disabled="true"],
+[data-tt-style="animal"] .animal-link[disabled] {
+  color: var(--foreground-disabled);
+  text-decoration: none;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-link {
+    transition: none;
+  }
+}

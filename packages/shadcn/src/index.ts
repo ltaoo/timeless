@@ -1,3 +1,4 @@
+import { Gallery } from "./modules/gallery";
 import { Input } from "./modules/input";
 import { FileDropZone, FileInput } from "./modules/file-picker";
 import { NumberInput } from "./modules/number-input";
@@ -95,6 +96,14 @@ import {
   FlowMinimap,
   FlowControls,
 } from "./modules/flow";
+import {
+  Tree,
+  TreeRow,
+  TreeCheckbox,
+  TreeIndicator,
+  TreeEmpty,
+  TREE_CLASSES,
+} from "./modules/tree";
 
 try {
   if (typeof window !== "undefined") {
@@ -107,6 +116,7 @@ console.log("shadcn.version" + __Version);
 export const TimelessShadcnVersion = __Version;
 
 export {
+  Gallery,
   Input,
   FileInput,
   FileDropZone,
@@ -193,6 +203,12 @@ export {
   FlowBackground,
   FlowMinimap,
   FlowControls,
+  Tree,
+  TreeRow,
+  TreeCheckbox,
+  TreeIndicator,
+  TreeEmpty,
+  TREE_CLASSES,
   // toast,
   // success,
   // error,

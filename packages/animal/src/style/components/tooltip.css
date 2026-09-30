@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Animal Island · Tooltip
+   --------------------------------------------------------------------------
+   结构：.animal-tooltip > .animal-tooltip__arrow / .animal-tooltip__inner
+
+   上游视觉：工具提示是本风格里唯一的**深色小气泡** —— 不落在奶油纸浮层语言里，
+   而是用暖棕前景色派生出的一块「深棕羊皮纸」：
+     · 底 color-mix(in srgb, var(--foreground) 85%, black)
+     · 字用奶油底 --background
+     · 2px 描边（--border-width），颜色再深一档保持 token 化
+     · 圆角接近胶囊（--radius-pill），小尺寸下更柔和
+     · 进场淡入 + 微缩放，关键帧 animal-tooltip-in
+
+   注意：headless 的 tooltip 是全局单例，模块侧拿不到 popper 状态，
+   因此箭头固定按默认 side="top" 居中放在气泡下沿（对应被锚定元素在上方）。
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-tooltip {
+  --tt-tooltip-bg: color-mix(in srgb, var(--foreground) 85%, black);
+  --tt-tooltip-color: var(--background);
+  --tt-tooltip-border: color-mix(in srgb, var(--foreground) 60%, black);
+
+  z-index: 1080;
+  display: block;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height);
+  text-align: start;
+  text-decoration: none;
+  white-space: normal;
+  opacity: 1;
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-tooltip__inner {
+  max-width: 15rem;
+  padding: 6px 12px;
+  color: var(--tt-tooltip-color);
+  text-align: center;
+  background-color: var(--tt-tooltip-bg);
+  border: var(--border-width) solid var(--tt-tooltip-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow);
+  animation: animal-tooltip-in var(--duration-fast) var(--easing-standard) both;
+}
+
+[data-tt-style="animal"] .animal-tooltip__arrow {
+  position: absolute;
+  left: 50%;
+  bottom: -0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--tt-tooltip-bg);
+  border-right: var(--border-width) solid var(--tt-tooltip-border);
+  border-bottom: var(--border-width) solid var(--tt-tooltip-border);
+  transform: translateX(-50%) rotate(45deg);
+  pointer-events: none;
+}
+
+@keyframes animal-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-tooltip__inner {
+    animation: none;
+  }
+}

@@ -1,0 +1,38 @@
+/* ==========================================================================
+   Bootstrap 5.3 · CheckboxGroup
+   上游没有独立的 group 组件（用 .form-check 纵向堆叠即可），这里补一层布局容器。
+   注意：bootstrap.css 未列出本文件，由 checkbox.css 顶部 @import 引入。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="bootstrap"] .checkbox-group-horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+[data-tt-style="bootstrap"] .checkbox-group-item {
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="bootstrap"] .checkbox-group-item:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+[data-tt-style="bootstrap"] .checkbox-group-item.is-disabled {
+  opacity: var(--disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .checkbox-group-item {
+    transition: none;
+  }
+}

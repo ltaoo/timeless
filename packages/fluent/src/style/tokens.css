@@ -1,0 +1,336 @@
+/* ==========================================================================
+   Fluent 2 (Windows 11 / Fluent UI) — 上游原始 token（第一层）
+   --------------------------------------------------------------------------
+   变量名照抄 @fluentui/tokens 的 webLightTheme / webDarkTheme 键名，保留
+   camelCase（--colorNeutralBackground1 / --colorBrandBackground …），因为这些
+   名字本身就是 Fluent 的公开 token 契约。值手工从 @fluentui/tokens 抄录
+   （Fluent 没有官方打包的 CSS 变量产物）。
+
+   全部挂在 [data-tt-style="fluent"] 之下做作用域隔离；暗色挂 .dark /
+   [data-theme="dark"]，与 app.setTheme 对齐。
+   组件代码不读这一层，只读 alias.css 里的 Timeless 语义别名。
+   ========================================================================== */
+
+[data-tt-style="fluent"] {
+  /* --- 中性表面 colorNeutralBackground* --- */
+  --colorNeutralBackground1: #ffffff;
+  --colorNeutralBackground1Hover: #f5f5f5;
+  --colorNeutralBackground1Pressed: #e0e0e0;
+  --colorNeutralBackground1Selected: #ebebeb;
+  --colorNeutralBackground2: #fafafa;
+  --colorNeutralBackground2Hover: #f0f0f0;
+  --colorNeutralBackground2Pressed: #dbdbdb;
+  --colorNeutralBackground2Selected: #e6e6e6;
+  --colorNeutralBackground3: #f5f5f5;
+  --colorNeutralBackground3Hover: #ebebeb;
+  --colorNeutralBackground3Pressed: #d6d6d6;
+  --colorNeutralBackground3Selected: #e0e0e0;
+  --colorNeutralBackground4: #f0f0f0;
+  --colorNeutralBackground4Hover: #fafafa;
+  --colorNeutralBackground4Pressed: #f5f5f5;
+  --colorNeutralBackground4Selected: #ffffff;
+  --colorNeutralBackground5: #ebebeb;
+  --colorNeutralBackground6: #e6e6e6;
+  --colorNeutralBackgroundDisabled: #f0f0f0;
+  --colorNeutralBackgroundInverted: #292929;
+
+  /* --- 中性前景 colorNeutralForeground* --- */
+  --colorNeutralForeground1: #242424;
+  --colorNeutralForeground1Hover: #242424;
+  --colorNeutralForeground1Pressed: #242424;
+  --colorNeutralForeground1Selected: #242424;
+  --colorNeutralForeground2: #424242;
+  --colorNeutralForeground2Hover: #242424;
+  --colorNeutralForeground2Pressed: #242424;
+  --colorNeutralForeground2Selected: #242424;
+  --colorNeutralForeground3: #616161;
+  --colorNeutralForeground3Hover: #424242;
+  --colorNeutralForeground3Pressed: #424242;
+  --colorNeutralForeground3Selected: #424242;
+  --colorNeutralForeground4: #707070;
+  --colorNeutralForegroundDisabled: #bdbdbd;
+  --colorNeutralForegroundOnBrand: #ffffff;
+  --colorNeutralForegroundInverted: #ffffff;
+  --colorNeutralForeground2BrandHover: #0f6cbd;
+  --colorNeutralForeground2BrandPressed: #115ea3;
+  --colorNeutralForeground2BrandSelected: #0f6cbd;
+
+  /* --- 中性描边 colorNeutralStroke* --- */
+  --colorNeutralStroke1: #d1d1d1;
+  --colorNeutralStroke1Hover: #c7c7c7;
+  --colorNeutralStroke1Pressed: #b3b3b3;
+  --colorNeutralStroke1Selected: #b3b3b3;
+  --colorNeutralStroke2: #e0e0e0;
+  --colorNeutralStroke3: #f0f0f0;
+  --colorNeutralStrokeAccessible: #616161;
+  --colorNeutralStrokeAccessibleHover: #575757;
+  --colorNeutralStrokeAccessiblePressed: #4d4d4d;
+  --colorNeutralStrokeAccessibleSelected: #0f6cbd;
+  --colorNeutralStrokeDisabled: #e0e0e0;
+  --colorNeutralStrokeOnBrand: #ffffff;
+
+  /* --- 中性阴影 --- */
+  --colorNeutralShadowAmbient: rgba(0, 0, 0, 0.12);
+  --colorNeutralShadowKey: rgba(0, 0, 0, 0.14);
+
+  /* --- 品牌 colorBrand* --- */
+  --colorBrandBackground: #0f6cbd;
+  --colorBrandBackgroundHover: #115ea3;
+  --colorBrandBackgroundPressed: #0c3b5e;
+  --colorBrandBackgroundSelected: #0f548c;
+  --colorBrandBackground2: #ebf3fc;
+  --colorBrandBackground2Hover: #cfe4fa;
+  --colorBrandBackground2Pressed: #96c6fa;
+  --colorBrandBackgroundStatic: #0f6cbd;
+  --colorBrandBackgroundInverted: #ffffff;
+  --colorBrandForeground1: #0f6cbd;
+  --colorBrandForeground2: #115ea3;
+  --colorBrandForeground2Hover: #0f548c;
+  --colorBrandForeground2Pressed: #0a2e4a;
+  --colorBrandForegroundLink: #115ea3;
+  --colorBrandForegroundLinkHover: #0f548c;
+  --colorBrandForegroundLinkPressed: #0c3b5e;
+  --colorBrandForegroundLinkSelected: #115ea3;
+  --colorBrandForegroundOnLight: #0f6cbd;
+  --colorBrandStroke1: #0f6cbd;
+  --colorBrandStroke2: #b4d6fa;
+  --colorBrandStroke2Hover: #77b7f7;
+  --colorBrandStroke2Pressed: #0f6cbd;
+
+  /* --- 复合品牌（checkbox/radio/switch/slider 的选中色） --- */
+  --colorCompoundBrandBackground: #0f6cbd;
+  --colorCompoundBrandBackgroundHover: #115ea3;
+  --colorCompoundBrandBackgroundPressed: #0c3b5e;
+  --colorCompoundBrandStroke: #0f6cbd;
+  --colorCompoundBrandStrokeHover: #115ea3;
+  --colorCompoundBrandStrokePressed: #0c3b5e;
+
+  /* --- 状态色 colorStatus* --- */
+  --colorStatusSuccessBackground1: #f1faf1;
+  --colorStatusSuccessBackground2: #9fd89f;
+  --colorStatusSuccessBackground3: #107c10;
+  --colorStatusSuccessForeground1: #0e700e;
+  --colorStatusSuccessForeground2: #0e700e;
+  --colorStatusSuccessForeground3: #107c10;
+  --colorStatusSuccessBorderActive: #107c10;
+  --colorStatusSuccessBorder1: #9fd89f;
+  --colorStatusSuccessBorder2: #107c10;
+
+  --colorStatusWarningBackground1: #fff9f5;
+  --colorStatusWarningBackground2: #fdcfb4;
+  --colorStatusWarningBackground3: #f7630c;
+  --colorStatusWarningForeground1: #bc4b09;
+  --colorStatusWarningForeground3: #bc4b09;
+  --colorStatusWarningBorderActive: #f7630c;
+  --colorStatusWarningBorder1: #fdcfb4;
+  --colorStatusWarningBorder2: #bc4b09;
+
+  --colorStatusDangerBackground1: #fdf3f4;
+  --colorStatusDangerBackground2: #eeacb2;
+  --colorStatusDangerBackground3: #c50f1f;
+  --colorStatusDangerForeground1: #b10e1c;
+  --colorStatusDangerForeground3: #b10e1c;
+  --colorStatusDangerBorderActive: #c50f1f;
+  --colorStatusDangerBorder1: #eeacb2;
+  --colorStatusDangerBorder2: #c50f1f;
+
+  /* --- 品牌色板 colorPalette* （组件里用到的少量） --- */
+  --colorPaletteRedBackground3: #d13438;
+  --colorPaletteRedForeground1: #bc2f32;
+  --colorPaletteGreenBackground3: #107c10;
+  --colorPaletteGreenForeground1: #0e700e;
+  --colorPaletteMarigoldBackground3: #eaa300;
+
+  /* --- 字体 --- */
+  --fontFamilyBase: "Segoe UI", "Segoe UI Web (West European)", -apple-system,
+    BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  --fontFamilyMonospace: Consolas, "Courier New", Courier, monospace;
+  --fontSizeBase100: 10px;
+  --fontSizeBase200: 12px;
+  --fontSizeBase300: 14px;
+  --fontSizeBase400: 16px;
+  --fontSizeBase500: 20px;
+  --fontSizeBase600: 24px;
+  --fontWeightRegular: 400;
+  --fontWeightMedium: 500;
+  --fontWeightSemibold: 600;
+  --fontWeightBold: 700;
+  --lineHeightBase200: 16px;
+  --lineHeightBase300: 20px;
+  --lineHeightBase400: 22px;
+  --lineHeightBase500: 28px;
+  --lineHeightBase600: 32px;
+
+  /* --- 圆角 --- */
+  --borderRadiusNone: 0;
+  --borderRadiusSmall: 2px;
+  --borderRadiusMedium: 4px;
+  --borderRadiusLarge: 6px;
+  --borderRadiusXLarge: 8px;
+  --borderRadiusCircular: 10000px;
+
+  /* --- 描边宽度 --- */
+  --strokeWidthThin: 1px;
+  --strokeWidthThick: 2px;
+  --strokeWidthThicker: 3px;
+  --strokeWidthThickest: 4px;
+
+  /* --- 阴影 shadow2 / 4 / 8 / 16 / 28 / 64 --- */
+  --shadow2: 0 0 2px var(--colorNeutralShadowAmbient),
+    0 1px 2px var(--colorNeutralShadowKey);
+  --shadow4: 0 0 2px var(--colorNeutralShadowAmbient),
+    0 2px 4px var(--colorNeutralShadowKey);
+  --shadow8: 0 0 2px var(--colorNeutralShadowAmbient),
+    0 4px 8px var(--colorNeutralShadowKey);
+  --shadow16: 0 0 2px var(--colorNeutralShadowAmbient),
+    0 8px 16px var(--colorNeutralShadowKey);
+  --shadow28: 0 0 8px var(--colorNeutralShadowAmbient),
+    0 14px 28px var(--colorNeutralShadowKey);
+  --shadow64: 0 0 8px var(--colorNeutralShadowAmbient),
+    0 32px 64px var(--colorNeutralShadowKey);
+
+  /* --- 动效曲线 --- */
+  --curveAccelerateMax: cubic-bezier(0.9, 0.1, 1, 0.2);
+  --curveAccelerateMid: cubic-bezier(1, 0, 1, 1);
+  --curveDecelerateMax: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --curveDecelerateMid: cubic-bezier(0, 0, 0, 1);
+  --curveEasyEase: cubic-bezier(0.33, 0, 0.67, 1);
+  --durationUltraFast: 50ms;
+  --durationFaster: 100ms;
+  --durationFast: 150ms;
+  --durationNormal: 200ms;
+  --durationSlow: 300ms;
+
+  /* --- 焦点 --- */
+  --focusRingWidth: 2px;
+  --focusRingColor: #000000;
+  --focusRingOffset: 0px;
+
+  /* --- 尺寸基线 --- */
+  --controlHeightSmall: 24px;
+  --controlHeightMedium: 32px;
+  --controlHeightLarge: 40px;
+}
+
+/* --- 暗色：webDarkTheme 的对应值 --- */
+.dark [data-tt-style="fluent"],
+[data-theme="dark"] [data-tt-style="fluent"],
+[data-tt-style="fluent"].dark,
+[data-tt-style="fluent"][data-theme="dark"] {
+  --colorNeutralBackground1: #292929;
+  --colorNeutralBackground1Hover: #3d3d3d;
+  --colorNeutralBackground1Pressed: #1f1f1f;
+  --colorNeutralBackground1Selected: #383838;
+  --colorNeutralBackground2: #1f1f1f;
+  --colorNeutralBackground2Hover: #333333;
+  --colorNeutralBackground2Pressed: #141414;
+  --colorNeutralBackground2Selected: #2e2e2e;
+  --colorNeutralBackground3: #141414;
+  --colorNeutralBackground3Hover: #292929;
+  --colorNeutralBackground3Pressed: #0a0a0a;
+  --colorNeutralBackground3Selected: #242424;
+  --colorNeutralBackground4: #0a0a0a;
+  --colorNeutralBackground4Hover: #1f1f1f;
+  --colorNeutralBackground4Pressed: #000000;
+  --colorNeutralBackground4Selected: #1a1a1a;
+  --colorNeutralBackground5: #000000;
+  --colorNeutralBackground6: #333333;
+  --colorNeutralBackgroundDisabled: #141414;
+  --colorNeutralBackgroundInverted: #ffffff;
+
+  --colorNeutralForeground1: #ffffff;
+  --colorNeutralForeground1Hover: #ffffff;
+  --colorNeutralForeground1Pressed: #ffffff;
+  --colorNeutralForeground1Selected: #ffffff;
+  --colorNeutralForeground2: #d6d6d6;
+  --colorNeutralForeground2Hover: #ffffff;
+  --colorNeutralForeground2Pressed: #ffffff;
+  --colorNeutralForeground2Selected: #ffffff;
+  --colorNeutralForeground3: #adadad;
+  --colorNeutralForeground3Hover: #d6d6d6;
+  --colorNeutralForeground3Pressed: #d6d6d6;
+  --colorNeutralForeground3Selected: #d6d6d6;
+  --colorNeutralForeground4: #999999;
+  --colorNeutralForegroundDisabled: #5c5c5c;
+  --colorNeutralForegroundOnBrand: #ffffff;
+  --colorNeutralForegroundInverted: #242424;
+  --colorNeutralForeground2BrandHover: #479ef5;
+  --colorNeutralForeground2BrandPressed: #62abf5;
+  --colorNeutralForeground2BrandSelected: #479ef5;
+
+  --colorNeutralStroke1: #666666;
+  --colorNeutralStroke1Hover: #757575;
+  --colorNeutralStroke1Pressed: #6b6b6b;
+  --colorNeutralStroke1Selected: #707070;
+  --colorNeutralStroke2: #525252;
+  --colorNeutralStroke3: #3d3d3d;
+  --colorNeutralStrokeAccessible: #adadad;
+  --colorNeutralStrokeAccessibleHover: #bdbdbd;
+  --colorNeutralStrokeAccessiblePressed: #b3b3b3;
+  --colorNeutralStrokeAccessibleSelected: #479ef5;
+  --colorNeutralStrokeDisabled: #424242;
+  --colorNeutralStrokeOnBrand: #292929;
+
+  --colorNeutralShadowAmbient: rgba(0, 0, 0, 0.24);
+  --colorNeutralShadowKey: rgba(0, 0, 0, 0.28);
+
+  --colorBrandBackground: #115ea3;
+  --colorBrandBackgroundHover: #0f6cbd;
+  --colorBrandBackgroundPressed: #0c3b5e;
+  --colorBrandBackgroundSelected: #0c3b5e;
+  --colorBrandBackground2: #082338;
+  --colorBrandBackground2Hover: #0f548c;
+  --colorBrandBackground2Pressed: #0a2e4a;
+  --colorBrandBackgroundStatic: #0f6cbd;
+  --colorBrandBackgroundInverted: #ffffff;
+  --colorBrandForeground1: #479ef5;
+  --colorBrandForeground2: #62abf5;
+  --colorBrandForeground2Hover: #77b7f7;
+  --colorBrandForeground2Pressed: #96c6fa;
+  --colorBrandForegroundLink: #479ef5;
+  --colorBrandForegroundLinkHover: #62abf5;
+  --colorBrandForegroundLinkPressed: #77b7f7;
+  --colorBrandForegroundLinkSelected: #479ef5;
+  --colorBrandForegroundOnLight: #0f6cbd;
+  --colorBrandStroke1: #479ef5;
+  --colorBrandStroke2: #0e4775;
+  --colorBrandStroke2Hover: #0f548c;
+  --colorBrandStroke2Pressed: #115ea3;
+
+  --colorCompoundBrandBackground: #479ef5;
+  --colorCompoundBrandBackgroundHover: #62abf5;
+  --colorCompoundBrandBackgroundPressed: #2886de;
+  --colorCompoundBrandStroke: #479ef5;
+  --colorCompoundBrandStrokeHover: #62abf5;
+  --colorCompoundBrandStrokePressed: #2886de;
+
+  --colorStatusSuccessBackground1: #052505;
+  --colorStatusSuccessBackground2: #094509;
+  --colorStatusSuccessBackground3: #107c10;
+  --colorStatusSuccessForeground1: #54b054;
+  --colorStatusSuccessForeground2: #9fd89f;
+  --colorStatusSuccessForeground3: #9fd89f;
+  --colorStatusSuccessBorderActive: #9fd89f;
+  --colorStatusSuccessBorder1: #107c10;
+  --colorStatusSuccessBorder2: #9fd89f;
+
+  --colorStatusWarningBackground1: #4a1e04;
+  --colorStatusWarningBackground2: #8a3707;
+  --colorStatusWarningBackground3: #f7630c;
+  --colorStatusWarningForeground1: #f98845;
+  --colorStatusWarningForeground3: #fdcfb4;
+  --colorStatusWarningBorderActive: #fdcfb4;
+  --colorStatusWarningBorder1: #f7630c;
+  --colorStatusWarningBorder2: #fdcfb4;
+
+  --colorStatusDangerBackground1: #3b0509;
+  --colorStatusDangerBackground2: #6e0811;
+  --colorStatusDangerBackground3: #c50f1f;
+  --colorStatusDangerForeground1: #dc626d;
+  --colorStatusDangerForeground3: #eeacb2;
+  --colorStatusDangerBorderActive: #eeacb2;
+  --colorStatusDangerBorder1: #c50f1f;
+  --colorStatusDangerBorder2: #eeacb2;
+
+  --focusRingColor: #ffffff;
+}

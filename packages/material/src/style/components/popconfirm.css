@@ -1,0 +1,106 @@
+/* ==========================================================================
+   Material 3 · Popconfirm
+   沿用 popover 的视觉语言，命名空间换成 .m3-popconfirm：
+   结构：.m3-popconfirm > .m3-popconfirm__arrow / __header / __body / __actions
+   浮层：--surface-container + --elevation-2，12px 圆角。操作按钮复用 .m3-btn。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-popconfirm {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 20rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-2);
+  outline: 0;
+}
+
+[data-tt-style="material"] .m3-popconfirm__header {
+  padding: 0.75rem 1rem 0.25rem;
+  font-size: var(--font-size);
+  font-weight: 500;
+  color: var(--popover-foreground);
+}
+
+[data-tt-style="material"] .m3-popconfirm__body {
+  padding: 0 1rem 0.75rem;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-popconfirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0 0.75rem 0.75rem;
+}
+
+[data-tt-style="material"] .m3-popconfirm__actions .m3-btn {
+  margin: 0;
+}
+
+/* --- 箭头（与 popover 同构） --- */
+[data-tt-style="material"] .m3-popconfirm__arrow {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--popover);
+  border: 1px solid var(--outline-variant);
+  pointer-events: none;
+}
+
+[data-tt-style="material"] .m3-popconfirm__arrow.is-top {
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="material"] .m3-popconfirm__arrow.is-bottom {
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+
+[data-tt-style="material"] .m3-popconfirm__arrow.is-left {
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+
+[data-tt-style="material"] .m3-popconfirm__arrow.is-right {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+/* --- 动画 --- */
+[data-tt-style="material"] .m3-popconfirm.is-enter {
+  animation: m3-popconfirm-in var(--duration-short) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-popconfirm.is-exit {
+  animation: m3-popconfirm-out var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-popconfirm-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes m3-popconfirm-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}

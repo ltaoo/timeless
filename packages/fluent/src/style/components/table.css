@@ -1,0 +1,47 @@
+/* ==========================================================================
+   Fluent 2 · Table
+   --------------------------------------------------------------------------
+   根节点 .fl-table，其余部位用原生语义标签（thead/tbody/tr/th/td），
+   通过后代选择器作用域化。
+   特征：行分割线 --stroke2；表头字 --colorNeutralForeground3。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-table {
+  width: 100%;
+  margin-bottom: var(--spacer);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--foreground);
+  vertical-align: top;
+  border-color: var(--stroke2);
+  border-collapse: collapse;
+  caption-side: bottom;
+}
+
+[data-tt-style="fluent"] .fl-table > :not(caption) > * > * {
+  padding: 10px 12px;
+  background-color: transparent;
+  border-bottom: var(--strokeWidthThin) solid var(--stroke2);
+}
+
+[data-tt-style="fluent"] .fl-table > thead > tr > th {
+  font-weight: var(--fontWeightSemibold);
+  font-size: var(--font-size-sm);
+  color: var(--colorNeutralForeground3);
+  text-align: left;
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-table > tbody > tr:hover > * {
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-table > tbody > tr:last-child > * {
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="fluent"] .fl-table > caption {
+  padding: 10px 12px;
+  color: var(--foreground-3);
+  text-align: left;
+}

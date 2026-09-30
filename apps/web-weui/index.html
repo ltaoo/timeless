@@ -13,7 +13,11 @@
       }
     }
   </script>
-  <link href="/timeless/0.31.1/timeless.weui.css" rel="stylesheet" />
+  <!-- 相对路径（配合 <base href="/">）→ /public/timeless/<ver>/…，dev.js / docs.js / vite dev 三种服务器都能命中。 -->
+  <link href="public/timeless/0.33.1/timeless.weui.css" rel="stylesheet" />
+  <!-- 用 <link> 而非 `import "./download-panel.css"`：原生 ES module 不能 import CSS，
+       那样只有打包器（vite）能跑，静态服务器（dev.js / docs.js）会因 MIME 不符整棵模块图失败。 -->
+  <link href="src/pages/home/download-panel.css" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -24,12 +28,146 @@
       -webkit-font-smoothing: antialiased;
     }
     #root { min-height: 100vh; }
+
+    /* --- 跨分类锚点定位时闪一下目标区块（pages/home/anchor.js 加/删 class）。 --- */
+    [data-section].is-flash { outline: 3px solid var(--weui-BRAND); outline-offset: 3px; }
+
+    /* --- 设计规范页外壳。本 app 无 Tailwind / gallery-*，规范页样式集中在这里；
+           只用已声明的 --weui-* token，字号写 px（--weui-FONT-SIZE-* 未声明）。
+           高度 100%（不是 100vh）：这一页被 keep-alive 塞进 position:absolute;inset:0
+           的盒子里，100vh 会与外层盒子双重滚动。 --- */
+    .weui-spec-root { height: 100%; overflow-y: auto; background: var(--weui-BG-1); }
+    .weui-spec-page { max-width: 1180px; margin: 0 auto; padding: 16px 16px 64px; }
+    .weui-spec-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding-bottom: 16px; margin-bottom: 20px;
+      border-bottom: 1px solid var(--weui-SEPARATOR-1);
+    }
+    .weui-spec-header-text { min-width: 0; }
+    .weui-spec-title { font-size: 20px; font-weight: 700; color: var(--weui-FG-0); }
+    .weui-spec-subtitle { font-size: 13px; color: var(--weui-FG-1); margin-top: 2px; }
+    .weui-spec-header-actions { display: flex; align-items: center; gap: 8px; }
+    .weui-spec-body {
+      display: grid; grid-template-columns: 300px minmax(0, 1fr);
+      gap: 20px; align-items: start;
+    }
+    @media (max-width: 960px) { .weui-spec-body { grid-template-columns: 1fr; } }
+    .weui-spec-panel {
+      position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto;
+      padding: 16px; border: 1px solid var(--weui-SEPARATOR-1); border-radius: 12px;
+      background: var(--weui-BG-2); color: var(--weui-FG-0);
+    }
+    .weui-spec-panel-title {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--weui-FG-1);
+    }
+    .weui-spec-panel-note { margin-top: 8px; font-size: 12px; line-height: 1.5; color: var(--weui-FG-1); }
+    .weui-spec-group { margin-top: 18px; }
+    .weui-spec-group-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    .weui-spec-group-empty { font-size: 12px; color: var(--weui-FG-1); line-height: 1.5; }
+    .weui-spec-knob { margin-bottom: 14px; }
+    .weui-spec-knob-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .weui-spec-knob-label { font-size: 13px; }
+    .weui-spec-knob-name {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px; color: var(--weui-FG-1);
+    }
+    .weui-spec-knob-body { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .weui-spec-knob-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px; color: var(--weui-FG-1);
+      min-width: 72px; text-align: right; word-break: break-all;
+    }
+    .weui-spec-knob-range { flex: 1; min-width: 0; }
+    .weui-spec-knob-color {
+      width: 44px; height: 30px; padding: 0; cursor: pointer;
+      border: 1px solid var(--weui-SEPARATOR-1); border-radius: 6px; background: var(--weui-BG-2);
+    }
+    .weui-spec-knob-text {
+      flex: 1; min-width: 0; padding: 4px 8px; box-sizing: border-box;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+      border: 1px solid var(--weui-SEPARATOR-1); border-radius: 6px;
+      background: var(--weui-BG-2); color: var(--weui-FG-0);
+    }
+    .weui-spec-actions {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--weui-SEPARATOR-1);
+    }
+    .weui-spec-canvas {
+      padding: 20px; border: 1px solid var(--weui-SEPARATOR-1); border-radius: 12px;
+      background: var(--weui-BG-2); color: var(--weui-FG-0);
+    }
+    .weui-spec-preview {
+      display: flex; flex-direction: column; gap: 16px;
+      padding-bottom: 20px; border-bottom: 1px solid var(--weui-SEPARATOR-1);
+    }
+    .weui-spec-preview-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .weui-spec-preview-field { width: 220px; }
+    .weui-spec-preview-card { width: 280px; }
+    .weui-spec-tables { display: flex; flex-direction: column; gap: 24px; margin-top: 24px; }
+    .weui-spec-section { margin-bottom: 4px; }
+    .weui-spec-section-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--weui-FG-0); }
+    .weui-spec-hint { font-size: 12px; line-height: 1.5; color: var(--weui-FG-1); margin-bottom: 8px; }
+    .weui-spec-notice {
+      font-size: 13px; line-height: 1.5; color: var(--weui-FG-1);
+      padding: 12px; border: 1px dashed var(--weui-SEPARATOR-1); border-radius: 8px;
+    }
+    .weui-spec-gaps {
+      margin-top: 24px; padding: 14px 16px; font-size: 12px; line-height: 1.6;
+      border: 1px solid var(--weui-ORANGE); border-radius: 10px;
+      background: var(--weui-TAG-BACKGROUND-ORANGE); color: var(--weui-FG-0);
+    }
+    .weui-spec-gaps-title { font-weight: 600; margin-bottom: 6px; }
+    .weui-spec-gaps code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px; color: var(--weui-FG-1);
+    }
+
+    /* --- 只读规范表 --- */
+    .weui-spec-table { display: flex; flex-direction: column; }
+    .weui-spec-tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 1.4fr) minmax(0, 1fr) 56px;
+      gap: 12px; align-items: center; padding: 6px 0;
+      border-bottom: 1px solid var(--weui-SEPARATOR-0); font-size: 13px;
+    }
+    .weui-spec-tr.is-head {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--weui-FG-1); border-bottom-width: 2px;
+    }
+    .weui-spec-token {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px; word-break: break-all;
+    }
+    .weui-spec-token-label { font-size: 11px; color: var(--weui-FG-1); }
+    .weui-spec-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px; color: var(--weui-FG-1); word-break: break-all;
+    }
+    .weui-spec-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px; color: var(--weui-FG-0); word-break: break-all;
+    }
+    .weui-spec-cell { display: flex; align-items: center; }
+    .weui-spec-swatch {
+      width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--weui-SEPARATOR-1);
+    }
+    .weui-spec-radius { width: 52px; height: 26px; background: var(--weui-BG-3); border: 1px solid var(--weui-SEPARATOR-1); }
+    .weui-spec-bar { height: 12px; max-width: 100%; border-radius: 2px; background: var(--weui-BRAND); }
+    .weui-spec-height { width: 52px; background: var(--weui-BG-3); border: 1px solid var(--weui-SEPARATOR-1); }
+    .weui-spec-type { line-height: 1; }
+    .weui-spec-shadow { width: 52px; height: 26px; border-radius: 6px; background: var(--weui-BG-2); }
+    .weui-spec-motion {
+      display: flex; align-items: center; justify-content: center;
+      width: 52px; height: 26px; font-size: 10px; border-radius: 6px;
+      background: var(--weui-BG-3); color: var(--weui-FG-1);
+    }
   </style>
-  <script src="/timeless/0.31.1/timeless.umd.min.js"></script>
-  <script src="/timeless/0.31.1/timeless.dom.umd.min.js"></script>
-  <script src="/timeless/0.31.1/timeless.weui.umd.min.js"></script>
-  <script src="/timeless/0.31.1/timeless.web.umd.min.js"></script>
-  <script src="/timeless/0.31.1/timeless.utils.umd.min.js"></script>
+  <script src="public/timeless/0.33.1/timeless.umd.min.js"></script>
+  <script src="public/timeless/0.33.1/timeless.dom.umd.min.js"></script>
+  <script src="public/timeless/0.33.1/timeless.weui.umd.min.js"></script>
+  <script src="public/timeless/0.33.1/timeless.web.umd.min.js"></script>
+  <script src="public/timeless/0.33.1/timeless.utils.umd.min.js"></script>
   <script>
     console.log("[weui-setup] Timeless.weui exports:", Object.keys(Timeless.weui || {}).length);
     Object.assign(window, Timeless);
@@ -38,6 +176,28 @@
 </head>
 
 <body>
+  <!--
+    主题引导：weui 的调色板挂在 body/.wx-root（不是 <html>），且
+    @media (prefers-color-scheme:dark) 选择器是 body:not([data-weui-theme='light'])，
+    所以「用户显式选了亮色」必须写成 data-weui-theme="light"，
+    否则在暗系统上会被系统偏好拉暗。
+  -->
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("timeless-weui");
+        var stored = raw ? JSON.parse(raw) : {};
+        var theme = stored && stored.theme;
+        var resolved;
+        if (!theme || theme === "system") {
+          resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        } else {
+          resolved = theme;
+        }
+        document.body.setAttribute("data-weui-theme", resolved);
+      } catch (e) { }
+    })();
+  </script>
   <div id="root"></div>
   <script type="module" src="src/index.js"></script>
 </body>

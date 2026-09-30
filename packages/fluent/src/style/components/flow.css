@@ -1,0 +1,320 @@
+/* ==========================================================================
+   Fluent 2 · Flow（.fl-flow）
+   --------------------------------------------------------------------------
+   结构由 modules/flow.ts 产出：
+     .fl-flow                               ← 画布根（滚轮缩放 / 空白处 pan）
+       .fl-flow__background                 ← 点阵 / 网格，颜色走 --stroke2
+       .fl-flow__canvas                     ← translate + scale 层
+         .fl-flow__edges > svg > .fl-flow__edge-hit + .fl-flow__edge
+         .fl-flow__node                     ← 绝对定位，left/top 由 state 下发
+           .fl-flow__node-actions > .fl-flow__action
+           .fl-flow__node-body > .fl-flow__node-label / .fl-flow__node-desc
+           .fl-flow__handle.is-source / .is-target
+       .fl-flow__controls > .fl-flow__control
+       .fl-flow__minimap > .fl-flow__minimap-node
+
+   Fluent 的口径：浮层是 1px stroke 轮廓 + 分级阴影（shadow4/8/16），选中态
+   走 --brand-stroke 的中心描边（stroke 画在控件内边界，不外扩），状态色用
+   --*-subtle 浅底 + 同名前景（Fluent 的状态色对里只有 subtle 适合做底）。
+   只读语义别名，不写 dark 分支。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-flow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+}
+
+[data-tt-style="fluent"] .fl-flow__background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-flow__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* --- 边 ------------------------------------------------------------------- */
+
+[data-tt-style="fluent"] .fl-flow__edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 20px 粗的透明命中路径：边太细点不中，靠它把可点区域撑开。 */
+[data-tt-style="fluent"] .fl-flow__edge-hit {
+  fill: none;
+  stroke: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+[data-tt-style="fluent"] .fl-flow__edge {
+  fill: none;
+  pointer-events: none;
+  stroke: var(--stroke1);
+}
+
+[data-tt-style="fluent"] .fl-flow__edge.is-selected {
+  stroke: var(--brand-stroke);
+}
+
+[data-tt-style="fluent"] .fl-flow__connecting-path {
+  fill: none;
+  stroke: var(--brand-stroke);
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+/* 流动虚线：`stroke-dasharray` 是固定值，动画只推 `stroke-dashoffset`。 */
+[data-tt-style="fluent"] .fl-flow__edge.is-animated {
+  stroke-dasharray: 6 4;
+  animation: fl-flow-dash 0.6s linear infinite;
+}
+
+/* --- 节点 ----------------------------------------------------------------- */
+
+[data-tt-style="fluent"] .fl-flow__node {
+  position: absolute;
+  box-sizing: border-box;
+  min-width: 68px;
+  background: var(--surface-1);
+  color: var(--foreground);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-4);
+  user-select: none;
+  cursor: move;
+  transition: box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-flow__node.is-dragging {
+  box-shadow: var(--shadow-16);
+}
+
+/* Fluent 的中心描边：ring 画在边框内侧，不改变节点占位。 */
+[data-tt-style="fluent"] .fl-flow__node.is-selected {
+  border-color: var(--brand-stroke);
+  box-shadow:
+    inset 0 0 0 1px var(--brand-stroke),
+    var(--shadow-4);
+}
+
+/* Fluent 的状态色成对出现：subtle 浅底 + 同名前景才是可读组合。 */
+[data-tt-style="fluent"] .fl-flow__node.is-pending {
+  border-color: var(--stroke2);
+}
+[data-tt-style="fluent"] .fl-flow__node.is-running {
+  background: var(--warning-subtle);
+  border-color: var(--warning);
+  color: var(--warning-subtle-foreground);
+  animation: fl-flow-pulse 1.6s ease-in-out infinite;
+}
+[data-tt-style="fluent"] .fl-flow__node.is-completed {
+  background: var(--success-subtle);
+  border-color: var(--success);
+  color: var(--success-subtle-foreground);
+}
+[data-tt-style="fluent"] .fl-flow__node.is-failed {
+  background: var(--destructive-subtle);
+  border-color: var(--destructive);
+  color: var(--destructive-subtle-foreground);
+}
+[data-tt-style="fluent"] .fl-flow__node.is-skipped {
+  background: var(--info-subtle);
+  border-color: var(--info-foreground);
+  color: var(--info-subtle-foreground);
+}
+
+[data-tt-style="fluent"] .fl-flow__node-body {
+  padding: 0.5rem 1rem;
+}
+
+[data-tt-style="fluent"] .fl-flow__node-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--fontWeightSemibold);
+  text-align: center;
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-flow__node-desc {
+  font-size: var(--font-size-xs);
+  text-align: center;
+  color: var(--foreground-3);
+}
+
+/* --- 节点悬浮动作条 -------------------------------------------------------- */
+
+[data-tt-style="fluent"] .fl-flow__node-actions {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 0.375rem;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-16);
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-flow__action {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--fontWeightSemibold);
+  color: var(--foreground-2);
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-flow__action:hover {
+  background: var(--surface-1-hover);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-flow__action.is-danger {
+  color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-flow__action.is-danger:hover {
+  background: var(--destructive-subtle);
+  color: var(--destructive-subtle-foreground);
+}
+
+/* --- 连接点 --------------------------------------------------------------- */
+
+[data-tt-style="fluent"] .fl-flow__handle {
+  position: absolute;
+  box-sizing: border-box;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--surface-1);
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+  transition: transform var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-flow__handle.is-source {
+  background: var(--brand-fill);
+}
+
+[data-tt-style="fluent"] .fl-flow__handle.is-target {
+  background: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-flow__handle:hover {
+  transform: translate(-50%, -50%) scale(1.25);
+  cursor: crosshair;
+}
+
+[data-tt-style="fluent"] .fl-flow__handle.is-disabled {
+  opacity: var(--disabled-opacity);
+  background: var(--surface-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-flow__handle.is-disabled:hover {
+  transform: translate(-50%, -50%);
+}
+
+/* --- 缩放控件 / 小地图 ----------------------------------------------------- */
+
+[data-tt-style="fluent"] .fl-flow__controls {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--surface-1);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-8);
+}
+
+[data-tt-style="fluent"] .fl-flow__control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-flow__control:hover {
+  background: var(--surface-1-hover);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-flow__minimap {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 50;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-8);
+  cursor: pointer;
+}
+
+[data-tt-style="fluent"] .fl-flow__minimap-node {
+  position: absolute;
+  background: var(--foreground-3);
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="fluent"] .fl-flow__minimap-node.is-selected {
+  background: var(--brand-fill);
+}
+
+/* keyframes 不能作用域化（@keyframes 没有选择器），只能按库前缀命名。 */
+@keyframes fl-flow-dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+@keyframes fl-flow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-flow__edge.is-animated,
+  [data-tt-style="fluent"] .fl-flow__node.is-running {
+    animation: none;
+  }
+}

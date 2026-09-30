@@ -1,0 +1,303 @@
+/* ==========================================================================
+   Animal Island · Sheet（Drawer / Panel，.animal-sheet 系列）
+   --------------------------------------------------------------------------
+   结构：.animal-sheet__scrim + .animal-sheet.[animal-sheet--left|right|top|bottom]
+         > .animal-sheet__header(__title + __close) / .animal-sheet__body
+
+   上游视觉（浮层统一语言）：
+     · 面板底 --popover（奶油纸），字 --popover-foreground（暖棕）
+     · 2px（--border-width）--border 描边，只在**朝向内容的那条边**上出现
+     · 朝内容一侧的圆角用 --radius-lg（24px），贴边一侧保持方角
+     · 柔和海拔阴影 --shadow-lg，**不**用像素堆叠的立体阴影
+     · scrim 用 color-mix(in srgb, var(--foreground) 35%, transparent)
+     · 滑入动画按 side 分别命名 animal-sheet-in-<side>
+   ========================================================================== */
+
+/* --- 遮罩 --- */
+[data-tt-style="animal"] .animal-sheet__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background-color: color-mix(in srgb, var(--foreground) 35%, transparent);
+}
+
+/* --- 面板 --- */
+[data-tt-style="animal"] .animal-sheet {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  box-shadow: var(--shadow-lg);
+  outline: 0;
+}
+
+[data-tt-style="animal"] .animal-sheet--left {
+  top: 0;
+  left: 0;
+  width: 25rem;
+  height: 100%;
+  border-right: var(--border-width) solid var(--border);
+  border-top-right-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+[data-tt-style="animal"] .animal-sheet--right {
+  top: 0;
+  right: 0;
+  width: 25rem;
+  height: 100%;
+  border-left: var(--border-width) solid var(--border);
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+}
+
+[data-tt-style="animal"] .animal-sheet--top {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 20rem;
+  border-bottom: var(--border-width) solid var(--border);
+  border-bottom-right-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+}
+
+[data-tt-style="animal"] .animal-sheet--bottom {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 20rem;
+  border-top: var(--border-width) solid var(--border);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+[data-tt-style="animal"] .animal-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: var(--spacer-lg) var(--spacer-lg) var(--spacer);
+}
+
+[data-tt-style="animal"] .animal-sheet__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: var(--line-height);
+  color: var(--foreground);
+}
+
+/* 无标题时关闭按钮也要贴右 */
+[data-tt-style="animal"] .animal-sheet__header .animal-sheet__close {
+  margin-left: auto;
+}
+
+[data-tt-style="animal"] .animal-sheet__close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-sheet__close:hover {
+  color: var(--accent-foreground);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-sheet__close:active {
+  color: var(--primary-pressed);
+  background-color: color-mix(in srgb, var(--accent) 88%, var(--foreground));
+}
+
+[data-tt-style="animal"] .animal-sheet__close:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-sheet__close[disabled],
+[data-tt-style="animal"] .animal-sheet__close[data-disabled="true"],
+[data-tt-style="animal"] .animal-sheet__close.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-sheet__body {
+  flex-grow: 1;
+  padding: var(--spacer-lg);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--popover-foreground);
+  overflow-y: auto;
+}
+
+/* --- 动画 --- */
+[data-tt-style="animal"] .animal-sheet__scrim.is-enter {
+  animation: animal-sheet-scrim-in var(--duration-normal) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-sheet__scrim.is-exit {
+  animation: animal-sheet-scrim-out var(--duration-fast) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-sheet--left.is-enter {
+  animation: animal-sheet-in-left var(--duration-slow) var(--easing-standard) both;
+}
+
+[data-tt-style="animal"] .animal-sheet--left.is-exit {
+  animation: animal-sheet-out-left var(--duration-normal) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-sheet--right.is-enter {
+  animation: animal-sheet-in-right var(--duration-slow) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-sheet--right.is-exit {
+  animation: animal-sheet-out-right var(--duration-normal) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-sheet--top.is-enter {
+  animation: animal-sheet-in-top var(--duration-slow) var(--easing-standard) both;
+}
+
+[data-tt-style="animal"] .animal-sheet--top.is-exit {
+  animation: animal-sheet-out-top var(--duration-normal) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-sheet--bottom.is-enter {
+  animation: animal-sheet-in-bottom var(--duration-slow) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-sheet--bottom.is-exit {
+  animation: animal-sheet-out-bottom var(--duration-normal) var(--easing-standard)
+    both;
+}
+
+@keyframes animal-sheet-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes animal-sheet-scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes animal-sheet-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes animal-sheet-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes animal-sheet-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes animal-sheet-out-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes animal-sheet-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes animal-sheet-out-top {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes animal-sheet-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes animal-sheet-out-bottom {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-sheet__close {
+    transition: none;
+  }
+
+  [data-tt-style="animal"] .animal-sheet__scrim.is-enter,
+  [data-tt-style="animal"] .animal-sheet__scrim.is-exit,
+  [data-tt-style="animal"] .animal-sheet--left.is-enter,
+  [data-tt-style="animal"] .animal-sheet--left.is-exit,
+  [data-tt-style="animal"] .animal-sheet--right.is-enter,
+  [data-tt-style="animal"] .animal-sheet--right.is-exit,
+  [data-tt-style="animal"] .animal-sheet--top.is-enter,
+  [data-tt-style="animal"] .animal-sheet--top.is-exit,
+  [data-tt-style="animal"] .animal-sheet--bottom.is-enter,
+  [data-tt-style="animal"] .animal-sheet--bottom.is-exit {
+    animation: none;
+  }
+}

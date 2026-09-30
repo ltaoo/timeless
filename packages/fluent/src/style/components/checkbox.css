@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Fluent 2 · Checkbox（.fl-checkbox / .fl-check）
+   --------------------------------------------------------------------------
+   · 20px 方块，4px 圆角（--radius-md）
+   · 未选中：--surface-1 底 + 1px --stroke-accessible
+   · 选中：--compound-brand 填充，勾用 ::after 绘制（不依赖内联 SVG）
+   · hover / pressed 只换 compound-brand 的 hover/pressed 档
+   注：headless 层用 <button> 承载可点击盒子，因此以 [data-checked] / .is-checked
+   取代原生 :checked。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="fluent"] .fl-checkbox {
+  --checkbox-bg: var(--surface-1);
+  --checkbox-border: var(--stroke-accessible);
+
+  position: relative;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background-color: var(--checkbox-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+  border: var(--strokeWidthThin) solid var(--checkbox-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+/* 勾：白色两段折线，用旋转的边框模拟 */
+[data-tt-style="fluent"] .fl-checkbox::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 3px;
+  width: 5px;
+  height: 9px;
+  border: solid var(--colorNeutralForegroundOnBrand);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-checkbox:hover {
+  --checkbox-border: var(--compound-brand-hover);
+}
+
+[data-tt-style="fluent"] .fl-checkbox:active {
+  --checkbox-border: var(--compound-brand-pressed);
+}
+
+[data-tt-style="fluent"] .fl-checkbox:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-checkbox[data-checked],
+[data-tt-style="fluent"] .fl-checkbox.is-checked {
+  --checkbox-bg: var(--compound-brand);
+  --checkbox-border: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-checkbox.is-checked::after {
+  transform: rotate(45deg) scale(1);
+}
+
+[data-tt-style="fluent"] .fl-checkbox.is-checked:hover {
+  --checkbox-bg: var(--compound-brand-hover);
+  --checkbox-border: var(--compound-brand-hover);
+}
+
+[data-tt-style="fluent"] .fl-checkbox.is-checked:active {
+  --checkbox-bg: var(--compound-brand-pressed);
+  --checkbox-border: var(--compound-brand-pressed);
+}
+
+[data-tt-style="fluent"] .fl-checkbox[disabled],
+[data-tt-style="fluent"] .fl-checkbox[data-disabled],
+[data-tt-style="fluent"] .fl-checkbox.is-disabled {
+  --checkbox-bg: var(--surface-disabled);
+  --checkbox-border: var(--stroke-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-checkbox.is-invalid,
+[data-tt-style="fluent"] .fl-checkbox[aria-invalid="true"] {
+  --checkbox-border: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-check__label {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="fluent"] .fl-check__label.is-disabled,
+[data-tt-style="fluent"] .fl-check__label[data-disabled="true"] {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-checkbox,
+  [data-tt-style="fluent"] .fl-checkbox::after {
+    transition: none;
+  }
+}

@@ -1,0 +1,100 @@
+/* ==========================================================================
+   Fluent 2 · Steps
+   --------------------------------------------------------------------------
+   结构：.fl-steps > .fl-steps__list > .fl-steps__item
+          > .fl-steps__indicator + .fl-steps__text(__title / __description)
+          + .fl-steps__connector
+   特征：active 用 --compound-brand，completed 用 --success。
+   状态：.is-completed / .is-current / .is-upcoming
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-steps {
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-steps__list {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-steps__item {
+  position: relative;
+  display: flex;
+  flex: 1 1 0%;
+  align-items: flex-start;
+  gap: var(--spacer-sm);
+}
+
+[data-tt-style="fluent"] .fl-steps__indicator {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--fontWeightSemibold);
+  line-height: 1;
+  color: var(--foreground-3);
+  background-color: var(--surface-1);
+  border: 1px solid var(--stroke1);
+  border-radius: var(--radius-pill);
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-steps__item.is-completed .fl-steps__indicator {
+  color: var(--colorNeutralForegroundOnBrand);
+  background-color: var(--success);
+  border-color: var(--success);
+}
+
+[data-tt-style="fluent"] .fl-steps__item.is-current .fl-steps__indicator {
+  color: var(--colorNeutralForegroundOnBrand);
+  background-color: var(--compound-brand);
+  border-color: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-steps__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: 3px;
+}
+
+[data-tt-style="fluent"] .fl-steps__title {
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightSemibold);
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-steps__description {
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-steps__connector {
+  flex: 1 1 auto;
+  align-self: flex-start;
+  height: 2px;
+  min-width: 1rem;
+  margin: calc(14px - 1px) var(--spacer-sm) 0;
+  background-color: var(--stroke2);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-steps__connector.is-completed {
+  background-color: var(--success);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-steps__indicator,
+  [data-tt-style="fluent"] .fl-steps__connector {
+    transition: none;
+  }
+}

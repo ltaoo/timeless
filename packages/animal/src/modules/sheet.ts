@@ -1,0 +1,211 @@
+import { ui, vm } from "@timeless/timeless";
+import { computed, ref, refobj } from "@timeless/timeless";
+import {
+  Fragment,
+  Icon,
+  Show,
+  View,
+  ViewChildren,
+  ViewProps,
+  classNames,
+} from "@timeless/timeless";
+
+/**
+ * Sheet · Animal Island（Drawer / Panel）
+ *
+ * 结构：
+ *   Root(Portal + Presence)
+ *     ├─ Overlay → .animal-sheet__scrim
+ *     └─ Content → .animal-sheet.[animal-sheet--left|right|top|bottom]
+ *          ├─ .animal-sheet__header（.animal-sheet__title + .animal-sheet__close）
+ *          └─ .animal-sheet__body（children）
+ *
+ * Animal Island 特征：奶油纸底 --popover + 2px --border 描边（只在朝向内容的一条边）
+ * + 朝内容一侧 --radius-lg（24px）圆角 + 柔和海拔 --shadow-lg；
+ * 按 side 滑入，关键帧 animal-sheet-in-<side>。
+ */
+
+const SHEET_BASE_Z = 1040;
+const Z_INDEX_NEST_GAP = 50;
+
+const SIDE_CLASSES: Record<string, string> = {
+  left: "animal-sheet--left",
+  right: "animal-sheet--right",
+  top: "animal-sheet--top",
+  bottom: "animal-sheet--bottom",
+};
+
+export function Sheet(
+  props: ViewProps & {
+    store: vm.DialogCore;
+    side?: "right" | "top" | "bottom" | "left";
+    zIndex?: number;
+  },
+  children?: ViewChildren | (() => ViewChildren),
+) {
+  const {
+    store,
+    side = "right",
+    zIndex: manualZIndex,
+    class: cls,
+    style: sty,
+    ...rest
+  } = props;
+
+  const state_ = refobj(store.state);
+  const presence_state_ = refobj(store.presence.state);
+  const was_exiting_ = ref(false);
+
+  const zIndex =
+    manualZIndex ??
+    SHEET_BASE_Z + vm.getGlobalLayerManager().size * Z_INDEX_NEST_GAP;
+
+  const unlistens = [
+    store.onStateChange((v) => {
+      state_.as(v);
+    }),
+    store.presence.onStateChange((v) => {
+      presence_state_.as(v);
+      if (v.exit) {
+        was_exiting_.as(true);
+      }
+      if (v.mounted) {
+        was_exiting_.as(false);
+      }
+    }),
+  ];
+
+  return ui.SheetPrimitive.Root(
+    {
+      store,
+      onUnmounted() {
+        unlistens.forEach((fn) => fn());
+      },
+    },
+    () => [
+      ui.SheetPrimitive.Overlay({
+        store,
+        zIndex,
+        class: computed(presence_state_, (d) => {
+          const keepExitClass =
+            !d.mounted && was_exiting_.value ? "is-exit" : "";
+          return [
+            "animal-sheet__scrim",
+            d.enter ? "is-enter" : "",
+            d.exit ? "is-exit" : "",
+            keepExitClass,
+          ]
+            .filter(Boolean)
+            .join(" ");
+        }),
+      }),
+      ui.SheetPrimitive.Content(
+        {
+          ...rest,
+          store,
+          side,
+          style: { ...(sty as any), "z-index": zIndex },
+          dataset: {
+            open: computed(presence_state_, (d) => (d.mounted ? "" : undefined)),
+          },
+          class: computed(presence_state_, (d) => {
+            const keepExitClass =
+              !d.mounted && was_exiting_.value ? "is-exit" : "";
+            return [
+              "animal-sheet",
+              SIDE_CLASSES[side] || "animal-sheet--right",
+              d.enter ? "is-enter" : "",
+              d.exit ? "is-exit" : "",
+              keepExitClass,
+              cls,
+            ]
+              .filter(Boolean)
+              .join(" ");
+          }),
+        },
+        [
+          SheetHeader({ store }, [
+            Show({
+              when: computed(state_, (d: any) => !!d.title),
+              ok() {
+                return [
+                  SheetTitle({ store }, [
+                    computed(state_, (d: any) => d.title || ""),
+                  ]),
+                ];
+              },
+            }),
+            SheetClose({ store }),
+          ]),
+          SheetBody({}, [
+            Fragment(
+              {},
+              typeof children === "function" ? children() : children || [],
+            ),
+          ]),
+        ],
+      ),
+    ],
+  );
+}
+
+export function SheetHeader(
+  props: ViewProps & { store?: vm.DialogCore },
+  children?: ViewChildren,
+) {
+  const { class: cls, store, ...rest } = props;
+  return ui.SheetPrimitive.Header(
+    { ...rest, store: store as any, class: classNames(["animal-sheet__header", cls]) },
+    children,
+  );
+}
+
+export function SheetTitle(
+  props: ViewProps & { store?: vm.DialogCore },
+  children?: ViewChildren,
+) {
+  const { class: cls, store, ...rest } = props;
+  const state_ = refobj(store ? store.state : ({} as any));
+  if (store) {
+    store.onStateChange((v) => {
+      state_.as(v);
+    });
+  }
+  return ui.SheetPrimitive.Title(
+    { ...rest, store: store as any, class: classNames(["animal-sheet__title", cls]) },
+    [
+      Show({
+        when: !!children,
+        ok() {
+          return children;
+        },
+        else() {
+          return [computed(state_, (d: any) => d.title || "")];
+        },
+      }),
+    ],
+  );
+}
+
+export function SheetBody(props: ViewProps, children?: ViewChildren) {
+  const { class: cls, ...rest } = props;
+  // Sheet 没有对应的 body primitive，直接落到作用域内的 .animal-sheet__body。
+  return View(
+    { ...rest, class: classNames(["animal-sheet__body", cls]) },
+    children,
+  );
+}
+
+export function SheetClose(props: ViewProps & { store: vm.DialogCore }) {
+  const { store, class: cls, ...rest } = props;
+  return ui.SheetPrimitive.Close(
+    {
+      ...rest,
+      store,
+      as: "button",
+      attributes: { type: "button", "aria-label": "Close" },
+      class: classNames(["animal-sheet__close", cls]),
+    },
+    [Icon({ name: "circle-x", size: 16 })],
+  );
+}

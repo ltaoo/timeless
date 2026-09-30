@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Fluent 2 · Kbd（.fl-kbd / .fl-kbd-group）
+   键帽：20px 高、--surface-3 底 + 1px --stroke2、底边加粗到 2px 表达键程。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--fontWeightRegular);
+  line-height: 1;
+  color: var(--foreground-2);
+  white-space: nowrap;
+  background-color: var(--surface-3);
+  border: var(--strokeWidthThin) solid var(--stroke2);
+  border-bottom-width: var(--strokeWidthThick);
+  border-radius: var(--radius-sm);
+  user-select: none;
+}
+
+[data-tt-style="fluent"] .fl-kbd-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

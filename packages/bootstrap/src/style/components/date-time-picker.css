@@ -1,0 +1,70 @@
+/* ==========================================================================
+   Bootstrap 5.3 · DateTimePicker（.datetimepicker）
+   左边复用 .datepicker__* 日历，右边复用 .timepicker__* 三列滚动选择，两者
+   横排放在 .datetimepicker__body 里；弹层复用 .popover。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .datetimepicker__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: var(--control-height);
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-tt-style="bootstrap"] .datetimepicker__trigger.is-open {
+  border-color: color-mix(in srgb, var(--primary) 50%, white);
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .datetimepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="bootstrap"] .datetimepicker__value.is-placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .datetimepicker__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .datetimepicker {
+  width: auto;
+  max-width: none;
+  padding: 0;
+}
+
+[data-tt-style="bootstrap"] .datetimepicker__body {
+  display: flex;
+  align-items: stretch;
+}
+
+[data-tt-style="bootstrap"] .datetimepicker__body .datepicker__calendar {
+  width: 17rem;
+  padding: 0.75rem;
+}
+
+[data-tt-style="bootstrap"] .datetimepicker__time {
+  display: flex;
+  flex-direction: column;
+  border-left: var(--bs-border-width) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .datetimepicker__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0.75rem;
+  border-top: var(--bs-border-width) solid var(--border);
+}

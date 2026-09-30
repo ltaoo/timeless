@@ -1,0 +1,183 @@
+/* ==========================================================================
+   Fluent 2 · Dialog（.fl-dialog 系列）
+   --------------------------------------------------------------------------
+   结构：.fl-dialog__scrim + .fl-dialog > .fl-dialog__positioner
+         > .fl-dialog__surface > __header(__title + __close) / __body / __footer
+   特征：8px 圆角（--radius-xl）+ 1.5px --stroke1 描边 + --shadow-64；
+        scrim 用 --surface-inverted 40% 叠加；进出场 --duration-normal +
+        --easing-decelerate。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-dialog__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background-color: var(--surface-inverted);
+  opacity: 0.4;
+}
+
+[data-tt-style="fluent"] .fl-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1051;
+  overflow: hidden auto;
+  outline: 0;
+}
+
+[data-tt-style="fluent"] .fl-dialog__positioner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  width: auto;
+  max-width: 40rem;
+  padding: 1.5rem;
+  margin: 0 auto;
+}
+
+[data-tt-style="fluent"] .fl-dialog__surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--foreground);
+  background-color: var(--surface-2);
+  background-clip: padding-box;
+  border: 1.5px solid var(--stroke1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-64);
+  outline: 0;
+}
+
+[data-tt-style="fluent"] .fl-dialog__header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: 1.5rem 1.5rem 0.75rem;
+}
+
+[data-tt-style="fluent"] .fl-dialog__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: var(--fontWeightSemibold);
+  line-height: var(--lineHeightBase400);
+  color: var(--foreground);
+}
+
+/* 无标题时关闭按钮也要贴右 */
+[data-tt-style="fluent"] .fl-dialog__header .fl-dialog__close {
+  margin-left: auto;
+}
+
+[data-tt-style="fluent"] .fl-dialog__close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--foreground-3);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-dialog__close:hover {
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-dialog__close:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-dialog__body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 0 1.5rem 1.25rem;
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground-2);
+}
+
+[data-tt-style="fluent"] .fl-dialog__footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0.75rem 1.5rem 1.5rem;
+}
+
+[data-tt-style="fluent"] .fl-dialog__footer .fl-btn {
+  margin: 0;
+}
+
+/* --- 动画：is-enter / is-exit（供 Presence 的 animationend 使用） --- */
+[data-tt-style="fluent"] .fl-dialog__scrim.is-enter {
+  animation: fl-dialog-scrim-in var(--duration-normal) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-dialog__scrim.is-exit {
+  animation: fl-dialog-scrim-out var(--duration-fast) var(--easing-accelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-dialog__positioner.is-enter {
+  animation: fl-dialog-surface-in var(--duration-slow) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-dialog__positioner.is-exit {
+  animation: fl-dialog-surface-out var(--duration-fast) var(--easing-accelerate) both;
+}
+
+@keyframes fl-dialog-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.4;
+  }
+}
+
+@keyframes fl-dialog-scrim-out {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fl-dialog-surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fl-dialog-surface-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-dialog__close {
+    transition: none;
+  }
+}

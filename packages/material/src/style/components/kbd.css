@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Material 3 · Kbd
+   --surface-container-high 底 + --outline-variant 描边的小键帽。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0.1rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  background-color: var(--surface-container-high);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-sm);
+  user-select: none;
+}
+
+[data-tt-style="material"] .m3-kbd-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-kbd {
+    transition: none;
+  }
+}

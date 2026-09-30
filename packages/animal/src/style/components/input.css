@@ -1,0 +1,202 @@
+/* ==========================================================================
+   Animal Island · Input + 通用输入盒基类（.animal-control）
+   --------------------------------------------------------------------------
+   结构：.animal-input（定位容器）
+           > input.animal-control（输入盒，承载 clear / loading 的定位上下文）
+           + .animal-input__clear / .animal-input__loading
+
+   .animal-control 是 input / textarea / number-input / file-picker 共用的输入盒
+   基类，本文件负责它的基础外观；textarea / number-input / file-picker 会在自己
+   的文件里覆盖高度 / 圆角 / 阴影。
+
+   Animal Island 视觉（见 docs/design-system/design-rules.md）：
+     · 羊皮纸输入盒：--input-bg-rest 底 + 2.5px --input 描边（--border-width-input）
+       + 胶囊圆角（--radius-pill）—— 禁止直角、禁止 1px 描边
+     · --shadow-input 的像素堆叠 3D 阴影 `0 3px 0 0 var(--shadow-input)`：
+       hover 阴影加深到 --input，active 压到 `0 1px 0 0`（上游招牌的输入按压感）
+     · hover 微微提亮底色到 --input-bg；focus 转薄荷青描边 + --accent 浅色光晕
+     · error / warning 只换阴影色（--destructive / --warning 系），不换描边
+     · 焦点是黄色描边（--ring），永不用蓝色
+   ========================================================================== */
+
+/* --- 定位容器 --- */
+[data-tt-style="animal"] .animal-input {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+/* --- 共享输入盒（input / textarea / number-input / file-picker） --- */
+[data-tt-style="animal"] .animal-control {
+  display: block;
+  width: 100%;
+  height: var(--control-height);
+  min-height: var(--control-height);
+  padding: 0 var(--spacer-lg);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 500;
+  line-height: var(--line-height);
+  letter-spacing: 0.01em;
+  color: var(--foreground);
+  background-color: var(--input-bg-rest);
+  border: var(--border-width-input) solid var(--input);
+  border-radius: var(--radius-pill);
+  outline: none;
+  appearance: none;
+  box-shadow: 0 3px 0 0 var(--shadow-input);
+  transition: color var(--duration-normal) var(--easing-standard),
+    background-color var(--duration-normal) var(--easing-standard),
+    border-color var(--duration-normal) var(--easing-standard),
+    box-shadow var(--duration-normal) var(--easing-standard),
+    transform var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-control::placeholder {
+  color: var(--muted-foreground);
+  font-weight: 400;
+  opacity: 1;
+}
+
+/* --- hover：提亮底色、加深 3D 阴影、上浮 1px --- */
+[data-tt-style="animal"] .animal-control:hover:not(:disabled):not(.is-disabled) {
+  background-color: var(--input-bg);
+  border-color: color-mix(in srgb, var(--input) 72%, var(--foreground));
+  box-shadow: 0 3px 0 0 var(--input);
+  transform: translateY(-1px);
+}
+
+/* --- active：按压，3D 阴影收平 --- */
+[data-tt-style="animal"] .animal-control:active:not(:disabled):not(.is-disabled) {
+  box-shadow: 0 1px 0 0 var(--shadow-input);
+  transform: translateY(1px);
+}
+
+/* --- focus：薄荷青描边 + 浅色光晕，保留 3D 阴影 --- */
+[data-tt-style="animal"] .animal-control:focus,
+[data-tt-style="animal"] .animal-control.is-focused,
+[data-tt-style="animal"] .animal-input:focus-within .animal-control {
+  background-color: var(--input-bg);
+  border-color: var(--primary);
+  box-shadow: 0 3px 0 0 var(--shadow-input), 0 0 0 3px var(--accent);
+  transform: none;
+}
+
+/* --- 键盘焦点：黄色描边，永不用蓝色 --- */
+[data-tt-style="animal"] .animal-control:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- 非法：描边与 3D 阴影转警示红（upstream status="error"） --- */
+[data-tt-style="animal"] .animal-control[aria-invalid="true"],
+[data-tt-style="animal"] .animal-control[data-invalid="true"],
+[data-tt-style="animal"] .animal-control.is-invalid {
+  border-color: var(--destructive);
+  box-shadow: 0 3px 0 0 var(--destructive-subtle-foreground);
+}
+
+[data-tt-style="animal"] .animal-control.is-invalid:hover:not(:disabled):not(
+    .is-disabled
+  ),
+[data-tt-style="animal"] .animal-control[aria-invalid="true"]:hover:not(
+    :disabled
+  ):not(.is-disabled) {
+  border-color: var(--destructive);
+  box-shadow: 0 3px 0 0 var(--destructive-subtle-foreground);
+}
+
+[data-tt-style="animal"] .animal-control.is-invalid:focus,
+[data-tt-style="animal"] .animal-control.is-invalid.is-focused,
+[data-tt-style="animal"] .animal-control[aria-invalid="true"]:focus {
+  border-color: var(--destructive);
+  box-shadow: 0 3px 0 0 var(--destructive-subtle-foreground),
+    0 0 0 3px var(--destructive-subtle);
+}
+
+/* --- 禁用：灰底无阴影，降不透明度 --- */
+[data-tt-style="animal"] .animal-control:disabled,
+[data-tt-style="animal"] .animal-control[disabled],
+[data-tt-style="animal"] .animal-control[data-disabled="true"],
+[data-tt-style="animal"] .animal-control.is-disabled,
+[data-tt-style="animal"] .animal-input.is-disabled .animal-control {
+  color: var(--foreground-disabled);
+  background-color: var(--input-bg-disabled);
+  border-color: var(--border-subtle);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+/* --- 右侧有 clear / loading 时给文字让位 --- */
+[data-tt-style="animal"] .animal-control.has-affix {
+  padding-right: 34px;
+}
+
+/* --- 清除按钮 --- */
+[data-tt-style="animal"] .animal-input__clear {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--muted-foreground);
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-input__clear:hover {
+  color: var(--foreground);
+  background-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+[data-tt-style="animal"] .animal-input__clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* --- 加载指示 --- */
+[data-tt-style="animal"] .animal-input__loading {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border: 2px solid var(--border-strong);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: animal-input-spin 1s linear infinite;
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-input__loading-inner {
+  display: none;
+}
+
+@keyframes animal-input-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-control,
+  [data-tt-style="animal"] .animal-input__clear,
+  [data-tt-style="animal"] .animal-input__loading {
+    transition: none;
+    animation: none;
+    transform: none;
+  }
+}

@@ -1,0 +1,227 @@
+/* ==========================================================================
+   Material 3 · Sheet（侧边面板）
+   结构：.m3-sheet__scrim + .m3-sheet.m3-sheet--[right|left|top|bottom]
+         > .m3-sheet__header(.m3-sheet__title + .m3-sheet__close) + .m3-sheet__body
+   M3 特征：24px 圆角（贴边那侧为 0）；--surface-container-low 底；
+   进出场走 --easing-emphasized + --duration-medium。
+   注：.m3-sheet__close 的图标按钮样式定义在 dialog.css（与 dialog 关闭按钮共用）。
+   ========================================================================== */
+
+[data-tt-style="material"] {
+  --m3-sheet-radius: 24px;
+}
+
+[data-tt-style="material"] .m3-sheet__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background-color: var(--scrim);
+  opacity: var(--m3-sheet-scrim-opacity, 0.32);
+}
+
+[data-tt-style="material"] .m3-sheet {
+  position: fixed;
+  z-index: 1041;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  color: var(--surface-foreground);
+  background-color: var(--surface-container-low);
+  background-clip: padding-box;
+  box-shadow: var(--elevation-1);
+  outline: 0;
+}
+
+[data-tt-style="material"] .m3-sheet--right {
+  top: 0;
+  right: 0;
+  width: 25rem;
+  height: 100%;
+  border-radius: var(--m3-sheet-radius) 0 0 var(--m3-sheet-radius);
+}
+
+[data-tt-style="material"] .m3-sheet--left {
+  top: 0;
+  left: 0;
+  width: 25rem;
+  height: 100%;
+  border-radius: 0 var(--m3-sheet-radius) var(--m3-sheet-radius) 0;
+}
+
+[data-tt-style="material"] .m3-sheet--top {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 20rem;
+  border-radius: 0 0 var(--m3-sheet-radius) var(--m3-sheet-radius);
+}
+
+[data-tt-style="material"] .m3-sheet--bottom {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 20rem;
+  border-radius: var(--m3-sheet-radius) var(--m3-sheet-radius) 0 0;
+}
+
+[data-tt-style="material"] .m3-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: 1rem 1rem 0.5rem;
+}
+
+[data-tt-style="material"] .m3-sheet__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--title-size);
+  font-weight: 500;
+  line-height: var(--line-height);
+  color: var(--surface-foreground);
+}
+
+/* 无标题时关闭按钮也要贴右 */
+[data-tt-style="material"] .m3-sheet__header .m3-sheet__close {
+  margin-left: auto;
+}
+
+[data-tt-style="material"] .m3-sheet__body {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--muted-foreground);
+}
+
+/* --- 动画：从贴边那侧滑入 --- */
+[data-tt-style="material"] .m3-sheet__scrim.is-enter {
+  animation: m3-sheet-scrim-in var(--duration-medium) var(--easing-standard) both;
+}
+
+[data-tt-style="material"] .m3-sheet__scrim.is-exit {
+  animation: m3-sheet-scrim-out var(--duration-short) var(--easing-standard) both;
+}
+
+[data-tt-style="material"] .m3-sheet--right.is-enter {
+  animation: m3-sheet-in-right var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-sheet--right.is-exit {
+  animation: m3-sheet-out-right var(--duration-short) var(--easing-standard) both;
+}
+
+[data-tt-style="material"] .m3-sheet--left.is-enter {
+  animation: m3-sheet-in-left var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-sheet--left.is-exit {
+  animation: m3-sheet-out-left var(--duration-short) var(--easing-standard) both;
+}
+
+[data-tt-style="material"] .m3-sheet--top.is-enter {
+  animation: m3-sheet-in-top var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-sheet--top.is-exit {
+  animation: m3-sheet-out-top var(--duration-short) var(--easing-standard) both;
+}
+
+[data-tt-style="material"] .m3-sheet--bottom.is-enter {
+  animation: m3-sheet-in-bottom var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-sheet--bottom.is-exit {
+  animation: m3-sheet-out-bottom var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-sheet-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--m3-sheet-scrim-opacity, 0.32);
+  }
+}
+
+@keyframes m3-sheet-scrim-out {
+  from {
+    opacity: var(--m3-sheet-scrim-opacity, 0.32);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes m3-sheet-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes m3-sheet-out-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes m3-sheet-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes m3-sheet-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes m3-sheet-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes m3-sheet-out-top {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes m3-sheet-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes m3-sheet-out-bottom {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}

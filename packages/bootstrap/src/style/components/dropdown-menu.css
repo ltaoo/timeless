@@ -1,0 +1,170 @@
+/* ==========================================================================
+   Bootstrap 5.3 · DropdownMenu / ContextMenu / static Menu
+   三个模块共用同一套类名（见 modules/menu-shared.ts 的 t 常量）：
+     .dropdown-menu / .dropdown-item / .dropdown-divider / .dropdown-header
+     .dropdown-submenu / .dropdown-item-icon / .dropdown-item-shortcut
+     .dropdown-item-check / .dropdown-item-arrow
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .dropdown-menu {
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  max-height: var(--tt-menu-max-height, 20rem);
+  overflow: hidden auto;
+  padding: 0.25rem 0;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  text-align: left;
+  list-style: none;
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  outline: 0;
+}
+
+/* --- 条目 --- */
+[data-tt-style="bootstrap"] .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.25rem 0.75rem;
+  clear: both;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="bootstrap"] .dropdown-item:hover,
+[data-tt-style="bootstrap"] .dropdown-item.is-focused {
+  color: var(--accent-foreground);
+  background-color: var(--accent);
+}
+
+[data-tt-style="bootstrap"] .dropdown-item:active {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .dropdown-item.is-disabled,
+[data-tt-style="bootstrap"] .dropdown-item[data-disabled],
+[data-tt-style="bootstrap"] .dropdown-item:disabled {
+  color: var(--muted-foreground);
+  pointer-events: none;
+  background-color: transparent;
+  opacity: var(--disabled-opacity);
+}
+
+/* 勾选位 / 图标位 / 快捷键 / 子菜单箭头 */
+[data-tt-style="bootstrap"] .dropdown-item-check {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .dropdown-item-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .dropdown-item-shortcut {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .dropdown-item-arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .dropdown-item-shortcut + .dropdown-item-arrow {
+  margin-left: 0.25rem;
+}
+
+/* --- 分组标题 / 分隔线 --- */
+[data-tt-style="bootstrap"] .dropdown-header {
+  display: block;
+  padding: 0.25rem 0.75rem;
+  margin-bottom: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+[data-tt-style="bootstrap"] .dropdown-divider {
+  height: 0;
+  margin: 0.25rem 0;
+  overflow: hidden;
+  border-top: var(--bs-border-width) solid var(--border);
+}
+
+/* --- 子菜单浮层 --- */
+[data-tt-style="bootstrap"] .dropdown-submenu {
+  min-width: 9rem;
+}
+
+/* --- 动画（DropdownMenu / ContextMenu / Menu 的浮层） --- */
+[data-tt-style="bootstrap"] .dropdown-menu.is-enter {
+  animation: bs-menu-in 0.12s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .dropdown-menu.is-exit {
+  animation: bs-menu-out 0.1s ease-in both;
+}
+
+@keyframes bs-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bs-menu-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .dropdown-item {
+    transition: none;
+  }
+}

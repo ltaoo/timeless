@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Fluent 2 · Cascader（.fl-cascader + 多级面板浮层）
+   --------------------------------------------------------------------------
+   结构：.fl-cascader（触发器）> __value + 清除/箭头
+         .fl-cascader__content（surface-1 + 1px --stroke1 + 8px 圆角 + shadow-16）
+           ├─ .fl-cascader__search（可选）
+           ├─ .fl-cascader__search-results > __search-result > __path
+           └─ .fl-cascader__panels（+ .is-hidden）
+                └─ .fl-cascader__panel × N > .fl-cascader__item
+                     > __item-text + __item-indicator
+
+   触发器与 select 同盒子指标（1px --stroke1、4px 圆角、32px 高）。
+   选项 .is-active（键盘/悬停聚焦）用左侧 3px --compound-brand 指示条。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-cascader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 20px;
+  color: var(--foreground);
+  text-align: left;
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-cascader:hover {
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="fluent"] .fl-cascader.is-open,
+[data-tt-style="fluent"] .fl-cascader:focus-within {
+  border-bottom-color: var(--compound-brand);
+  box-shadow: inset 0 -2px 0 var(--compound-brand);
+  outline: none;
+}
+
+[data-tt-style="fluent"] .fl-cascader.is-disabled {
+  color: var(--foreground-disabled);
+  background-color: var(--surface-disabled);
+  border-color: var(--stroke-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-cascader__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-cascader__value.is-placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="fluent"] .fl-cascader__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+  transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+/* 展开时箭头翻转：锚在触发器根上的 .is-open（比图标自身的类更可靠） */
+[data-tt-style="fluent"] .fl-cascader.is-open .fl-cascader__icon {
+  transform: rotate(180deg);
+}
+
+[data-tt-style="fluent"] .fl-cascader__clear {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--foreground-3);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-cascader__clear:hover {
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-cascader__clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+/* --- 浮层 --- */
+[data-tt-style="fluent"] .fl-cascader__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: min(720px, 90vw);
+  overflow: hidden;
+  color: var(--popover-foreground);
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-16);
+  outline: none;
+  animation: fl-cascader-in var(--duration-normal) var(--easing-decelerate) both;
+}
+
+/* --- 搜索 --- */
+[data-tt-style="fluent"] .fl-cascader__search {
+  height: 32px;
+  margin: 8px 8px 4px;
+  padding: 0 8px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--foreground);
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-cascader__search::placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="fluent"] .fl-cascader__search:focus {
+  border-bottom-color: var(--compound-brand);
+  box-shadow: inset 0 -2px 0 var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-cascader__search-results {
+  max-height: 264px;
+  padding: 4px;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--stroke1) transparent;
+}
+
+[data-tt-style="fluent"] .fl-cascader__search-result {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-cascader__search-result:hover {
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-cascader__path {
+  font-size: var(--font-size-sm);
+  color: var(--foreground-2);
+}
+
+/* --- 多级面板 --- */
+[data-tt-style="fluent"] .fl-cascader__panels {
+  display: flex;
+  align-items: stretch;
+}
+
+[data-tt-style="fluent"] .fl-cascader__panels.is-hidden {
+  display: none;
+}
+
+[data-tt-style="fluent"] .fl-cascader__panel {
+  min-width: 160px;
+  max-height: 264px;
+  padding: 4px;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--stroke1) transparent;
+}
+
+[data-tt-style="fluent"] .fl-cascader__panel:not(:first-child) {
+  border-left: var(--strokeWidthThin) solid var(--stroke2);
+}
+
+[data-tt-style="fluent"] .fl-cascader__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px 6px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground);
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+/* 左侧 3px 品牌竖条：悬停 / 键盘聚焦时出现 */
+[data-tt-style="fluent"] .fl-cascader__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  transform: translateY(-50%);
+  background-color: var(--compound-brand);
+  border-radius: var(--radius-pill);
+  transition: height var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-cascader__item:hover,
+[data-tt-style="fluent"] .fl-cascader__item.is-active {
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-cascader__item:hover::before,
+[data-tt-style="fluent"] .fl-cascader__item.is-active::before {
+  height: 60%;
+}
+
+[data-tt-style="fluent"] .fl-cascader__item.is-selected {
+  font-weight: var(--fontWeightSemibold);
+  color: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-cascader__item.is-disabled {
+  color: var(--foreground-disabled);
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-cascader__item.is-disabled::before {
+  height: 0;
+}
+
+[data-tt-style="fluent"] .fl-cascader__item-indicator {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+}
+
+@keyframes fl-cascader-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-cascader,
+  [data-tt-style="fluent"] .fl-cascader__icon,
+  [data-tt-style="fluent"] .fl-cascader__item,
+  [data-tt-style="fluent"] .fl-cascader__item::before,
+  [data-tt-style="fluent"] .fl-cascader__content {
+    transition: none;
+    animation: none;
+  }
+}

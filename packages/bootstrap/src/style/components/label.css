@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Label（.form-label）
+   Bootstrap 只给 .form-label 一个 margin-bottom，这里补上字重与禁用态。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .form-label {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 500;
+  line-height: var(--line-height);
+  color: var(--foreground);
+}
+
+[data-tt-style="bootstrap"] .form-label.is-disabled,
+[data-tt-style="bootstrap"] .form-label[data-disabled="true"],
+[data-tt-style="bootstrap"] .form-label[aria-disabled="true"] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="bootstrap"] .form-label.is-invalid {
+  color: var(--bs-form-invalid-color);
+}
+
+[data-tt-style="bootstrap"] .form-label .form-label-required {
+  margin-left: 0.125rem;
+  color: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .form-label {
+    transition: none;
+  }
+}

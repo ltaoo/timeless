@@ -1,0 +1,120 @@
+/* ==========================================================================
+   Material 3 · Radio
+   20px 圆形；选中态边框 --primary + 内圆 --primary（直径 10px）。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-radio {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  vertical-align: middle;
+  background-color: transparent;
+  border: 2px solid var(--muted-foreground);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-radio:hover {
+  border-color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-radio:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring-color);
+}
+
+[data-tt-style="material"] .m3-radio.is-checked,
+[data-tt-style="material"] .m3-radio[data-checked] {
+  border-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-radio.is-checked::after,
+[data-tt-style="material"] .m3-radio[data-checked]::after {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-radio.is-invalid,
+[data-tt-style="material"] .m3-radio[aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+[data-tt-style="material"] .m3-radio:disabled,
+[data-tt-style="material"] .m3-radio[data-disabled],
+[data-tt-style="material"] .m3-radio.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+/* --- 行布局 + 标签 --- */
+[data-tt-style="material"] .m3-radio-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.5rem;
+}
+
+[data-tt-style="material"] .m3-radio-label {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="material"] .m3-radio-label.is-disabled,
+[data-tt-style="material"] .m3-radio-label[data-disabled="true"] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+
+/* --- 组 --- */
+[data-tt-style="material"] .m3-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="material"] .m3-radio-group--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+[data-tt-style="material"] .m3-radio-group__item {
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+[data-tt-style="material"] .m3-radio-group__item:focus-within {
+  outline: 2px solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+[data-tt-style="material"] .m3-radio-group__item.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-radio {
+    transition: none;
+  }
+}

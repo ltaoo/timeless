@@ -1,0 +1,239 @@
+/* ==========================================================================
+   Fluent 2 · Button（.fl-btn）
+   --------------------------------------------------------------------------
+   结构特征（Fluent 2 Button 的硬指标）：
+     · 固定 32px 高度（--control-height）、4px 圆角（--radius）
+     · 1px --stroke1 描边；默认 --surface-1 底 + --foreground 字
+     · primary 形态用 --brand-fill / -hover / -pressed，无描边
+     · outline 形态用 1px --brand-stroke + 透明底
+     · hover / pressed 只换 token，不做位移（Fluent 没有 elevation 变化）
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-btn {
+  --btn-height: var(--control-height);
+  --btn-padding-x: 12px;
+  --btn-font-size: var(--font-size);
+  --btn-radius: var(--radius);
+  --btn-color: var(--foreground);
+  --btn-bg: var(--surface-1);
+  --btn-border: var(--stroke1);
+  --btn-hover-color: var(--foreground);
+  --btn-hover-bg: var(--surface-1-hover);
+  --btn-hover-border: var(--stroke1-hover);
+  --btn-pressed-color: var(--foreground);
+  --btn-pressed-bg: var(--surface-1-pressed);
+  --btn-pressed-border: var(--stroke1-pressed);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--btn-height);
+  min-width: var(--btn-height);
+  padding: 0 var(--btn-padding-x);
+  font-family: var(--font-sans);
+  font-size: var(--btn-font-size);
+  font-weight: var(--fontWeightMedium);
+  line-height: 20px;
+  color: var(--btn-color);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--btn-bg);
+  border: var(--strokeWidthThin) solid var(--btn-border);
+  border-radius: var(--btn-radius);
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-btn:hover {
+  color: var(--btn-hover-color);
+  background-color: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border);
+}
+
+[data-tt-style="fluent"] .fl-btn:active {
+  color: var(--btn-pressed-color);
+  background-color: var(--btn-pressed-bg);
+  border-color: var(--btn-pressed-border);
+}
+
+[data-tt-style="fluent"] .fl-btn:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-btn:disabled,
+[data-tt-style="fluent"] .fl-btn[data-disabled="true"],
+[data-tt-style="fluent"] .fl-btn.is-disabled {
+  color: var(--foreground-disabled);
+  background-color: var(--surface-disabled);
+  border-color: var(--stroke-disabled);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- loading：spinner 显示期间禁用交互 --- */
+[data-tt-style="fluent"] .fl-btn.is-loading {
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-btn .fl-btn__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: fl-spin 1s linear infinite;
+}
+
+@keyframes fl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- 尺寸：24 / 32 / 40 --- */
+[data-tt-style="fluent"] .fl-btn--sm {
+  --btn-height: var(--control-height-sm);
+  --btn-padding-x: 8px;
+  --btn-font-size: var(--font-size-sm);
+}
+
+[data-tt-style="fluent"] .fl-btn--lg {
+  --btn-height: var(--control-height-lg);
+  --btn-padding-x: 16px;
+  --btn-font-size: var(--font-size-lg);
+}
+
+[data-tt-style="fluent"] .fl-btn--icon {
+  --btn-padding-x: 0;
+  width: var(--btn-height);
+}
+
+/* --- primary：品牌实心，无描边 --- */
+[data-tt-style="fluent"] .fl-btn--primary {
+  --btn-color: var(--colorNeutralForegroundOnBrand);
+  --btn-bg: var(--brand-fill);
+  --btn-border: transparent;
+  --btn-hover-color: var(--colorNeutralForegroundOnBrand);
+  --btn-hover-bg: var(--brand-fill-hover);
+  --btn-hover-border: transparent;
+  --btn-pressed-color: var(--colorNeutralForegroundOnBrand);
+  --btn-pressed-bg: var(--brand-fill-pressed);
+  --btn-pressed-border: transparent;
+}
+
+[data-tt-style="fluent"] .fl-btn--primary:disabled,
+[data-tt-style="fluent"] .fl-btn--primary[data-disabled="true"],
+[data-tt-style="fluent"] .fl-btn--primary.is-disabled {
+  color: var(--foreground-disabled);
+  background-color: var(--surface-disabled);
+}
+
+/* --- secondary：中性描边（与默认态同源，显式写出便于阅读） --- */
+[data-tt-style="fluent"] .fl-btn--secondary {
+  --btn-bg: var(--surface-1);
+  --btn-border: var(--stroke1);
+}
+
+/* --- outline：品牌描边 + 透明底 --- */
+[data-tt-style="fluent"] .fl-btn--outline {
+  --btn-color: var(--brand-fill);
+  --btn-bg: transparent;
+  --btn-border: var(--brand-stroke);
+  --btn-hover-color: var(--brand-fill-hover);
+  --btn-hover-bg: transparent;
+  --btn-hover-border: var(--brand-fill-hover);
+  --btn-pressed-color: var(--brand-fill-pressed);
+  --btn-pressed-bg: transparent;
+  --btn-pressed-border: var(--brand-fill-pressed);
+}
+
+/* --- subtle：透明底，hover 时才出现表面 --- */
+[data-tt-style="fluent"] .fl-btn--subtle {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-hover-bg: var(--accent);
+  --btn-hover-border: transparent;
+  --btn-pressed-bg: var(--surface-1-pressed);
+  --btn-pressed-border: transparent;
+}
+
+/* --- transparent：品牌文字，hover 加下划线 --- */
+[data-tt-style="fluent"] .fl-btn--transparent {
+  --btn-color: var(--brand-fill);
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-hover-color: var(--brand-fill-hover);
+  --btn-hover-bg: transparent;
+  --btn-hover-border: transparent;
+  --btn-pressed-color: var(--brand-fill-pressed);
+  --btn-pressed-bg: transparent;
+  --btn-pressed-border: transparent;
+}
+
+[data-tt-style="fluent"] .fl-btn--transparent:hover {
+  text-decoration: underline;
+}
+
+/* --- 状态色实心（Fluent 主线没有，为画廊补齐，仍走 token） --- */
+[data-tt-style="fluent"] .fl-btn--danger {
+  --btn-color: var(--destructive-foreground);
+  --btn-bg: var(--destructive);
+  --btn-border: transparent;
+  --btn-hover-color: var(--destructive-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--destructive) 88%, black);
+  --btn-hover-border: transparent;
+  --btn-pressed-color: var(--destructive-foreground);
+  --btn-pressed-bg: color-mix(in srgb, var(--destructive) 78%, black);
+  --btn-pressed-border: transparent;
+}
+
+[data-tt-style="fluent"] .fl-btn--success {
+  --btn-color: var(--success-foreground);
+  --btn-bg: var(--success);
+  --btn-border: transparent;
+  --btn-hover-color: var(--success-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--success) 88%, black);
+  --btn-hover-border: transparent;
+  --btn-pressed-color: var(--success-foreground);
+  --btn-pressed-bg: color-mix(in srgb, var(--success) 78%, black);
+  --btn-pressed-border: transparent;
+}
+
+[data-tt-style="fluent"] .fl-btn--warning {
+  --btn-color: var(--warning-foreground);
+  --btn-bg: var(--warning);
+  --btn-border: transparent;
+  --btn-hover-color: var(--warning-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--warning) 88%, black);
+  --btn-hover-border: transparent;
+  --btn-pressed-color: var(--warning-foreground);
+  --btn-pressed-bg: color-mix(in srgb, var(--warning) 78%, black);
+  --btn-pressed-border: transparent;
+}
+
+[data-tt-style="fluent"] .fl-btn--info {
+  --btn-color: var(--info-foreground);
+  --btn-bg: var(--info);
+  --btn-border: transparent;
+  --btn-hover-color: var(--info-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--info) 88%, black);
+  --btn-hover-border: transparent;
+  --btn-pressed-color: var(--info-foreground);
+  --btn-pressed-bg: color-mix(in srgb, var(--info) 78%, black);
+  --btn-pressed-border: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-btn,
+  [data-tt-style="fluent"] .fl-btn .fl-btn__spinner {
+    transition: none;
+    animation: none;
+  }
+}

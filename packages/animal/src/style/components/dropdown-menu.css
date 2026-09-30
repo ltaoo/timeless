@@ -1,0 +1,216 @@
+/* ==========================================================================
+   Animal Island · DropdownMenu / ContextMenu / static Menu
+   --------------------------------------------------------------------------
+   三个模块共用同一套类名（见 modules/menu-shared.ts 的 t 常量）：
+     .animal-menu / .animal-menu__item / .animal-menu__separator / .animal-menu__label
+     .animal-menu--submenu / .animal-menu__icon / .animal-menu__shortcut
+     .animal-menu__check / .animal-menu__arrow
+
+   上游视觉：
+     · 浮层底 --popover（奶油纸），字 --popover-foreground（暖棕）
+     · 2px（--border-width）--border 描边，圆角 --radius-lg（24px），柔和阴影 --shadow-lg
+     · 行 hover 用薄荷浅底 --accent；选中/聚焦的指示条是**薄荷青** --primary
+       的左侧竖条（替换 Fluent 的 --compound-brand）
+     · 进场 zoom-in，关键帧 animal-menu-in
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-menu {
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  max-height: var(--tt-menu-max-height, 20rem);
+  overflow: hidden auto;
+  padding: var(--spacer-xs);
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  text-align: left;
+  list-style: none;
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  outline: 0;
+}
+
+/* --- 条目 --- */
+[data-tt-style="animal"] .animal-menu__item-wrap {
+  display: block;
+}
+
+[data-tt-style="animal"] .animal-menu__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  width: 100%;
+  padding: 6px 10px 6px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+/* 左侧 3px 薄荷青竖条：hover / 聚焦 / 展开时出现 */
+[data-tt-style="animal"] .animal-menu__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  transform: translateY(-50%);
+  background-color: var(--primary);
+  border-radius: var(--radius-pill);
+  transition: height var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-menu__item:hover,
+[data-tt-style="animal"] .animal-menu__item.is-focused {
+  color: var(--foreground);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-menu__item:hover::before,
+[data-tt-style="animal"] .animal-menu__item.is-focused::before {
+  height: 60%;
+}
+
+[data-tt-style="animal"] .animal-menu__item:active {
+  background-color: color-mix(in srgb, var(--accent) 85%, var(--foreground));
+}
+
+[data-tt-style="animal"] .animal-menu__item.is-disabled,
+[data-tt-style="animal"] .animal-menu__item[data-disabled],
+[data-tt-style="animal"] .animal-menu__item:disabled {
+  color: var(--foreground-disabled);
+  pointer-events: none;
+  background-color: transparent;
+}
+
+[data-tt-style="animal"] .animal-menu__item.is-disabled::before,
+[data-tt-style="animal"] .animal-menu__item[data-disabled]::before {
+  height: 0;
+}
+
+[data-tt-style="animal"] .animal-menu__item:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -1px;
+}
+
+/* 勾选位 / 图标位 / 快捷键 / 子菜单箭头 */
+[data-tt-style="animal"] .animal-menu__check {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-menu__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-menu__shortcut {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.01em;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-menu__arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-menu__shortcut + .animal-menu__arrow {
+  margin-left: 4px;
+}
+
+/* --- 分组标题 / 分隔线 --- */
+[data-tt-style="animal"] .animal-menu__label {
+  display: block;
+  padding: 6px 12px 2px;
+  margin-bottom: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+[data-tt-style="animal"] .animal-menu__separator {
+  height: 0;
+  margin: var(--spacer-xs) 0;
+  overflow: hidden;
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+/* --- 子菜单浮层 --- */
+[data-tt-style="animal"] .animal-menu--submenu {
+  min-width: 9rem;
+}
+
+/* --- 动画（DropdownMenu / ContextMenu / Menu 的浮层） --- */
+[data-tt-style="animal"] .animal-menu.is-enter {
+  animation: animal-menu-in var(--duration-fast) var(--easing-standard) both;
+}
+
+[data-tt-style="animal"] .animal-menu.is-exit {
+  animation: animal-menu-out var(--duration-fast) var(--easing-standard) both;
+}
+
+@keyframes animal-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes animal-menu-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-menu__item,
+  [data-tt-style="animal"] .animal-menu__item::before {
+    transition: none;
+  }
+
+  [data-tt-style="animal"] .animal-menu.is-enter,
+  [data-tt-style="animal"] .animal-menu.is-exit {
+    animation: none;
+  }
+}

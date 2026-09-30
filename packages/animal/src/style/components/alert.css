@@ -1,0 +1,108 @@
+/* ==========================================================================
+   Animal Island · Alert（.animal-alert）
+   --------------------------------------------------------------------------
+   结构：.animal-alert > .animal-alert__title / .animal-alert__description
+                     （可选 .animal-alert__icon）。
+
+   变体由 module 层映射：默认（default 不加类）、--primary、--secondary、
+   --success、--warning、--danger、--info。
+
+   Animal Island 视觉：
+     · 小羊皮纸告示：2px --border 描边 + --radius 圆角
+     · 保留态用奶油纸底 --card；状态变体换 soft fill（--*-subtle）
+       配各自的 subtle-foreground，描边用该状态的 40% 色
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-alert {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-xs);
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 500;
+  line-height: var(--line-height);
+  color: var(--card-foreground);
+  background-color: var(--card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-alert:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- 品牌 / 信息：薄荷青浅底 --- */
+[data-tt-style="animal"] .animal-alert--primary,
+[data-tt-style="animal"] .animal-alert--info {
+  color: var(--info-subtle-foreground);
+  background-color: var(--info-subtle);
+  border-color: color-mix(in srgb, var(--info) 40%, transparent);
+}
+
+[data-tt-style="animal"] .animal-alert--secondary {
+  color: var(--secondary-foreground);
+  background-color: var(--secondary);
+  border-color: var(--border);
+}
+
+[data-tt-style="animal"] .animal-alert--success {
+  color: var(--success-subtle-foreground);
+  background-color: var(--success-subtle);
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+}
+
+[data-tt-style="animal"] .animal-alert--warning {
+  color: var(--warning-subtle-foreground);
+  background-color: var(--warning-subtle);
+  border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+}
+
+[data-tt-style="animal"] .animal-alert--danger {
+  color: var(--destructive-subtle-foreground);
+  background-color: var(--destructive-subtle);
+  border-color: color-mix(in srgb, var(--destructive) 40%, transparent);
+}
+
+[data-tt-style="animal"] .animal-alert__title {
+  margin: 0;
+  font-size: var(--font-size);
+  font-weight: 700;
+  line-height: var(--line-height);
+  color: inherit;
+}
+
+[data-tt-style="animal"] .animal-alert__description {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height);
+  opacity: 0.9;
+}
+
+/* 可选图标：绝对定位在左上角，后续内容让位 */
+[data-tt-style="animal"] .animal-alert__icon {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  display: inline-flex;
+}
+
+[data-tt-style="animal"] .animal-alert__icon ~ * {
+  padding-left: 22px;
+}
+
+[data-tt-style="animal"] .animal-alert.is-disabled,
+[data-tt-style="animal"] .animal-alert[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-alert {
+    transition: none;
+  }
+}

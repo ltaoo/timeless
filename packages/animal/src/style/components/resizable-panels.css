@@ -1,0 +1,130 @@
+/* ==========================================================================
+   Animal Island · ResizablePanels（.animal-resizable）
+   --------------------------------------------------------------------------
+   类名来自 modules/resizable-panels.ts：
+     .animal-resizable（--horizontal / --vertical）
+     .animal-resizable__panel / .animal-resizable__handle（--horizontal /
+       --vertical / [data-dragging="true"]）/ .animal-resizable__grip
+
+   Animal Island 视觉：
+     · 面板是羊皮纸卡片，2px --border 描边；分隔手柄是一条 2px 描边线
+     · 手柄 hover / 拖拽时整条线转薄荷青（--primary），并带薄荷浅色光晕
+     · 抓手（grip）是 4px 宽圆角短棒，用 --border-strong；拖拽时转 --primary
+     · 视觉线保持 2px，但用 ::after 向外扩 4px 命中区
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-resizable {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+}
+
+[data-tt-style="animal"] .animal-resizable--horizontal {
+  flex-direction: row;
+}
+
+[data-tt-style="animal"] .animal-resizable--vertical {
+  flex-direction: column;
+}
+
+[data-tt-style="animal"] .animal-resizable__panel {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--surface-1);
+}
+
+[data-tt-style="animal"] .animal-resizable__handle {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--border);
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-resizable__handle--horizontal {
+  width: var(--border-width);
+  cursor: col-resize;
+}
+
+[data-tt-style="animal"] .animal-resizable__handle--vertical {
+  width: 100%;
+  height: var(--border-width);
+  cursor: row-resize;
+}
+
+/* 扩大命中区域（视觉仍是 2px 细线） */
+[data-tt-style="animal"] .animal-resizable__handle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+[data-tt-style="animal"] .animal-resizable__handle--horizontal::after {
+  left: -4px;
+  right: -4px;
+}
+
+[data-tt-style="animal"] .animal-resizable__handle--vertical::after {
+  top: -4px;
+  bottom: -4px;
+}
+
+[data-tt-style="animal"] .animal-resizable__handle:hover,
+[data-tt-style="animal"] .animal-resizable__handle:active,
+[data-tt-style="animal"] .animal-resizable__handle[data-dragging="true"] {
+  background-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--accent);
+}
+
+[data-tt-style="animal"] .animal-resizable__handle:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -2px;
+}
+
+[data-tt-style="animal"] .animal-resizable__handle.is-disabled,
+[data-tt-style="animal"] .animal-resizable__handle[data-disabled="true"] {
+  cursor: default;
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-resizable__grip {
+  z-index: 10;
+  display: flex;
+  flex-shrink: 0;
+  width: 4px;
+  height: 24px;
+  background-color: var(--border-strong);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-resizable__handle--vertical .animal-resizable__grip {
+  width: 24px;
+  height: 4px;
+}
+
+[data-tt-style="animal"] .animal-resizable__handle:hover
+  .animal-resizable__grip,
+[data-tt-style="animal"] .animal-resizable__handle[data-dragging="true"]
+  .animal-resizable__grip {
+  background-color: var(--primary-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-resizable__handle,
+  [data-tt-style="animal"] .animal-resizable__grip {
+    transition: none;
+  }
+}

@@ -1,0 +1,49 @@
+/* ==========================================================================
+   Fluent 2 · Tooltip
+   --------------------------------------------------------------------------
+   结构：.fl-tooltip > .fl-tooltip__arrow / .fl-tooltip__inner
+   特征：深色气泡（--surface-inverted 底 + 白字），1px 透明描边 + --shadow-8。
+
+   注意：headless 的 tooltip 是全局单例，模块侧拿不到它的 popper 状态，
+   因此无法按 placement 计算箭头方向。这里按默认的 side="top" 把箭头固定居中
+   放在气泡下沿（对应被锚定元素在上方的情形）。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-tooltip {
+  --tt-tooltip-bg: var(--surface-inverted);
+  --tt-tooltip-color: var(--colorNeutralForegroundInverted);
+  z-index: 1080;
+  display: block;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: var(--fontWeightRegular);
+  line-height: var(--lineHeightBase200);
+  text-align: start;
+  text-decoration: none;
+  white-space: normal;
+  opacity: 1;
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-tooltip__inner {
+  max-width: 15rem;
+  padding: 6px 10px;
+  color: var(--tt-tooltip-color);
+  text-align: center;
+  background-color: var(--tt-tooltip-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-8);
+}
+
+[data-tt-style="fluent"] .fl-tooltip__arrow {
+  position: absolute;
+  left: 50%;
+  bottom: -0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--tt-tooltip-bg);
+  transform: translateX(-50%) rotate(45deg);
+  pointer-events: none;
+}

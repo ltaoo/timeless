@@ -29,6 +29,11 @@ const BUILD_ORDER = [
   "provider-web",
   "shadcn",
   "weui",
+  "bootstrap",
+  "material",
+  "fluent",
+  "animal",
+  "findrssui",
 ];
 
 // Browser distribution consumed by wx_channels_download and the web demos.
@@ -42,6 +47,22 @@ const ARTIFACTS = [
   ["shadcn", "timeless.shadcn.css"],
   ["weui", "timeless.weui.umd.min.js"],
   ["weui", "timeless.weui.css"],
+  ["bootstrap", "timeless.bootstrap.umd.min.js"],
+  ["bootstrap", "timeless.bootstrap.css"],
+  ["material", "timeless.material.umd.min.js"],
+  ["material", "timeless.material.css"],
+  ["fluent", "timeless.fluent.umd.min.js"],
+  ["fluent", "timeless.fluent.css"],
+  ["animal", "timeless.animal.umd.min.js"],
+  ["animal", "timeless.animal.css"],
+  // animal 的 webfont 子集是**独立文件**（vite 的 lib 模式默认会把资源内联成
+  // base64，靠 fonts.css 里的 `?no-inline` 关掉了），必须随 CSS 一起发布：
+  // 产物平铺在 dist 根，CSS 用 url("./animal-*.woff2") 相对引用。
+  // 两族各一个可变字体（wght 轴），见 packages/animal/src/style/fonts.css。
+  ["animal", "animal-nunito.woff2"],
+  ["animal", "animal-noto.woff2"],
+  ["findrssui", "timeless.findrssui.umd.min.js"],
+  ["findrssui", "timeless.findrssui.css"],
 ];
 
 // Each profile is a valid browser loading combination. The full and lite
@@ -56,6 +77,27 @@ const LOAD_PROFILES = {
   ],
   lite: ["timeless.lite.umd.min.js", "timeless.dom.umd.min.js"],
   lite_with_utils: ["timeless.lite.umd.min.js", "timeless.utils.umd.min.js"],
+  // Scoped style libraries. They are mutually exclusive with the global
+  // shadcn/weui bundles, so they stay out of `full` on purpose. The four of
+  // them *can* load together (attribute-scoped CSS, no shared globals), which
+  // makes this the strongest duplicate-dependency check.
+  style_libs: [
+    "timeless.dom.umd.min.js",
+    "timeless.web.umd.min.js",
+    "timeless.bootstrap.umd.min.js",
+    "timeless.material.umd.min.js",
+    "timeless.fluent.umd.min.js",
+    "timeless.animal.umd.min.js",
+  ],
+  // findrss-reader 自有组件库。它的 CSS 没有 `*` / `body` 级重置，只在
+  // `:root` 上挂 `--frui-*`，因此与 shadcn/weui 不冲突；这里只作**清单记录**，
+  // 不进 `full`（不是核心加载面）。
+  findrssui: [
+    "timeless.umd.min.js",
+    "timeless.dom.umd.min.js",
+    "timeless.web.umd.min.js",
+    "timeless.findrssui.umd.min.js",
+  ],
 };
 
 const isProd = process.argv.includes("--prod");

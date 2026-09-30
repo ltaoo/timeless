@@ -1,3 +1,4 @@
+import { Gallery } from "./modules/gallery";
 import { Button } from "./modules/button";
 import { Input } from "./modules/input";
 import { Textarea } from "./modules/textarea";
@@ -31,6 +32,7 @@ try {
 export const TimelessWeUIVersion = __Version;
 
 export {
+  Gallery,
   Button,
   Input,
   Textarea,

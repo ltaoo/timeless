@@ -1,0 +1,81 @@
+/* ==========================================================================
+   Material 3 · Progress
+   线性进度条：轨道 4px --surface-container-highest、指示器 --primary。
+   条纹 / 动画沿用可选修饰类，动画名带 m3- 前缀避免多库重名。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-progress {
+  display: flex;
+  width: 100%;
+  height: 4px;
+  overflow: hidden;
+  font-size: var(--font-size-xs);
+  background-color: var(--surface-container-highest);
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="material"] .m3-progress__bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--primary-foreground);
+  text-align: center;
+  white-space: nowrap;
+  background-color: var(--primary);
+  transition: width var(--duration-medium) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-progress__bar--success {
+  background-color: var(--success);
+}
+
+[data-tt-style="material"] .m3-progress__bar--warning {
+  background-color: var(--warning);
+}
+
+[data-tt-style="material"] .m3-progress__bar--danger {
+  background-color: var(--destructive);
+}
+
+[data-tt-style="material"] .m3-progress__bar--info {
+  background-color: var(--info);
+}
+
+[data-tt-style="material"] .m3-progress__bar--striped {
+  background-image: linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--primary-foreground) 15%, transparent) 25%,
+    transparent 25%,
+    transparent 50%,
+    color-mix(in srgb, var(--primary-foreground) 15%, transparent) 50%,
+    color-mix(in srgb, var(--primary-foreground) 15%, transparent) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+}
+
+[data-tt-style="material"] .m3-progress__bar--animated {
+  animation: m3-progress-stripes 1s linear infinite;
+}
+
+@keyframes m3-progress-stripes {
+  from {
+    background-position: 1rem 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-progress__bar {
+    transition: none;
+  }
+
+  [data-tt-style="material"] .m3-progress__bar--animated {
+    animation: none;
+  }
+}

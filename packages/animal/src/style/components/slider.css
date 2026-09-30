@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Animal Island · Slider（.animal-slider）
+   --------------------------------------------------------------------------
+   结构：.animal-slider
+           > .animal-slider__track
+               > .animal-slider__fill（width 由百分比驱动）
+           + .animal-slider__thumb（left 由百分比驱动，垂直居中恒定 transform）
+
+   注：thumb 的定位 transform（translate(-50%,-50%)）由 primitive 写成 inline
+   style，优先级高于样式表，因此本文件**不再覆写** thumb 的 transform。
+
+   Animal Island 视觉：
+     · 轨道是一条深色内阴影的凹槽（inset 0 2px 4px），已选段填充薄荷青 --primary
+     · 滑块是羊皮纸胶囊片：2.5px --primary 描边 + 柔和堆叠阴影，hover 变大靠底色
+     · hover 描边转 --primary-hover，active 转 --primary-pressed
+     · 非法时填充与描边转 --destructive；禁用降不透明度
+     · 焦点是黄色描边（--ring），永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 24px;
+  padding: 0;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+[data-tt-style="animal"] .animal-slider__track {
+  position: relative;
+  flex-grow: 1;
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--surface-2);
+  box-shadow: inset 0 2px 4px
+    color-mix(in srgb, var(--card-foreground) 12%, transparent);
+}
+
+[data-tt-style="animal"] .animal-slider__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary);
+  transition: width var(--duration-fast) linear,
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+/* --- 滑块 --- */
+[data-tt-style="animal"] .animal-slider__thumb {
+  width: 20px;
+  height: 20px;
+  border: var(--border-width-input) solid var(--primary);
+  border-radius: var(--radius-pill);
+  background-color: var(--input-bg);
+  box-shadow: 0 2px 0 0 var(--shadow-input);
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-slider:hover .animal-slider__thumb {
+  border-color: var(--primary-hover);
+  background-color: var(--accent);
+  box-shadow: 0 3px 0 0 var(--shadow-input);
+}
+
+[data-tt-style="animal"] .animal-slider:active .animal-slider__thumb {
+  border-color: var(--primary-pressed);
+  box-shadow: 0 1px 0 0 var(--shadow-input);
+}
+
+[data-tt-style="animal"] .animal-slider:focus-visible,
+[data-tt-style="animal"] .animal-slider__thumb:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- 非法 --- */
+[data-tt-style="animal"] .animal-slider.is-invalid .animal-slider__fill,
+[data-tt-style="animal"]
+  .animal-slider[aria-invalid="true"]
+  .animal-slider__fill {
+  background-color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-slider.is-invalid .animal-slider__thumb,
+[data-tt-style="animal"]
+  .animal-slider[aria-invalid="true"]
+  .animal-slider__thumb {
+  border-color: var(--destructive);
+}
+
+/* --- 禁用 --- */
+[data-tt-style="animal"] .animal-slider:disabled,
+[data-tt-style="animal"] .animal-slider[disabled],
+[data-tt-style="animal"] .animal-slider[data-disabled="true"],
+[data-tt-style="animal"] .animal-slider.is-disabled {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-slider.is-disabled .animal-slider__fill,
+[data-tt-style="animal"] .animal-slider[disabled] .animal-slider__fill {
+  background-color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-slider.is-disabled .animal-slider__thumb,
+[data-tt-style="animal"] .animal-slider[disabled] .animal-slider__thumb {
+  border-color: var(--border-subtle);
+  background-color: var(--surface-1);
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-slider__fill,
+  [data-tt-style="animal"] .animal-slider__thumb {
+    transition: none;
+  }
+}

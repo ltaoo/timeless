@@ -1,0 +1,34 @@
+/* ==========================================================================
+   Material 3 · Form
+   M3 没有独立的 form 容器组件（表单布局靠 Field / FieldSet 组合），Form 组件
+   本身只是透传（见 modules/form.ts）。这里只提供一点可选布局钩子：给它加
+   .m3-form 时会得到一个纵向间距容器；字段级样式仍用 .m3-field 家族。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer);
+  width: 100%;
+}
+
+[data-tt-style="material"] .m3-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-sm);
+  align-items: flex-end;
+}
+
+[data-tt-style="material"] .m3-form__error {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--font-size-sm);
+  color: var(--destructive);
+}
+
+[data-tt-style="material"] .m3-form__help {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}

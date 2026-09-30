@@ -1,0 +1,151 @@
+/* ==========================================================================
+   Animal Island · Textarea（.animal-textarea）
+   --------------------------------------------------------------------------
+   结构：.animal-textarea
+           > .animal-textarea__field（定位容器）
+               > textarea.animal-control + __clear / __loading
+           + .animal-textarea__count
+
+   复用 input.css 的 .animal-control 输入盒基类，只改写多行场景的差异。
+
+   Animal Island 视觉：
+     · 多行输入不做胶囊：圆角收到 --radius（18px），仍是 2.5px --input 描边
+     · 不用 3D 堆叠阴影，改用柔和高度阴影（--shadow-sm / hover --shadow），
+       因为大块的多行盒子套 3D 阴影会显得过重
+     · focus 转薄荷青描边 + --accent 光晕；禁用灰底无阴影
+     · 计数文案用 --muted-foreground，字距 0.02em
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-textarea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-xs);
+  width: 100%;
+}
+
+[data-tt-style="animal"] .animal-textarea__field {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+/* --- 多行输入盒：覆盖 input.css 的胶囊 / 3D 阴影 --- */
+[data-tt-style="animal"] textarea.animal-control {
+  height: auto;
+  min-height: calc(var(--control-height) * 2);
+  padding: var(--spacer-sm) var(--spacer-lg);
+  line-height: var(--line-height);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  resize: vertical;
+}
+
+[data-tt-style="animal"] textarea.animal-control:hover:not(:disabled):not(
+    .is-disabled
+  ) {
+  background-color: var(--input-bg);
+  border-color: color-mix(in srgb, var(--input) 72%, var(--foreground));
+  box-shadow: var(--shadow);
+  transform: none;
+}
+
+[data-tt-style="animal"] textarea.animal-control:active:not(:disabled):not(
+    .is-disabled
+  ) {
+  box-shadow: var(--shadow-sm);
+  transform: none;
+}
+
+[data-tt-style="animal"] textarea.animal-control:focus,
+[data-tt-style="animal"] textarea.animal-control.is-focused,
+[data-tt-style="animal"] .animal-textarea__field:focus-within textarea.animal-control {
+  background-color: var(--input-bg);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm), 0 0 0 3px var(--accent);
+  transform: none;
+}
+
+[data-tt-style="animal"] textarea.animal-control:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] textarea.animal-control:disabled,
+[data-tt-style="animal"] textarea.animal-control.is-disabled {
+  background-color: var(--input-bg-disabled);
+  border-color: var(--border-subtle);
+  box-shadow: none;
+}
+
+/* --- 清除按钮（右上角） --- */
+[data-tt-style="animal"] .animal-textarea__clear {
+  position: absolute;
+  top: var(--spacer-sm);
+  right: var(--spacer-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--muted-foreground);
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-textarea__clear:hover {
+  color: var(--foreground);
+  background-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+[data-tt-style="animal"] .animal-textarea__clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* --- 加载指示（右上角） --- */
+[data-tt-style="animal"] .animal-textarea__loading {
+  position: absolute;
+  top: var(--spacer);
+  right: var(--spacer);
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-textarea__loading-inner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-strong);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: animal-textarea-spin 1s linear infinite;
+}
+
+@keyframes animal-textarea-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- 字数统计 --- */
+[data-tt-style="animal"] .animal-textarea__count {
+  align-self: flex-end;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] textarea.animal-control,
+  [data-tt-style="animal"] .animal-textarea__clear,
+  [data-tt-style="animal"] .animal-textarea__loading-inner {
+    transition: none;
+    animation: none;
+  }
+}

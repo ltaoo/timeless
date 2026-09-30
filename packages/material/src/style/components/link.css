@@ -1,0 +1,40 @@
+/* ==========================================================================
+   Material 3 · Link
+   --primary 文字 + 下划线；补齐禁用态与焦点环。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-link {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-link:hover {
+  color: color-mix(in srgb, var(--primary) 80%, var(--foreground));
+  text-decoration-thickness: 2px;
+}
+
+[data-tt-style="material"] .m3-link:focus-visible {
+  outline: 2px solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+[data-tt-style="material"] .m3-link.is-disabled,
+[data-tt-style="material"] .m3-link[aria-disabled="true"],
+[data-tt-style="material"] .m3-link[data-disabled="true"] {
+  color: var(--muted-foreground);
+  text-decoration: none;
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-link {
+    transition: none;
+  }
+}

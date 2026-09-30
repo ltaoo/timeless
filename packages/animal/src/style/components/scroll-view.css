@@ -1,0 +1,59 @@
+/* ==========================================================================
+   Animal Island · ScrollView（.animal-scroll-view）
+   --------------------------------------------------------------------------
+   滚动行为/触底回调由 ScrollViewCore 负责（见 ui-primitive/scroll-view），
+   本文件只提供容器与细滚动条 —— 与 .animal-scroll-area 同一套 thumb 规则：
+     · 轨道透明
+     · thumb 用暖棕细描边色 --border-strong，hover 加深到 --foreground
+     · thumb 为胶囊形（--radius-pill），与「胶囊化」语言一致
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-scroll-view {
+  position: relative;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+[data-tt-style="animal"] .animal-scroll-view::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-tt-style="animal"] .animal-scroll-view::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-tt-style="animal"] .animal-scroll-view::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="animal"] .animal-scroll-view::-webkit-scrollbar-thumb:hover {
+  background-color: var(--foreground);
+}
+
+[data-tt-style="animal"] .animal-scroll-view::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* 滚动区本身不常被聚焦，但作为可滚动区域给出黄色焦点环（永不用蓝色） */
+[data-tt-style="animal"] .animal-scroll-view:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-scroll-view.is-disabled,
+[data-tt-style="animal"] .animal-scroll-view[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-scroll-view {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,126 @@
+/* ==========================================================================
+   Material 3 — Timeless 语义别名（第二层）
+   --------------------------------------------------------------------------
+   组件代码只读这一层（--primary / --background / --border / --radius …），
+   不直接读 --md-sys-*。与 bootstrap / fluent 的别名表保持同名，这样三套库的
+   模块代码形状一致，只有 CSS 值不同。
+
+   除通用别名外，M3 额外暴露 surface-container / outline / state-layer /
+   elevation 这几组 M3 专有语义，供组件样式表达 M3 的层级与状态层。
+   ========================================================================== */
+
+[data-tt-style="material"] {
+  /* --- 表面与文字 --- */
+  --background: var(--md-sys-color-background);
+  --foreground: var(--md-sys-color-on-background);
+  --card: var(--md-sys-color-surface-container-low);
+  --card-foreground: var(--md-sys-color-on-surface);
+  --popover: var(--md-sys-color-surface-container);
+  --popover-foreground: var(--md-sys-color-on-surface);
+
+  /* --- 主 / 次操作 --- */
+  --primary: var(--md-sys-color-primary);
+  --primary-foreground: var(--md-sys-color-on-primary);
+  --primary-container: var(--md-sys-color-primary-container);
+  --primary-container-foreground: var(--md-sys-color-on-primary-container);
+  --secondary: var(--md-sys-color-secondary);
+  --secondary-foreground: var(--md-sys-color-on-secondary);
+  --secondary-container: var(--md-sys-color-secondary-container);
+  --secondary-container-foreground: var(--md-sys-color-on-secondary-container);
+
+  /* --- 弱化 / 强调 --- */
+  --muted: var(--md-sys-color-surface-container-high);
+  --muted-foreground: var(--md-sys-color-on-surface-variant);
+  --accent: var(--md-sys-color-surface-container-highest);
+  --accent-foreground: var(--md-sys-color-on-surface);
+
+  /* --- 语义状态色 --- */
+  --destructive: var(--md-sys-color-error);
+  --destructive-foreground: var(--md-sys-color-on-error);
+  --destructive-container: var(--md-sys-color-error-container);
+  --destructive-container-foreground: var(--md-sys-color-on-error-container);
+  --success: #146c2e;
+  --success-foreground: #ffffff;
+  --success-container: #c4eed0;
+  --warning: #7a5900;
+  --warning-foreground: #ffffff;
+  --warning-container: #ffdf99;
+  --info: #00639b;
+  --info-foreground: #ffffff;
+  --info-container: #cbe6ff;
+
+  /* --- 边框 / 输入 / 焦点 --- */
+  --border: var(--md-sys-color-outline-variant);
+  --input: var(--md-sys-color-outline);
+  --ring: var(--md-sys-color-primary);
+  --ring-width: 2px;
+  --ring-color: var(--md-sys-color-primary);
+
+  /* --- M3 专有：表面容器 / 描边 / 反色 --- */
+  --surface: var(--md-sys-color-surface);
+  --surface-foreground: var(--md-sys-color-on-surface);
+  --surface-variant: var(--md-sys-color-surface-variant);
+  --surface-container-lowest: var(--md-sys-color-surface-container-lowest);
+  --surface-container-low: var(--md-sys-color-surface-container-low);
+  --surface-container: var(--md-sys-color-surface-container);
+  --surface-container-high: var(--md-sys-color-surface-container-high);
+  --surface-container-highest: var(--md-sys-color-surface-container-highest);
+  --outline: var(--md-sys-color-outline);
+  --outline-variant: var(--md-sys-color-outline-variant);
+  --inverse-surface: var(--md-sys-color-inverse-surface);
+  --inverse-surface-foreground: var(--md-sys-color-inverse-on-surface);
+  --scrim: var(--md-sys-color-scrim);
+
+  /* --- M3 状态层：hover / focus / pressed 的不透明度 --- */
+  --state-hover: var(--md-sys-state-hover-state-layer-opacity);
+  --state-focus: var(--md-sys-state-focus-state-layer-opacity);
+  --state-pressed: var(--md-sys-state-pressed-state-layer-opacity);
+  --state-dragged: var(--md-sys-state-dragged-state-layer-opacity);
+
+  /* --- 形状（M3 corner 档位） --- */
+  --radius: var(--md-sys-shape-corner-medium);
+  --radius-sm: var(--md-sys-shape-corner-extra-small);
+  --radius-md: var(--md-sys-shape-corner-small);
+  --radius-lg: var(--md-sys-shape-corner-large);
+  --radius-xl: var(--md-sys-shape-corner-extra-large);
+  --radius-pill: var(--md-sys-shape-corner-full);
+
+  /* --- 阴影（M3 elevation level 1–5） --- */
+  --shadow-sm: var(--md-sys-elevation-level1);
+  --shadow: var(--md-sys-elevation-level2);
+  --shadow-lg: var(--md-sys-elevation-level3);
+  --elevation-1: var(--md-sys-elevation-level1);
+  --elevation-2: var(--md-sys-elevation-level2);
+  --elevation-3: var(--md-sys-elevation-level3);
+  --elevation-4: var(--md-sys-elevation-level4);
+  --elevation-5: var(--md-sys-elevation-level5);
+
+  /* --- 动效 --- */
+  --easing-standard: var(--md-sys-motion-easing-standard);
+  --easing-emphasized: var(--md-sys-motion-easing-emphasized);
+  --duration-short: var(--md-sys-motion-duration-short2);
+  --duration-medium: var(--md-sys-motion-duration-medium2);
+  --duration-long: var(--md-sys-motion-duration-long2);
+
+  /* --- 状态 --- */
+  --disabled-opacity: 0.38;
+  --disabled-container-opacity: 0.12;
+
+  /* --- 字体（M3 typescale 的常用档位映射到通用名） --- */
+  --font-sans: var(--md-ref-typeface-plain);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-size: var(--md-sys-typescale-body-large-size);
+  --font-size-sm: var(--md-sys-typescale-body-small-size);
+  --font-size-xs: var(--md-sys-typescale-label-small-size);
+  --line-height: var(--md-sys-typescale-body-large-line-height);
+  --label-size: var(--md-sys-typescale-label-large-size);
+  --title-size: var(--md-sys-typescale-title-medium-size);
+
+  /* --- 间距与控件尺寸 --- */
+  --spacer: 16px;
+  --spacer-sm: 8px;
+  --spacer-lg: 24px;
+  --control-height: var(--md-sys-size-control-height);
+  --control-height-sm: 32px;
+  --control-height-lg: 56px;
+}

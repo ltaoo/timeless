@@ -1,0 +1,302 @@
+/* ==========================================================================
+   Animal Island · Select（.animal-select + 下拉面板）
+   --------------------------------------------------------------------------
+   结构：
+     Trigger  .animal-select（role="combobox"）
+                > .animal-select__search | .animal-select__value(.is-placeholder)
+                + .animal-select__clear | .animal-select__icon(.is-open)
+     面板      .animal-select__content（Portal 浮层）
+                > .animal-select__viewport
+                    > .animal-select__group-label
+                    > .animal-select__item(.is-selected/.is-focused/.is-disabled)
+                        > .animal-select__item-indicator + .animal-select__item-text
+
+   触发器的盒子指标同时被 search-select.css 引用（见其文件头）。
+
+   Animal Island 视觉：
+     · 触发器是一枚羊皮纸输入盒：2.5px --input 描边（--border-width-input）+
+       胶囊圆角（--radius-pill）；hover 上浮 1px，active 下压 1px
+     · focus / open 转薄荷青描边 + --accent 光晕
+     · 下拉面板是羊皮纸浮层（--popover）+ 2px --border 描边 + 18px 圆角 + --shadow-lg
+     · 选中项用薄荷青（--primary）文字 + 右侧薄荷青勾，hover/聚焦行用 --accent 浅底
+     · 焦点是黄色描边（--ring），永不用蓝色
+   ========================================================================== */
+
+/* --- 触发器 --- */
+[data-tt-style="animal"] .animal-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 var(--spacer-lg);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 500;
+  line-height: var(--line-height);
+  letter-spacing: 0.01em;
+  color: var(--foreground);
+  text-align: left;
+  background-color: var(--input-bg-rest);
+  border: var(--border-width-input) solid var(--input);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: color var(--duration-normal) var(--easing-standard),
+    background-color var(--duration-normal) var(--easing-standard),
+    border-color var(--duration-normal) var(--easing-standard),
+    box-shadow var(--duration-normal) var(--easing-standard),
+    transform var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-select:hover:not(:disabled):not(.is-disabled) {
+  background-color: var(--input-bg);
+  border-color: color-mix(in srgb, var(--input) 72%, var(--foreground));
+  transform: translateY(-1px);
+}
+
+[data-tt-style="animal"] .animal-select:active:not(:disabled):not(.is-disabled) {
+  transform: translateY(1px);
+}
+
+/* focus / open：薄荷青描边 + 浅色光晕 */
+[data-tt-style="animal"] .animal-select:focus,
+[data-tt-style="animal"] .animal-select.is-focused,
+[data-tt-style="animal"] .animal-select.is-open {
+  background-color: var(--input-bg);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--accent);
+  outline: none;
+}
+
+/* 键盘焦点：黄色描边（放在 :focus 之后，保证键盘操作能看到黄色 ring） */
+[data-tt-style="animal"] .animal-select:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- 非法 --- */
+[data-tt-style="animal"] .animal-select.is-invalid,
+[data-tt-style="animal"] .animal-select[aria-invalid="true"],
+[data-tt-style="animal"] .animal-select[data-invalid="true"] {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px var(--destructive-subtle);
+}
+
+/* --- 禁用 --- */
+[data-tt-style="animal"] .animal-select:disabled,
+[data-tt-style="animal"] .animal-select[disabled],
+[data-tt-style="animal"] .animal-select[data-disabled="true"],
+[data-tt-style="animal"] .animal-select.is-disabled {
+  color: var(--foreground-disabled);
+  background-color: var(--input-bg-disabled);
+  border-color: var(--border-subtle);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+/* --- 值 / 占位 --- */
+[data-tt-style="animal"] .animal-select__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="animal"] .animal-select__value.is-placeholder {
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+
+/* --- 搜索输入 --- */
+[data-tt-style="animal"] .animal-select__search {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+[data-tt-style="animal"] .animal-select__search::placeholder {
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+
+/* --- 箭头图标 --- */
+[data-tt-style="animal"] .animal-select__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--muted-foreground);
+  transition: transform var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-select__icon.is-open {
+  transform: rotate(180deg);
+}
+
+[data-tt-style="animal"] .animal-select.is-focused .animal-select__icon,
+[data-tt-style="animal"] .animal-select.is-open .animal-select__icon {
+  color: var(--primary);
+}
+
+/* --- 清除按钮 --- */
+[data-tt-style="animal"] .animal-select__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-left: auto;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-select__clear:hover {
+  color: var(--foreground);
+  background-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+[data-tt-style="animal"] .animal-select__clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* --- 下拉面板：羊皮纸浮层 + 2px 描边 + 大圆角 + 浮层阴影 --- */
+[data-tt-style="animal"] .animal-select__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  max-height: 18rem;
+  overflow: hidden;
+  padding: var(--spacer-xs);
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  outline: none;
+}
+
+[data-tt-style="animal"] .animal-select__viewport {
+  position: relative;
+  flex: 1 1 0%;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* --- 选项 --- */
+[data-tt-style="animal"] .animal-select__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  width: 100%;
+  padding: 7px 30px 7px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--foreground);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-select__item.is-focused,
+[data-tt-style="animal"] .animal-select__item:hover {
+  color: var(--accent-foreground);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-select__item:active {
+  color: var(--foreground);
+  background-color: var(--secondary);
+}
+
+[data-tt-style="animal"] .animal-select__item.is-selected {
+  color: var(--primary);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-select__item.is-disabled,
+[data-tt-style="animal"] .animal-select__item[data-disabled] {
+  color: var(--foreground-disabled);
+  background-color: transparent;
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-select__item:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -2px;
+}
+
+[data-tt-style="animal"] .animal-select__item-indicator {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--primary);
+  transform: translateY(-50%);
+}
+
+[data-tt-style="animal"] .animal-select__item-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- 分组标题 / 空态 / 加载 --- */
+[data-tt-style="animal"] .animal-select__group-label {
+  padding: 6px 12px 2px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+  user-select: none;
+}
+
+[data-tt-style="animal"] .animal-select__empty,
+[data-tt-style="animal"] .animal-select__loading {
+  padding: var(--spacer-xl) var(--spacer-sm);
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  text-align: center;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-select,
+  [data-tt-style="animal"] .animal-select__icon,
+  [data-tt-style="animal"] .animal-select__clear,
+  [data-tt-style="animal"] .animal-select__item {
+    transition: none;
+  }
+}

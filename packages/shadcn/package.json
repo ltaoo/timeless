@@ -1,6 +1,6 @@
 {
   "name": "@timeless/shadcn",
-  "version": "0.33.1",
+  "version": "0.34.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
     "./globals.css": "./dist/timeless.shadcn.css"
   },
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "docs": "node ../../scripts/docs.js"
   },
   "type": "module",
   "files": [

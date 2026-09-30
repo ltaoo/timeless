@@ -115,6 +115,6 @@ export default function ArticleListPageView(props) {
         ]),
       ],
     },
-    [StandardSubViews(props)],
+    [Timeless.ui.StandardSubViews(props)],
   );
 }

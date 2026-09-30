@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Material 3 · AspectRatio
+   运行期内联 padding-bottom 驱动比例，外层相对定位、内层绝对铺满。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-ratio {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+[data-tt-style="material"] .m3-ratio__inner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+[data-tt-style="material"] .m3-ratio__inner > img,
+[data-tt-style="material"] .m3-ratio__inner > video,
+[data-tt-style="material"] .m3-ratio__inner > iframe,
+[data-tt-style="material"] .m3-ratio__inner > canvas,
+[data-tt-style="material"] .m3-ratio__inner > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

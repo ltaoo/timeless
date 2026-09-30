@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Animal Island · Badge（.animal-badge）
+   --------------------------------------------------------------------------
+   变体由 module 层映射：默认（default / primary 不加类）、--secondary、
+   --outline、--danger、--success、--warning、--info。
+
+   Animal Island 视觉：
+     · 小羊皮纸碎片：2px --border 描边 + pill 圆角，24px 高
+     · 默认是奶油纸底暖棕字；--secondary 换次级底；--outline 只留描边
+     · 状态变体用 soft fill（--destructive-subtle / --success-subtle /
+       --warning-subtle / --info-subtle）配各自的 subtle-foreground
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-xs);
+  height: 24px;
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--card-foreground);
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  background-color: var(--card);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-badge:hover:not(.is-disabled):not(
+    [data-disabled="true"]
+  ) {
+  border-color: var(--border-strong);
+}
+
+[data-tt-style="animal"] .animal-badge:active:not(.is-disabled):not(
+    [data-disabled="true"]
+  ) {
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-badge:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-badge--secondary {
+  color: var(--secondary-foreground);
+  background-color: var(--secondary);
+}
+
+[data-tt-style="animal"] .animal-badge--outline {
+  color: var(--foreground);
+  background-color: transparent;
+  border-color: var(--border-strong);
+}
+
+[data-tt-style="animal"] .animal-badge--danger {
+  color: var(--destructive-subtle-foreground);
+  background-color: var(--destructive-subtle);
+  border-color: color-mix(in srgb, var(--destructive) 40%, transparent);
+}
+
+[data-tt-style="animal"] .animal-badge--success {
+  color: var(--success-subtle-foreground);
+  background-color: var(--success-subtle);
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+}
+
+[data-tt-style="animal"] .animal-badge--warning {
+  color: var(--warning-subtle-foreground);
+  background-color: var(--warning-subtle);
+  border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+}
+
+[data-tt-style="animal"] .animal-badge--info {
+  color: var(--info-subtle-foreground);
+  background-color: var(--info-subtle);
+  border-color: color-mix(in srgb, var(--info) 40%, transparent);
+}
+
+[data-tt-style="animal"] .animal-badge.is-disabled,
+[data-tt-style="animal"] .animal-badge[data-disabled="true"] {
+  color: var(--foreground-disabled);
+  background-color: var(--surface-disabled);
+  border-color: var(--border-subtle);
+  opacity: var(--disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-badge {
+    transition: none;
+  }
+
+  [data-tt-style="animal"] .animal-badge:active {
+    transform: none;
+  }
+}

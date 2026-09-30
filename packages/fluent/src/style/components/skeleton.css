@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Fluent 2 · Skeleton（.fl-skeleton）
+   Fluent 的骨架屏用柔和的高光扫过（shimmer），底色 --surface-3。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-skeleton {
+  display: block;
+  background-color: var(--surface-3);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    color-mix(in srgb, var(--foreground) 7%, transparent) 50%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  background-position: 150% 0;
+  border-radius: var(--radius);
+  animation: fl-shimmer 1.6s var(--easing-standard) infinite;
+}
+
+[data-tt-style="fluent"] .fl-skeleton.is-rounded,
+[data-tt-style="fluent"] .fl-skeleton.fl-skeleton--circle {
+  border-radius: var(--radius-pill);
+}
+
+@keyframes fl-shimmer {
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-skeleton {
+    animation: none;
+  }
+}

@@ -1,0 +1,181 @@
+/* ==========================================================================
+   Animal Island · Card（.animal-card）
+   --------------------------------------------------------------------------
+   结构：.animal-card > .animal-card__header（> __title / __description）
+                            / .animal-card__content / .animal-card__footer。
+
+   Animal Island 视觉（上游 Card 的硬指标）：
+     · **默认没有 box-shadow**：层次来自 2px 描边与羊皮纸底色，而不是海拔
+     · 圆角 var(--tile-radius)=20px，底色 var(--card)=rgb(247,243,223)，
+       正文 var(--card-foreground)=#725d42，字重 500
+     · 虚线变体 .animal-card--dashed 换 --tile-dashed-bg / --tile-dashed-border
+     · 可选可点变体 .animal-card--hoverable 才启用 cursor + hover 上浮 -2px，
+       过渡 0.3s ease；dashed + hoverable 只换 --tile-hover-border，不做位移
+     · color 变体走岛屿色板别名 --palette-<name> / -fg
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-card {
+  --card-bg: var(--card);
+  --card-fg: var(--card-foreground);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  color: var(--card-fg);
+  background-color: var(--card-bg);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--tile-radius);
+  /* 上游硬指标：卡片默认无立体阴影 */
+  box-shadow: none;
+  transition: all 0.3s ease;
+}
+
+/* --- type: dashed --- */
+[data-tt-style="animal"] .animal-card--dashed {
+  --card-bg: var(--tile-dashed-bg);
+
+  border-style: dashed;
+  border-color: var(--tile-dashed-border);
+  box-shadow: none;
+}
+
+/* --- 可选 hoverable：开启后才可点、才上浮 --- */
+[data-tt-style="animal"] .animal-card--hoverable {
+  cursor: pointer;
+}
+
+[data-tt-style="animal"] .animal-card--hoverable:hover {
+  transform: translateY(-2px);
+}
+
+/* dashed + hoverable：不做位移，只把虚线边框染深 */
+[data-tt-style="animal"] .animal-card--dashed.animal-card--hoverable:hover {
+  transform: none;
+  border-color: var(--tile-hover-border);
+}
+
+[data-tt-style="animal"] .animal-card:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-card.is-disabled,
+[data-tt-style="animal"] .animal-card[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+/* --- 内部部件 --- */
+[data-tt-style="animal"] .animal-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-xs);
+  padding: 16px 24px 0;
+}
+
+[data-tt-style="animal"] .animal-card__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: var(--line-height);
+  letter-spacing: 0.02em;
+  color: var(--card-fg);
+}
+
+[data-tt-style="animal"] .animal-card__description {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: color-mix(in srgb, var(--card-fg) 72%, transparent);
+}
+
+[data-tt-style="animal"] .animal-card__content {
+  flex: 1 1 auto;
+  padding: 16px 24px;
+  color: var(--card-fg);
+}
+
+[data-tt-style="animal"] .animal-card__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  padding: 0 24px 16px;
+}
+
+/* ==========================================================================
+   color 变体：上游 Card `color` prop 的 13 个取值（default 不加类）。
+   只换背景与文字，描边保持 --border。
+   ========================================================================== */
+[data-tt-style="animal"] .animal-card--app-pink {
+  --card-bg: var(--palette-app-pink);
+  --card-fg: var(--palette-app-pink-fg);
+}
+
+[data-tt-style="animal"] .animal-card--purple {
+  --card-bg: var(--palette-purple);
+  --card-fg: var(--palette-purple-fg);
+}
+
+[data-tt-style="animal"] .animal-card--app-blue {
+  --card-bg: var(--palette-app-blue);
+  --card-fg: var(--palette-app-blue-fg);
+}
+
+[data-tt-style="animal"] .animal-card--app-yellow {
+  --card-bg: var(--palette-app-yellow);
+  --card-fg: var(--palette-app-yellow-fg);
+}
+
+[data-tt-style="animal"] .animal-card--app-orange {
+  --card-bg: var(--palette-app-orange);
+  --card-fg: var(--palette-app-orange-fg);
+}
+
+[data-tt-style="animal"] .animal-card--app-teal {
+  --card-bg: var(--palette-app-teal);
+  --card-fg: var(--palette-app-teal-fg);
+}
+
+[data-tt-style="animal"] .animal-card--app-green {
+  --card-bg: var(--palette-app-green);
+  --card-fg: var(--palette-app-green-fg);
+}
+
+[data-tt-style="animal"] .animal-card--app-red {
+  --card-bg: var(--palette-app-red);
+  --card-fg: var(--palette-app-red-fg);
+}
+
+[data-tt-style="animal"] .animal-card--lime-green {
+  --card-bg: var(--palette-lime-green);
+  --card-fg: var(--palette-lime-green-fg);
+}
+
+[data-tt-style="animal"] .animal-card--yellow-green {
+  --card-bg: var(--palette-yellow-green);
+  --card-fg: var(--palette-yellow-green-fg);
+}
+
+[data-tt-style="animal"] .animal-card--brown {
+  --card-bg: var(--palette-brown);
+  --card-fg: var(--palette-brown-fg);
+}
+
+[data-tt-style="animal"] .animal-card--warm-peach-pink {
+  --card-bg: var(--palette-warm-peach-pink);
+  --card-fg: var(--palette-warm-peach-pink-fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-card {
+    transition: none;
+  }
+
+  [data-tt-style="animal"] .animal-card--hoverable:hover {
+    transform: none;
+  }
+}

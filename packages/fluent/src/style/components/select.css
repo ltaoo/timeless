@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Fluent 2 · Select（.fl-select + 下拉面板）
+   --------------------------------------------------------------------------
+   · 触发器沿用输入控件盒子指标（1px --stroke1、4px 圆角、32px 高），
+     聚焦时底部同样出现 2px --compound-brand 下划线
+   · 下拉面板：1px --stroke1 描边 + 4px 圆角 + --shadow-16（Fluent 浮层层级）
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightRegular);
+  line-height: 20px;
+  color: var(--foreground);
+  text-align: left;
+  background-color: var(--surface-1);
+  appearance: none;
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-select:hover {
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="fluent"] .fl-select:focus-visible,
+[data-tt-style="fluent"] .fl-select.is-focused {
+  border-color: var(--stroke1);
+  border-bottom-color: var(--compound-brand);
+  box-shadow: inset 0 -2px 0 var(--compound-brand);
+  outline: none;
+}
+
+[data-tt-style="fluent"] .fl-select[disabled],
+[data-tt-style="fluent"] .fl-select[data-disabled],
+[data-tt-style="fluent"] .fl-select.is-disabled {
+  color: var(--foreground-disabled);
+  background-color: var(--surface-disabled);
+  border-color: var(--stroke-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-select.is-invalid,
+[data-tt-style="fluent"] .fl-select[aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+[data-tt-style="fluent"] .fl-select.is-open {
+  border-bottom-color: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-select__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-select__value.is-placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="fluent"] .fl-select__search {
+  flex: 1 1 auto;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+[data-tt-style="fluent"] .fl-select__search::placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="fluent"] .fl-select__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+  transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-select__icon.is-open {
+  transform: rotate(180deg);
+}
+
+[data-tt-style="fluent"] .fl-select__clear {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--foreground-3);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-select__clear:hover {
+  color: var(--foreground);
+}
+
+[data-tt-style="fluent"] .fl-select__clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+/* --- 下拉面板：shadow-16 + 1px stroke1 + 4px 圆角 --- */
+[data-tt-style="fluent"] .fl-select__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 8rem;
+  max-height: 18rem;
+  overflow: hidden;
+  padding: 4px;
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-16);
+  outline: none;
+}
+
+[data-tt-style="fluent"] .fl-select__viewport {
+  position: relative;
+  flex: 1 1 0%;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--stroke1) transparent;
+}
+
+[data-tt-style="fluent"] .fl-select__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 28px 6px 8px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-select__item.is-focused,
+[data-tt-style="fluent"] .fl-select__item:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+[data-tt-style="fluent"] .fl-select__item.is-selected {
+  font-weight: var(--fontWeightSemibold);
+  color: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-select__item.is-disabled,
+[data-tt-style="fluent"] .fl-select__item[data-disabled] {
+  color: var(--foreground-disabled);
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-select__item:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -1px;
+}
+
+[data-tt-style="fluent"] .fl-select__item-indicator {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  color: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-select__group-label {
+  padding: 6px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--fontWeightSemibold);
+  color: var(--foreground-3);
+  user-select: none;
+}
+
+[data-tt-style="fluent"] .fl-select__empty,
+[data-tt-style="fluent"] .fl-select__loading {
+  padding: 24px 8px;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-select,
+  [data-tt-style="fluent"] .fl-select__icon,
+  [data-tt-style="fluent"] .fl-select__item,
+  [data-tt-style="fluent"] .fl-select__clear {
+    transition: none;
+  }
+}

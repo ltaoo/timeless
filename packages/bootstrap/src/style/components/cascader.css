@@ -1,0 +1,188 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Cascader（.cascader）
+   触发器沿用 .form-control（.cascader__trigger 补 flex），弹层复用 .popover。
+   主体是横向排列的逐级面板 .cascader__panels > .cascader__panel，条目
+   .cascader__item，展开 / 高亮态 .is-active；开启 search 时上方出现搜索框与
+   结果列表（路径用 .cascader__path 展示）。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .cascader__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: var(--control-height);
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-tt-style="bootstrap"] .cascader__trigger.is-open {
+  border-color: color-mix(in srgb, var(--primary) 50%, white);
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .cascader__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="bootstrap"] .cascader__value.is-placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .cascader__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--muted-foreground);
+  transition: transform 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .cascader__icon.is-open {
+  transform: rotate(180deg);
+}
+
+[data-tt-style="bootstrap"] .cascader__clear {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .cascader__clear:hover {
+  color: var(--foreground);
+}
+
+/* --- 弹层 --- */
+[data-tt-style="bootstrap"] .cascader {
+  width: auto;
+  max-width: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+[data-tt-style="bootstrap"] .cascader__search {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--foreground);
+  background: transparent;
+  border: 0;
+  border-bottom: var(--bs-border-width) solid var(--border);
+  outline: 0;
+}
+
+[data-tt-style="bootstrap"] .cascader__search::placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .cascader__search-results {
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.25rem;
+}
+
+[data-tt-style="bootstrap"] .cascader__panels {
+  display: flex;
+  align-items: stretch;
+}
+
+[data-tt-style="bootstrap"] .cascader__panels.is-hidden {
+  display: none;
+}
+
+[data-tt-style="bootstrap"] .cascader__panel {
+  min-width: 9rem;
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.25rem;
+  scrollbar-width: thin;
+}
+
+[data-tt-style="bootstrap"] .cascader__panel + .cascader__panel {
+  border-left: var(--bs-border-width) solid var(--border);
+}
+
+[data-tt-style="bootstrap"] .cascader__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--foreground);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .cascader__item:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+[data-tt-style="bootstrap"] .cascader__item.is-active {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 500;
+}
+
+[data-tt-style="bootstrap"] .cascader__item:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .cascader__item:active {
+  background-color: var(--muted);
+}
+
+[data-tt-style="bootstrap"] .cascader__item.is-disabled {
+  color: var(--muted-foreground);
+  pointer-events: none;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="bootstrap"] .cascader__item-text {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="bootstrap"] .cascader__item-indicator {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .cascader__path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .cascader__icon,
+  [data-tt-style="bootstrap"] .cascader__clear,
+  [data-tt-style="bootstrap"] .cascader__item {
+    transition: none;
+  }
+}

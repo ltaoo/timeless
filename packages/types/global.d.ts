@@ -927,6 +927,8 @@ declare module "packages/primitive/src/content/box" {
     /** Event handlers supported by Box */
     export type BoxEvents = Partial<{
         onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+        /** Called once when the element enters the viewport. */
+        onExpose?: (entry: IntersectionObserverEntry) => void;
         beforeUnmounted?: () => void;
         onUnmounted?: () => void;
         onClick?: (e: MouseEvent) => void;
@@ -979,6 +981,8 @@ declare module "packages/primitive/src/content/box" {
         state: BoxState & T;
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            /** Called once when the element enters the viewport. */
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1020,10 +1024,35 @@ declare module "packages/primitive/src/content/box" {
     };
 }
 declare module "packages/primitive/src/content/view" {
+    /**
+     * View - The primary generic container component in Timeless.
+     *
+     * View is the main building block for UI, similar to a div in HTML.
+     * It's more generic than Box and provides:
+     * - Full attribute/style/class management
+     * - Complete event handling
+     * - Child rendering
+     * - Reactive prop support
+     *
+     * Most components are built on View or compose it.
+     *
+     * @example
+     * ```tsx
+     * <View
+     *   id="container"
+     *   style={{ padding: 16 }}
+     *   class="card"
+     *   onClick={handleClick}
+     * >
+     *   <Text>Content</Text>
+     * </View>
+     * ```
+     */
+    import { PointerInfo } from "@/event/index";
     import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
     import { BoxProps } from "packages/primitive/src/content/box";
     /** Props for View component */
-    export type ViewProps = BoxProps & {
+    export type ViewProps = Omit<BoxProps, "onPointerDown" | "onPointerUp"> & {
         /** Element ID */
         id?: string;
         /** Unique key for list rendering */
@@ -1032,9 +1061,22 @@ declare module "packages/primitive/src/content/view" {
         as?: string;
         /** Whether element is draggable */
         draggable?: boolean;
+        /**
+         * 指针按下；`info` 提供按下位置与累计位移。
+         *
+         * View 一定派发 `info`；声明为可选是为了让 ViewProps 仍能赋给 BoxProps
+         * （Box 只挂原生事件，没有 info），这样各组件透传 props 不受影响。
+         */
+        onPointerDown?: (event: PointerEvent, info?: PointerInfo) => void;
+        /** 按下后指针移动（可移出元素）；`info` 提供位移距离与方向 */
+        onPointerMove?: (event: PointerEvent, info?: PointerInfo) => void;
+        /** 指针抬起；`info` 为本次拖动的最终位移 */
+        onPointerUp?: (event: PointerEvent, info?: PointerInfo) => void;
     };
     /** Internal state for View */
-    type ViewState = {};
+    type ViewState = {
+        as: string;
+    };
     /**
      * Creates a View component - the primary container.
      *
@@ -1350,6 +1392,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1392,6 +1435,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1437,6 +1481,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1485,6 +1530,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1529,6 +1575,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1575,6 +1622,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1618,6 +1666,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1661,6 +1710,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1719,6 +1769,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1761,6 +1812,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1804,6 +1856,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1851,6 +1904,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1900,6 +1954,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1950,6 +2005,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -1995,6 +2051,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -2043,6 +2100,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -2086,6 +2144,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -2132,6 +2191,7 @@ declare module "packages/primitive/src/content/svg" {
         children: import("@timeless/inner-primitive").TimelessElement<any, any>[];
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -2394,6 +2454,7 @@ declare module "packages/primitive/src/content/img" {
         state: import("packages/primitive/src/content/box").BoxState & ImgState;
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -2516,6 +2577,7 @@ declare module "packages/primitive/src/content/video" {
         state: import("packages/primitive/src/content/box").BoxState & VideoState;
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -2629,6 +2691,7 @@ declare module "packages/primitive/src/content/audio" {
         state: import("packages/primitive/src/content/box").BoxState & AudioState;
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -2747,6 +2810,7 @@ declare module "packages/primitive/src/content/rich-text" {
         state: import("packages/primitive/src/content/box").BoxState & RichTextState;
         events: Partial<{
             onMounted?: (event: MountedEvent<MountedEvent>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -2902,7 +2966,9 @@ declare module "packages/primitive/src/floating/popper" {
      * @param children - Content to render
      * @returns A TimelessElement representing a positioned element
      */
-    export function Popper(props: PopperProps, children?: ViewChildren): TimelessElement<{}, any>;
+    export function Popper(props: PopperProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/primitive/src/floating/dialog" {
     /**
@@ -3359,6 +3425,7 @@ declare module "packages/primitive/src/content/list-item-view" {
         state: import("packages/primitive/src/content/box").BoxState & ListItemViewState<T>;
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -3459,6 +3526,7 @@ declare module "packages/primitive/src/content/list-view" {
             };
             events: Partial<{
                 onMounted?: (event: MountedEvent<MountedEvent>) => void | (() => void);
+                onExpose?: (entry: IntersectionObserverEntry) => void;
                 beforeUnmounted?: () => void;
                 onUnmounted?: () => void;
                 onClick?: (e: MouseEvent) => void;
@@ -3514,6 +3582,80 @@ declare module "packages/primitive/src/content/list-view" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
+}
+declare module "packages/primitive/src/content/list-view-v2" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "packages/primitive/src/content/box";
+    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    export type ListViewV2Reactive<T> = T | Ref<T> | DerivedRef<T>;
+    export type ListViewV2Key<T> = keyof T | ((item: T, index: number) => unknown);
+    export type ListViewV2ItemHeight<T> = ListViewV2Reactive<number> | ((item: T, index: number) => number);
+    export type ListViewV2ScrollEvent = {
+        target: HTMLElement;
+        scrollTop: number;
+        clientHeight: number;
+        scrollHeight: number;
+    };
+    export type ListViewV2ItemResizeEvent<T> = {
+        target: HTMLElement;
+        index: number;
+        item: T;
+        key: unknown;
+        height: number;
+        previousHeight: number;
+    };
+    export type ListViewV2Props<T extends Record<string, unknown>> = BoxProps & {
+        each: T[] | Ref<T[]> | DerivedRef<T[]>;
+        render: (item: Ref<T>, index: Ref<number>) => ViewChildren;
+        key?: ListViewV2Key<T>;
+        size?: number;
+        buffer?: number;
+        itemHeight?: ListViewV2ItemHeight<T>;
+        gutter?: ListViewV2Reactive<number>;
+        paddingBottom?: ListViewV2Reactive<number | string>;
+        externalScroll?: ListViewV2Reactive<boolean>;
+        scrollTop?: ListViewV2Reactive<number | string>;
+        viewportHeight?: ListViewV2Reactive<number | string>;
+        onScrollTopAdjust?: (delta: number) => void;
+        onItemResize?: (event: ListViewV2ItemResizeEvent<T>) => void;
+        onScroll?: (event: ListViewV2ScrollEvent) => void;
+        onReachBottom?: (event: ListViewV2ScrollEvent) => void;
+    };
+    export type ListViewV2ModelOptions<T extends Record<string, unknown>> = {
+        items?: T[];
+        key?: ListViewV2Key<T>;
+        itemHeight?: number | ((item: T, index: number) => number);
+        gutter?: number;
+    };
+    export function createListViewV2Model<T extends Record<string, unknown>>(options?: ListViewV2ModelOptions<T>): {
+        readonly items: T[];
+        readonly estimatedItemHeight: number;
+        getKey: (index: number) => unknown;
+        getItemHeight: (index: number) => number;
+        getOffset: (index: number) => number;
+        getTotalHeight: () => number;
+        getRange: (scroll_top: number, viewport_height: number, buffer?: number) => {
+            start: number;
+            end: number;
+            visibleStart: number;
+        };
+        setItems: (next_items: T[]) => boolean;
+        setLayout: (next_item_height: number | ((item: T, index: number) => number), next_gutter: number) => void;
+        measure: (index: number, height: number) => {
+            changed: boolean;
+            previousHeight: number;
+            height: number;
+        };
+    };
+    export type ListViewV2Model<T extends Record<string, unknown>> = ReturnType<typeof createListViewV2Model<T>>;
+    export type ListViewV2Config<T extends Record<string, unknown>> = Pick<ListViewV2Props<T>, "key" | "size" | "buffer" | "itemHeight" | "gutter" | "paddingBottom" | "externalScroll" | "scrollTop" | "viewportHeight" | "onScrollTopAdjust" | "onItemResize" | "onScroll" | "onReachBottom">;
+    export type ListViewV2Element<T extends Record<string, unknown>> = TimelessElement & {
+        source: ListViewV2Props<T>["each"];
+        config: ListViewV2Config<T>;
+        model: ListViewV2Model<T>;
+        renderItem(item: Ref<T>, index: Ref<number>): TimelessElement | null;
+    };
+    export function ListViewV2<T extends Record<string, unknown>>(props: ListViewV2Props<T>): ListViewV2Element<T>;
 }
 declare module "packages/primitive/src/content/icon" {
     import { MountedEvent } from "@/event";
@@ -3599,6 +3741,142 @@ declare module "packages/primitive/src/content/aspect-ratio" {
         onMounted(event: MountedEvent<any>): void;
         onUnmounted(): void;
     };
+}
+declare module "packages/primitive/src/content/table" {
+    import { ViewProps } from "packages/primitive/src/content/view";
+    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    export type TableElementType = "table" | "table-caption" | "table-header" | "table-body" | "table-footer" | "table-row" | "table-head" | "table-cell";
+    export type TableCellProps = ViewProps & {
+        colSpan?: number;
+        rowSpan?: number;
+        scope?: "col" | "colgroup" | "row" | "rowgroup";
+    };
+    export function Table(props?: ViewProps, children?: ViewChildren): TimelessElement<any, any>;
+    export function TableCaption(props?: ViewProps, children?: ViewChildren): TimelessElement<any, any>;
+    export function TableHeader(props?: ViewProps, children?: ViewChildren): TimelessElement<any, any>;
+    export function TableBody(props?: ViewProps, children?: ViewChildren): TimelessElement<any, any>;
+    export function TableFooter(props?: ViewProps, children?: ViewChildren): TimelessElement<any, any>;
+    export function TableRow(props?: ViewProps, children?: ViewChildren): TimelessElement<any, any>;
+    export function TableHead(props?: TableCellProps, children?: ViewChildren): TimelessElement<any, any>;
+    export function TableCell(props?: TableCellProps, children?: ViewChildren): TimelessElement<any, any>;
+}
+declare module "packages/primitive/src/content/tablev2" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "packages/primitive/src/content/box";
+    import { ListViewV2ItemHeight, ListViewV2ItemResizeEvent, ListViewV2Reactive, ListViewV2ScrollEvent } from "packages/primitive/src/content/list-view-v2";
+    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
+    export type TableV2Reactive<T> = T | Ref<T> | DerivedRef<T>;
+    export type TableV2SortDirection = "asc" | "desc";
+    export type TableV2Status = "initial" | "loading" | "normal" | "empty" | "error";
+    export type TableV2Sort = {
+        key: string;
+        direction: TableV2SortDirection;
+    } | null;
+    export type TableV2CellContext<T extends Record<string, unknown>> = {
+        column: TableV2Column<T>;
+        index: number;
+        indexRef: Ref<number> | DerivedRef<number>;
+        itemRef?: Ref<T>;
+    };
+    export type TableV2Column<T extends Record<string, unknown>> = {
+        key: string;
+        title?: ViewChildren;
+        dataIndex?: keyof T;
+        width?: number | string;
+        align?: "left" | "center" | "right";
+        searchable?: boolean;
+        sortable?: boolean;
+        sorter?: (left: T, right: T) => number;
+        render?: (item: T, context: TableV2CellContext<T>) => ViewChildren;
+        headerClass?: string;
+        headerStyle?: BoxProps["style"];
+        cellClass?: string | ((item: T) => string | undefined);
+        cellStyle?: BoxProps["style"] | ((item: T) => BoxProps["style"]);
+    };
+    export type TableV2Pagination = {
+        page?: number | Ref<number>;
+        pageSize?: number | Ref<number>;
+        total?: TableV2Reactive<number>;
+        mode?: "local" | "remote";
+        onChange?: (page: number, page_size: number) => void;
+    };
+    export type TableV2ModelOptions<T extends Record<string, unknown>> = {
+        rows: T[] | Ref<T[]> | DerivedRef<T[]>;
+        columns: TableV2Column<T>[];
+        query?: string | Ref<string>;
+        sort?: TableV2Sort | Ref<TableV2Sort>;
+        pagination?: false | TableV2Pagination;
+        filter?: (item: T, query: string) => boolean;
+        onQueryChange?: (query: string) => void;
+        onSortChange?: (sort: TableV2Sort) => void;
+    };
+    export type TableV2Model<T extends Record<string, unknown>> = ReturnType<typeof createTableV2Model<T>>;
+    export function createTableV2Model<T extends Record<string, unknown>>(options: TableV2ModelOptions<T>): {
+        state: {
+            query: Ref<string>;
+            sort: Ref<{
+                key: string;
+                direction: TableV2SortDirection;
+            }>;
+            page: Ref<number>;
+            pageSize: Ref<number>;
+            filteredRows: DerivedRef<T[]>;
+            visibleRows: DerivedRef<T[]>;
+            total: DerivedRef<number>;
+            totalPages: DerivedRef<number>;
+        };
+        methods: {
+            setQuery: (value: string) => void;
+            setPage: (value: number) => void;
+            toggleSort: (column: TableV2Column<T>) => void;
+        };
+        destroy: () => void;
+    };
+    export type TableV2VirtualOptions<T extends Record<string, unknown>> = {
+        size?: number;
+        buffer?: number;
+        itemHeight?: ListViewV2ItemHeight<T>;
+        gutter?: ListViewV2Reactive<number>;
+        paddingBottom?: ListViewV2Reactive<number | string>;
+        class?: string;
+        style?: BoxProps["style"];
+        onScroll?: (event: ListViewV2ScrollEvent) => void;
+        onReachBottom?: (event: ListViewV2ScrollEvent) => void;
+        onItemResize?: (event: ListViewV2ItemResizeEvent<T>) => void;
+    };
+    export type TableV2RowSelection<T extends Record<string, unknown>> = {
+        width?: number | string;
+        selected: (item: T) => TableV2Reactive<boolean>;
+        allSelected?: TableV2Reactive<boolean>;
+        indeterminate?: TableV2Reactive<boolean>;
+        disabled?: (item: T) => boolean;
+        onSelect: (item: T, selected: boolean, event: Event) => void;
+        onSelectAll?: (selected: boolean, event: Event) => void;
+    };
+    export type TableV2Props<T extends Record<string, unknown>> = TableV2ModelOptions<T> & BoxProps & {
+        name?: string;
+        status?: TableV2Reactive<TableV2Status>;
+        error?: unknown;
+        searchable?: boolean;
+        searchPlaceholder?: string;
+        rowKey?: keyof T & string;
+        rowSelection?: TableV2RowSelection<T>;
+        virtual?: boolean | TableV2VirtualOptions<T>;
+        resizable?: boolean;
+        panelClass?: string;
+        panelStyle?: BoxProps["style"];
+        headerClass?: string;
+        bodyClass?: string;
+        rowClass?: string | ((item: T) => string | undefined);
+        rowStyle?: BoxProps["style"] | ((item: T) => BoxProps["style"]);
+        onRow?: (item: T) => Partial<BoxProps> | undefined;
+        emptyContent?: ViewChildren;
+        loadingContent?: ViewChildren;
+        errorContent?: ViewChildren;
+    };
+    export function TableV2<T extends Record<string, unknown>>(props: TableV2Props<T>): TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/primitive/src/layout/flex" {
     import { Ref } from "packages/reactive/src/index";
@@ -3849,9 +4127,134 @@ declare module "packages/primitive/src/layout/scroll" {
         };
     };
 }
+declare module "packages/primitive/src/layout/swiper" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
+    import { BoxProps } from "@/content/box";
+    import { ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event";
+    export type SwiperOrientation = "horizontal" | "vertical";
+    export type SwiperPhase = "idle" | "dragging" | "settling";
+    type MaybeRef<T> = T | Ref<T> | DerivedRef<T>;
+    export type SwiperChangeEvent = {
+        index: number;
+        previousIndex: number;
+    };
+    export type SwiperState = {
+        index: number;
+        count: number;
+        orientation: SwiperOrientation;
+        threshold: number;
+        resistance: number;
+        duration: number;
+        disabled: boolean;
+        mousewheel: boolean;
+        pullToRefresh: boolean;
+        refreshThreshold: number;
+        refreshHoldDistance: number;
+        reachBottom: boolean;
+        reachBottomThreshold: number;
+    };
+    export type SwiperRefreshEvent = {
+        index: number;
+        complete: () => void;
+    };
+    export type SwiperReachBottomEvent = {
+        index: number;
+        count: number;
+    };
+    export type SwiperProps = BoxProps & {
+        /** Current zero-based slide index. Writable refs are updated after a swipe. */
+        index?: MaybeRef<number>;
+        /** Swipe axis. */
+        orientation?: MaybeRef<SwiperOrientation>;
+        /** 0..1 means a viewport ratio; values greater than 1 mean pixels. */
+        threshold?: MaybeRef<number>;
+        /** Initial edge response; resistance grows progressively with drag distance. */
+        resistance?: MaybeRef<number>;
+        /** Transition duration in milliseconds. */
+        duration?: MaybeRef<number>;
+        disabled?: MaybeRef<boolean>;
+        /** Enables wheel navigation on DOM hosts. */
+        mousewheel?: MaybeRef<boolean>;
+        /** Enables pull-to-refresh at the leading edge. */
+        pullToRefresh?: MaybeRef<boolean>;
+        /** Pull distance in pixels required to start refreshing. */
+        refreshThreshold?: MaybeRef<number>;
+        /** Track offset kept visible while the refresh promise is pending. */
+        refreshHoldDistance?: MaybeRef<number>;
+        /** Number of remaining slides at which onReachBottom should fire. */
+        reachBottomThreshold?: MaybeRef<number>;
+        onChange?: (event: SwiperChangeEvent) => void;
+        onSwipeStart?: (state: SwiperHostState) => void;
+        onSwipeMove?: (state: SwiperHostState) => void;
+        onSwipeEnd?: (event: SwiperChangeEvent & {
+            changed: boolean;
+        }) => void;
+        onRefresh?: (event: SwiperRefreshEvent) => void | Promise<unknown>;
+        onReachBottom?: (event: SwiperReachBottomEvent) => void | Promise<unknown>;
+    };
+    export type SwiperHostState = {
+        index: number;
+        count: number;
+        size: number;
+        offset: number;
+        orientation: SwiperOrientation;
+        phase: SwiperPhase;
+        disabled: boolean;
+        pullDistance: number;
+        refreshing: boolean;
+    };
+    type SwiperHost = {
+        mount(): void;
+        unmount(): void;
+        destroy(): void;
+        setOptions(options: Partial<SwiperState>): void;
+        slideTo(index: number, animated?: boolean): boolean;
+        next(animated?: boolean): boolean;
+        previous(animated?: boolean): boolean;
+        finishRefresh(): boolean;
+    };
+    /**
+     * Creates a platform-neutral swiper container.
+     *
+     * Each direct child should be wrapped with {@link SwiperItem}.
+     */
+    export function Swiper(props?: SwiperProps, children?: ViewChildren): {
+        t: string;
+        $elm: SwiperHost | null;
+        state: any;
+        children: any;
+        events: any;
+        methods: {
+            slideTo(next_index: number, animated?: boolean): boolean;
+            next(animated?: boolean): boolean;
+            previous(animated?: boolean): boolean;
+            finishRefresh(): boolean;
+        };
+        handleChange(event: SwiperChangeEvent): void;
+        handleSwipeStart(state: SwiperHostState): void;
+        handleSwipeMove(state: SwiperHostState): void;
+        handleSwipeEnd(event: SwiperChangeEvent & {
+            changed: boolean;
+        }): void;
+        handleRefresh(event: {
+            index: number;
+        }): void;
+        handleReachBottom(event: SwiperReachBottomEvent): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        destroy(): void;
+    };
+    export type SwiperItemProps = BoxProps;
+    /** Creates one full-size slide inside a {@link Swiper}. */
+    export function SwiperItem(props?: SwiperItemProps, children?: ViewChildren): TimelessElement;
+}
 declare module "packages/primitive/src/layout/window" {
+    import { Ref } from "packages/reactive/src/index";
     import { ViewProps } from "@/content/view";
     import { ViewChildren } from "@/content/type";
+    import { MountedEvent } from "@/event";
     export type WindowViewProps = ViewProps & {
         width?: number | "100%";
         height?: number | "100%";
@@ -3863,6 +4266,86 @@ declare module "packages/primitive/src/layout/window" {
         children: any;
         methods: {};
     };
+    /** Props for Window component */
+    export type WindowProps = ViewProps & {
+        /** 标题（支持响应式） */
+        title?: string | Ref<string | number>;
+        /** 初始位置（px，fixed 定位），默认 24 */
+        x?: number;
+        y?: number;
+        /** 默认 420 */
+        width?: number | string;
+        /** 默认 "auto" */
+        height?: number | string;
+        /** z-index（支持响应式，层级变化不重建窗口），默认 240 */
+        zIndex?: number | Ref<number>;
+        /** 头部是否可拖动，默认 true */
+        draggable?: boolean;
+        /** 提供时渲染关闭按钮 */
+        onClose?: () => void;
+        /** 位置变化回调 */
+        onPositionChange?: (position: {
+            x: number;
+            y: number;
+        }) => void;
+        /** 窗口内任意 pointerdown（冒泡到根）时回调，用于置顶聚焦 */
+        onActivate?: () => void;
+        /**
+         * 拖动结束回调。命名与继承自 BoxEvents 的 `onDragEnd(e: DragEvent)` 区分，
+         * 程序化 setPosition 不会触发本回调。
+         */
+        onDragFinish?: (position: {
+            x: number;
+            y: number;
+        }) => void;
+        headerClass?: string;
+        bodyClass?: string;
+        closeClass?: string;
+        /** 默认 "关闭" */
+        closeLabel?: string;
+        /** 默认 Text("×") */
+        closeIcon?: ViewChildren;
+    };
+    export function Window(props: WindowProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        methods: {
+            /** 开始拖动：记录按下点与窗口原点 */
+            beginDrag(client_x: number, client_y: number): {
+                x: number;
+                y: number;
+            };
+            /** 拖动到指针位置（按相对按下点的位移平移） */
+            dragTo(client_x: number, client_y: number): {
+                x: number;
+                y: number;
+            };
+            /** 结束拖动 */
+            endDrag(): {
+                x: number;
+                y: number;
+            };
+            getPosition: () => {
+                x: number;
+                y: number;
+            };
+            setPosition: (next?: {
+                x: number;
+                y: number;
+            } | null) => {
+                x: number;
+                y: number;
+            };
+        };
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        destroy(): void;
+    };
+    export type Window = ReturnType<typeof Window>;
 }
 declare module "packages/primitive/src/layout/tab" {
     import { ViewProps } from "@/content/view";
@@ -4149,11 +4632,13 @@ declare module "packages/primitive/src/input/file-picker" {
     import { Ref } from "packages/reactive/src/index";
     import { BoxProps } from "@/content/box";
     import { MountedEvent } from "@/event";
+    import { DisabledValue } from "@/util/disabled";
     export type FilePickerProps = BoxProps & {
         accept?: string | Ref<string>;
         multiple?: boolean | Ref<boolean>;
         capture?: string | Ref<string>;
         files?: Ref<FileList | null>;
+        disabled?: DisabledValue;
         onChange?: (event: Event) => void;
         onFileDrop?: (files: FileList, event: DragEvent) => void;
     };
@@ -4178,6 +4663,7 @@ declare module "packages/primitive/src/input/textarea" {
         rendered: boolean;
         style: RawViewStyleProperties;
         styleSet?: string[];
+        attributes: Record<string, string | number | boolean | undefined>;
         id?: string;
         name?: string;
         value: string;
@@ -4725,6 +5211,35 @@ declare module "packages/primitive/src/event/index" {
     export type ScrollEvent<T = any> = {
         scrollTop: number;
     };
+    /** 指针位移方向（四向）；无位移为 "none" */
+    export type PointerDirection = "none" | "left" | "right" | "up" | "down";
+    /**
+     * PointerInfo - 指针事件的位移信息（参考 kit 里的 CanvasPointer）。
+     *
+     * 按下时记录起点，移动 / 抬起时给出相对起点的位移（dx / dy）、
+     * 距离（distance）与方向（direction）。
+     */
+    export type PointerInfo = {
+        /** 当前指针位置（clientX / clientY） */
+        x: number;
+        y: number;
+        /** 按下时的指针位置 */
+        startX: number;
+        startY: number;
+        /** 相对按下位置的位移 */
+        dx: number;
+        dy: number;
+        /** 位移距离（dx / dy 的欧氏距离，保留两位小数） */
+        distance: number;
+        /** 位移方向 */
+        direction: PointerDirection;
+        /** 指针是否处于按下状态 */
+        pressing: boolean;
+        /** 按下后是否发生了位移 */
+        dragging: boolean;
+        /** 触发本次事件的 pointerId */
+        pointerId: number;
+    };
 }
 declare module "packages/primitive/src/interaction/link" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
@@ -4756,10 +5271,13 @@ declare module "packages/primitive/src/interaction/link" {
     };
 }
 declare module "packages/primitive/src/interaction/button" {
+    import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { ViewChildren } from "@/content/type";
     import { MountedEvent } from "@/event/index";
     import { BoxProps } from "@/content/box";
-    export type ButtonProps = BoxProps & {};
+    export type ButtonProps = BoxProps & {
+        disabled?: boolean | DerivedRef<boolean> | Ref<boolean>;
+    };
     export function Button(props?: ButtonProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -5162,8 +5680,11 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/floating/dropdown-menu";
     export * from "packages/primitive/src/floating/context-menu";
     export * from "packages/primitive/src/content/list-view";
+    export * from "packages/primitive/src/content/list-view-v2";
     export * from "packages/primitive/src/content/icon";
     export * from "packages/primitive/src/content/aspect-ratio";
+    export * from "packages/primitive/src/content/table";
+    export * from "packages/primitive/src/content/tablev2";
     export * from "packages/primitive/src/content/type";
     export * from "packages/primitive/src/layout/flex";
     export * from "packages/primitive/src/layout/grid";
@@ -5171,6 +5692,7 @@ declare module "packages/primitive/src/index" {
     export * from "packages/primitive/src/layout/column";
     export * from "packages/primitive/src/layout/split";
     export * from "packages/primitive/src/layout/scroll";
+    export * from "packages/primitive/src/layout/swiper";
     export * from "packages/primitive/src/layout/window";
     export * from "packages/primitive/src/layout/tab";
     export * from "packages/primitive/src/input/input";
@@ -5342,8 +5864,122 @@ declare module "packages/icons/src/asn/bolt" {
     };
     export default _default_4;
 }
-declare module "packages/icons/src/asn/braces" {
+declare module "packages/icons/src/asn/book-user" {
     const _default_5: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-book-user";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 13a3 3 0 1 0-6 0";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "8";
+                readonly r: "2";
+            };
+        }];
+    };
+    export default _default_5;
+}
+declare module "packages/icons/src/asn/bot" {
+    const _default_6: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-bot";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 8V4H8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2 14h2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M20 14h2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 13v2";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9 13v2";
+            };
+        }, {
+            readonly tag: "rect";
+            readonly attrs: {
+                readonly width: "16";
+                readonly height: "12";
+                readonly x: "4";
+                readonly y: "8";
+                readonly rx: "2";
+            };
+        }];
+    };
+    export default _default_6;
+}
+declare module "packages/icons/src/asn/box" {
+    const _default_7: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-box";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m3.3 7 8.7 5 8.7-5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 22V12";
+            };
+        }];
+    };
+    export default _default_7;
+}
+declare module "packages/icons/src/asn/braces" {
+    const _default_8: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5366,10 +6002,10 @@ declare module "packages/icons/src/asn/braces" {
             };
         }];
     };
-    export default _default_5;
+    export default _default_8;
 }
 declare module "packages/icons/src/asn/calendar" {
-    const _default_6: {
+    const _default_9: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5406,10 +6042,10 @@ declare module "packages/icons/src/asn/calendar" {
             };
         }];
     };
-    export default _default_6;
+    export default _default_9;
 }
 declare module "packages/icons/src/asn/check" {
-    const _default_7: {
+    const _default_10: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5427,10 +6063,10 @@ declare module "packages/icons/src/asn/check" {
             };
         }];
     };
-    export default _default_7;
+    export default _default_10;
 }
 declare module "packages/icons/src/asn/chevron-down" {
-    const _default_8: {
+    const _default_11: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5448,10 +6084,10 @@ declare module "packages/icons/src/asn/chevron-down" {
             };
         }];
     };
-    export default _default_8;
+    export default _default_11;
 }
 declare module "packages/icons/src/asn/chevron-left" {
-    const _default_9: {
+    const _default_12: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5469,10 +6105,10 @@ declare module "packages/icons/src/asn/chevron-left" {
             };
         }];
     };
-    export default _default_9;
+    export default _default_12;
 }
 declare module "packages/icons/src/asn/chevron-right" {
-    const _default_10: {
+    const _default_13: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5490,10 +6126,10 @@ declare module "packages/icons/src/asn/chevron-right" {
             };
         }];
     };
-    export default _default_10;
+    export default _default_13;
 }
 declare module "packages/icons/src/asn/chevron-up" {
-    const _default_11: {
+    const _default_14: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5511,10 +6147,10 @@ declare module "packages/icons/src/asn/chevron-up" {
             };
         }];
     };
-    export default _default_11;
+    export default _default_14;
 }
 declare module "packages/icons/src/asn/circle-alert" {
-    const _default_12: {
+    const _default_15: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5550,10 +6186,10 @@ declare module "packages/icons/src/asn/circle-alert" {
             };
         }];
     };
-    export default _default_12;
+    export default _default_15;
 }
 declare module "packages/icons/src/asn/circle-arrow-down" {
-    const _default_13: {
+    const _default_16: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5583,10 +6219,10 @@ declare module "packages/icons/src/asn/circle-arrow-down" {
             };
         }];
     };
-    export default _default_13;
+    export default _default_16;
 }
 declare module "packages/icons/src/asn/circle-ellipsis" {
-    const _default_14: {
+    const _default_17: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5621,10 +6257,10 @@ declare module "packages/icons/src/asn/circle-ellipsis" {
             };
         }];
     };
-    export default _default_14;
+    export default _default_17;
 }
 declare module "packages/icons/src/asn/circle-x" {
-    const _default_15: {
+    const _default_18: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5654,10 +6290,10 @@ declare module "packages/icons/src/asn/circle-x" {
             };
         }];
     };
-    export default _default_15;
+    export default _default_18;
 }
 declare module "packages/icons/src/asn/clock-3" {
-    const _default_16: {
+    const _default_19: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5682,10 +6318,10 @@ declare module "packages/icons/src/asn/clock-3" {
             };
         }];
     };
-    export default _default_16;
+    export default _default_19;
 }
 declare module "packages/icons/src/asn/clock-arrow-down" {
-    const _default_17: {
+    const _default_20: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5718,10 +6354,10 @@ declare module "packages/icons/src/asn/clock-arrow-down" {
             };
         }];
     };
-    export default _default_17;
+    export default _default_20;
 }
 declare module "packages/icons/src/asn/clock" {
-    const _default_18: {
+    const _default_21: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5746,10 +6382,10 @@ declare module "packages/icons/src/asn/clock" {
             };
         }];
     };
-    export default _default_18;
+    export default _default_21;
 }
 declare module "packages/icons/src/asn/cloud-download" {
-    const _default_19: {
+    const _default_22: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5777,10 +6413,10 @@ declare module "packages/icons/src/asn/cloud-download" {
             };
         }];
     };
-    export default _default_19;
+    export default _default_22;
 }
 declare module "packages/icons/src/asn/copy" {
-    const _default_20: {
+    const _default_23: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5808,10 +6444,10 @@ declare module "packages/icons/src/asn/copy" {
             };
         }];
     };
-    export default _default_20;
+    export default _default_23;
 }
 declare module "packages/icons/src/asn/corner-down-right" {
-    const _default_21: {
+    const _default_24: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5834,10 +6470,10 @@ declare module "packages/icons/src/asn/corner-down-right" {
             };
         }];
     };
-    export default _default_21;
+    export default _default_24;
 }
 declare module "packages/icons/src/asn/download" {
-    const _default_22: {
+    const _default_25: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5865,10 +6501,10 @@ declare module "packages/icons/src/asn/download" {
             };
         }];
     };
-    export default _default_22;
+    export default _default_25;
 }
 declare module "packages/icons/src/asn/ellipsis-vertical" {
-    const _default_23: {
+    const _default_26: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5902,10 +6538,10 @@ declare module "packages/icons/src/asn/ellipsis-vertical" {
             };
         }];
     };
-    export default _default_23;
+    export default _default_26;
 }
 declare module "packages/icons/src/asn/ellipsis" {
-    const _default_24: {
+    const _default_27: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5939,10 +6575,10 @@ declare module "packages/icons/src/asn/ellipsis" {
             };
         }];
     };
-    export default _default_24;
+    export default _default_27;
 }
 declare module "packages/icons/src/asn/external-link" {
-    const _default_25: {
+    const _default_28: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5970,10 +6606,38 @@ declare module "packages/icons/src/asn/external-link" {
             };
         }];
     };
-    export default _default_25;
+    export default _default_28;
+}
+declare module "packages/icons/src/asn/eye" {
+    const _default_29: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-eye";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "3";
+            };
+        }];
+    };
+    export default _default_29;
 }
 declare module "packages/icons/src/asn/file-box" {
-    const _default_26: {
+    const _default_30: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6011,10 +6675,46 @@ declare module "packages/icons/src/asn/file-box" {
             };
         }];
     };
-    export default _default_26;
+    export default _default_30;
+}
+declare module "packages/icons/src/asn/file-code" {
+    const _default_31: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-code-icon lucide-file-code";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10 12.5 8 15l2 2.5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m14 12.5 2 2.5-2 2.5";
+            };
+        }];
+    };
+    export default _default_31;
 }
 declare module "packages/icons/src/asn/file-image" {
-    const _default_27: {
+    const _default_32: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6049,10 +6749,10 @@ declare module "packages/icons/src/asn/file-image" {
             };
         }];
     };
-    export default _default_27;
+    export default _default_32;
 }
 declare module "packages/icons/src/asn/file-lock" {
-    const _default_28: {
+    const _default_33: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6089,10 +6789,10 @@ declare module "packages/icons/src/asn/file-lock" {
             };
         }];
     };
-    export default _default_28;
+    export default _default_33;
 }
 declare module "packages/icons/src/asn/file-play" {
-    const _default_29: {
+    const _default_34: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6120,10 +6820,48 @@ declare module "packages/icons/src/asn/file-play" {
             };
         }];
     };
-    export default _default_29;
+    export default _default_34;
+}
+declare module "packages/icons/src/asn/file-search" {
+    const _default_35: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-file-search-icon lucide-file-search";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M13.3 16.3 15 18";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "11.5";
+                readonly cy: "14.5";
+                readonly r: "2.5";
+            };
+        }];
+    };
+    export default _default_35;
 }
 declare module "packages/icons/src/asn/file-stack" {
-    const _default_30: {
+    const _default_36: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6151,10 +6889,10 @@ declare module "packages/icons/src/asn/file-stack" {
             };
         }];
     };
-    export default _default_30;
+    export default _default_36;
 }
 declare module "packages/icons/src/asn/file-symlink" {
-    const _default_31: {
+    const _default_37: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6182,10 +6920,10 @@ declare module "packages/icons/src/asn/file-symlink" {
             };
         }];
     };
-    export default _default_31;
+    export default _default_37;
 }
 declare module "packages/icons/src/asn/file-text" {
-    const _default_32: {
+    const _default_38: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6223,10 +6961,10 @@ declare module "packages/icons/src/asn/file-text" {
             };
         }];
     };
-    export default _default_32;
+    export default _default_38;
 }
 declare module "packages/icons/src/asn/file-video-camera" {
-    const _default_33: {
+    const _default_39: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6263,10 +7001,10 @@ declare module "packages/icons/src/asn/file-video-camera" {
             };
         }];
     };
-    export default _default_33;
+    export default _default_39;
 }
 declare module "packages/icons/src/asn/file-volume" {
-    const _default_34: {
+    const _default_40: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6299,10 +7037,10 @@ declare module "packages/icons/src/asn/file-volume" {
             };
         }];
     };
-    export default _default_34;
+    export default _default_40;
 }
 declare module "packages/icons/src/asn/file" {
-    const _default_35: {
+    const _default_41: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6325,10 +7063,10 @@ declare module "packages/icons/src/asn/file" {
             };
         }];
     };
-    export default _default_35;
+    export default _default_41;
 }
 declare module "packages/icons/src/asn/film" {
-    const _default_36: {
+    const _default_42: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6385,10 +7123,10 @@ declare module "packages/icons/src/asn/film" {
             };
         }];
     };
-    export default _default_36;
+    export default _default_42;
 }
 declare module "packages/icons/src/asn/folder-closed" {
-    const _default_37: {
+    const _default_43: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6411,10 +7149,10 @@ declare module "packages/icons/src/asn/folder-closed" {
             };
         }];
     };
-    export default _default_37;
+    export default _default_43;
 }
 declare module "packages/icons/src/asn/folder-open" {
-    const _default_38: {
+    const _default_44: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6432,10 +7170,10 @@ declare module "packages/icons/src/asn/folder-open" {
             };
         }];
     };
-    export default _default_38;
+    export default _default_44;
 }
 declare module "packages/icons/src/asn/folder" {
-    const _default_39: {
+    const _default_45: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6453,10 +7191,10 @@ declare module "packages/icons/src/asn/folder" {
             };
         }];
     };
-    export default _default_39;
+    export default _default_45;
 }
 declare module "packages/icons/src/asn/funnel" {
-    const _default_40: {
+    const _default_46: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6474,10 +7212,10 @@ declare module "packages/icons/src/asn/funnel" {
             };
         }];
     };
-    export default _default_40;
+    export default _default_46;
 }
 declare module "packages/icons/src/asn/gauge" {
-    const _default_41: {
+    const _default_47: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6500,10 +7238,45 @@ declare module "packages/icons/src/asn/gauge" {
             };
         }];
     };
-    export default _default_41;
+    export default _default_47;
+}
+declare module "packages/icons/src/asn/git-branch" {
+    const _default_48: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-git-branch-icon lucide-git-branch";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M15 6a9 9 0 0 0-9 9V3";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "18";
+                readonly cy: "6";
+                readonly r: "3";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "6";
+                readonly cy: "18";
+                readonly r: "3";
+            };
+        }];
+    };
+    export default _default_48;
 }
 declare module "packages/icons/src/asn/git-fork" {
-    const _default_42: {
+    const _default_49: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6547,10 +7320,43 @@ declare module "packages/icons/src/asn/git-fork" {
             };
         }];
     };
-    export default _default_42;
+    export default _default_49;
+}
+declare module "packages/icons/src/asn/globe" {
+    const _default_50: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-globe";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2 12h20";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "12";
+                readonly cy: "12";
+                readonly r: "10";
+            };
+        }];
+    };
+    export default _default_50;
 }
 declare module "packages/icons/src/asn/grid-3x3" {
-    const _default_43: {
+    const _default_51: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6592,10 +7398,10 @@ declare module "packages/icons/src/asn/grid-3x3" {
             };
         }];
     };
-    export default _default_43;
+    export default _default_51;
 }
 declare module "packages/icons/src/asn/hard-drive-download" {
-    const _default_44: {
+    const _default_52: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6637,10 +7443,10 @@ declare module "packages/icons/src/asn/hard-drive-download" {
             };
         }];
     };
-    export default _default_44;
+    export default _default_52;
 }
 declare module "packages/icons/src/asn/hard-drive" {
-    const _default_45: {
+    const _default_53: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6673,10 +7479,10 @@ declare module "packages/icons/src/asn/hard-drive" {
             };
         }];
     };
-    export default _default_45;
+    export default _default_53;
 }
 declare module "packages/icons/src/asn/history" {
-    const _default_46: {
+    const _default_54: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6704,10 +7510,10 @@ declare module "packages/icons/src/asn/history" {
             };
         }];
     };
-    export default _default_46;
+    export default _default_54;
 }
 declare module "packages/icons/src/asn/house" {
-    const _default_47: {
+    const _default_55: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6730,10 +7536,10 @@ declare module "packages/icons/src/asn/house" {
             };
         }];
     };
-    export default _default_47;
+    export default _default_55;
 }
 declare module "packages/icons/src/asn/image" {
-    const _default_48: {
+    const _default_56: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6768,10 +7574,10 @@ declare module "packages/icons/src/asn/image" {
             };
         }];
     };
-    export default _default_48;
+    export default _default_56;
 }
 declare module "packages/icons/src/asn/inbox" {
-    const _default_49: {
+    const _default_57: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6794,10 +7600,10 @@ declare module "packages/icons/src/asn/inbox" {
             };
         }];
     };
-    export default _default_49;
+    export default _default_57;
 }
 declare module "packages/icons/src/asn/library" {
-    const _default_50: {
+    const _default_58: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6830,10 +7636,10 @@ declare module "packages/icons/src/asn/library" {
             };
         }];
     };
-    export default _default_50;
+    export default _default_58;
 }
 declare module "packages/icons/src/asn/list-filter" {
-    const _default_51: {
+    const _default_59: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6861,10 +7667,10 @@ declare module "packages/icons/src/asn/list-filter" {
             };
         }];
     };
-    export default _default_51;
+    export default _default_59;
 }
 declare module "packages/icons/src/asn/loader-circle" {
-    const _default_52: {
+    const _default_60: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6882,10 +7688,10 @@ declare module "packages/icons/src/asn/loader-circle" {
             };
         }];
     };
-    export default _default_52;
+    export default _default_60;
 }
 declare module "packages/icons/src/asn/loader" {
-    const _default_53: {
+    const _default_61: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6938,10 +7744,46 @@ declare module "packages/icons/src/asn/loader" {
             };
         }];
     };
-    export default _default_53;
+    export default _default_61;
+}
+declare module "packages/icons/src/asn/maximize" {
+    const _default_62: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-maximize";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 3H5a2 2 0 0 0-2 2v3";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21 8V5a2 2 0 0 0-2-2h-3";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 16v3a2 2 0 0 0 2 2h3";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M16 21h3a2 2 0 0 0 2-2v-3";
+            };
+        }];
+    };
+    export default _default_62;
 }
 declare module "packages/icons/src/asn/menu" {
-    const _default_54: {
+    const _default_63: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6969,10 +7811,31 @@ declare module "packages/icons/src/asn/menu" {
             };
         }];
     };
-    export default _default_54;
+    export default _default_63;
+}
+declare module "packages/icons/src/asn/message-circle" {
+    const _default_64: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-message-circle";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719";
+            };
+        }];
+    };
+    export default _default_64;
 }
 declare module "packages/icons/src/asn/message-square-more" {
-    const _default_55: {
+    const _default_65: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7005,10 +7868,31 @@ declare module "packages/icons/src/asn/message-square-more" {
             };
         }];
     };
-    export default _default_55;
+    export default _default_65;
+}
+declare module "packages/icons/src/asn/minus" {
+    const _default_66: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-minus";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M5 12h14";
+            };
+        }];
+    };
+    export default _default_66;
 }
 declare module "packages/icons/src/asn/moon" {
-    const _default_56: {
+    const _default_67: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7026,10 +7910,45 @@ declare module "packages/icons/src/asn/moon" {
             };
         }];
     };
-    export default _default_56;
+    export default _default_67;
+}
+declare module "packages/icons/src/asn/music" {
+    const _default_68: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-music-icon lucide-music";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M9 18V5l12-2v13";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "6";
+                readonly cy: "18";
+                readonly r: "3";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "18";
+                readonly cy: "16";
+                readonly r: "3";
+            };
+        }];
+    };
+    export default _default_68;
 }
 declare module "packages/icons/src/asn/panel-left" {
-    const _default_57: {
+    const _default_69: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7056,10 +7975,31 @@ declare module "packages/icons/src/asn/panel-left" {
             };
         }];
     };
-    export default _default_57;
+    export default _default_69;
+}
+declare module "packages/icons/src/asn/paperclip" {
+    const _default_70: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-paperclip";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551";
+            };
+        }];
+    };
+    export default _default_70;
 }
 declare module "packages/icons/src/asn/pause" {
-    const _default_58: {
+    const _default_71: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7090,10 +8030,36 @@ declare module "packages/icons/src/asn/pause" {
             };
         }];
     };
-    export default _default_58;
+    export default _default_71;
+}
+declare module "packages/icons/src/asn/pen-line" {
+    const _default_72: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-pen-line";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M13 21h8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z";
+            };
+        }];
+    };
+    export default _default_72;
 }
 declare module "packages/icons/src/asn/play" {
-    const _default_59: {
+    const _default_73: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7111,10 +8077,10 @@ declare module "packages/icons/src/asn/play" {
             };
         }];
     };
-    export default _default_59;
+    export default _default_73;
 }
 declare module "packages/icons/src/asn/plus" {
-    const _default_60: {
+    const _default_74: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7137,10 +8103,10 @@ declare module "packages/icons/src/asn/plus" {
             };
         }];
     };
-    export default _default_60;
+    export default _default_74;
 }
 declare module "packages/icons/src/asn/radio-tower" {
-    const _default_61: {
+    const _default_75: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7190,10 +8156,10 @@ declare module "packages/icons/src/asn/radio-tower" {
             };
         }];
     };
-    export default _default_61;
+    export default _default_75;
 }
 declare module "packages/icons/src/asn/refresh-ccw" {
-    const _default_62: {
+    const _default_76: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7226,10 +8192,10 @@ declare module "packages/icons/src/asn/refresh-ccw" {
             };
         }];
     };
-    export default _default_62;
+    export default _default_76;
 }
 declare module "packages/icons/src/asn/refresh-cw" {
-    const _default_63: {
+    const _default_77: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7262,10 +8228,58 @@ declare module "packages/icons/src/asn/refresh-cw" {
             };
         }];
     };
-    export default _default_63;
+    export default _default_77;
+}
+declare module "packages/icons/src/asn/robot-arm" {
+    const _default_78: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-robot-arm";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 21 7.5 8.322";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m14 7 1.75-3.767a.5.5 0 0 1 .662-.172L20 5.005";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "m20 8.998-3.588 1.944a.5.5 0 0 1-.662-.172L14 7H8";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3.486 21h10";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M5 21V8.732";
+            };
+        }, {
+            readonly tag: "circle";
+            readonly attrs: {
+                readonly cx: "6";
+                readonly cy: "7";
+                readonly r: "2";
+            };
+        }];
+    };
+    export default _default_78;
 }
 declare module "packages/icons/src/asn/rotate-ccw" {
-    const _default_64: {
+    const _default_79: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7288,10 +8302,10 @@ declare module "packages/icons/src/asn/rotate-ccw" {
             };
         }];
     };
-    export default _default_64;
+    export default _default_79;
 }
 declare module "packages/icons/src/asn/rss" {
-    const _default_65: {
+    const _default_80: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7321,10 +8335,10 @@ declare module "packages/icons/src/asn/rss" {
             };
         }];
     };
-    export default _default_65;
+    export default _default_80;
 }
 declare module "packages/icons/src/asn/save" {
-    const _default_66: {
+    const _default_81: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7352,10 +8366,10 @@ declare module "packages/icons/src/asn/save" {
             };
         }];
     };
-    export default _default_66;
+    export default _default_81;
 }
 declare module "packages/icons/src/asn/scroll-text" {
-    const _default_67: {
+    const _default_82: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7388,10 +8402,10 @@ declare module "packages/icons/src/asn/scroll-text" {
             };
         }];
     };
-    export default _default_67;
+    export default _default_82;
 }
 declare module "packages/icons/src/asn/search" {
-    const _default_68: {
+    const _default_83: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7416,10 +8430,10 @@ declare module "packages/icons/src/asn/search" {
             };
         }];
     };
-    export default _default_68;
+    export default _default_83;
 }
 declare module "packages/icons/src/asn/server" {
-    const _default_69: {
+    const _default_84: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7468,10 +8482,10 @@ declare module "packages/icons/src/asn/server" {
             };
         }];
     };
-    export default _default_69;
+    export default _default_84;
 }
 declare module "packages/icons/src/asn/settings" {
-    const _default_70: {
+    const _default_85: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7496,10 +8510,10 @@ declare module "packages/icons/src/asn/settings" {
             };
         }];
     };
-    export default _default_70;
+    export default _default_85;
 }
 declare module "packages/icons/src/asn/square-arrow-down" {
-    const _default_71: {
+    const _default_86: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7531,10 +8545,36 @@ declare module "packages/icons/src/asn/square-arrow-down" {
             };
         }];
     };
-    export default _default_71;
+    export default _default_86;
+}
+declare module "packages/icons/src/asn/square-pen" {
+    const _default_87: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-square-pen";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z";
+            };
+        }];
+    };
+    export default _default_87;
 }
 declare module "packages/icons/src/asn/square" {
-    const _default_72: {
+    const _default_88: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7556,10 +8596,10 @@ declare module "packages/icons/src/asn/square" {
             };
         }];
     };
-    export default _default_72;
+    export default _default_88;
 }
 declare module "packages/icons/src/asn/sun" {
-    const _default_73: {
+    const _default_89: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7619,10 +8659,10 @@ declare module "packages/icons/src/asn/sun" {
             };
         }];
     };
-    export default _default_73;
+    export default _default_89;
 }
 declare module "packages/icons/src/asn/table" {
-    const _default_74: {
+    const _default_90: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7659,10 +8699,10 @@ declare module "packages/icons/src/asn/table" {
             };
         }];
     };
-    export default _default_74;
+    export default _default_90;
 }
 declare module "packages/icons/src/asn/trash-2" {
-    const _default_75: {
+    const _default_91: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7700,10 +8740,10 @@ declare module "packages/icons/src/asn/trash-2" {
             };
         }];
     };
-    export default _default_75;
+    export default _default_91;
 }
 declare module "packages/icons/src/asn/trash" {
-    const _default_76: {
+    const _default_92: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7731,10 +8771,10 @@ declare module "packages/icons/src/asn/trash" {
             };
         }];
     };
-    export default _default_76;
+    export default _default_92;
 }
 declare module "packages/icons/src/asn/undo-2" {
-    const _default_77: {
+    const _default_93: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7757,10 +8797,10 @@ declare module "packages/icons/src/asn/undo-2" {
             };
         }];
     };
-    export default _default_77;
+    export default _default_93;
 }
 declare module "packages/icons/src/asn/upload" {
-    const _default_78: {
+    const _default_94: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7788,10 +8828,10 @@ declare module "packages/icons/src/asn/upload" {
             };
         }];
     };
-    export default _default_78;
+    export default _default_94;
 }
 declare module "packages/icons/src/asn/user" {
-    const _default_79: {
+    const _default_95: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7816,10 +8856,10 @@ declare module "packages/icons/src/asn/user" {
             };
         }];
     };
-    export default _default_79;
+    export default _default_95;
 }
 declare module "packages/icons/src/asn/users" {
-    const _default_80: {
+    const _default_96: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7854,10 +8894,10 @@ declare module "packages/icons/src/asn/users" {
             };
         }];
     };
-    export default _default_80;
+    export default _default_96;
 }
 declare module "packages/icons/src/asn/video" {
-    const _default_81: {
+    const _default_97: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7884,10 +8924,10 @@ declare module "packages/icons/src/asn/video" {
             };
         }];
     };
-    export default _default_81;
+    export default _default_97;
 }
 declare module "packages/icons/src/asn/wrench" {
-    const _default_82: {
+    const _default_98: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7905,10 +8945,10 @@ declare module "packages/icons/src/asn/wrench" {
             };
         }];
     };
-    export default _default_82;
+    export default _default_98;
 }
 declare module "packages/icons/src/asn/x" {
-    const _default_83: {
+    const _default_99: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7931,7 +8971,7 @@ declare module "packages/icons/src/asn/x" {
             };
         }];
     };
-    export default _default_83;
+    export default _default_99;
 }
 declare module "packages/icons/src/asn/index" {
     export { default as Activity } from "packages/icons/src/asn/activity";
@@ -7939,6 +8979,9 @@ declare module "packages/icons/src/asn/index" {
     export { default as ArrowLeft } from "packages/icons/src/asn/arrow-left";
     export { default as ArrowRight } from "packages/icons/src/asn/arrow-right";
     export { default as Bolt } from "packages/icons/src/asn/bolt";
+    export { default as BookUser } from "packages/icons/src/asn/book-user";
+    export { default as Bot } from "packages/icons/src/asn/bot";
+    export { default as Box } from "packages/icons/src/asn/box";
     export { default as Braces } from "packages/icons/src/asn/braces";
     export { default as Calendar } from "packages/icons/src/asn/calendar";
     export { default as Check } from "packages/icons/src/asn/check";
@@ -7960,10 +9003,13 @@ declare module "packages/icons/src/asn/index" {
     export { default as EllipsisVertical } from "packages/icons/src/asn/ellipsis-vertical";
     export { default as Ellipsis } from "packages/icons/src/asn/ellipsis";
     export { default as ExternalLink } from "packages/icons/src/asn/external-link";
+    export { default as Eye } from "packages/icons/src/asn/eye";
     export { default as FileBox } from "packages/icons/src/asn/file-box";
+    export { default as FileCode } from "packages/icons/src/asn/file-code";
     export { default as FileImage } from "packages/icons/src/asn/file-image";
     export { default as FileLock } from "packages/icons/src/asn/file-lock";
     export { default as FilePlay } from "packages/icons/src/asn/file-play";
+    export { default as FileSearch } from "packages/icons/src/asn/file-search";
     export { default as FileStack } from "packages/icons/src/asn/file-stack";
     export { default as FileSymlink } from "packages/icons/src/asn/file-symlink";
     export { default as FileText } from "packages/icons/src/asn/file-text";
@@ -7976,7 +9022,9 @@ declare module "packages/icons/src/asn/index" {
     export { default as Folder } from "packages/icons/src/asn/folder";
     export { default as Funnel } from "packages/icons/src/asn/funnel";
     export { default as Gauge } from "packages/icons/src/asn/gauge";
+    export { default as GitBranch } from "packages/icons/src/asn/git-branch";
     export { default as GitFork } from "packages/icons/src/asn/git-fork";
+    export { default as Globe } from "packages/icons/src/asn/globe";
     export { default as Grid3x3 } from "packages/icons/src/asn/grid-3x3";
     export { default as HardDriveDownload } from "packages/icons/src/asn/hard-drive-download";
     export { default as HardDrive } from "packages/icons/src/asn/hard-drive";
@@ -7988,16 +9036,23 @@ declare module "packages/icons/src/asn/index" {
     export { default as ListFilter } from "packages/icons/src/asn/list-filter";
     export { default as LoaderCircle } from "packages/icons/src/asn/loader-circle";
     export { default as Loader } from "packages/icons/src/asn/loader";
+    export { default as Maximize } from "packages/icons/src/asn/maximize";
     export { default as Menu } from "packages/icons/src/asn/menu";
+    export { default as MessageCircle } from "packages/icons/src/asn/message-circle";
     export { default as MessageSquareMore } from "packages/icons/src/asn/message-square-more";
+    export { default as Minus } from "packages/icons/src/asn/minus";
     export { default as Moon } from "packages/icons/src/asn/moon";
+    export { default as Music } from "packages/icons/src/asn/music";
     export { default as PanelLeft } from "packages/icons/src/asn/panel-left";
+    export { default as Paperclip } from "packages/icons/src/asn/paperclip";
     export { default as Pause } from "packages/icons/src/asn/pause";
+    export { default as PenLine } from "packages/icons/src/asn/pen-line";
     export { default as Play } from "packages/icons/src/asn/play";
     export { default as Plus } from "packages/icons/src/asn/plus";
     export { default as RadioTower } from "packages/icons/src/asn/radio-tower";
     export { default as RefreshCcw } from "packages/icons/src/asn/refresh-ccw";
     export { default as RefreshCw } from "packages/icons/src/asn/refresh-cw";
+    export { default as RobotArm } from "packages/icons/src/asn/robot-arm";
     export { default as RotateCcw } from "packages/icons/src/asn/rotate-ccw";
     export { default as Rss } from "packages/icons/src/asn/rss";
     export { default as Save } from "packages/icons/src/asn/save";
@@ -8006,6 +9061,7 @@ declare module "packages/icons/src/asn/index" {
     export { default as Server } from "packages/icons/src/asn/server";
     export { default as Settings } from "packages/icons/src/asn/settings";
     export { default as SquareArrowDown } from "packages/icons/src/asn/square-arrow-down";
+    export { default as SquarePen } from "packages/icons/src/asn/square-pen";
     export { default as Square } from "packages/icons/src/asn/square";
     export { default as Sun } from "packages/icons/src/asn/sun";
     export { default as Table } from "packages/icons/src/asn/table";
@@ -8136,6 +9192,111 @@ declare module "packages/icons/src/index" {
                     readonly cx: "12";
                     readonly cy: "12";
                     readonly r: "4";
+                };
+            }];
+        };
+        "book-user": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-book-user";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 13a3 3 0 1 0-6 0";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "8";
+                    readonly r: "2";
+                };
+            }];
+        };
+        bot: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-bot";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 8V4H8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2 14h2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M20 14h2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 13v2";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9 13v2";
+                };
+            }, {
+                readonly tag: "rect";
+                readonly attrs: {
+                    readonly width: "16";
+                    readonly height: "12";
+                    readonly x: "4";
+                    readonly y: "8";
+                    readonly rx: "2";
+                };
+            }];
+        };
+        box: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-box";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m3.3 7 8.7 5 8.7-5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 22V12";
                 };
             }];
         };
@@ -8706,6 +9867,31 @@ declare module "packages/icons/src/index" {
                 };
             }];
         };
+        eye: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-eye";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "3";
+                };
+            }];
+        };
         "file-box": {
             readonly tag: "svg";
             readonly attrs: {
@@ -8741,6 +9927,39 @@ declare module "packages/icons/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "M7 17v5";
+                };
+            }];
+        };
+        "file-code": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-code-icon lucide-file-code";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10 12.5 8 15l2 2.5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m14 12.5 2 2.5-2 2.5";
                 };
             }];
         };
@@ -8841,6 +10060,41 @@ declare module "packages/icons/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z";
+                };
+            }];
+        };
+        "file-search": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-file-search-icon lucide-file-search";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M14 2v5a1 1 0 0 0 1 1h5";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M13.3 16.3 15 18";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "11.5";
+                    readonly cy: "14.5";
+                    readonly r: "2.5";
                 };
             }];
         };
@@ -9188,6 +10442,38 @@ declare module "packages/icons/src/index" {
                 };
             }];
         };
+        "git-branch": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-git-branch-icon lucide-git-branch";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M15 6a9 9 0 0 0-9 9V3";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "18";
+                    readonly cy: "6";
+                    readonly r: "3";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "6";
+                    readonly cy: "18";
+                    readonly r: "3";
+                };
+            }];
+        };
         "git-fork": {
             readonly tag: "svg";
             readonly attrs: {
@@ -9229,6 +10515,36 @@ declare module "packages/icons/src/index" {
                     readonly cx: "18";
                     readonly cy: "6";
                     readonly r: "3";
+                };
+            }];
+        };
+        globe: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-globe";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2 12h20";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "12";
+                    readonly cy: "12";
+                    readonly r: "10";
                 };
             }];
         };
@@ -9590,6 +10906,39 @@ declare module "packages/icons/src/index" {
                 };
             }];
         };
+        maximize: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-maximize";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 3H5a2 2 0 0 0-2 2v3";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21 8V5a2 2 0 0 0-2-2h-3";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 16v3a2 2 0 0 0 2 2h3";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M16 21h3a2 2 0 0 0 2-2v-3";
+                };
+            }];
+        };
         menu: {
             readonly tag: "svg";
             readonly attrs: {
@@ -9615,6 +10964,24 @@ declare module "packages/icons/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "M4 19h16";
+                };
+            }];
+        };
+        "message-circle": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-message-circle";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719";
                 };
             }];
         };
@@ -9651,6 +11018,24 @@ declare module "packages/icons/src/index" {
                 };
             }];
         };
+        minus: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-minus";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M5 12h14";
+                };
+            }];
+        };
         moon: {
             readonly tag: "svg";
             readonly attrs: {
@@ -9666,6 +11051,38 @@ declare module "packages/icons/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401";
+                };
+            }];
+        };
+        music: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-music-icon lucide-music";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M9 18V5l12-2v13";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "6";
+                    readonly cy: "18";
+                    readonly r: "3";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "18";
+                    readonly cy: "16";
+                    readonly r: "3";
                 };
             }];
         };
@@ -9693,6 +11110,24 @@ declare module "packages/icons/src/index" {
                     readonly x: "3";
                     readonly y: "3";
                     readonly rx: "2";
+                };
+            }];
+        };
+        paperclip: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-paperclip";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551";
                 };
             }];
         };
@@ -9724,6 +11159,29 @@ declare module "packages/icons/src/index" {
                     readonly width: "5";
                     readonly height: "18";
                     readonly rx: "1";
+                };
+            }];
+        };
+        "pen-line": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-pen-line";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M13 21h8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z";
                 };
             }];
         };
@@ -9881,6 +11339,51 @@ declare module "packages/icons/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "M8 16H3v5";
+                };
+            }];
+        };
+        "robot-arm": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-robot-arm";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 21 7.5 8.322";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m14 7 1.75-3.767a.5.5 0 0 1 .662-.172L20 5.005";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "m20 8.998-3.588 1.944a.5.5 0 0 1-.662-.172L14 7H8";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3.486 21h10";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M5 21V8.732";
+                };
+            }, {
+                readonly tag: "circle";
+                readonly attrs: {
+                    readonly cx: "6";
+                    readonly cy: "7";
+                    readonly r: "2";
                 };
             }];
         };
@@ -10126,6 +11629,29 @@ declare module "packages/icons/src/index" {
                     readonly x: "3";
                     readonly y: "3";
                     readonly rx: "2";
+                };
+            }];
+        };
+        "square-pen": {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-square-pen";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z";
                 };
             }];
         };
@@ -10494,986 +12020,6 @@ declare module "packages/icons/src/index" {
             }];
         };
     };
-}
-declare module "packages/types/src/index" {
-    export type Unpacked<T> = T extends (infer U)[] ? U : T extends (...args: any[]) => infer U ? U : T extends Promise<infer U> ? U : T;
-    export type MutableRecord<U> = {
-        [SubType in keyof U]: {
-            type: SubType;
-            data: U[SubType];
-        };
-    }[keyof U];
-    export type MutableRecord2<U> = {
-        [SubType in keyof U]: {
-            type: SubType;
-            data: U[SubType];
-        } & U[SubType];
-    }[keyof U];
-    export type Shift<T extends any[]> = ((...args: T) => void) extends (arg1: any, ...rest: infer R) => void ? R : never;
-    export type Rect = {
-        width: number;
-        height: number;
-        x: number;
-        y: number;
-        left: number;
-        right: number;
-        top: number;
-        bottom: number;
-    };
-    export interface JSONArray extends Array<JSONValue> {
-    }
-    export type JSONValue = string | number | boolean | JSONObject | JSONArray | null;
-    export type JSONObject = {
-        [Key in string]?: JSONValue;
-    };
-    /**
-     * type UserID = Brand<string, "UserID">;
-     */
-    const __brand: unique symbol;
-    export type Brand<T, B> = T & {
-        readonly [__brand]: B;
-    };
-}
-declare module "packages/kit/src/app/types" {
-    export type ThemeTypes = "dark" | "light" | "system";
-    export enum OrientationTypes {
-        Horizontal = "horizontal",
-        Vertical = "vertical"
-    }
-    export type KeyboardEvent = {
-        code: string;
-        shift: boolean;
-        ctrl: boolean;
-        cmd: boolean;
-        alt: boolean;
-        preventDefault: () => void;
-    };
-}
-declare module "packages/kit/src/app/utils" {
-    const mediaSizes: {
-        sm: number;
-        /** 中等设备宽度阈值 */
-        md: number;
-        /** 大设备宽度阈值 */
-        lg: number;
-        /** 特大设备宽度阈值 */
-        xl: number;
-        /** 特大设备宽度阈值 */
-        "2xl": number;
-    };
-    export function getCurrentDeviceSize(width: number): "sm" | "md" | "lg" | "xl" | "2xl";
-    export type DeviceSizeTypes = keyof typeof mediaSizes;
-    export function listenMultiEvent(events: (() => void)[]): () => void;
-}
-declare module "packages/kit/src/app/index" {
-    /**
-     * @file 应用，包含一些全局相关的事件、状态
-     */
-    import { BaseDomain, Handler, Result } from "packages/base/src/index";
-    import { JSONObject } from "packages/types/src/index";
-    import { StorageCore } from "@/storage";
-    import { ClipboardModel } from "@/clipboard";
-    import { ThemeTypes, OrientationTypes } from "packages/kit/src/app/types";
-    import { DeviceSizeTypes } from "packages/kit/src/app/utils";
-    enum Events {
-        Tip = 0,
-        Loading = 1,
-        HideLoading = 2,
-        Error = 3,
-        Login = 4,
-        Logout = 5,
-        ForceUpdate = 6,
-        DeviceSizeChange = 7,
-        /** 生命周期 */
-        Ready = 8,
-        Show = 9,
-        Hidden = 10,
-        /** 平台相关 */
-        Resize = 11,
-        Blur = 12,
-        Keydown = 13,
-        Keyup = 14,
-        OrientationChange = 15,
-        EscapeKeyDown = 16,
-        StateChange = 17
-    }
-    type TheTypesOfEvents = {
-        [Events.Ready]: void;
-        [Events.Error]: Error;
-        [Events.Tip]: {
-            icon?: unknown;
-            text: string[];
-            type?: "success" | "error" | "info" | "warning" | "loading";
-        };
-        [Events.Loading]: {
-            text: string[];
-        };
-        [Events.HideLoading]: void;
-        [Events.Login]: {};
-        [Events.Logout]: void;
-        [Events.ForceUpdate]: void;
-        [Events.Resize]: {
-            width: number;
-            height: number;
-        };
-        [Events.DeviceSizeChange]: DeviceSizeTypes;
-        [Events.Keydown]: KeyboardEvent;
-        [Events.Keyup]: KeyboardEvent;
-        [Events.EscapeKeyDown]: void;
-        [Events.Blur]: void;
-        [Events.Show]: void;
-        [Events.Hidden]: void;
-        [Events.OrientationChange]: "vertical" | "horizontal";
-        [Events.StateChange]: ApplicationState;
-    };
-    type ApplicationState = {
-        ready: boolean;
-        env: JSONObject;
-        theme: ThemeTypes;
-        deviceSize: DeviceSizeTypes;
-        height: number;
-    };
-    type ApplicationProps<T extends {
-        storage: StorageCore<any>;
-    }> = {
-        storage: T["storage"];
-        clipboard: ClipboardModel;
-        /**
-         * 应用加载前的声明周期，只有返回 Result.Ok() 页面才会展示内容
-         */
-        beforeReady?: () => Promise<Result<null>>;
-        onReady?: () => void;
-    };
-    export class ApplicationModel<T extends {
-        storage: StorageCore<any>;
-    }> extends BaseDomain<TheTypesOfEvents> {
-        $storage: T["storage"];
-        $clipboard: ClipboardModel;
-        lifetimes: Pick<ApplicationProps<T>, "beforeReady" | "onReady">;
-        ready: boolean;
-        screen: {
-            statusBarHeight?: number;
-            menuButton?: {
-                width: number;
-                left: number;
-                right: number;
-            };
-            width: number;
-            height: number;
-        };
-        env: {
-            wechat: boolean;
-            ios: boolean;
-            android: boolean;
-            pc: boolean;
-            weapp: boolean;
-            prod: "develop" | "trial" | "release";
-        };
-        orientation: OrientationTypes;
-        curDeviceSize: DeviceSizeTypes;
-        height: number;
-        theme: ThemeTypes;
-        safeArea: boolean;
-        Events: typeof Events;
-        get state(): ApplicationState;
-        constructor(props: ApplicationProps<T>);
-        /** 启动应用 */
-        start(size: {
-            width: number;
-            height: number;
-        }): Promise<Result<any>>;
-        /** 应用指定主题 */
-        setTheme(theme: ThemeTypes): import("@timeless/inner-base").Resp<null>;
-        getTheme(): ThemeTypes;
-        tipUpdate(): void;
-        tip(arg: {
-            icon?: unknown;
-            text: string[];
-            type?: "success" | "error" | "info" | "warning" | "loading";
-        }): string;
-        loading(arg: {
-            text: string[];
-        }): {
-            hideLoading: () => void;
-        };
-        hideLoading(): void;
-        /** 手机震动 */
-        vibrate(): void;
-        setSize(size: {
-            width: number;
-            height: number;
-        }): void;
-        /** 设置页面 title */
-        setTitle(title: string): void;
-        openWindow(url: string): void;
-        setEnv(env: JSONObject): void;
-        setHeight(v: number): void;
-        /** 复制文本到粘贴板 */
-        copy(text: string): void;
-        getComputedStyle(el: unknown): {};
-        /** 发送推送 */
-        notify(msg: {
-            title: string;
-            body: string;
-        }): void;
-        disablePointer(): void;
-        enablePointer(): void;
-        /** 平台相关的全局事件 */
-        keydown(event: KeyboardEvent): void;
-        keyup(event: KeyboardEvent): void;
-        escape(): void;
-        resize(size: {
-            width: number;
-            height: number;
-        }): void;
-        blur(): void;
-        handleScreenOrientationChange(orientation: number): void;
-        handleResize(size: {
-            width: number;
-            height: number;
-        }): void;
-        onReady(handler: Handler<TheTypesOfEvents[Events.Ready]>): () => void;
-        onDeviceSizeChange(handler: Handler<TheTypesOfEvents[Events.DeviceSizeChange]>): () => void;
-        onUpdate(handler: Handler<TheTypesOfEvents[Events.ForceUpdate]>): () => void;
-        /** 平台相关全局事件 */
-        onOrientationChange(handler: Handler<TheTypesOfEvents[Events.OrientationChange]>): () => void;
-        onResize(handler: Handler<TheTypesOfEvents[Events.Resize]>): () => void;
-        onBlur(handler: Handler<TheTypesOfEvents[Events.Blur]>): () => void;
-        onShow(handler: Handler<TheTypesOfEvents[Events.Show]>): () => void;
-        onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>): () => void;
-        onKeydown(handler: Handler<TheTypesOfEvents[Events.Keydown]>): () => void;
-        onKeyup(handler: Handler<TheTypesOfEvents[Events.Keyup]>): () => void;
-        onEscapeKeyDown(handler: Handler<TheTypesOfEvents[Events.EscapeKeyDown]>): () => void;
-        onTip(handler: Handler<TheTypesOfEvents[Events.Tip]>): () => void;
-        onLoading(handler: Handler<TheTypesOfEvents[Events.Loading]>): () => void;
-        onHideLoading(handler: Handler<TheTypesOfEvents[Events.HideLoading]>): () => void;
-        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
-        /**
-         * ----------------
-         * Event
-         * ----------------
-         */
-        onError(handler: Handler<TheTypesOfEvents[Events.Error]>): () => void;
-    }
-}
-declare module "packages/kit/src/clipboard/index" {
-    import { Handler, BizError, Result } from "packages/base/src/index";
-    export function ClipboardModel(): {
-        methods: {
-            refresh(): void;
-            readText(): Promise<Result<string>>;
-            writeText(text: string): void;
-        };
-        ui: {};
-        state: {};
-        readonly readText: () => Promise<Result<string>>;
-        readonly writeText: (text: string) => void;
-        ready(): void;
-        destroy(): void;
-        onStateChange(handler: Handler<{}>): () => void;
-        onError(handler: Handler<BizError>): () => void;
-    };
-    export type ClipboardModel = ReturnType<typeof ClipboardModel>;
-}
-declare module "packages/utils/src/nzh/langs/cn_b" {
-    export const lang_cn_b: {
-        ch: string;
-        ch_u: string;
-        ch_f: string;
-        ch_d: string;
-        m_t: string;
-        m_z: string;
-        m_u: string;
-    };
-}
-declare module "packages/utils/src/nzh/langs/cn_s" {
-    export const lang_cn_s: {
-        ch: string;
-        ch_u: string;
-        ch_f: string;
-        ch_d: string;
-    };
-}
-declare module "packages/utils/src/nzh/utils" {
-    /**
-     * 科学计数法转十进制
-     *
-     * @param {string} num 科学记数法字符串
-     * @returns string
-     */
-    export function e2ten(num: string): string;
-    /**
-     * 分析数字字符串
-     *
-     * @param {string} num NumberString
-     * @returns object
-     */
-    export function getNumbResult(num: number | string): {
-        int: string;
-        decimal: string;
-        minus: boolean;
-        num: string;
-    };
-    /**
-     * 数组归一 (按索引覆盖合并数组,并清空被合并的数组)
-     *
-     * @param {array} baseArray 基础数组
-     * @param {...array} array1
-     * @returns array
-     */
-    export function centerArray(baseArray: unknown[], array1: unknown[], array2?: unknown[]): unknown[];
-    /**
-     * 检查对像属性 (非原型链)
-     *
-     * @param {object} obj
-     * @param {string} key
-     * @returns
-     */
-    export function hasAttr(obj: Record<string, unknown>, key: string): any;
-    /**
-     * 扩展对像(浅复制)
-     *
-     * @param {object} obj
-     * @param {object} obj1
-     * @returns
-     */
-    export function extend(...args: unknown[]): any;
-    /**
-     * 获取真实数位
-     *
-     * @param {number} index 中文单位的索引
-     */
-    export function getDigit(index: number): number;
-    /**
-     * 往数组头部插入0
-     *
-     * @param {array} arr
-     * @param {number} n
-     */
-    export function unshiftZero(arr: unknown[], n: number): void;
-    /**
-     * 清理多余"零"
-     *
-     * @param {any} str
-     * @param {any} zero "零"字符
-     * @param {any} type 清理模式 ^ - 开头, $ - 结尾, nto1 - 多个连续变一个
-     * @returns
-     */
-    export function clearZero(str: string, zero: string, type?: string): string;
-}
-declare module "packages/utils/src/nzh/index" {
-    /**
-     * 中文数字转阿拉伯数字
-     *
-     * @param {string} cnnumb 中文数字字符串
-     * @returns Number
-     */
-    export const cn: {
-        encodeS(num: number | string, options?: Record<string, unknown>): string;
-        encodeB(num: string, options?: Record<string, unknown>): string;
-        decodeS(num: string, options?: Record<string, unknown>): number;
-    };
-}
-declare module "packages/utils/src/primitive" {
-    export function toNumber<T extends number | undefined>(v: any, default_v?: T): T extends undefined ? number | null : number;
-    export function inRange(v: number, [a, b]: [number, number]): boolean;
-}
-declare module "packages/utils/src/download" {
-    export function downloadFile(url: string, filename: string): void;
-}
-declare module "packages/utils/src/lodash/debounce" {
-    export function debounce<T extends (...args: any[]) => any>(wait: number, func: T): (...args: Parameters<T>) => void;
-}
-declare module "packages/utils/src/lodash/throttle" {
-    export function throttle<T extends (...args: any[]) => any>(delay: number, func: T): (...args: Parameters<T>) => any;
-}
-declare module "packages/utils/src/qs/index" {
-    /**
-     * A simple implementation of qs.parse and qs.stringify
-     * Handles basic query string parsing/stringifying
-     */
-    export function qs_parse(str: string, options?: {
-        ignoreQueryPrefix?: boolean;
-    }): Record<string, any>;
-    export function qs_stringify(obj: Record<string, any>): string;
-}
-declare module "packages/utils/src/json" {
-    import { Result } from "packages/base/src/index";
-    /** 解析一段 json 字符串 */
-    export function parseJSONStr<T extends any>(json: string): Result<T>;
-}
-declare module "packages/utils/src/browser" {
-    import { Result } from "packages/base/src/index";
-    export function loadImage(data: any): Promise<Result<HTMLImageElement>>;
-    export function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer>;
-    export function readFileAsURL(file: File): Promise<Result<string>>;
-    export function readFileAsArrayBuffer(file: File): Promise<Result<ArrayBuffer>>;
-}
-declare module "packages/utils/src/index" {
-    import dayjs from "dayjs";
-    import "dayjs/locale/zh-cn";
-    export { dayjs };
-    export * from "packages/utils/src/primitive";
-    export * from "packages/utils/src/download";
-    export * from "packages/utils/src/lodash/debounce";
-    export * from "packages/utils/src/lodash/throttle";
-    export * from "packages/utils/src/qs/index";
-    export * from "packages/utils/src/json";
-    export * from "packages/utils/src/browser";
-    export function toFixed(v: any, n?: number): number;
-    export function uidFactory(): () => number;
-    /**
-     * 返回一个指定长度的随机字符串
-     * @param length
-     * @returns
-     */
-    export function random_key(length: number): string;
-    export function padding_zero(str: number | string): string;
-    export function remove_str(filename: string, index: number, length: number): string;
-    /**
-     * 阿拉伯数字转中文数字
-     * @param num
-     * @returns
-     */
-    export function num_to_chinese(num: number): string;
-    export function chinese_num_to_num(str: string): number;
-    export function update_arr_item<T>(arr: T[], index: number, v2: T): T[];
-    export function remove_arr_item<T>(arr: T[], index: number): T[];
-    export function sleep(ms: number): Promise<unknown>;
-}
-declare module "packages/kit/src/storage/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    enum Events {
-        StateChange = 0
-    }
-    type TheTypesOfEvents<T> = {
-        [Events.StateChange]: StorageCoreState<T>;
-    };
-    type StorageCoreProps<T> = {
-        key: string;
-        values: T;
-        defaultValues: T;
-        client: {
-            setItem: (key: string, value: string) => void;
-            getItem: (key: string) => void;
-        };
-    };
-    type StorageCoreState<T> = {
-        values: T;
-    };
-    export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<TheTypesOfEvents<T>> {
-        key: string;
-        values: T;
-        defaultValues: T;
-        client: StorageCoreProps<T>["client"];
-        get state(): {
-            values: T;
-        };
-        constructor(props: Partial<{
-            _name: string;
-        }> & StorageCoreProps<T>);
-        get<K extends keyof T>(key: K, defaultValue?: T[K]): T[K];
-        set: (key: keyof T, value: unknown) => void;
-        merge: <K extends keyof T>(key: K, values: Partial<T[K]>, extra?: Partial<{
-            reverse: boolean;
-            limit: number;
-        }>) => {};
-        clear<K extends keyof T>(key: K): any;
-        remove<K extends keyof T>(key: K): void;
-        onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
-    }
-}
-declare module "packages/kit/src/history/index" {
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    import { RouteViewCore } from "@/route_view";
-    import { NavigatorCore } from "@/navigator";
-    enum Events {
-        TopViewChange = 0,
-        RouteChange = 1,
-        ClickLink = 2,
-        Back = 3,
-        Forward = 4,
-        StateChange = 5
-    }
-    type TheTypesOfEvents = {
-        [Events.TopViewChange]: RouteViewCore;
-        [Events.ClickLink]: {
-            href: string;
-            target: string | null;
-        };
-        [Events.Back]: void;
-        [Events.Forward]: void;
-        [Events.RouteChange]: {
-            view: RouteViewCore;
-            name: string;
-            href: string;
-            pathname: string;
-            query: Record<string, string>;
-            reason: "back" | "forward" | "push" | "replace";
-            /** 用于在页面间传递标记、数据等 */
-            data?: any;
-            /** 调用方希望忽略这次 route change */
-            ignore?: boolean;
-        };
-        [Events.StateChange]: HistoryCoreState;
-    };
-    type HistoryCoreProps<K extends string, R extends Record<string, any>> = {
-        view: RouteViewCore;
-        router: NavigatorCore;
-        routes: Record<K, R>;
-        views: Record<string, RouteViewCore>;
-        /** 是否采用虚拟路由（不改变浏览器历史） */
-        virtual?: boolean;
-    };
-    type HistoryCoreState = {
-        href: string;
-        stacks: {
-            id: string;
-            key: string;
-            title: string;
-            visible: boolean;
-            query: string;
-        }[];
-        cursor: number;
-    };
-    export class HistoryCore<K extends string, R extends Record<string, any>> extends BaseDomain<TheTypesOfEvents> {
-        virtual: boolean;
-        /** 路由配置 */
-        routes: Record<K, R>;
-        /** 加载的所有视图 */
-        views: Record<string, RouteViewCore>;
-        /** 按顺序依次 push 的视图 */
-        stacks: RouteViewCore[];
-        /** 栈指针 */
-        cursor: number;
-        /** 浏览器 url 管理 */
-        $router: NavigatorCore;
-        /** 根视图 */
-        $view: RouteViewCore;
-        get state(): HistoryCoreState;
-        constructor(props: Partial<{
-            _name: string;
-        }> & HistoryCoreProps<K, R>);
-        resolveLayoutDefaultName(name: K): K;
-        push(name: K, query?: Record<string, string>, options?: Partial<{
-            /** 不变更 history stack */
-            ignore: boolean;
-        }>): any;
-        replace(name: K, query?: Record<string, string>): any;
-        back(opt?: Partial<{
-            data: any;
-        }>): void;
-        forward(): void;
-        reload(): void;
-        /** 销毁所有页面，然后前往指定路由 */
-        destroyAllAndPush(name: K, query?: Record<string, string>, options?: Partial<{
-            /** 不变更 history stack */
-            ignore: boolean;
-        }>): any;
-        /** 跳转到兄弟页面 */
-        ensureParent(view: RouteViewCore, query?: Record<string, string>): any;
-        buildURL(name: K, query?: Record<string, string>): any;
-        buildURLWithPrefix(name: K, query?: Record<string, string>): any;
-        isRoot(name: K): boolean;
-        isLayout(name: K): any;
-        handleClickLink(params: {
-            href: string;
-            target: null | string;
-        }): void;
-        onTopViewChange(handler: Handler<TheTypesOfEvents[Events.TopViewChange]>): () => void;
-        onRouteChange(handler: Handler<TheTypesOfEvents[Events.RouteChange]>): () => void;
-        onBack(handler: Handler<TheTypesOfEvents[Events.Back]>): () => void;
-        onForward(handler: Handler<TheTypesOfEvents[Events.Forward]>): () => void;
-        onClickLink(handler: Handler<TheTypesOfEvents[Events.ClickLink]>): () => void;
-        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
-    }
-}
-declare module "packages/kit/src/navigator/index" {
-    /**
-     * @file 仅负责「地址」的核心类
-     * 包括 URL 解析、应用等
-     */
-    import { BaseDomain, Handler } from "packages/base/src/index";
-    enum Events {
-        PushState = 0,
-        ReplaceState = 1,
-        PopState = 2,
-        Back = 3,
-        Forward = 4,
-        Reload = 5,
-        Start = 6,
-        PathnameChange = 7,
-        /** 销毁所有页面并跳转至指定页面 */
-        Relaunch = 8,
-        /** ???? */
-        RedirectToHome = 9,
-        HistoriesChange = 10
-    }
-    type TheTypesOfEvents = {
-        [Events.PathnameChange]: {
-            pathname: string;
-            search: string;
-            type: RouteAction;
-        };
-        [Events.PushState]: {
-            from: string | null;
-            to: string | null;
-            path: string;
-            pathname: string;
-        };
-        [Events.ReplaceState]: {
-            from: string | null;
-            path: string;
-            pathname: string;
-        };
-        [Events.PopState]: {
-            type: string;
-            href: string;
-            pathname: string;
-        };
-        [Events.Back]: void;
-        [Events.Forward]: void;
-        [Events.Reload]: void;
-        [Events.Start]: RouteLocation;
-        [Events.Relaunch]: void;
-        [Events.HistoriesChange]: {
-            pathname: string;
-            href: string;
-        }[];
-    };
-    type RouteLocation = {
-        host: string;
-        protocol: string;
-        origin: string;
-        pathname: string;
-        href: string;
-        search: string;
-    };
-    export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
-        static prefix: string | null;
-        static parse(url: string): {
-            query: Record<string, string>;
-            pathname: string;
-            search: string;
-            href: string;
-            origin: string;
-            protocol: string;
-            host: string;
-            hostname: string;
-            port: string;
-            hash: string;
-            auth: string;
-        };
-        unique_id: string;
-        debug: boolean;
-        name: string;
-        /** 当前 pathname */
-        pathname: string;
-        /** 当前路由的 query */
-        query: Record<string, string>;
-        /** 当前路由的 params */
-        params: Record<string, string>;
-        /** 当前 URL */
-        location: Partial<RouteLocation>;
-        href: string;
-        histories: {
-            pathname: string;
-            href: string;
-        }[];
-        prevHistories: {
-            pathname: string;
-            href: string;
-        }[];
-        /** 发生跳转前的 pathname */
-        prevPathname: string | null;
-        /** router 基础信息 */
-        origin: string;
-        host: string;
-        _pending: {
-            pathname: string;
-            search: string;
-            type: RouteAction;
-        };
-        get state(): {
-            pathname: string;
-            search: string;
-            params: Record<string, string>;
-            query: Record<string, string>;
-            location: Partial<RouteLocation>;
-        };
-        /** 启动路由监听 */
-        prepare(location: RouteLocation): Promise<void>;
-        start(): void;
-        private setPrevPathname;
-        private setPathname;
-        /** 调用该方法来「改变地址」 */
-        pushState(url: string): void;
-        replaceState(url: string): Promise<void>;
-        /** 外部路由改变（点击浏览器前进、后退），作出响应 */
-        handlePopState({ type, pathname, href, }: {
-            type: string;
-            href: string;
-            pathname: string;
-        }): void;
-        onStart(handler: Handler<TheTypesOfEvents[Events.Start]>): () => void;
-        onHistoryChange(handler: Handler<TheTypesOfEvents[Events.HistoriesChange]>): () => void;
-        onPushState(handler: Handler<TheTypesOfEvents[Events.PushState]>): () => void;
-        onReplaceState(handler: Handler<TheTypesOfEvents[Events.ReplaceState]>): () => void;
-        onPopState(handler: Handler<TheTypesOfEvents[Events.PopState]>): () => void;
-        onReload(handler: Handler<TheTypesOfEvents[Events.Reload]>): () => void;
-        onPathnameChange(handler: Handler<TheTypesOfEvents[Events.PathnameChange]>): () => void;
-        onBack(handler: Handler<TheTypesOfEvents[Events.Back]>): () => void;
-        onForward(handler: Handler<TheTypesOfEvents[Events.Forward]>): () => void;
-        onRelaunch(handler: Handler<TheTypesOfEvents[Events.Relaunch]>): () => void;
-        onHistoriesChange(handler: Handler<TheTypesOfEvents[Events.HistoriesChange]>): () => void;
-    }
-    export type RouteAction = "initialize" | "push" | "replace" | "back" | "forward";
-}
-declare module "packages/kit/src/http_client/index" {
-    import { Result, BaseDomain, Handler } from "packages/base/src/index";
-    import { JSONObject } from "packages/types/src/index";
-    enum Events {
-        StateChange = 0
-    }
-    type TheTypesOfEvents = {
-        [Events.StateChange]: void;
-    };
-    type HttpClientCoreProps = {
-        hostname?: string;
-        headers?: Record<string, string>;
-        debug?: boolean;
-    };
-    export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
-        hostname: string;
-        headers: Record<string, string>;
-        debug: boolean;
-        constructor(props?: HttpClientCoreProps);
-        get<T>(endpoint: unknown, query?: Record<string, string | number | undefined>, extra?: Partial<{
-            headers: Record<string, string | number>;
-            id: string;
-        }>): Promise<Result<T>>;
-        post<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: Partial<{
-            headers: Record<string, string | number>;
-            id: string;
-        }>): Promise<Result<T>>;
-        fetch<T>(options: {
-            url: unknown;
-            method: "GET" | "POST";
-            id?: string;
-            data?: JSONObject | FormData;
-            headers?: Record<string, string | number>;
-        }): Promise<{
-            data: T;
-        }>;
-        cancel(id: string): import("@timeless/inner-base").Resp<null>;
-        setHeaders(headers: Record<string, string>): void;
-        appendHeaders(headers: Record<string, string>): void;
-        setDebug(debug: boolean): void;
-        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
-    }
-}
-declare module "packages/kit/src/http_client/socket" {
-    import { Result } from "packages/base/src/index";
-    export type MaybePromise<T> = T | Promise<T>;
-    export type SocketCloseReason = {
-        code?: number;
-        reason?: string;
-        clean?: boolean;
-        event?: unknown;
-    };
-    export type SocketMessageMeta = {
-        event?: unknown;
-        receivedAt?: number;
-    };
-    export type SocketConnection = {
-        send: (data: unknown) => MaybePromise<Result<null> | void>;
-        close: (code?: number, reason?: string) => MaybePromise<Result<null> | void>;
-    };
-    export type SocketOpenOptions = {
-        endpoint: unknown;
-        hostname: string;
-        headers: Record<string, string | number>;
-        query?: Record<string, string | number | boolean | null | undefined>;
-        params?: any;
-        signal: AbortSignal;
-        onMessage: (data: unknown, meta?: SocketMessageMeta) => void;
-        onClose: (reason: SocketCloseReason) => void;
-        onError: (error: unknown) => void;
-    };
-    /**
-     * Socket transport abstraction. Platform providers implement `open`; the
-     * channel domain owns connection state, message processing, and reconnection.
-     */
-    export class SocketClientCore {
-        open(options: SocketOpenOptions): MaybePromise<Result<SocketConnection>>;
-    }
-}
-declare module "packages/kit/src/channel/index" {
-    /**
-     * @file Bidirectional, long-lived channel domain model.
-     */
-    import { BaseDomain, BizError, Handler, Result } from "packages/base/src/index";
-    import { SocketClientCore, SocketCloseReason, SocketMessageMeta } from "@/http_client/socket";
-    export type ChannelStatus = "idle" | "connecting" | "connected" | "reconnecting" | "closing" | "closed" | "failed";
-    export type ChannelMessageMeta = {
-        raw: unknown;
-        event?: unknown;
-        receivedAt: number;
-    };
-    export type ChannelSentMessage<T> = {
-        data: T;
-        raw: unknown;
-        sentAt: number;
-    };
-    export type ChannelReconnectInfo = {
-        attempt: number;
-        delay: number;
-        scheduledAt: number;
-    };
-    export type ChannelReconnectOptions = {
-        enabled?: boolean;
-        interval?: number;
-    };
-    export type ChannelCoreProps<TMessage = unknown, TSend = unknown> = {
-        _name?: string;
-        client?: SocketClientCore;
-        hostname?: string;
-        headers?: Record<string, string | number>;
-        query?: Record<string, string | number | boolean | null | undefined>;
-        params?: any;
-        initialMessage?: TSend;
-        process?: (v: unknown, meta: ChannelMessageMeta) => TMessage;
-        encode?: (v: TSend) => unknown;
-        reconnect?: ChannelReconnectOptions;
-        onConnected?: () => void;
-        onReconnecting?: (info: ChannelReconnectInfo) => void;
-        onReconnected?: () => void;
-        onMessage?: (message: TMessage) => void;
-        onSent?: (message: ChannelSentMessage<TSend>) => void;
-        onClose?: (reason: SocketCloseReason) => void;
-        onFailed?: (error: BizError) => void;
-        onStatusChange?: (status: ChannelStatus) => void;
-        onConnecting?: (connecting: boolean) => void;
-    };
-    export type ChannelState<TMessage, TSend> = {
-        initial: boolean;
-        connecting: boolean;
-        connected: boolean;
-        status: ChannelStatus;
-        error: BizError | null;
-        lastMessage: TMessage | null;
-        lastSent: TSend | null;
-        closeReason: SocketCloseReason | null;
-        reconnectAttempt: number;
-        nextReconnectAt: number | null;
-    };
-    enum Events {
-        BeforeConnect = 0,
-        ConnectingChange = 1,
-        StatusChange = 2,
-        Connected = 3,
-        Reconnecting = 4,
-        Reconnected = 5,
-        Message = 6,
-        MessageChange = 7,
-        Sent = 8,
-        Close = 9,
-        Failed = 10,
-        StateChange = 11
-    }
-    type TheTypesOfEvents<TMessage, TSend> = {
-        [Events.BeforeConnect]: void;
-        [Events.ConnectingChange]: boolean;
-        [Events.StatusChange]: ChannelStatus;
-        [Events.Connected]: void;
-        [Events.Reconnecting]: ChannelReconnectInfo;
-        [Events.Reconnected]: void;
-        [Events.Message]: TMessage;
-        [Events.MessageChange]: TMessage | null;
-        [Events.Sent]: ChannelSentMessage<TSend>;
-        [Events.Close]: SocketCloseReason;
-        [Events.Failed]: BizError;
-        [Events.StateChange]: ChannelState<TMessage, TSend>;
-    };
-    export type TheMessageOfChannelCore<T extends ChannelCore<any, any>> = NonNullable<T["lastMessage"]>;
-    export type TheSendMessageOfChannelCore<T extends ChannelCore<any, any>> = NonNullable<T["lastSent"]>;
-    export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain<TheTypesOfEvents<TMessage, TSend>> {
-        _name: string;
-        client?: SocketClientCore;
-        endpoint: unknown;
-        hostname: string;
-        headers: Record<string, string | number>;
-        query?: Record<string, string | number | boolean | null | undefined>;
-        params?: any;
-        initialMessage?: TSend;
-        process?: (v: unknown, meta: ChannelMessageMeta) => TMessage;
-        encode?: (v: TSend) => unknown;
-        initial: boolean;
-        connecting: boolean;
-        connected: boolean;
-        status: ChannelStatus;
-        error: BizError | null;
-        lastMessage: TMessage | null;
-        lastSent: TSend | null;
-        closeReason: SocketCloseReason | null;
-        reconnectAttempt: number;
-        nextReconnectAt: number | null;
-        pending: Promise<Result<null>> | null;
-        id: string;
-        private connection;
-        private connectionController;
-        private reconnectTimer;
-        private reconnectEnabled;
-        private reconnectDelay;
-        private shouldConnect;
-        private connectedOnce;
-        get state(): ChannelState<TMessage, TSend>;
-        constructor(endpoint: unknown, props?: ChannelCoreProps<TMessage, TSend>);
-        connect(): Promise<Result<any>>;
-        private beginConnect;
-        private runConnect;
-        sendMessage(data: TSend): Promise<Result<any>>;
-        send(data: TSend): Promise<Result<any>>;
-        close(code?: number, reason?: string): Promise<Result<any>>;
-        disconnect(code?: number, reason?: string): Promise<Result<any>>;
-        reconnect(): Promise<Result<any>>;
-        clear(): void;
-        getHostname(): string;
-        setHostname(hostname: string): void;
-        setHeaders(headers: Record<string, string | number>): void;
-        appendHeaders(headers: Record<string, string | number>): void;
-        setClient(client: SocketClientCore): void;
-        setError(error: BizError): void;
-        destroy(): void;
-        receiveMessage(data: unknown, extra?: SocketMessageMeta): void;
-        private discardConnection;
-        private handleConnected;
-        private handleClose;
-        private finishClose;
-        private handleError;
-        private fail;
-        private reportError;
-        private scheduleReconnect;
-        private cancelReconnect;
-        private setConnecting;
-        private setStatus;
-        private emitState;
-        beforeConnect(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.BeforeConnect]>): () => void;
-        onConnectingChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.ConnectingChange]>): () => void;
-        onStatusChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.StatusChange]>): () => void;
-        onConnected(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Connected]>): () => void;
-        onReconnecting(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Reconnecting]>): () => void;
-        onReconnected(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Reconnected]>): () => void;
-        onMessage(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Message]>): () => void;
-        onMessageChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.MessageChange]>): () => void;
-        onSent(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Sent]>): () => void;
-        onClose(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Close]>): () => void;
-        onFailed(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Failed]>, opt?: Partial<{
-            override: boolean;
-        }>): () => void;
-        onError(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Failed]>): () => void;
-        onStateChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.StateChange]>): () => void;
-    }
 }
 declare module "packages/ui-vm/src/accordion/index" {
     import { Handler } from "packages/base/src/index";
@@ -12592,6 +13138,172 @@ declare module "packages/ui-vm/src/form/index" {
         input: ValueInputInterface<any>;
     }>> = {}> = ReturnType<typeof FormCore<F>>;
 }
+declare module "packages/utils/src/nzh/langs/cn_b" {
+    export const lang_cn_b: {
+        ch: string;
+        ch_u: string;
+        ch_f: string;
+        ch_d: string;
+        m_t: string;
+        m_z: string;
+        m_u: string;
+    };
+}
+declare module "packages/utils/src/nzh/langs/cn_s" {
+    export const lang_cn_s: {
+        ch: string;
+        ch_u: string;
+        ch_f: string;
+        ch_d: string;
+    };
+}
+declare module "packages/utils/src/nzh/utils" {
+    /**
+     * 科学计数法转十进制
+     *
+     * @param {string} num 科学记数法字符串
+     * @returns string
+     */
+    export function e2ten(num: string): string;
+    /**
+     * 分析数字字符串
+     *
+     * @param {string} num NumberString
+     * @returns object
+     */
+    export function getNumbResult(num: number | string): {
+        int: string;
+        decimal: string;
+        minus: boolean;
+        num: string;
+    };
+    /**
+     * 数组归一 (按索引覆盖合并数组,并清空被合并的数组)
+     *
+     * @param {array} baseArray 基础数组
+     * @param {...array} array1
+     * @returns array
+     */
+    export function centerArray(baseArray: unknown[], array1: unknown[], array2?: unknown[]): unknown[];
+    /**
+     * 检查对像属性 (非原型链)
+     *
+     * @param {object} obj
+     * @param {string} key
+     * @returns
+     */
+    export function hasAttr(obj: Record<string, unknown>, key: string): any;
+    /**
+     * 扩展对像(浅复制)
+     *
+     * @param {object} obj
+     * @param {object} obj1
+     * @returns
+     */
+    export function extend(...args: unknown[]): any;
+    /**
+     * 获取真实数位
+     *
+     * @param {number} index 中文单位的索引
+     */
+    export function getDigit(index: number): number;
+    /**
+     * 往数组头部插入0
+     *
+     * @param {array} arr
+     * @param {number} n
+     */
+    export function unshiftZero(arr: unknown[], n: number): void;
+    /**
+     * 清理多余"零"
+     *
+     * @param {any} str
+     * @param {any} zero "零"字符
+     * @param {any} type 清理模式 ^ - 开头, $ - 结尾, nto1 - 多个连续变一个
+     * @returns
+     */
+    export function clearZero(str: string, zero: string, type?: string): string;
+}
+declare module "packages/utils/src/nzh/index" {
+    /**
+     * 中文数字转阿拉伯数字
+     *
+     * @param {string} cnnumb 中文数字字符串
+     * @returns Number
+     */
+    export const cn: {
+        encodeS(num: number | string, options?: Record<string, unknown>): string;
+        encodeB(num: string, options?: Record<string, unknown>): string;
+        decodeS(num: string, options?: Record<string, unknown>): number;
+    };
+}
+declare module "packages/utils/src/primitive" {
+    export function toNumber<T extends number | undefined>(v: any, default_v?: T): T extends undefined ? number | null : number;
+    export function inRange(v: number, [a, b]: [number, number]): boolean;
+}
+declare module "packages/utils/src/download" {
+    export function downloadFile(url: string, filename: string): void;
+}
+declare module "packages/utils/src/lodash/debounce" {
+    export function debounce<T extends (...args: any[]) => any>(wait: number, func: T): (...args: Parameters<T>) => void;
+}
+declare module "packages/utils/src/lodash/throttle" {
+    export function throttle<T extends (...args: any[]) => any>(delay: number, func: T): (...args: Parameters<T>) => any;
+}
+declare module "packages/utils/src/qs/index" {
+    /**
+     * A simple implementation of qs.parse and qs.stringify
+     * Handles basic query string parsing/stringifying
+     */
+    export function qs_parse(str: string, options?: {
+        ignoreQueryPrefix?: boolean;
+    }): Record<string, any>;
+    export function qs_stringify(obj: Record<string, any>): string;
+}
+declare module "packages/utils/src/json" {
+    import { Result } from "packages/base/src/index";
+    /** 解析一段 json 字符串 */
+    export function parseJSONStr<T extends any>(json: string): Result<T>;
+}
+declare module "packages/utils/src/browser" {
+    import { Result } from "packages/base/src/index";
+    export function loadImage(data: any): Promise<Result<HTMLImageElement>>;
+    export function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer>;
+    export function readFileAsURL(file: File): Promise<Result<string>>;
+    export function readFileAsArrayBuffer(file: File): Promise<Result<ArrayBuffer>>;
+}
+declare module "packages/utils/src/index" {
+    import dayjs from "dayjs";
+    import "dayjs/locale/zh-cn";
+    export { dayjs };
+    export * from "packages/utils/src/primitive";
+    export * from "packages/utils/src/download";
+    export * from "packages/utils/src/lodash/debounce";
+    export * from "packages/utils/src/lodash/throttle";
+    export * from "packages/utils/src/qs/index";
+    export * from "packages/utils/src/json";
+    export * from "packages/utils/src/browser";
+    export function toFixed(v: any, n?: number): number;
+    export function uidFactory(): () => number;
+    /**
+     * 返回一个指定长度的随机字符串
+     * @param length
+     * @returns
+     */
+    export function random_key(length: number): string;
+    export function padding_zero(str: number | string): string;
+    export function remove_str(filename: string, index: number, length: number): string;
+    /**
+     * 阿拉伯数字转中文数字
+     * @param num
+     * @returns
+     */
+    export function num_to_chinese(num: number): string;
+    export function chinese_num_to_num(str: string): number;
+    export function update_arr_item<T>(arr: T[], index: number, v2: T): T[];
+    export function remove_arr_item<T>(arr: T[], index: number): T[];
+    export function sleep(ms: number): Promise<unknown>;
+}
 declare module "packages/ui-vm/src/formv2/types" {
     export type FormInputInterface<T> = {
         shape: "number" | "string" | "textarea" | "boolean" | "select" | "multiple-select" | "tag-input" | "custom" | "switch" | "checkbox" | "input" | "drag-upload" | "image-upload" | "upload" | "date-picker" | "list" | "form" | "drag-select";
@@ -13468,6 +14180,8 @@ declare module "packages/ui-vm/src/popover/index" {
         side?: Side;
         align?: Align;
         strategy?: "fixed" | "absolute";
+        offsetX?: number;
+        offsetY?: number;
         closeable?: boolean;
         /** 关闭时是否销毁内容 DOM，默认 true。设为 false 时关闭仅隐藏，再次打开恢复原状态 */
         destroyOnClose?: boolean;
@@ -14263,6 +14977,14 @@ declare module "packages/ui-vm/src/popper/index" {
         strategy: Strategy;
         x: number;
         y: number;
+        /**
+         * 上方 placement 使用的固定底边锚点。
+         *
+         * Primitive 会将浮层的顶部定位到该坐标，再通过 translateY(-100%)
+         * 把浮层底边对齐到这里。这样内容高度变化时可以只依赖 CSS 向上生长，
+         * 无需重新执行 place()。
+         */
+        anchorY?: number;
         placement: Placement;
         isPlaced: boolean;
         top?: number;
@@ -14360,6 +15082,7 @@ declare module "packages/ui-vm/src/popper/index" {
         state: PopperState;
         _enter: boolean;
         _focus: boolean;
+        _place_request_id: number;
         _scrolling_subscriber: null | (() => void);
         constructor(props?: Partial<{
             _name: string;
@@ -15583,173 +16306,363 @@ declare module "packages/ui-vm/src/toast/index" {
         get [Symbol.toStringTag](): string;
     }
 }
-declare module "packages/ui-vm/src/tree/constants" {
-    export enum TARGET_POSITION_TYPE {
-        TOP = 1,
-        BOTTOM = -1,
-        CONTENT = 0
-    }
-}
 declare module "packages/ui-vm/src/tree/types" {
-    export type SourceNode = {
-        key: string;
-        title: string;
-        children?: Array<SourceNode>;
+    /**
+     * Tree 的通用节点与落点类型。
+     *
+     * 这一层刻意不认识 `type: "file" | "directory"` 这类业务字段：**带 `children`
+     * 数组的节点就是可展开目录**，其余是叶子。业务字段（type / size / icon /
+     * resource …）通过索引签名原样透传，渲染层按需读取。
+     */
+    export type TreeNode = {
+        /** 稳定标识；不传则由 assignIds 按下标生成内部 `_id` */
+        key?: string;
+        /** 显示名 */
+        title?: string;
+        children?: TreeNode[];
+        disabled?: boolean;
+        /** 这一行能否作为拖拽源（默认可以）。`false` 只挡「拖起」，仍可作为落点。 */
+        draggable?: boolean;
+        /** 强制叶子（即使带 children 也不可展开） */
+        isLeaf?: boolean;
+        /** 内部：稳定 id（`d0/f1` 这种），由 assignIds 生成 */
+        _id?: string;
+        /** 内部：`a/b/c` 路径，折叠状态跨数据重建的搬运锚点 */
+        _path?: string;
+        /** 业务字段原样透传 */
+        [k: string]: unknown;
     };
-    export type FormattedSourceNode = {
+    /** 拖拽落点类型。替代旧的 TARGET_POSITION_TYPE 枚举。 */
+    export type DropKind = "before" | "after" | "into" | "root";
+    /**
+     * flattenTree 产出的一行。**纯数据，不带任何 ref** —— 行的结构字段全部编进了
+     * `key`，所以渲染层可以只读快照、不订阅共享 ref（见 flattenTree 注释）。
+     */
+    export type TreeRow = {
+        node: TreeNode;
+        depth: number;
+        parent: TreeNode | null;
+        collapsed: boolean;
         key: string;
-        title: string;
-        pos: string;
-        children?: Array<FormattedSourceNode>;
-        [propsName: string]: unknown;
+        /** 祖先缩进引导线：`guides[level] === true` 表示本行要在第 level 层画一条竖线。
+         *  该层祖先后面还有兄弟，或它展开着且有 ≥2 个可见子节点（详见 flattenTree）。
+         *  长度恒等于 depth。 */
+        guides: boolean[];
+    };
+    /** 落点判定结果。 */
+    export type DropTarget = {
+        kind: DropKind;
+        /** 命中的行 _id；root 落点为 "" */
+        id: string;
+        /** 目标父节点 _id；根级为 "" */
+        parentKey: string;
+        index: number;
+        /** 落回原位 / 未发生变化 */
+        noop: boolean;
+    };
+    /**
+     * 渲染层上报的命中信息。
+     *
+     * 命中测试（`closest("[data-tree-row-id]")` + `(y - rect.top) / rect.height`）留在
+     * 渲染层，落点判定（before/after/into/root、目标父节点、index、环防护）留在 core。
+     * 所以 `ui-vm` 里不会出现任何 `document` / `getBoundingClientRect`。
+     */
+    export type DragHit = {
+        id: string;
+        ratio: number;
+    } | {
+        root: true;
+    } | null;
+    /** moveNode / commitDrag 回传的移动信息。 */
+    export type TreeMoveInfo = {
+        node: TreeNode;
+        from: {
+            parentKey: string;
+            index: number;
+        };
+        to: {
+            parentKey: string;
+            index: number;
+        };
+        /** 移动后的整棵树（内部字段已剥离） */
+        tree: TreeNode;
+    };
+    /** 拖拽落定后随 `TreeMoveInfo` 一起回传：目标父节点下移动后的完整子节点顺序。 */
+    export type TreeMoveContext = {
+        /** 目标父节点 children 的 `_id`，按落定后的最终顺序（目录与叶子混编）。 */
+        order: string[];
+    };
+    export type TreeCheckInfo = {
+        node: TreeNode;
+        checkedKeys: Set<string>;
+        halfCheckedKeys: Set<string>;
+    };
+    export type TreeSelectInfo = {
+        node: TreeNode;
+        selectedKeys: Set<string>;
     };
 }
 declare module "packages/ui-vm/src/tree/utils" {
-    import { TARGET_POSITION_TYPE } from "packages/ui-vm/src/tree/constants";
-    import { SourceNode } from "packages/ui-vm/src/tree/types";
-    export function noop(): void;
     /**
-     * type NodeLevel = string; // like 0、0-0、0-1、0-0-0
-     * interface SourceNode {
-     *  key: string;
-     *  title: string;
-     *  children?: Array<SourceNode>;
-     * }
-     * interface FormattedSourceNode {
-     *  key: string;
-     *  title: string;
-     *  pos: string;
-     *  children?: Array<FormattedSourceNode>;
-     *  [propsName: string]: any;
-     * }
-     */
-    /**
-     * add some key to sourceNode
-     * @param {Array<SourceNode>} data
-     * @param {string} [level='0'] - level at tree
-     * @return {Array<FormattedSourceNode>}
-     */
-    export const formatSourceNodes: (sourceNodes: SourceNode[], level?: number, parentPos?: string) => {
-        key: string;
-        title: string;
-        pos: string;
-        children?: Array<SourceNode>;
-    }[];
-    /**
-     * collect node key and its children keys
-     * @param {Array<VueComponent>} treeNodes
-     * @param {function} callback
-     */
-    export function traverseTreeNodes(treeNodes: any[], callback: any): void;
-    /**
+     * Tree 的纯数据函数。全部与 DOM / 响应式无关，可在任何宿主里跑。
      *
-     * @param {*} smallArray
-     * @param {*} bigArray
+     * 从 apps/web-shadcn/src/components/tree.js 提升而来，做了两处泛化：
+     *   1) 目录判定改成「带 children 数组」，不再读业务字段 `type`；
+     *   2) 显示名读 `title`（缺省回落到 payload 的 name / display_name …）。
+     *
+     * 保留的核心约定：
+     *   - `_id`（`d0/f1` 这种稳定 id）作折叠键 / 行标识 / 拖拽命中标识。拖拽会改路径，
+     *     所以 _id 必须比 _path 稳：只在「构建 / 重建一棵树」时生成，拖拽后不要重算。
+     *   - `_path`（`a/b/c`）是折叠状态跨数据重建时唯一的搬运锚点。
      */
-    export function isInclude(smallArray: any, bigArray: any): any;
+    import { DropTarget, DropKind, TreeRow, TreeNode } from "packages/ui-vm/src/tree/types";
+    export function noop(): void;
+    /** 目录 = 非显式 isLeaf，且有 children 数组（空数组也算目录）。 */
+    export function isDirectory(node: TreeNode | null | undefined): boolean;
+    /** 节点的显示名：title → name → key。 */
+    export function nodeLabel(node: TreeNode | null | undefined): string;
+    /** 递归按 nodeCompare 排序；只在调用方显式要求时跑（顺序默认就是 children 顺序）。 */
+    export function sortTree(nodes: TreeNode[] | undefined): TreeNode[] | undefined;
+    /** 子树里的叶子数（目录本身不计）。 */
+    export function countFiles(node: TreeNode | null | undefined): number;
+    /** 直接子节点数。 */
+    export function countChildren(node: TreeNode | null | undefined): number;
     /**
-     * get key and children's key of dragging node
-     * @param {VueComponent} treeNode - dragging node
-     * @return {Array<>}
+     * 给整棵树生成稳定 _id：显式 `key` 优先，否则 `父_id/类型前缀+同级下标`，例如 "d0/d1/f2"。
+     *
+     * 只在「构建 / 重建一棵树」时调用。拖拽调整顺序后不要再调用（_id 要跟着节点走，
+     * 下标变了也不重算），否则折叠状态与行的 key 会一起失稳。
      */
-    export function getDraggingNodesKey(treeNode: any): any[];
+    export function assignIds(nodes: TreeNode[] | undefined, prefix: string): TreeNode[] | undefined;
+    /** 重算 _path：用于 title 提示、外部回传路径，以及折叠状态的跨重建搬运。 */
+    export function assignPaths(nodes: TreeNode[] | undefined, prefix: string): void;
+    /** 深拷贝并剥掉内部字段（_id / _path），供 assignIds / assignPaths 重新标记。 */
+    export function cloneNodes(nodes: TreeNode[] | undefined): TreeNode[];
     /**
-     * get node position info
-     * @param {Element} ele
+     * 深拷贝但保留 _id / _path。
+     * 拖拽提交时要换一棵新树（rows 靠引用变化才会重算），但 _id 必须稳定，
+     * 所以这里不能用 cloneNodes。
      */
-    export function getOffset(ele: any): any;
+    export function cloneKeepIds(nodes: TreeNode[] | undefined): TreeNode[];
     /**
-     * type TargetPositionType = -1 | 0 | 1;
+     * 把树摊平成「可见行」数组，折叠的目录不展开其子树。
+     *
+     * 这里**不排序**：children 的数组顺序就是用户看到、也是拖出来的顺序。
+     *
+     * 每一行都是纯数据。渲染器对同 key 只 move、不重跑 render，所以凡是「同一个 key
+     * 下可能变化」的东西都必须编进 key，否则 DOM 会留着旧内容：
+     *   - depth：换层级后缩进不会更新
+     *   - collapsed（目录）：箭头与子行展开状态不会更新
+     *   - childrenCount：拖进来一个子节点后「N 项」不更新
+     *   - _path：同级换父节点后 title 不更新
+     *   - guides：兄弟顺序变化后层级引导线该出现 / 消失却不重绘（见下）
+     * _id 在树内唯一，这些字段只是让 key 在内容变化时失效，不会互相撞车。
+     *
+     * `guides` 是「行只读快照」不变量的延续：拖拽重排只换 children 顺序，_id / depth /
+     * collapsed / count / _path 全都不变，只有 guides 会变。key 全程只作身份标识
+     * （Map 键 / `data-list-view-key` / `Object.is` 比较），从不被解析或 split，
+     * 所以把 mask 追加在末尾是安全的。
+     *
+     * 这条约定是整个 Tree 能「行只读快照、不订阅结构性 ref」的前提，不是实现细节。
      */
+    export function flattenTree(nodes: TreeNode[] | undefined, collapsed: Set<string>, depth: number, output: TreeRow[], parent?: TreeNode | null): TreeRow[];
     /**
-     * @param {Event} e
-     * @param {VueComponent} treeNode - entered node
-     * @return {TargetPostionType}
-     * TARGET_POSITION_TYPE.BOTTOM
-     * |TARGET_POSITION_TYPE.CONTENT
-     * |TARGET_POSITION_TYPE.TOP
+     * 把折叠状态从旧树搬到新树：按 _path 对应。
+     * 外部数据导致整棵树重建时 _id 会重生成，只能靠 _path 找回折叠的目录。
      */
-    export function calcDropPosition(e: any, treeNode: any): TARGET_POSITION_TYPE;
-    interface FindSourceCallback {
-        (sourceNode: SourceNode, index: number, arr: Array<SourceNode>): void;
-    }
+    export function remapCollapsedIds(old_nodes: TreeNode[] | undefined, new_nodes: TreeNode[] | undefined, set: Set<string>): Set<string>;
+    /** 收集 node 及其所有后代的 _id（拖拽环防护 + 父子联动勾选）。 */
+    export function collectSubtreeKeys(node: TreeNode | null | undefined, output?: Set<string>): Set<string>;
+    /** 整棵树里所有目录的 _id（collapseAll 用）。 */
+    export function collectDirectoryKeys(nodes: TreeNode[] | undefined, output?: Set<string>): Set<string>;
+    /** 按 _id 定位节点，返回 { parent, index, node, ancestors }（ancestors 不含自身）。 */
+    export function locate(root: TreeNode | null | undefined, id: string): {
+        parent: TreeNode;
+        index: number;
+        node: TreeNode;
+        ancestors: TreeNode[];
+    } | null;
     /**
-     *  interface FindSourceCallback {
-     *      (sourceNode: SourceNode, index: number, arr: Array<SourceNode>): void;
-     *  }
+     * 把 node 移到 to_parent 的第 to_index 位。返回是否真的产生了位移。
+     *
+     * 同父下移要先 to_index -= 1：摘除自己之后，目标下标左边的兄弟会左移一位。
      */
+    export function moveNode(root: TreeNode | null | undefined, node: TreeNode | null | undefined, to_parent: TreeNode | null | undefined, to_index?: number): boolean;
+    /** 树是否为空（没有根级节点）。 */
+    export function isTreeEmpty(root: TreeNode | null | undefined): boolean;
+    /** 供外部展示用：剥掉 _id / _path 等内部字段，只留结构与业务字段。 */
+    export function plainTree(node: TreeNode | null | undefined): TreeNode | null;
     /**
-     * @param {Array<SourceNode>} data
-     * @param {string} key
-     * @param {FindSourceCallback} callback
+     * 按 `name` 里的 `/` 拆名建树。
+     *
+     * 接受两种输入：
+     *  - 扁平资源数组（每项带 `name` / `title` 这类含 `/` 的字段）
+     *  - 预览对象 `{ tree, resources }`（兼容旧调用）
      */
-    export const findSourceNodeByKey: (sourceNodes: SourceNode[], key: string, callback: FindSourceCallback) => void;
-    /**
-     * get last sourceNodes and move type
-     * @param {Array<SourceNode>} sourceNodes
-     * @param {any} draggingNodeKey
-     * @param {any} targetNodeKey
-     * @param {TargetPostionType} targetPosition
-     * @return {SourceNode | undefined} targetNode
-     * @return {number | undefined} targetNodeIndex
-     * @return {Array<SourceNode> | undefined} targetNodes
-     * @return {SourceNode} originSourceNode
-     * @return {number} originSourceNodeIndex
-     * @return {Array<SourceNode>} originSourceNodes
-     */
-    export function computeMoveNeededParams(sourceNodes: SourceNode[], draggingNodeKey: string, targetNodeKey: string, targetPosition: TARGET_POSITION_TYPE): {
-        targetSourceNode: any;
-        originSourceNode: any;
-        originSourceNodeIndex: any;
-        originSourceNodes: any;
-        targetSourceNodes?: undefined;
-        targetSourceNodeIndex?: undefined;
-    } | {
-        targetSourceNodes: any;
-        targetSourceNodeIndex: any;
-        originSourceNode: any;
-        originSourceNodeIndex: any;
-        originSourceNodes: any;
-        targetSourceNode?: undefined;
-    };
-    /**
-     * param reassign, no return
-     * @param {number} targetSourceNodeIndex
-     * @param {Array<SourceNode>} targetSourceNodes
-     * @param {SourceNode} originSourceNode
-     * @param {number} originSourceNodeIndex
-     * @param {Array<SourceNode>} originSourceNodes
-     */
-    export function insertToTop(targetSourceNodeIndex: number, targetSourceNodes: SourceNode[], originSourceNode: SourceNode, originSourceNodeIndex: number, originSourceNodes: SourceNode[]): {
-        targetSourceNodes: SourceNode[];
-        originSourceNodes: SourceNode[];
-    };
-    /**
-     * param reassign, no return
-     * @param {number} targetSourceNodeIndex
-     * @param {Array<SourceNode>} targetSourceNodes
-     * @param {SourceNode} originSourceNode
-     * @param {number} originSourceNodeIndex
-     * @param {Array<SourceNode>} originSourceNodes
-     */
-    export function insertToBottom(targetSourceNodeIndex: number, targetSourceNodes: SourceNode[], originSourceNode: SourceNode, originSourceNodeIndex: number, originSourceNodes: SourceNode[]): {
-        targetSourceNodes: SourceNode[];
-        originSourceNodes: SourceNode[];
-    };
+    export function buildTreeFromPaths(input: unknown, options?: {
+        label?: (resource: any, index: number) => string;
+    }): TreeNode;
+    /** 判定落点是否需要「展开目标目录」（into 且当前折叠）。 */
+    export function shouldExpandTarget(target: DropTarget | null): string;
+    /** 落点类型的中文描述，供渲染层的 hint 文案复用。 */
+    export function describeDrop(kind: DropKind): string;
 }
 declare module "packages/ui-vm/src/tree/index" {
+    /**
+     * TreeCore —— 树形组件的纯逻辑层。
+     *
+     * 分层约定（与 apps/web-shadcn/src/components/tree.js 的提升版一致）：
+     *
+     *   source（外部数据） → prepared（克隆 + _id + _path） → root（叠加手动顺序） → rows（摊平）
+     *
+     * 三棵树分开的原因：外部数据一变，手动顺序自动作废（拖拽结果不能覆盖新数据），
+     * 但 `_id` 必须是稳定的，所以 prepared 只在 setNodes 时重建、拖拽只换 root 那一层。
+     *
+     * 命中测试（DOM 几何）留在渲染层，落点判定留在 core：渲染层只上报
+     * `{ id, ratio }` / `{ root: true }` / `null`，core 据此算出 before / after / into / root、
+     * 目标父节点、index、noop，并做环防护。因此本文件不出现任何 document / 几何 API。
+     *
+     * 行只读快照：`rows` 里的每一行都是纯数据，所有结构字段都编进了 `key`
+     * （见 flattenTree）。渲染层因此可以让行完全不订阅共享 ref —— 这是刻意的，
+     * 行一旦订阅结构性 ref，被卸载时的同步 destroy 会从正在遍历的订阅者数组里把自己
+     * splice 掉，让排在后面的订阅者整批被跳过。
+     */
     import { BaseDomain, Handler } from "packages/base/src/index";
-    import * as Utils from "packages/ui-vm/src/tree/utils";
-    export { Utils };
+    import { DragHit, DropTarget, TreeCheckInfo, TreeMoveContext, TreeMoveInfo, TreeNode, TreeRow, TreeSelectInfo } from "packages/ui-vm/src/tree/types";
+    export * from "packages/ui-vm/src/tree/types";
+    export * from "packages/ui-vm/src/tree/utils";
     enum Events {
         StateChange = 0
     }
     type TheTypesOfEvents = {
         [Events.StateChange]: TreeState;
     };
-    type TreeState = {};
+    export type TreeCoreProps = {
+        /** 树数据：根节点，或根级 children 数组 */
+        nodes?: TreeNode[] | TreeNode;
+        /** 是否允许折叠（默认 true） */
+        collapsible?: boolean;
+        /** 是否允许拖拽排序（默认 false） */
+        draggable?: boolean;
+        /** 是否允许落在根级（根落点 / 根级兄弟旁；默认 true） */
+        allowRootDrop?: boolean;
+        /** 是否显示勾选框（默认 false） */
+        checkable?: boolean;
+        /** 多选（配合 checkable，默认 false） */
+        multiple?: boolean;
+        /** 父子联动勾选（默认 true） */
+        checkChildNodesAuto?: boolean;
+        /** 受控：展开的目录集合（初始值，之后用 expand / collapse 命令驱动） */
+        expandedKeys?: Set<string>;
+        /** 受控：勾选的节点集合（初始值） */
+        checkedKeys?: Set<string>;
+        /** 受控：选中的节点集合（初始值） */
+        selectedKeys?: Set<string>;
+        onExpand?: (key: string, expanded: boolean) => void;
+        onCheck?: (key: string, checked: boolean, info: TreeCheckInfo) => void;
+        onSelect?: (key: string, info: TreeSelectInfo) => void;
+        onMove?: (info: TreeMoveInfo, context: TreeMoveContext) => void;
+        onNodeClick?: (node: TreeNode) => void;
+    };
+    export type TreeState = {
+        /** 当前展示的根节点（叠加了手动顺序） */
+        nodes: TreeNode;
+        /** 可见行（每次提交都是新数组） */
+        rows: TreeRow[];
+        collapsedKeys: Set<string>;
+        checkedKeys: Set<string>;
+        halfCheckedKeys: Set<string>;
+        selectedKeys: Set<string>;
+        /** 正在被拖起的节点 _id；未拖拽时为 null */
+        draggingKey: string | null;
+        /** 正在被拖起的节点；未拖拽时为 null */
+        draggingNode: TreeNode | null;
+        dropTarget: DropTarget | null;
+        /** 是否处于拖拽中（行被拖起后为 true） */
+        dragging: boolean;
+    };
     export class TreeCore extends BaseDomain<TheTypesOfEvents> {
+        props: TreeCoreProps;
+        collapsible: boolean;
+        draggable: boolean;
+        allowRootDrop: boolean;
+        checkable: boolean;
+        multiple: boolean;
+        checkChildNodesAuto: boolean;
+        private _source;
+        private _prepared;
+        private _manual;
+        private _collapsed;
+        private _checked;
+        private _halfChecked;
+        private _selected;
+        private _rows;
+        private _session;
+        private _dropTarget;
+        constructor(props?: TreeCoreProps);
+        get state(): TreeState;
         onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
+        get rows(): TreeRow[];
+        get nodes(): TreeNode;
+        get collapsedKeys(): Set<string>;
+        /**
+         * 换一棵树。_id 会重生成，所以折叠状态按 _path 搬到新 _id 上，手动顺序作废。
+         */
+        setNodes(nodes: TreeNode[] | TreeNode): void;
+        /** 按扁平资源数组（`name` 里带 `/`）建树。 */
+        setResources(resources: unknown): void;
+        getRow(key: string): TreeRow | null;
+        getNode(key: string): TreeNode | null;
+        toJSON(): TreeNode | null;
+        isTreeEmpty(): boolean;
+        expand(key: string): void;
+        collapse(key: string): void;
+        toggleExpand(key: string): void;
+        expandAll(): void;
+        collapseAll(): void;
+        private _setCollapsed;
+        /** `checked` 省略时取反。会递归整棵子树（checkChildNodesAuto）并重算半选。 */
+        check(key: string, checked?: boolean): void;
+        uncheckAll(): void;
+        select(key: string, multi?: boolean): void;
+        /** 行被点击：先发 onNodeClick，再选中，目录再顺带折叠切换。 */
+        clickNode(key: string): void;
+        /** 指针越过 4px 阈值后由渲染层调用，开启一次拖拽会话。 */
+        beginDrag(key: string): void;
+        /**
+         * 渲染层只上报命中：`{ id, ratio }`（行内相对高度）/ `{ root: true }`（容器底部留白）
+         * / `null`（没有落点）。落点判定与环防护都在这里。
+         */
+        updateDrag(hit: DragHit): void;
+        /** 返回真实的移动信息；落回原位 / 无落点 / 被环防护拒掉时返回 null。 */
+        commitDrag(): TreeMoveInfo | null;
+        cancelDrag(): void;
+        /** 编程式移动：把 `key` 移到 `parentKey`（"" = 根级）的第 `index` 位。 */
+        moveNode(key: string, parentKey: string, index: number): TreeMoveInfo | null;
+        private _resolveDrop;
+        private _applyMove;
+        /** 供渲染层展示的落点描述（不涉及 DOM）。 */
+        describeDropTarget(): string;
+        countChildren(node: TreeNode): number;
+        private _root;
+        /** 重算 rows / 半选 / 清理失效键，然后广播。每次提交 rows 都是新数组。 */
+        private _recompute;
+        /**
+         * 自底向上传导勾选：子节点全勾 → 父目录跟着勾上；有一个没勾 → 父目录取消勾选。
+         * 空目录不参与传导（没有子节点可依据），只保留它自己的手动勾选态。
+         *
+         * 只在 checkChildNodesAuto 下跑。向下传导（勾目录带动子树）由 check 自己完成，
+         * 这里补的是「取消一个子节点后父目录也要跟着取消」这半程。
+         */
+        private _conductChecked;
+        /**
+         * 自底向上重算半选：子树不是全选但有选中 → 半选。
+         * 目录自身的勾选也参与（父子联动下勾目录会连自己也勾上）。
+         */
+        private _recomputeHalfChecked;
+        /** 数据换代后，指向已不存在节点的键要清掉，否则会一直算进半选。 */
+        private _pruneKeys;
+        private _emitState;
     }
 }
 declare module "packages/ui-vm/src/video-player/index" {
@@ -17398,9 +18311,92 @@ declare module "packages/ui-vm/src/window/window" {
     };
     export type WindowModel = ReturnType<typeof WindowModel>;
 }
+declare module "packages/ui-vm/src/window/window-manager" {
+    /**
+     * WindowManager - 平台无关的多窗口层级 + 位置管理器
+     *
+     * 与 LayerManager（点击外部即 dismiss 的浮层）语义不同：这里管理的窗口常驻，
+     * 只负责「谁在最上面」与「每个窗口落在哪」，窗口自身的拖拽数学仍在视图层。
+     *
+     * 层级用列表顺序隐式表达：`windows` 末尾即栈顶，每次结构变化后统一按
+     * `z = baseZ + i * stepZ` 重算，因此不会出现索引与 z 不一致。
+     *
+     * 使用方式：
+     * 1. 打开窗口调用 open(id, position)
+     * 2. 点击窗口置顶调用 focus(id)
+     * 3. 拖拽结束调用 moveTo(id, position)
+     * 4. 关闭窗口调用 close(id) / closeAll()
+     */
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { WindowPoint } from "packages/ui-vm/src/window/section";
+    export type ManagedWindowState = {
+        id: string;
+        position: WindowPoint;
+        z: number;
+    };
+    export type WindowManagerState = {
+        windows: ManagedWindowState[];
+        activeId: string;
+    };
+    export type WindowManagerProps = {
+        /** 最底层窗口的 z-index，默认 240 */
+        baseZ?: number;
+        /** 每高一层递增的 z-index，默认 1 */
+        stepZ?: number;
+    };
+    export const DEFAULT_WINDOW_BASE_Z = 240;
+    export const DEFAULT_WINDOW_STEP_Z = 1;
+    enum Events {
+        StateChange = 0,
+        WindowsChange = 1,
+        ActiveChange = 2
+    }
+    type TheTypesOfEvents = {
+        [Events.StateChange]: WindowManagerState;
+        [Events.WindowsChange]: {
+            opened: string[];
+            closed: string[];
+        };
+        [Events.ActiveChange]: string;
+    };
+    export class WindowManager extends BaseDomain<TheTypesOfEvents> {
+        private baseZ;
+        private stepZ;
+        /** 顺序即层级，末尾最上 */
+        private _windows;
+        private _activeId;
+        constructor(props?: WindowManagerProps);
+        /** 全量快照（每次读取返回新对象，调用方可安全持有） */
+        get state(): WindowManagerState;
+        get size(): number;
+        get activeId(): string;
+        has(id: string): boolean;
+        /** 未找到返回 -1 */
+        zIndexOf(id: string): number;
+        /** 未找到返回 { x: 0, y: 0 } */
+        positionOf(id: string): WindowPoint;
+        /** 不存在则追加并聚焦；已存在则仅聚焦（位置不动） */
+        open(id: string, position?: Partial<WindowPoint> | null): ManagedWindowState;
+        close(id: string): boolean;
+        closeAll(): void;
+        /** 移到末尾、重算 z、activeId = id；不存在返回 false */
+        focus(id: string): boolean;
+        /** 只改位置，不动层级；不存在或位置未变返回 false */
+        moveTo(id: string, position?: Partial<WindowPoint> | null): boolean;
+        /** 主动广播一次全量快照 */
+        refresh(): void;
+        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
+        onWindowsChange(handler: Handler<TheTypesOfEvents[Events.WindowsChange]>): () => void;
+        onActiveChange(handler: Handler<TheTypesOfEvents[Events.ActiveChange]>): () => void;
+        private snapshot_of;
+        /** 按列表顺序重算 z */
+        private reassign;
+    }
+}
 declare module "packages/ui-vm/src/window/index" {
     export * from "packages/ui-vm/src/window/section";
     export * from "packages/ui-vm/src/window/window";
+    export * from "packages/ui-vm/src/window/window-manager";
 }
 declare module "packages/ui-vm/src/affix/index" {
     /**
@@ -17940,6 +18936,129 @@ declare module "packages/ui-vm/src/switch/index" {
         }>): () => void;
     };
     export type SwitchCore = ReturnType<typeof SwitchCore>;
+}
+declare module "packages/ui-vm/src/swiper/index" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    export type SwiperOrientation = "horizontal" | "vertical";
+    export type SwiperPhase = "idle" | "dragging" | "settling" | "refreshing";
+    export type SwiperPoint = {
+        x: number;
+        y: number;
+    };
+    export type SwiperCoreOptions = Partial<{
+        _name: string;
+        index: number;
+        count: number;
+        size: number;
+        orientation: SwiperOrientation;
+        threshold: number;
+        resistance: number;
+        disabled: boolean;
+        pullToRefresh: boolean;
+        refreshThreshold: number;
+        refreshHoldDistance: number;
+        reachBottom: boolean;
+        reachBottomThreshold: number;
+    }>;
+    export type SwiperState = {
+        index: number;
+        count: number;
+        size: number;
+        offset: number;
+        orientation: SwiperOrientation;
+        phase: SwiperPhase;
+        disabled: boolean;
+        pullDistance: number;
+        refreshing: boolean;
+    };
+    export type SwiperChangeEvent = {
+        index: number;
+        previousIndex: number;
+    };
+    export type SwiperReachBottomEvent = {
+        index: number;
+        count: number;
+    };
+    enum Events {
+        StateChange = 0,
+        Change = 1,
+        SwipeStart = 2,
+        SwipeMove = 3,
+        SwipeEnd = 4,
+        Refresh = 5,
+        ReachBottom = 6
+    }
+    type TheTypesOfEvents = {
+        [Events.StateChange]: SwiperState;
+        [Events.Change]: SwiperChangeEvent;
+        [Events.SwipeStart]: SwiperState;
+        [Events.SwipeMove]: SwiperState;
+        [Events.SwipeEnd]: SwiperChangeEvent & {
+            changed: boolean;
+        };
+        [Events.Refresh]: {
+            index: number;
+        };
+        [Events.ReachBottom]: SwiperReachBottomEvent;
+    };
+    /**
+     * Platform-neutral state machine for a touch-driven swiper.
+     *
+     * A threshold in the range 0..1 is interpreted as a proportion of the
+     * viewport. A value greater than 1 is interpreted as pixels.
+     */
+    export class SwiperCore extends BaseDomain<TheTypesOfEvents> {
+        index: number;
+        count: number;
+        size: number;
+        offset: number;
+        orientation: SwiperOrientation;
+        phase: SwiperPhase;
+        threshold: number;
+        resistance: number;
+        disabled: boolean;
+        pullToRefresh: boolean;
+        refreshThreshold: number;
+        refreshHoldDistance: number;
+        reachBottom: boolean;
+        reachBottomThreshold: number;
+        pullDistance: number;
+        private start_point;
+        private last_point;
+        private gesture_axis;
+        private pending_index;
+        private suppress_click_until;
+        private reach_bottom_emitted_for_count;
+        get state(): SwiperState;
+        constructor(options?: SwiperCoreOptions);
+        setOptions(options: SwiperCoreOptions): void;
+        setCount(count: number): void;
+        setSize(size: number): void;
+        setIndex(index: number): boolean;
+        slideTo(index: number, animated?: boolean): boolean;
+        next(animated?: boolean): boolean;
+        previous(animated?: boolean): boolean;
+        beginSwipe(point: SwiperPoint): boolean;
+        moveSwipe(point: SwiperPoint): boolean;
+        endSwipe(point?: SwiperPoint): boolean;
+        cancelSwipe(): boolean;
+        finishTransition(): boolean;
+        shouldSuppressClick(): boolean;
+        finishRefresh(): boolean;
+        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
+        onChange(handler: Handler<TheTypesOfEvents[Events.Change]>): () => void;
+        onSwipeStart(handler: Handler<TheTypesOfEvents[Events.SwipeStart]>): () => void;
+        onSwipeMove(handler: Handler<TheTypesOfEvents[Events.SwipeMove]>): () => void;
+        onSwipeEnd(handler: Handler<TheTypesOfEvents[Events.SwipeEnd]>): () => void;
+        onRefresh(handler: Handler<TheTypesOfEvents[Events.Refresh]>): () => void;
+        onReachBottom(handler: Handler<TheTypesOfEvents[Events.ReachBottom]>): () => void;
+        private start_settling;
+        private apply_edge_resistance;
+        private clamp_index;
+        private update_count;
+        private maybe_emit_reach_bottom;
+        private emit_state;
+    }
 }
 declare module "packages/ui-vm/src/toggle/index" {
     import { BaseDomain } from "packages/base/src/index";
@@ -19416,6 +20535,7 @@ declare module "packages/ui-vm/src/flow/index" {
         NodeDrag = "NodeDrag",
         NodeDragStop = "NodeDragStop",
         EdgeClick = "EdgeClick",
+        NodeRerun = "NodeRerun",
         SelectionChange = "SelectionChange",
         ViewportChange = "ViewportChange",
         StateChange = "StateChange"
@@ -19448,6 +20568,9 @@ declare module "packages/ui-vm/src/flow/index" {
         [Events.EdgeClick]: {
             edge: FlowEdgeModel;
             event: MouseEvent;
+        };
+        [Events.NodeRerun]: {
+            node: FlowNodeModel;
         };
         [Events.SelectionChange]: {
             nodes: FlowNodeModel[];
@@ -19535,7 +20658,7 @@ declare module "packages/ui-vm/src/flow/index" {
             edges: FlowEdge[];
             viewport?: Viewport;
         }): void;
-        onNodeRerun(): void;
+        onNodeRerun(handler: Handler<TheTypesOfEvents[Events.NodeRerun]>): () => void;
         onConnect(handler: Handler<TheTypesOfEvents[Events.Connect]>): () => void;
         onNodesChange(handler: Handler<FlowNodeModel[]>): () => void;
         onEdgesChange(handler: Handler<FlowEdgeModel[]>): () => void;
@@ -19570,6 +20693,55 @@ declare module "packages/ui-vm/src/flow/index" {
         }>): () => void;
         onViewportChange(handler: Handler<Viewport>): () => void;
         onStateChange(handler: Handler<FlowState>): () => void;
+    }
+}
+declare module "packages/ui-vm/src/gallery/index" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    export type GalleryItem = {
+        src: string;
+        thumbnail?: string;
+        alt?: string;
+        caption?: string;
+    };
+    export type GalleryState = {
+        items: GalleryItem[];
+        index: number;
+        open: boolean;
+        current: GalleryItem | null;
+        status: "loading" | "loaded" | "error";
+        can_previous: boolean;
+        can_next: boolean;
+    };
+    enum Events {
+        StateChange = 0
+    }
+    type GalleryEvents = {
+        [Events.StateChange]: GalleryState;
+    };
+    /** Platform-neutral image selection and preview state. */
+    export class GalleryCore extends BaseDomain<GalleryEvents> {
+        private items;
+        private index;
+        private visible;
+        private statuses;
+        readonly loop: boolean;
+        constructor(props?: {
+            items?: GalleryItem[];
+            index?: number;
+            loop?: boolean;
+        });
+        get state(): GalleryState;
+        private clamp_index;
+        private notify;
+        open(index?: number): void;
+        close(): void;
+        select(index: number): void;
+        previous(): void;
+        next(): void;
+        private move;
+        setItems(items: GalleryItem[]): void;
+        setStatus(src: string, status: GalleryState["status"]): void;
+        onStateChange(handler: Handler<GalleryState>): () => void;
     }
 }
 declare module "packages/ui-vm/src/index" {
@@ -19644,6 +20816,7 @@ declare module "packages/ui-vm/src/index" {
     export * from "packages/ui-vm/src/element/index";
     export * from "packages/ui-vm/src/simple-select/index";
     export * from "packages/ui-vm/src/switch/index";
+    export * from "packages/ui-vm/src/swiper/index";
     export * from "packages/ui-vm/src/toggle/index";
     export * from "packages/ui-vm/src/tree-select/index";
     export * from "packages/ui-vm/src/tag-select/index";
@@ -19660,6 +20833,853 @@ declare module "packages/ui-vm/src/index" {
     export * from "packages/ui-vm/src/flow/index";
     export * from "packages/ui-vm/src/flow/node";
     export * from "packages/ui-vm/src/pointer/index";
+    export * from "packages/ui-vm/src/gallery/index";
+}
+declare module "packages/types/src/index" {
+    export type Unpacked<T> = T extends (infer U)[] ? U : T extends (...args: any[]) => infer U ? U : T extends Promise<infer U> ? U : T;
+    export type MutableRecord<U> = {
+        [SubType in keyof U]: {
+            type: SubType;
+            data: U[SubType];
+        };
+    }[keyof U];
+    export type MutableRecord2<U> = {
+        [SubType in keyof U]: {
+            type: SubType;
+            data: U[SubType];
+        } & U[SubType];
+    }[keyof U];
+    export type Shift<T extends any[]> = ((...args: T) => void) extends (arg1: any, ...rest: infer R) => void ? R : never;
+    export type Rect = {
+        width: number;
+        height: number;
+        x: number;
+        y: number;
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+    };
+    export interface JSONArray extends Array<JSONValue> {
+    }
+    export type JSONValue = string | number | boolean | JSONObject | JSONArray | null;
+    export type JSONObject = {
+        [Key in string]?: JSONValue;
+    };
+    /**
+     * type UserID = Brand<string, "UserID">;
+     */
+    const __brand: unique symbol;
+    export type Brand<T, B> = T & {
+        readonly [__brand]: B;
+    };
+}
+declare module "packages/kit/src/app/types" {
+    export type ThemeTypes = "dark" | "light" | "system";
+    export enum OrientationTypes {
+        Horizontal = "horizontal",
+        Vertical = "vertical"
+    }
+    export type KeyboardEvent = {
+        code: string;
+        shift: boolean;
+        ctrl: boolean;
+        cmd: boolean;
+        alt: boolean;
+        preventDefault: () => void;
+    };
+}
+declare module "packages/kit/src/app/utils" {
+    const mediaSizes: {
+        sm: number;
+        /** 中等设备宽度阈值 */
+        md: number;
+        /** 大设备宽度阈值 */
+        lg: number;
+        /** 特大设备宽度阈值 */
+        xl: number;
+        /** 特大设备宽度阈值 */
+        "2xl": number;
+    };
+    export function getCurrentDeviceSize(width: number): "sm" | "md" | "lg" | "xl" | "2xl";
+    export type DeviceSizeTypes = keyof typeof mediaSizes;
+    export function listenMultiEvent(events: (() => void)[]): () => void;
+}
+declare module "packages/kit/src/app/index" {
+    /**
+     * @file 应用，包含一些全局相关的事件、状态
+     */
+    import { BaseDomain, Handler, Result } from "packages/base/src/index";
+    import { JSONObject } from "packages/types/src/index";
+    import { StorageCore } from "@/storage";
+    import { ClipboardModel } from "@/clipboard";
+    import { ThemeTypes, OrientationTypes } from "packages/kit/src/app/types";
+    import { DeviceSizeTypes } from "packages/kit/src/app/utils";
+    enum Events {
+        Tip = 0,
+        Loading = 1,
+        HideLoading = 2,
+        Error = 3,
+        Login = 4,
+        Logout = 5,
+        ForceUpdate = 6,
+        DeviceSizeChange = 7,
+        /** 生命周期 */
+        Ready = 8,
+        Show = 9,
+        Hidden = 10,
+        /** 平台相关 */
+        Resize = 11,
+        Blur = 12,
+        Keydown = 13,
+        Keyup = 14,
+        OrientationChange = 15,
+        EscapeKeyDown = 16,
+        StateChange = 17
+    }
+    type TheTypesOfEvents = {
+        [Events.Ready]: void;
+        [Events.Error]: Error;
+        [Events.Tip]: {
+            icon?: unknown;
+            text: string[];
+            type?: "success" | "error" | "info" | "warning" | "loading";
+        };
+        [Events.Loading]: {
+            text: string[];
+        };
+        [Events.HideLoading]: void;
+        [Events.Login]: {};
+        [Events.Logout]: void;
+        [Events.ForceUpdate]: void;
+        [Events.Resize]: {
+            width: number;
+            height: number;
+        };
+        [Events.DeviceSizeChange]: DeviceSizeTypes;
+        [Events.Keydown]: KeyboardEvent;
+        [Events.Keyup]: KeyboardEvent;
+        [Events.EscapeKeyDown]: void;
+        [Events.Blur]: void;
+        [Events.Show]: void;
+        [Events.Hidden]: void;
+        [Events.OrientationChange]: "vertical" | "horizontal";
+        [Events.StateChange]: ApplicationState;
+    };
+    type ApplicationState = {
+        ready: boolean;
+        env: JSONObject;
+        theme: ThemeTypes;
+        deviceSize: DeviceSizeTypes;
+        height: number;
+    };
+    type ApplicationProps<T extends {
+        storage: StorageCore<any>;
+    }> = {
+        storage: T["storage"];
+        clipboard: ClipboardModel;
+        /**
+         * 应用加载前的声明周期，只有返回 Result.Ok() 页面才会展示内容
+         */
+        beforeReady?: () => Promise<Result<null>>;
+        onReady?: () => void;
+    };
+    export class ApplicationModel<T extends {
+        storage: StorageCore<any>;
+    }> extends BaseDomain<TheTypesOfEvents> {
+        $storage: T["storage"];
+        $clipboard: ClipboardModel;
+        lifetimes: Pick<ApplicationProps<T>, "beforeReady" | "onReady">;
+        ready: boolean;
+        screen: {
+            statusBarHeight?: number;
+            menuButton?: {
+                width: number;
+                left: number;
+                right: number;
+            };
+            width: number;
+            height: number;
+        };
+        env: {
+            wechat: boolean;
+            ios: boolean;
+            android: boolean;
+            pc: boolean;
+            weapp: boolean;
+            prod: "develop" | "trial" | "release";
+        };
+        orientation: OrientationTypes;
+        curDeviceSize: DeviceSizeTypes;
+        height: number;
+        theme: ThemeTypes;
+        safeArea: boolean;
+        Events: typeof Events;
+        get state(): ApplicationState;
+        constructor(props: ApplicationProps<T>);
+        /** 启动应用 */
+        start(size: {
+            width: number;
+            height: number;
+        }): Promise<Result<any>>;
+        /** 应用指定主题 */
+        setTheme(theme: ThemeTypes): import("@timeless/inner-base").Resp<null>;
+        getTheme(): ThemeTypes;
+        tipUpdate(): void;
+        tip(arg: {
+            icon?: unknown;
+            text: string[];
+            type?: "success" | "error" | "info" | "warning" | "loading";
+        }): string;
+        loading(arg: {
+            text: string[];
+        }): {
+            hideLoading: () => void;
+        };
+        hideLoading(): void;
+        /** 手机震动 */
+        vibrate(): void;
+        setSize(size: {
+            width: number;
+            height: number;
+        }): void;
+        /** 设置页面 title */
+        setTitle(title: string): void;
+        openWindow(url: string): void;
+        setEnv(env: JSONObject): void;
+        setHeight(v: number): void;
+        /** 复制文本到粘贴板 */
+        copy(text: string): void;
+        getComputedStyle(el: unknown): {};
+        /** 发送推送 */
+        notify(msg: {
+            title: string;
+            body: string;
+        }): void;
+        disablePointer(): void;
+        enablePointer(): void;
+        /** 平台相关的全局事件 */
+        keydown(event: KeyboardEvent): void;
+        keyup(event: KeyboardEvent): void;
+        escape(): void;
+        resize(size: {
+            width: number;
+            height: number;
+        }): void;
+        blur(): void;
+        handleScreenOrientationChange(orientation: number): void;
+        handleResize(size: {
+            width: number;
+            height: number;
+        }): void;
+        onReady(handler: Handler<TheTypesOfEvents[Events.Ready]>): () => void;
+        onDeviceSizeChange(handler: Handler<TheTypesOfEvents[Events.DeviceSizeChange]>): () => void;
+        onUpdate(handler: Handler<TheTypesOfEvents[Events.ForceUpdate]>): () => void;
+        /** 平台相关全局事件 */
+        onOrientationChange(handler: Handler<TheTypesOfEvents[Events.OrientationChange]>): () => void;
+        onResize(handler: Handler<TheTypesOfEvents[Events.Resize]>): () => void;
+        onBlur(handler: Handler<TheTypesOfEvents[Events.Blur]>): () => void;
+        onShow(handler: Handler<TheTypesOfEvents[Events.Show]>): () => void;
+        onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>): () => void;
+        onKeydown(handler: Handler<TheTypesOfEvents[Events.Keydown]>): () => void;
+        onKeyup(handler: Handler<TheTypesOfEvents[Events.Keyup]>): () => void;
+        onEscapeKeyDown(handler: Handler<TheTypesOfEvents[Events.EscapeKeyDown]>): () => void;
+        onTip(handler: Handler<TheTypesOfEvents[Events.Tip]>): () => void;
+        onLoading(handler: Handler<TheTypesOfEvents[Events.Loading]>): () => void;
+        onHideLoading(handler: Handler<TheTypesOfEvents[Events.HideLoading]>): () => void;
+        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
+        /**
+         * ----------------
+         * Event
+         * ----------------
+         */
+        onError(handler: Handler<TheTypesOfEvents[Events.Error]>): () => void;
+    }
+}
+declare module "packages/kit/src/clipboard/index" {
+    import { Handler, BizError, Result } from "packages/base/src/index";
+    export function ClipboardModel(): {
+        methods: {
+            refresh(): void;
+            readText(): Promise<Result<string>>;
+            writeText(text: string): void;
+        };
+        ui: {};
+        state: {};
+        readonly readText: () => Promise<Result<string>>;
+        readonly writeText: (text: string) => void;
+        ready(): void;
+        destroy(): void;
+        onStateChange(handler: Handler<{}>): () => void;
+        onError(handler: Handler<BizError>): () => void;
+    };
+    export type ClipboardModel = ReturnType<typeof ClipboardModel>;
+}
+declare module "packages/kit/src/storage/index" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    enum Events {
+        StateChange = 0
+    }
+    type TheTypesOfEvents<T> = {
+        [Events.StateChange]: StorageCoreState<T>;
+    };
+    type StorageCoreProps<T> = {
+        key: string;
+        values: T;
+        defaultValues: T;
+        client: {
+            setItem: (key: string, value: string) => void;
+            getItem: (key: string) => void;
+        };
+    };
+    type StorageCoreState<T> = {
+        values: T;
+    };
+    export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<TheTypesOfEvents<T>> {
+        key: string;
+        values: T;
+        defaultValues: T;
+        client: StorageCoreProps<T>["client"];
+        get state(): {
+            values: T;
+        };
+        constructor(props: Partial<{
+            _name: string;
+        }> & StorageCoreProps<T>);
+        get<K extends keyof T>(key: K, defaultValue?: T[K]): T[K];
+        set: (key: keyof T, value: unknown) => void;
+        merge: <K extends keyof T>(key: K, values: Partial<T[K]>, extra?: Partial<{
+            reverse: boolean;
+            limit: number;
+        }>) => {};
+        clear<K extends keyof T>(key: K): any;
+        remove<K extends keyof T>(key: K): void;
+        onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>): () => void;
+    }
+}
+declare module "packages/kit/src/hls-player/index" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    export type HLSPlayerStatus = "idle" | "waiting" | "loading" | "ready" | "playing" | "error";
+    export type HLSPlayerReason = "idle" | "waiting-source" | "source-missing" | "source-loading" | "source-ready" | "playing" | "buffering" | "network-retry" | "media-recovery" | "unsupported" | "invalid-target" | "invalid-source" | "playback-error";
+    export type HLSPlayerState = {
+        status: HLSPlayerStatus;
+        reason: HLSPlayerReason;
+    };
+    export type HLSPlayerMountOptions = {
+        url: string;
+        autoplay?: boolean;
+        terminal?: boolean;
+        pollInterval?: number;
+    };
+    export type HLSPlayerSession = number;
+    enum Events {
+        StateChange = 0
+    }
+    type TheTypesOfEvents = {
+        [Events.StateChange]: HLSPlayerState;
+    };
+    export class HLSPlayerCore extends BaseDomain<TheTypesOfEvents> {
+        status: HLSPlayerStatus;
+        reason: HLSPlayerReason;
+        get state(): HLSPlayerState;
+        mount(target: unknown, options: HLSPlayerMountOptions): HLSPlayerSession | null;
+        unmount(session?: HLSPlayerSession | null): boolean;
+        handleStateChange(state: HLSPlayerState): void;
+        onStateChange(handler: Handler<HLSPlayerState>): () => void;
+        destroy(): void;
+    }
+}
+declare module "packages/kit/src/history/index" {
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    import { RouteViewCore } from "@/route_view";
+    import { NavigatorCore } from "@/navigator";
+    enum Events {
+        TopViewChange = 0,
+        RouteChange = 1,
+        ClickLink = 2,
+        Back = 3,
+        Forward = 4,
+        StateChange = 5
+    }
+    type TheTypesOfEvents = {
+        [Events.TopViewChange]: RouteViewCore;
+        [Events.ClickLink]: {
+            href: string;
+            target: string | null;
+        };
+        [Events.Back]: void;
+        [Events.Forward]: void;
+        [Events.RouteChange]: {
+            view: RouteViewCore;
+            name: string;
+            href: string;
+            pathname: string;
+            query: Record<string, string>;
+            reason: "back" | "forward" | "push" | "replace";
+            /** 用于在页面间传递标记、数据等 */
+            data?: any;
+            /** 调用方希望忽略这次 route change */
+            ignore?: boolean;
+        };
+        [Events.StateChange]: HistoryCoreState;
+    };
+    type HistoryCoreProps<K extends string, R extends Record<string, any>> = {
+        view: RouteViewCore;
+        router: NavigatorCore;
+        routes: Record<K, R>;
+        views: Record<string, RouteViewCore>;
+        /** 是否采用虚拟路由（不改变浏览器历史） */
+        virtual?: boolean;
+    };
+    type HistoryCoreState = {
+        href: string;
+        stacks: {
+            id: string;
+            key: string;
+            title: string;
+            visible: boolean;
+            query: string;
+        }[];
+        cursor: number;
+    };
+    export class HistoryCore<K extends string, R extends Record<string, any>> extends BaseDomain<TheTypesOfEvents> {
+        virtual: boolean;
+        /** 路由配置 */
+        routes: Record<K, R>;
+        /** 加载的所有视图 */
+        views: Record<string, RouteViewCore>;
+        /** 按顺序依次 push 的视图 */
+        stacks: RouteViewCore[];
+        /** 栈指针 */
+        cursor: number;
+        /** 浏览器 url 管理 */
+        $router: NavigatorCore;
+        /** 根视图 */
+        $view: RouteViewCore;
+        get state(): HistoryCoreState;
+        constructor(props: Partial<{
+            _name: string;
+        }> & HistoryCoreProps<K, R>);
+        resolveLayoutDefaultName(name: K): K;
+        push(name: K, query?: Record<string, string>, options?: Partial<{
+            /** 不变更 history stack */
+            ignore: boolean;
+        }>): any;
+        replace(name: K, query?: Record<string, string>): any;
+        back(opt?: Partial<{
+            data: any;
+        }>): void;
+        forward(): void;
+        reload(): void;
+        /** 销毁所有页面，然后前往指定路由 */
+        destroyAllAndPush(name: K, query?: Record<string, string>, options?: Partial<{
+            /** 不变更 history stack */
+            ignore: boolean;
+        }>): any;
+        /** 跳转到兄弟页面 */
+        ensureParent(view: RouteViewCore, query?: Record<string, string>): any;
+        buildURL(name: K, query?: Record<string, string>): any;
+        buildURLWithPrefix(name: K, query?: Record<string, string>): any;
+        isRoot(name: K): boolean;
+        isLayout(name: K): any;
+        handleClickLink(params: {
+            href: string;
+            target: null | string;
+        }): void;
+        onTopViewChange(handler: Handler<TheTypesOfEvents[Events.TopViewChange]>): () => void;
+        onRouteChange(handler: Handler<TheTypesOfEvents[Events.RouteChange]>): () => void;
+        onBack(handler: Handler<TheTypesOfEvents[Events.Back]>): () => void;
+        onForward(handler: Handler<TheTypesOfEvents[Events.Forward]>): () => void;
+        onClickLink(handler: Handler<TheTypesOfEvents[Events.ClickLink]>): () => void;
+        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
+    }
+}
+declare module "packages/kit/src/navigator/index" {
+    /**
+     * @file 仅负责「地址」的核心类
+     * 包括 URL 解析、应用等
+     */
+    import { BaseDomain, Handler } from "packages/base/src/index";
+    enum Events {
+        PushState = 0,
+        ReplaceState = 1,
+        PopState = 2,
+        Back = 3,
+        Forward = 4,
+        Reload = 5,
+        Start = 6,
+        PathnameChange = 7,
+        /** 销毁所有页面并跳转至指定页面 */
+        Relaunch = 8,
+        /** ???? */
+        RedirectToHome = 9,
+        HistoriesChange = 10
+    }
+    type TheTypesOfEvents = {
+        [Events.PathnameChange]: {
+            pathname: string;
+            search: string;
+            type: RouteAction;
+        };
+        [Events.PushState]: {
+            from: string | null;
+            to: string | null;
+            path: string;
+            pathname: string;
+        };
+        [Events.ReplaceState]: {
+            from: string | null;
+            path: string;
+            pathname: string;
+        };
+        [Events.PopState]: {
+            type: string;
+            href: string;
+            pathname: string;
+        };
+        [Events.Back]: void;
+        [Events.Forward]: void;
+        [Events.Reload]: void;
+        [Events.Start]: RouteLocation;
+        [Events.Relaunch]: void;
+        [Events.HistoriesChange]: {
+            pathname: string;
+            href: string;
+        }[];
+    };
+    type RouteLocation = {
+        host: string;
+        protocol: string;
+        origin: string;
+        pathname: string;
+        href: string;
+        search: string;
+    };
+    export class NavigatorCore extends BaseDomain<TheTypesOfEvents> {
+        static prefix: string | null;
+        static parse(url: string): {
+            query: Record<string, string>;
+            pathname: string;
+            search: string;
+            href: string;
+            origin: string;
+            protocol: string;
+            host: string;
+            hostname: string;
+            port: string;
+            hash: string;
+            auth: string;
+        };
+        unique_id: string;
+        debug: boolean;
+        name: string;
+        /** 当前 pathname */
+        pathname: string;
+        /** 当前路由的 query */
+        query: Record<string, string>;
+        /** 当前路由的 params */
+        params: Record<string, string>;
+        /** 当前 URL */
+        location: Partial<RouteLocation>;
+        href: string;
+        histories: {
+            pathname: string;
+            href: string;
+        }[];
+        prevHistories: {
+            pathname: string;
+            href: string;
+        }[];
+        /** 发生跳转前的 pathname */
+        prevPathname: string | null;
+        /** router 基础信息 */
+        origin: string;
+        host: string;
+        _pending: {
+            pathname: string;
+            search: string;
+            type: RouteAction;
+        };
+        get state(): {
+            pathname: string;
+            search: string;
+            params: Record<string, string>;
+            query: Record<string, string>;
+            location: Partial<RouteLocation>;
+        };
+        /** 启动路由监听 */
+        prepare(location: RouteLocation): Promise<void>;
+        start(): void;
+        private setPrevPathname;
+        private setPathname;
+        /** 调用该方法来「改变地址」 */
+        pushState(url: string): void;
+        replaceState(url: string): Promise<void>;
+        /** 外部路由改变（点击浏览器前进、后退），作出响应 */
+        handlePopState({ type, pathname, href, }: {
+            type: string;
+            href: string;
+            pathname: string;
+        }): void;
+        onStart(handler: Handler<TheTypesOfEvents[Events.Start]>): () => void;
+        onHistoryChange(handler: Handler<TheTypesOfEvents[Events.HistoriesChange]>): () => void;
+        onPushState(handler: Handler<TheTypesOfEvents[Events.PushState]>): () => void;
+        onReplaceState(handler: Handler<TheTypesOfEvents[Events.ReplaceState]>): () => void;
+        onPopState(handler: Handler<TheTypesOfEvents[Events.PopState]>): () => void;
+        onReload(handler: Handler<TheTypesOfEvents[Events.Reload]>): () => void;
+        onPathnameChange(handler: Handler<TheTypesOfEvents[Events.PathnameChange]>): () => void;
+        onBack(handler: Handler<TheTypesOfEvents[Events.Back]>): () => void;
+        onForward(handler: Handler<TheTypesOfEvents[Events.Forward]>): () => void;
+        onRelaunch(handler: Handler<TheTypesOfEvents[Events.Relaunch]>): () => void;
+        onHistoriesChange(handler: Handler<TheTypesOfEvents[Events.HistoriesChange]>): () => void;
+    }
+    export type RouteAction = "initialize" | "push" | "replace" | "back" | "forward";
+}
+declare module "packages/kit/src/http_client/index" {
+    import { Result, BaseDomain, Handler } from "packages/base/src/index";
+    import { JSONObject } from "packages/types/src/index";
+    enum Events {
+        StateChange = 0
+    }
+    type TheTypesOfEvents = {
+        [Events.StateChange]: void;
+    };
+    type HttpClientCoreProps = {
+        hostname?: string;
+        headers?: Record<string, string>;
+        debug?: boolean;
+    };
+    export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
+        hostname: string;
+        headers: Record<string, string>;
+        debug: boolean;
+        constructor(props?: HttpClientCoreProps);
+        get<T>(endpoint: unknown, query?: Record<string, string | number | undefined>, extra?: Partial<{
+            headers: Record<string, string | number>;
+            id: string;
+        }>): Promise<Result<T>>;
+        post<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: Partial<{
+            headers: Record<string, string | number>;
+            id: string;
+        }>): Promise<Result<T>>;
+        fetch<T>(options: {
+            url: unknown;
+            method: "GET" | "POST";
+            id?: string;
+            data?: JSONObject | FormData;
+            headers?: Record<string, string | number>;
+        }): Promise<{
+            data: T;
+        }>;
+        cancel(id: string): import("@timeless/inner-base").Resp<null>;
+        setHeaders(headers: Record<string, string>): void;
+        appendHeaders(headers: Record<string, string>): void;
+        setDebug(debug: boolean): void;
+        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
+    }
+}
+declare module "packages/kit/src/http_client/socket" {
+    import { Result } from "packages/base/src/index";
+    export type MaybePromise<T> = T | Promise<T>;
+    export type SocketCloseReason = {
+        code?: number;
+        reason?: string;
+        clean?: boolean;
+        event?: unknown;
+    };
+    export type SocketMessageMeta = {
+        event?: unknown;
+        receivedAt?: number;
+    };
+    export type SocketConnection = {
+        send: (data: unknown) => MaybePromise<Result<null> | void>;
+        close: (code?: number, reason?: string) => MaybePromise<Result<null> | void>;
+    };
+    export type SocketOpenOptions = {
+        endpoint: unknown;
+        hostname: string;
+        headers: Record<string, string | number>;
+        query?: Record<string, string | number | boolean | null | undefined>;
+        params?: any;
+        signal: AbortSignal;
+        onMessage: (data: unknown, meta?: SocketMessageMeta) => void;
+        onClose: (reason: SocketCloseReason) => void;
+        onError: (error: unknown) => void;
+    };
+    /**
+     * Socket transport abstraction. Platform providers implement `open`; the
+     * channel domain owns connection state, message processing, and reconnection.
+     */
+    export class SocketClientCore {
+        open(options: SocketOpenOptions): MaybePromise<Result<SocketConnection>>;
+    }
+}
+declare module "packages/kit/src/channel/index" {
+    /**
+     * @file Bidirectional, long-lived channel domain model.
+     */
+    import { BaseDomain, BizError, Handler, Result } from "packages/base/src/index";
+    import { SocketClientCore, SocketCloseReason, SocketMessageMeta } from "@/http_client/socket";
+    export type ChannelStatus = "idle" | "connecting" | "connected" | "reconnecting" | "closing" | "closed" | "failed";
+    export type ChannelMessageMeta = {
+        raw: unknown;
+        event?: unknown;
+        receivedAt: number;
+    };
+    export type ChannelSentMessage<T> = {
+        data: T;
+        raw: unknown;
+        sentAt: number;
+    };
+    export type ChannelReconnectInfo = {
+        attempt: number;
+        delay: number;
+        scheduledAt: number;
+    };
+    export type ChannelReconnectOptions = {
+        enabled?: boolean;
+        interval?: number;
+    };
+    export type ChannelCoreProps<TMessage = unknown, TSend = unknown> = {
+        _name?: string;
+        client?: SocketClientCore;
+        hostname?: string;
+        headers?: Record<string, string | number>;
+        query?: Record<string, string | number | boolean | null | undefined>;
+        params?: any;
+        initialMessage?: TSend;
+        process?: (v: unknown, meta: ChannelMessageMeta) => TMessage;
+        encode?: (v: TSend) => unknown;
+        reconnect?: ChannelReconnectOptions;
+        onConnected?: () => void;
+        onReconnecting?: (info: ChannelReconnectInfo) => void;
+        onReconnected?: () => void;
+        onMessage?: (message: TMessage) => void;
+        onSent?: (message: ChannelSentMessage<TSend>) => void;
+        onClose?: (reason: SocketCloseReason) => void;
+        onFailed?: (error: BizError) => void;
+        onStatusChange?: (status: ChannelStatus) => void;
+        onConnecting?: (connecting: boolean) => void;
+    };
+    export type ChannelState<TMessage, TSend> = {
+        initial: boolean;
+        connecting: boolean;
+        connected: boolean;
+        status: ChannelStatus;
+        error: BizError | null;
+        lastMessage: TMessage | null;
+        lastSent: TSend | null;
+        closeReason: SocketCloseReason | null;
+        reconnectAttempt: number;
+        nextReconnectAt: number | null;
+    };
+    enum Events {
+        BeforeConnect = 0,
+        ConnectingChange = 1,
+        StatusChange = 2,
+        Connected = 3,
+        Reconnecting = 4,
+        Reconnected = 5,
+        Message = 6,
+        MessageChange = 7,
+        Sent = 8,
+        Close = 9,
+        Failed = 10,
+        StateChange = 11
+    }
+    type TheTypesOfEvents<TMessage, TSend> = {
+        [Events.BeforeConnect]: void;
+        [Events.ConnectingChange]: boolean;
+        [Events.StatusChange]: ChannelStatus;
+        [Events.Connected]: void;
+        [Events.Reconnecting]: ChannelReconnectInfo;
+        [Events.Reconnected]: void;
+        [Events.Message]: TMessage;
+        [Events.MessageChange]: TMessage | null;
+        [Events.Sent]: ChannelSentMessage<TSend>;
+        [Events.Close]: SocketCloseReason;
+        [Events.Failed]: BizError;
+        [Events.StateChange]: ChannelState<TMessage, TSend>;
+    };
+    export type TheMessageOfChannelCore<T extends ChannelCore<any, any>> = NonNullable<T["lastMessage"]>;
+    export type TheSendMessageOfChannelCore<T extends ChannelCore<any, any>> = NonNullable<T["lastSent"]>;
+    export class ChannelCore<TMessage = unknown, TSend = unknown> extends BaseDomain<TheTypesOfEvents<TMessage, TSend>> {
+        _name: string;
+        client?: SocketClientCore;
+        endpoint: unknown;
+        hostname: string;
+        headers: Record<string, string | number>;
+        query?: Record<string, string | number | boolean | null | undefined>;
+        params?: any;
+        initialMessage?: TSend;
+        process?: (v: unknown, meta: ChannelMessageMeta) => TMessage;
+        encode?: (v: TSend) => unknown;
+        initial: boolean;
+        connecting: boolean;
+        connected: boolean;
+        status: ChannelStatus;
+        error: BizError | null;
+        lastMessage: TMessage | null;
+        lastSent: TSend | null;
+        closeReason: SocketCloseReason | null;
+        reconnectAttempt: number;
+        nextReconnectAt: number | null;
+        pending: Promise<Result<null>> | null;
+        id: string;
+        private connection;
+        private connectionController;
+        private reconnectTimer;
+        private reconnectEnabled;
+        private reconnectDelay;
+        private shouldConnect;
+        private connectedOnce;
+        get state(): ChannelState<TMessage, TSend>;
+        constructor(endpoint: unknown, props?: ChannelCoreProps<TMessage, TSend>);
+        connect(): Promise<Result<any>>;
+        private beginConnect;
+        private runConnect;
+        sendMessage(data: TSend): Promise<Result<any>>;
+        send(data: TSend): Promise<Result<any>>;
+        close(code?: number, reason?: string): Promise<Result<any>>;
+        disconnect(code?: number, reason?: string): Promise<Result<any>>;
+        reconnect(): Promise<Result<any>>;
+        clear(): void;
+        getHostname(): string;
+        setHostname(hostname: string): void;
+        setHeaders(headers: Record<string, string | number>): void;
+        appendHeaders(headers: Record<string, string | number>): void;
+        setClient(client: SocketClientCore): void;
+        setError(error: BizError): void;
+        destroy(): void;
+        receiveMessage(data: unknown, extra?: SocketMessageMeta): void;
+        private discardConnection;
+        private handleConnected;
+        private handleClose;
+        private finishClose;
+        private handleError;
+        private fail;
+        private reportError;
+        private scheduleReconnect;
+        private cancelReconnect;
+        private setConnecting;
+        private setStatus;
+        private emitState;
+        beforeConnect(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.BeforeConnect]>): () => void;
+        onConnectingChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.ConnectingChange]>): () => void;
+        onStatusChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.StatusChange]>): () => void;
+        onConnected(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Connected]>): () => void;
+        onReconnecting(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Reconnecting]>): () => void;
+        onReconnected(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Reconnected]>): () => void;
+        onMessage(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Message]>): () => void;
+        onMessageChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.MessageChange]>): () => void;
+        onSent(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Sent]>): () => void;
+        onClose(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Close]>): () => void;
+        onFailed(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Failed]>, opt?: Partial<{
+            override: boolean;
+        }>): () => void;
+        onError(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.Failed]>): () => void;
+        onStateChange(handler: Handler<TheTypesOfEvents<TMessage, TSend>[Events.StateChange]>): () => void;
+    }
 }
 declare module "packages/kit/src/route_view/utils" {
     import { JSONObject } from "packages/types/src/index";
@@ -20584,6 +22604,7 @@ declare module "packages/kit/src/request/index" {
         constructor(fn: F, props?: RequestProps<F, P>);
         /** 执行 service 函数 */
         run(...args: Parameters<F>): Promise<Result<P>>;
+        private execute;
         /** 使用当前参数再请求一次 */
         reload(): void;
         cancel(): import("@timeless/inner-base").Resp<null>;
@@ -20610,6 +22631,7 @@ declare module "packages/kit/src/index" {
     export type { ThemeTypes, OrientationTypes, KeyboardEvent } from "packages/kit/src/app/types";
     export { ClipboardModel } from "packages/kit/src/clipboard/index";
     export { StorageCore } from "packages/kit/src/storage/index";
+    export { HLSPlayerCore, type HLSPlayerMountOptions, type HLSPlayerReason, type HLSPlayerSession, type HLSPlayerState, type HLSPlayerStatus, } from "packages/kit/src/hls-player/index";
     export { HistoryCore } from "packages/kit/src/history/index";
     export { NavigatorCore } from "packages/kit/src/navigator/index";
     export { HttpClientCore } from "packages/kit/src/http_client/index";
@@ -20713,7 +22735,9 @@ declare module "packages/ui-primitive/src/modules/popper" {
         onDismiss?: () => void;
         /** 参考元素离开视口时的回调 */
         onReferenceOutOfView?: () => void;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Viewport(props: ViewProps & {
         store: PopperCore;
     }, children: ViewChildren): any;
@@ -20750,9 +22774,15 @@ declare module "packages/ui-primitive/src/modules/popper" {
 }
 declare module "packages/ui-primitive/src/modules/head" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
-    export function Head1(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Head2(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Head3(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    export function Head1(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Head2(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Head3(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/paragraph" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
@@ -20778,52 +22808,80 @@ declare module "packages/ui-primitive/src/modules/image" {
     }, children?: ViewChildren): TimelessElement;
 }
 declare module "packages/ui-primitive/src/modules/table" {
-    import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
-    export function Table(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function TableHeader(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function TableBody(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function TableRow(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function TableHead(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function TableCell(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    import { TableCellProps, ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
+    export function Table(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<any, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<any, any>;
+    export function TableCaption(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<any, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<any, any>;
+    export function TableFooter(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<any, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<any, any>;
+    export function TableHead(props: TableCellProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<any, any>;
+    export function TableCell(props: TableCellProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<any, any>;
 }
 declare module "packages/ui-primitive/src/modules/card" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
-    export function Card(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function CardHeader(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function CardTitle(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function CardDescription(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function CardContent(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function CardFooter(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    export function Card(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/badge" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/separator" {
     import { ViewProps } from "packages/ui-primitive/src/core";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/skeleton" {
     import { ViewProps } from "packages/ui-primitive/src/core";
-    export function Skeleton(props: ViewProps): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    export function Skeleton(props: ViewProps): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/alert" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/avatar" {
     import { ViewProps, ViewChildren, ImgProps } from "packages/ui-primitive/src/core";
     export function Root(props: ViewProps & {
         size?: "default" | "large";
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Image(props: ImgProps & {
         alt?: string;
         onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void;
@@ -20838,6 +22896,7 @@ declare module "packages/ui-primitive/src/modules/avatar" {
         };
         events: Partial<{
             onMounted?: (event: MountedEvent<VNodeView>) => void | (() => void);
+            onExpose?: (entry: IntersectionObserverEntry) => void;
             beforeUnmounted?: () => void;
             onUnmounted?: () => void;
             onClick?: (e: MouseEvent) => void;
@@ -20871,12 +22930,16 @@ declare module "packages/ui-primitive/src/modules/avatar" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
-    export function Fallback(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    export function Fallback(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Avatar(props: Omit<ViewProps, "onMounted"> & ImgProps & {
         alt?: string;
         size?: "default" | "large";
         fallback?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/progress" {
     import { Ref } from "packages/ui-primitive/src/core";
@@ -20886,12 +22949,16 @@ declare module "packages/ui-primitive/src/modules/progress" {
         store?: ProgressCore;
         value?: Ref<number> | number;
         max?: number;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Indicator(props: ViewProps & {
         store?: ProgressCore;
         value: Ref<number>;
         max?: number;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/button" {
     import { ViewChildren, FragmentProps, ButtonProps } from "packages/ui-primitive/src/core";
@@ -20955,7 +23022,9 @@ declare module "packages/ui-primitive/src/modules/arrow" {
     import { PopperCore } from "packages/ui-vm/src/index";
     export function Arrow(props: ViewProps & {
         store: PopperCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/menu" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
@@ -21064,22 +23133,38 @@ declare module "packages/ui-primitive/src/modules/menu" {
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function GroupLabel(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Label(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function GroupLabel(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function ItemImpl(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Separator(props: ViewProps): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Separator(props: ViewProps): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Arrow(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
     }, children: ViewChildren): {
@@ -21184,18 +23269,30 @@ declare module "packages/ui-primitive/src/modules/dropdown-menu" {
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Label(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Separator(props: ViewProps): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Separator(props: ViewProps): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Arrow(props: ViewProps & {
         store: DropdownMenuCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
     }, children: ViewChildren): {
@@ -21295,18 +23392,30 @@ declare module "packages/ui-primitive/src/modules/context-menu" {
     };
     export function Group(props: ViewProps & {
         store?: MenuGroupCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Label(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Label(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Item(props: ViewProps & {
         store: MenuItemCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Separator(props: ViewProps): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Separator(props: ViewProps): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Arrow(props: ViewProps & {
         store: ContextMenuCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function SubMenu(props: ViewProps & {
         store: MenuCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function SubMenuTrigger(props: ViewProps & {
         store: MenuItemCore;
     }, children: ViewChildren): {
@@ -21348,26 +23457,36 @@ declare module "packages/ui-primitive/src/modules/resizable-panels" {
     export function Group(props: ViewProps & {
         store: ResizablePanelsCore;
         direction?: "horizontal" | "vertical";
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Panel(props: ViewProps & {
         store: ResizablePanelCore;
         group?: ResizablePanelsCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Handle(props: ViewProps & {
         store: ResizablePanelsCore;
         panelBefore: ResizablePanelCore;
         panelAfter: ResizablePanelCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/tabs" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/ui-primitive/src/core";
     import { TabHeaderCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: TabHeaderCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function List(props: ViewProps & {
         store: TabHeaderCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Tab(props: ButtonProps & {
         store: TabHeaderCore<any>;
         value: string;
@@ -21385,34 +23504,48 @@ declare module "packages/ui-primitive/src/modules/tabs" {
     export function Indicator(props: ViewProps & {
         store: TabHeaderCore<any>;
         value: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Content(props: ViewProps & {
         store: TabHeaderCore<any>;
         value: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/accordion" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
     import { AccordionCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: AccordionCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Item(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Trigger(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Chevron(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Content(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/input" {
     import { ViewProps, ViewChildren, InputProps } from "packages/ui-primitive/src/core";
@@ -21423,7 +23556,9 @@ declare module "packages/ui-primitive/src/modules/input" {
     export function setInputProvider(provider: Provider): void;
     export function Root(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Input(props: InputProps & {
         store: InputCore<any>;
         id?: string;
@@ -21438,23 +23573,33 @@ declare module "packages/ui-primitive/src/modules/input" {
     };
     export function Value(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Clear(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Loading(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Disabled(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/file-picker" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
     import { FilePickerCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store?: FilePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Input(props: ViewProps & {
         store: FilePickerCore;
         id?: string;
@@ -21469,29 +23614,43 @@ declare module "packages/ui-primitive/src/modules/file-picker" {
     };
     export function Clear(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Loading(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function DropZone(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Dragging(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function DragInvalid(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Disabled(props: ViewProps & {
         store: FilePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/number-input" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
     import { NumberInputCore } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store?: NumberInputCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Input(props: ViewProps & {
         store: NumberInputCore;
     }): {
@@ -21505,16 +23664,24 @@ declare module "packages/ui-primitive/src/modules/number-input" {
     };
     export function IncreaseButton(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function DecreaseButton(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Value(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Disabled(props: ViewProps & {
         store: NumberInputCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/textarea" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
@@ -21525,7 +23692,9 @@ declare module "packages/ui-primitive/src/modules/textarea" {
     export function setTextareaProvider(provider: Provider): void;
     export function Root(props: ViewProps & {
         store?: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Textarea(props: ViewProps & {
         id?: string | undefined;
         store: InputCore<any>;
@@ -21537,6 +23706,7 @@ declare module "packages/ui-primitive/src/modules/textarea" {
             rendered: boolean;
             style: RawViewStyleProperties;
             styleSet?: string[];
+            attributes: Record<string, string | number | boolean | undefined>;
             id?: string;
             name?: string;
             value: string;
@@ -21559,19 +23729,29 @@ declare module "packages/ui-primitive/src/modules/textarea" {
     };
     export function Value(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Clear(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Loading(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Count(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Disabled(props: ViewProps & {
         store: InputCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/select" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
@@ -21606,13 +23786,19 @@ declare module "packages/ui-primitive/src/modules/select" {
     };
     export function Value(props: ViewProps & {
         store: SelectCore<any>;
-    }): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Icon(props: ViewProps & {
         store?: SelectCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Clear(props: ViewProps & {
         store: SelectCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Portal(props: {
         store: SelectCore<any>;
         animation?: {
@@ -21654,10 +23840,14 @@ declare module "packages/ui-primitive/src/modules/select" {
             in: string;
             out: string;
         };
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function AlignedPositionContent(props: ViewProps & {
         store: SelectCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Viewport(props: ViewProps & {
         store: SelectCore<any>;
     }, children: ViewChildren): {
@@ -21686,10 +23876,14 @@ declare module "packages/ui-primitive/src/modules/select" {
         beforeUnmounted(): void;
         onUnmounted(): void;
     };
-    export function ItemText(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function ItemIndicator(props: ViewProps & {
         store: SelectItemCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function ScrollUpButton(props: ViewProps & {
         store: SelectCore<any>;
     }, children: ViewChildren): {
@@ -21757,16 +23951,24 @@ declare module "packages/ui-primitive/src/modules/cascader" {
     export function Trigger(props: ViewProps & {
         store: CascaderCore<any>;
         id?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Value(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Icon(props: ViewProps & {
         store?: CascaderCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Clear(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Content(props: ViewProps & {
         store: CascaderCore<any>;
         animation?: {
@@ -21788,7 +23990,9 @@ declare module "packages/ui-primitive/src/modules/cascader" {
     };
     export function Panels(props: ViewProps & {
         store: CascaderCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Panel(props: ViewProps & {
         store: CascaderCore<any>;
         panelIndex: number;
@@ -21796,13 +24000,19 @@ declare module "packages/ui-primitive/src/modules/cascader" {
             selected: boolean;
             focused: boolean;
         })[];
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Item(props: ViewProps & {
         store: CascaderCore<any>;
         panelIndex: number;
         option: CascaderOption<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function ItemText(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function ItemIndicator(props: ViewProps & {
         store: CascaderCore<any>;
         hasChildren: boolean;
@@ -21855,7 +24065,9 @@ declare module "packages/ui-primitive/src/modules/cascader" {
             path: CascaderOption<any>[];
             value: any[];
         };
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/tag-select" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
@@ -21878,22 +24090,34 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
     export function Trigger(props: ViewProps & {
         store: TagSelectCore<any>;
         id?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Value(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function TagList(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Tag(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function TagRemove(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Icon(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Portal(props: ViewProps & {
         store: TagSelectCore<any>;
         animation?: {
@@ -21931,7 +24155,9 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
     };
     export function Viewport(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function FilteredList(props: ViewProps & {
         store: TagSelectCore<any>;
         each: (option: {
@@ -21940,7 +24166,9 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
             selected: boolean;
             focused: boolean;
         }, index: number) => ViewChildren;
-    }): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Empty(props: ViewProps & {
         store: TagSelectCore<any>;
     }, children: ViewChildren): {
@@ -21959,15 +24187,23 @@ declare module "packages/ui-primitive/src/modules/tag-select" {
     export function Item(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function ItemText(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ItemText(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function ItemIndicator(props: ViewProps & {
         store: TagSelectCore<any>;
         value: any;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Clear(props: ViewProps & {
         store: TagSelectCore<any>;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Search(props: ViewProps & {
         store: TagSelectCore<any>;
         placeholder?: string;
@@ -22002,15 +24238,23 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
     export function Trigger(props: ViewProps & {
         store: DatePickerCore;
         id?: string;
-    }, children?: ViewChildren): TimelessElement<{}, any>;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function Value(props: ViewProps & {
         store: DatePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): TimelessElement<{}, any>;
-    export function Icon(props: ViewProps, children: ViewChildren): TimelessElement<{}, any>;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function Clear(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): TimelessElement<{}, any>;
+    }, children: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function Portal(props: ViewProps & {
         store: DatePickerCore;
     }, children?: ViewChildren): {
@@ -22044,10 +24288,14 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
     };
     export function Calendar(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): TimelessElement<{}, any>;
+    }, children: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function CalendarHeader(props: ViewProps & {
         store: DatePickerCore;
-    }, children?: ViewChildren): TimelessElement<{}, any>;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function CalendarPrevButton(props: ButtonProps & {
         store: DatePickerCore;
     }, children?: ViewChildren): {
@@ -22074,10 +24322,14 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
     };
     export function CalendarGrid(props: ViewProps & {
         store: DatePickerCore;
-    }, children: ViewChildren): TimelessElement<{}, any>;
+    }, children: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function CalendarGridHeader(props: ViewProps & {
         store: DatePickerCore;
-    }, children?: ViewChildren): TimelessElement<{}, any>;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function CalendarGridBody(props: ViewProps & {
         store: DatePickerCore;
         renderCell?: (cell: {
@@ -22087,7 +24339,9 @@ declare module "packages/ui-primitive/src/modules/date-picker" {
             is_prev_month: boolean;
             is_next_month: boolean;
         }) => TimelessElement | null;
-    }, children?: ViewChildren): TimelessElement<{}, any>;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function CalendarCell(props: ButtonProps & {
         store: DatePickerCore;
         value: Date;
@@ -22126,12 +24380,18 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     export function Trigger(props: ViewProps & {
         store: DateRangePickerCore;
         id?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Value(props: ViewProps & {
         store: DateRangePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Icon(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Portal(props: ViewProps & {
         store: DateRangePickerCore;
     }, children?: ViewChildren): {
@@ -22165,19 +24425,29 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     };
     export function Calendars(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function LeftCalendar(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function RightCalendar(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function LeftCalendarHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function RightCalendarHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function LeftPrevButton(props: ButtonProps & {
         store: DateRangePickerCore;
     }, children?: ViewChildren): {
@@ -22228,16 +24498,24 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     };
     export function CalendarGrid(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function CalendarGridHeader(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function LeftCalendarGridBody(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function RightCalendarGridBody(props: ViewProps & {
         store: DateRangePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function CalendarCell(props: ButtonProps & {
         store: DateRangePickerCore;
         value: Date;
@@ -22276,15 +24554,23 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     export function Trigger(props: ViewProps & {
         store: TimePickerCore;
         id?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Value(props: ViewProps & {
         store: TimePickerCore;
         placeholder?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Icon(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Icon(props: ViewProps, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Clear(props: ViewProps & {
         store: TimePickerCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Portal(props: ViewProps & {
         store: TimePickerCore;
     }, children?: ViewChildren): {
@@ -22318,10 +24604,14 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     };
     export function TimePanel(props: ViewProps & {
         store: TimePickerCore;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function HourColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function HourItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -22337,7 +24627,9 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     };
     export function MinuteColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function MinuteItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -22353,7 +24645,9 @@ declare module "packages/ui-primitive/src/modules/time-picker" {
     };
     export function SecondColumn(props: ViewProps & {
         store: TimePickerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function SecondItem(props: ButtonProps & {
         store: TimePickerCore;
         value: number;
@@ -22464,7 +24758,9 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
     };
     export function Group(props: ViewProps & {
         store: CheckboxGroupCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function GroupItem(props: ViewProps & {
         store: CheckboxGroupCore<any>;
         item: {
@@ -22474,7 +24770,9 @@ declare module "packages/ui-primitive/src/modules/checkbox" {
         };
         renderCheckbox?: (core: CheckboxCore) => ViewChildren;
         renderLabel?: (label: string) => ViewChildren;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/radio" {
     import { RadioProps } from "packages/ui-primitive/src/core";
@@ -22549,7 +24847,9 @@ declare module "packages/ui-primitive/src/modules/radio" {
     };
     export function Group(props: ViewProps & {
         store: RadioGroupCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function GroupItem(props: ViewProps & {
         store: RadioGroupCore<any>;
         item: {
@@ -22557,25 +24857,36 @@ declare module "packages/ui-primitive/src/modules/radio" {
             value: any;
             core: RadioCore;
         };
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/slider" {
+    import { Ref } from "packages/ui-primitive/src/core";
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
     export function Root(props: ViewProps & {
-        value?: number;
+        value?: number | Ref<number>;
         min?: number;
         max?: number;
         step?: number;
         disabled?: boolean;
         onChange?: (v: number) => void;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Track(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Track(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Range(props: ViewProps & {
         percentage: any;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Thumb(props: ViewProps & {
         percentage: any;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/toggle" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/ui-primitive/src/core";
@@ -22595,7 +24906,9 @@ declare module "packages/ui-primitive/src/modules/toggle" {
     };
     export function Thumb(props: ViewProps & {
         store: SwitchCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/switch" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/ui-primitive/src/core";
@@ -22615,17 +24928,23 @@ declare module "packages/ui-primitive/src/modules/switch" {
     };
     export function Thumb(props: ViewProps & {
         store: SwitchCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/field" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
     import { SingleFieldCore } from "packages/ui-vm/src/index";
     export function Label(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Control(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Error(props: ViewProps & {
         store: SingleFieldCore<any>;
         fallback?: ViewChildren;
@@ -22644,7 +24963,9 @@ declare module "packages/ui-primitive/src/modules/field" {
     };
     export function Help(props: ViewProps & {
         store: SingleFieldCore<any>;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/popover" {
     import { ViewProps, ViewChildren, ButtonProps } from "packages/ui-primitive/src/core";
@@ -22668,7 +24989,9 @@ declare module "packages/ui-primitive/src/modules/popover" {
     };
     export function Content(props: ViewProps & {
         store: PopoverCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Trigger(props: ViewProps & {
         store: PopoverCore;
     }, children?: ViewChildren): {
@@ -22727,10 +25050,14 @@ declare module "packages/ui-primitive/src/modules/popconfirm" {
     };
     export function Content(props: ViewProps & {
         store: PopconfirmCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Trigger(props: ViewProps & {
         store: PopconfirmCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Portal(props: ViewProps & {
         store: PopconfirmCore;
     }, children?: ViewChildren): {
@@ -22802,12 +25129,16 @@ declare module "packages/ui-primitive/src/modules/tooltip" {
     };
     export function Content(props: ViewProps & {
         store?: TooltipCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Trigger(props: ViewProps & {
         content?: ViewChildren;
         side?: Side;
         align?: Align;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Portal(props: ViewProps & {
         store?: TooltipCore;
     }, children?: ViewChildren): {
@@ -22839,23 +25170,35 @@ declare module "packages/ui-primitive/src/modules/sheet" {
     export function Overlay(props: ViewProps & {
         store: DialogCore;
         zIndex?: number;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Content(props: ViewProps & {
         store: DialogCore;
         side?: "right" | "top" | "bottom" | "left";
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Header(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Title(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Description(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Close(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/dialog" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
@@ -22875,32 +25218,50 @@ declare module "packages/ui-primitive/src/modules/dialog" {
     export function Overlay(props: ViewProps & {
         store: DialogCore;
         zIndex?: number;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Content(props: ViewProps & {
         store: DialogCore;
         zIndex?: number;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Header(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Title(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Body(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Footer(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Close(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Cancel(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function OK(props: ViewProps & {
         store: DialogCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/toast" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
@@ -22910,23 +25271,35 @@ declare module "packages/ui-primitive/src/modules/toast" {
     }, children?: ViewChildren): ViewChildren;
     export function Mask(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Viewport(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Item(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Icon(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Text(props: ViewProps & {
         store: ToastCore;
         text: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Close(props: ViewProps & {
         store: ToastCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/steps" {
     import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
@@ -22938,26 +25311,40 @@ declare module "packages/ui-primitive/src/modules/steps" {
     export function Root(props: ViewProps & {
         store: StepCore;
         items: StepItem[];
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function List(props: ViewProps & {
         store: StepCore;
         items: StepItem[];
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Item(props: ViewProps & {
         store: StepCore;
         index: number;
         item?: StepItem;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Indicator(props: ViewProps & {
         store: StepCore;
         index: number;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Connector(props: ViewProps & {
         store: StepCore;
         index: number;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Title(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function Description(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Title(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Description(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/scroll-view" {
     import { ViewProps, ViewChildren, TimelessElement } from "packages/ui-primitive/src/core";
@@ -23007,13 +25394,19 @@ declare module "packages/ui-primitive/src/modules/sonner" {
     import { SonnerCore } from "packages/ui-vm/src/index";
     export function Toast(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Content(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Close(props: {
         store: SonnerCore;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/modules/error-boundary" {
     import { TimelessElement } from "packages/ui-primitive/src/core";
@@ -23093,39 +25486,385 @@ declare module "packages/ui-primitive/src/modules/flow" {
     import { FlowCanvasModel } from "packages/ui-vm/src/index";
     export function Root(props: ViewProps & {
         store: FlowCanvasModel;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Canvas(props: ViewProps & {
         store: FlowCanvasModel;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function NodeLayer(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
-    export function EdgeLayer(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function NodeLayer(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function EdgeLayer(props: ViewProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Node(props: ViewProps & {
         store: FlowCanvasModel;
         nodeId: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Edge(props: ViewProps & {
         store: FlowCanvasModel;
         edgeId: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Handle(props: ViewProps & {
         store: FlowCanvasModel;
         nodeId: string;
         handleId: string;
         type: "source" | "target";
         position?: "top" | "right" | "bottom" | "left";
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Background(props: ViewProps & {
         variant?: "dots" | "lines" | "cross";
         gap?: number;
         size?: number;
         color?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Minimap(props: ViewProps & {
         store: FlowCanvasModel;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
     export function Controls(props: ViewProps & {
         store: FlowCanvasModel;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/ui-primitive/src/modules/tree" {
+    /**
+     * TreePrimitive —— Tree 的渲染层（形状层）。
+     *
+     * 分层：`TreeCore`（`@timeless/inner-vm`）管数据与交互语义，这里只管 DOM 形状与
+     * 指针会话，样式库只提供类名 + CSS。所以本文件里没有任何业务字段
+     * （`type` / `size` / 文件名后缀）——那些由调用方通过 `renderRow` / `renderIcon` /
+     * `renderMeta` 注入。
+     *
+     * ## 三条不能违反的约定
+     *
+     * 1. **行只订阅「纯样式」ref。**`flattenTree` 把行的结构字段（depth / collapsed /
+     *    子节点数 / _path）全编进了 key，所以行可以只读快照、完全不订阅结构性 ref。
+     *    这是必须的：`ref.notify` / `computed._notify` 都是**直接遍历订阅者数组**，行被
+     *    卸载时的同步 `destroy` 会 `splice` 掉自己，让排在后面的订阅者整批被跳过 ——
+     *    表现为「折叠全部」后部分目录的箭头再也不跟着变。
+     *    因此 `Root` 把 store 状态镜像成几个 ref，并且**严格按顺序**赋值：
+     *    先 `state_`（它会触发虚拟列表重建 / 卸载行），再 `dragging_node_` /
+     *    `drop_target_` / `checked_` / `half_checked_` / `selected_`。后者的 notify 循环里
+     *    绝不会发生卸载，行订阅它们才是安全的。
+     *
+     * 2. **不用手搓 `{t:"view",...}` 对象**（`DOMView.render()` 读 `elm.children` /
+     *    `elm.state`，手搓对象会被丢掉）。
+     *
+     * 3. **`classNames([...])` 立刻调用**，响应式元素写在数组里 —— 它返回
+     *    `ClassNameRef`，包进 `computed()` 会变成 `DerivedRef<ClassNameRef>`，primitive
+     *    里 `cls.value.split(" ")` 直接抛 TypeError。
+     *
+     * ## 命中测试在这里，落点判定在 core
+     *
+     * 渲染层只做 `closest("[data-tree-row-id]")` 与 `(y - rect.top) / rect.height`，然后
+     * `store.updateDrag({ id, ratio })`；before / after / into / root、目标父节点、
+     * index、noop、环防护全在 core。`ui-vm` 里因此不会出现 `document` /
+     * `getBoundingClientRect`。
+     *
+     * ## 已知边界
+     *
+     * 拖拽期间**不做边缘自动滚动**（刻意如此：自动滚动会让被拖的行或落点行被虚拟列表
+     * 卸载）。缓解手段是列表底部的留白落点带（拖进去 = 移到根级末尾）与 `expandAll()`。
+     */
+    import { TreeCore } from "packages/ui-vm/src/index";
+    import type { DropTarget, TreeNode, TreeRow } from "packages/ui-vm/src/index";
+    import type { ClassNameRef, DerivedRef, Ref, RefObject, TimelessElement, ViewChildren, ViewProps } from "packages/ui-primitive/src/core";
+    /**
+     * 类名由样式库提供，primitive 不内置任何默认值 —— 同一页加载多套样式库时，
+     * 内置默认类名会互相串味。
+     *
+     * 状态类（`rowLifted` / `rowInto` / `lineBefore` …）的**名字**也由库决定，
+     * primitive 只负责在对应状态下把它们拼上去。
+     */
+    export type TreeClassNames = {
+        root?: string | Ref<string> | DerivedRef<string> | ClassNameRef;
+        scroll?: string | Ref<string> | DerivedRef<string> | ClassNameRef;
+        /** 行：常驻基础类 */
+        row?: string;
+        /** 行：被拖起的原位影子 */
+        rowLifted?: string;
+        /** 行：落点是「移入本行（目录）」 */
+        rowInto?: string;
+        /** 行：落点是「放在本行之前 / 之后」（行本身的高亮） */
+        rowBefore?: string;
+        rowAfter?: string;
+        /** 行：命中落点的目录 */
+        rowSelected?: string;
+        rowDisabled?: string;
+        /** 折叠箭头容器 / 箭头图标 */
+        caret?: string;
+        caretIcon?: string;
+        /** 图标容器 */
+        icon?: string;
+        /** 标题 */
+        title?: string;
+        /** 右侧 meta（子项数 / 体积） */
+        meta?: string;
+        /** 层级引导线：每层缩进槽里的一段竖线（绝对定位，位置由 primitive 算）。 */
+        guide?: string;
+        /** 落点指示线：基础类 + before / after 两种激活态。 */
+        line?: string;
+        lineBefore?: string;
+        lineAfter?: string;
+        /** 勾选框：容器 + 勾选 / 半选两个状态类 + 方框 + 勾 */
+        checkbox?: string;
+        checkboxChecked?: string;
+        checkboxHalf?: string;
+        checkboxBox?: string;
+        checkboxIndicator?: string;
+        /** 跟手浮层 */
+        ghost?: string;
+        ghostTitle?: string;
+        empty?: string;
+        hint?: string;
+    };
+    /** 渲染层共享的拖拽 / 勾选态。见文件头「行只订阅纯样式 ref」。 */
+    export type TreeGhostBox = {
+        x: number;
+        y: number;
+        offsetX: number;
+        offsetY: number;
+        width: number;
+        height: number;
+    };
+    export type TreeClickGuard = {
+        /** 紧跟拖拽的那一次 click 是否为「不该处理」的。 */
+        consume(): boolean;
+        /** 拖拽结束时置位；用一个 `setTimeout(0)` 复位。 */
+        arm(): void;
+        reset(): void;
+    };
+    export type TreeRuntime = {
+        dragging_node_: Ref<TreeNode | null>;
+        drop_target_: Ref<DropTarget | null>;
+        checked_: Ref<Set<string>>;
+        half_checked_: Ref<Set<string>>;
+        selected_: Ref<Set<string>>;
+        /**
+         * `refobj` 造的可写对象 ref。
+         * 声明成 `RefObject` 是因为框架把 `refObject()` 的返回值标成了内部
+         * `TimelessRefObject`（少了 `eq` / `getDeps` 等 `Ref` 字段），无法直接赋给
+         * 任何 `Ref` 形状 —— 但运行时就是同一份对象，`derive` 只用 `value` + `subscribe`。
+         */
+        ghost_: RefObject<TreeGhostBox>;
+        /**
+         * `ghostRow` 模式下被拖行起拖瞬间的 DOM 快照（见 `snapshot_row`）。
+         * 不是 ref：一次拖拽内有效，`reset_session` 清空，浮层挂载时读一次即用。
+         */
+        ghost_copy: HTMLElement | null;
+        click_guard: TreeClickGuard;
+    };
+    export type TreeVisualState = {
+        lifted: boolean;
+        before: boolean;
+        after: boolean;
+        into: boolean;
+    };
+    export function createTreeRuntime(): TreeRuntime;
+    export function getTreeRuntime(store: TreeCore): TreeRuntime;
+    /** 落点是否要求「展开目标目录」；要求时返回它的 _id。 */
+    export function shouldExpandTarget(target: DropTarget | null): string;
+    export type TreeRowProps = {
+        store: TreeCore;
+        runtime: TreeRuntime;
+        row: TreeRow;
+        index?: number;
+        classes?: TreeClassNames;
+        /** 每层缩进 px */
+        indent?: number;
+        /** 是否渲染折叠箭头 */
+        collapsible?: boolean;
+        /** 目录 / 叶子图标；不传用 `folder` / `file` */
+        renderIcon?: (node: TreeNode, is_dir: boolean) => ViewChildren;
+        /** 右侧 meta；不传则目录显示「N 项」、叶子留空 */
+        renderMeta?: (node: TreeNode, is_dir: boolean) => ViewChildren;
+        /** 覆盖默认的「选中 + 目录折叠」行点击行为 */
+        onRowClick?: (node: TreeNode, id: string) => void;
+    };
+    export function Row(props: TreeRowProps): TimelessElement;
+    export type TreeCheckboxProps = {
+        store: TreeCore;
+        runtime: TreeRuntime;
+        node: TreeNode;
+        classes?: TreeClassNames;
+    };
+    /**
+     * 勾选框。父子联动 / 半选由 `store.check` 负责，这里只把
+     * `checked_` / `half_checked_` 投影成类名。
+     */
+    export function Checkbox(props: TreeCheckboxProps): TimelessElement;
+    /** 勾选框里的方框 + 勾（可见性交给库的 `.is-checked` / `.is-indeterminate` 类）。 */
+    export function Indicator(props: {
+        classes?: TreeClassNames;
+    }): TimelessElement;
+    export function Empty(props: {
+        classes?: TreeClassNames;
+        text?: string;
+    }): TimelessElement;
+    export function Hint(props: {
+        classes?: TreeClassNames;
+        text: string | Ref<string> | DerivedRef<string>;
+    }): TimelessElement;
+    export type TreeGhostProps = {
+        runtime: TreeRuntime;
+        classes?: TreeClassNames;
+        renderIcon?: (node: TreeNode, is_dir: boolean) => ViewChildren;
+        /** 见 `TreeRootProps.ghostRow`。 */
+        ghostRow?: boolean;
+    };
+    /** 跟手浮层（`Portal` 挂在 body，不受列表滚动裁剪）。 */
+    export function Ghost(props: TreeGhostProps): TimelessElement;
+    export type TreeScrollProps = {
+        store: TreeCore;
+        runtime: TreeRuntime;
+        rows: TreeRow[] | Ref<TreeRow[]> | DerivedRef<TreeRow[]>;
+        classes?: TreeClassNames;
+        /** 行高（initial estimate；挂载后按实测回填） */
+        itemHeight?: number;
+        /** 可视区外多挂几行 */
+        buffer?: number;
+        /** 拖到这段底部留白 = 移到根级末尾 */
+        dropRootHeight?: number;
+        /** 滚动容器最大高度 px（默认 360）；`<= 0` = 不限制：容器随内容长高，滚动交给外层 */
+        maxHeight?: number;
+        indent?: number;
+        collapsible?: boolean;
+        renderRow?: (props: TreeRowProps) => ViewChildren;
+        renderIcon?: (node: TreeNode, is_dir: boolean) => ViewChildren;
+        renderMeta?: (node: TreeNode, is_dir: boolean) => ViewChildren;
+    };
+    /**
+     * 虚拟列表视口。`ListViewV2` 只在 key 不变时复用已挂载的行，而
+     * `flattenTree` 把行的所有结构字段都编进了 key，所以这里可以让行只读快照。
+     */
+    export function Scroll(props: TreeScrollProps): TimelessElement;
+    export type TreeRootProps = {
+        store: TreeCore;
+        classes?: TreeClassNames;
+        /** 每层缩进 px（默认 18） */
+        indent?: number;
+        /** 行高（默认 28） */
+        itemHeight?: number;
+        buffer?: number;
+        /** 底部留白落点带高度（默认 40） */
+        dropRootHeight?: number;
+        /** 滚动容器最大高度 px（默认 360）；`<= 0` = 不限制：容器随内容长高，滚动交给外层 */
+        maxHeight?: number;
+        /** 悬停折叠目录的中间区自动展开延时（默认 600ms） */
+        autoExpandMs?: number;
+        emptyText?: string;
+        /** 默认操作提示（没在拖拽时显示） */
+        hintText?: string;
+        /** 目录 / 叶子图标 */
+        renderIcon?: (node: TreeNode, is_dir: boolean) => ViewChildren;
+        /** 右侧 meta */
+        renderMeta?: (node: TreeNode, is_dir: boolean) => ViewChildren;
+        /** 整体替换行渲染（app 层用它注入文件图标 / 体积格式化） */
+        renderRow?: (props: TreeRowProps) => ViewChildren;
+        onRowClick?: (node: TreeNode, id: string) => void;
+        /**
+         * 跟手浮层 = **被拖行起拖瞬间的 DOM 快照**，而不是 `ghost` + `ghostTitle`
+         * 的紧凑卡片。整行外观（图标 / 头像 / meta / 缩进）与宽高因此与原行完全一致，
+         * 且宿主不必再写一份 renderer。
+         *
+         * 默认 false：紧凑卡片是四套作用域库 / shadcn 的既有外观，只有需要「浮层就是
+         * 那一行」的库打开它（findrssui 已打开）。
+         */
+        ghostRow?: boolean;
+        /**
+         * 行级右键（`data-tree-row-id` 委托，与 `onRowClick` 同源）。命中行时 `node` 是该行
+         * `TreeNode`，空白处 / 行已卸载为 `null`（空树、列表底部留白因此也能开菜单）。
+         * 只做命中测试，**不** preventDefault —— 是否吃掉浏览器菜单由宿主决定。
+         */
+        onRowContextMenu?: (node: TreeNode | null, event: MouseEvent) => void;
+    } & Omit<ViewProps, "class">;
+    /**
+     * Tree 的最外层。指针事件挂在它身上（稳定祖先），行只是纯派生样式。
+     *
+     * 同时负责把 store 状态镜像成渲染层 ref —— 见文件头「行只订阅纯样式 ref」。
+     */
+    export function Root(props: TreeRootProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/ui-primitive/src/modules/gallery" {
+    import { GalleryCore, GalleryItem } from "packages/ui-vm/src/index";
+    import { ViewProps, ViewChildren } from "packages/ui-primitive/src/core";
+    export type GalleryProps = ViewProps & {
+        store: GalleryCore;
+    };
+    export type GalleryClasses = Partial<Record<"grid" | "thumbnail" | "preview" | "toolbar" | "image" | "counter" | "control" | "status", string>>;
+    export function Root(props: GalleryProps, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Thumbnail(props: GalleryProps & {
+        item: GalleryItem;
+        index: number;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Grid(props: GalleryProps & {
+        thumbnailClass?: string;
+    }): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
+    export function Previous(props: GalleryProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Next(props: GalleryProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function Close(props: GalleryProps, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    /** Native dialog supplies modal focus trapping, Escape and focus restoration.
+     * No document/window access at module or construction time (SSR-safe).
+     */
+    export function Preview(props: GalleryProps & {
+        classes?: GalleryClasses;
+    }): import("packages/ui-primitive/src/core").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/ui-primitive/src/index" {
     export * as PresencePrimitive from "packages/ui-primitive/src/modules/presence";
@@ -23181,15 +25920,31 @@ declare module "packages/ui-primitive/src/index" {
     export { StandardSubViews } from "packages/ui-primitive/src/modules/standard-sub-views";
     export * as ErrorBoundaryPrimitive from "packages/ui-primitive/src/modules/error-boundary";
     export * as FlowPrimitive from "packages/ui-primitive/src/modules/flow";
+    export * as TreePrimitive from "packages/ui-primitive/src/modules/tree";
+    export * as GalleryPrimitive from "packages/ui-primitive/src/modules/gallery";
 }
 declare module "packages/timeless/src/index" {
+    import * as icons from "packages/icons/src/index";
+    import { type Platform } from "packages/lite/src/index";
+    import * as vm from "packages/ui-vm/src/index";
     export * from "packages/lite/src/index";
-    export * as icons from "packages/icons/src/index";
+    export { icons };
     export * as kit from "packages/kit/src/index";
     export * as ui from "packages/ui-primitive/src/index";
     export * as utils from "packages/utils/src/index";
-    export * as vm from "packages/ui-vm/src/index";
-    export { Result, base, mitt } from "packages/primitive/src/index";
+    export { vm };
+    export { Result, base, mitt } from "packages/lite/src/index";
+    export const Version: any;
+    export function setPlatform<T extends Platform = Platform>(platform: T): T;
+}
+declare module "packages/shadcn/src/modules/gallery" {
+    import { vm, type ViewProps } from "packages/timeless/src/index";
+    /** shadcn visual composition; selection and modal behavior live in shared layers. */
+    export function Gallery(props: ViewProps & {
+        store: vm.GalleryCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/input" {
     import { vm } from "packages/timeless/src/index";
@@ -23197,7 +25952,9 @@ declare module "packages/shadcn/src/modules/input" {
     export function Input(props: ViewProps & {
         store: vm.InputCore<any>;
         id?: string;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/file-picker" {
     import { vm } from "packages/timeless/src/index";
@@ -23205,11 +25962,15 @@ declare module "packages/shadcn/src/modules/file-picker" {
     export function FileDropZone(props: ViewProps & {
         store: vm.FilePickerCore;
         tip?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function FileInput(props: ViewProps & {
         store: vm.FilePickerCore;
         id?: string;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/number-input" {
     import { vm } from "packages/timeless/src/index";
@@ -23218,7 +25979,9 @@ declare module "packages/shadcn/src/modules/number-input" {
         store: vm.NumberInputCore;
         id?: string;
         showControls?: boolean;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/textarea" {
     import { vm } from "packages/timeless/src/index";
@@ -23229,7 +25992,9 @@ declare module "packages/shadcn/src/modules/textarea" {
         showClear?: boolean;
         showLoading?: boolean;
         showCount?: boolean;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/label" {
     import { ViewChildren, LabelProps, TimelessElement } from "packages/timeless/src/index";
@@ -23262,7 +26027,9 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
         class?: string;
         itemClass?: string;
         direction?: "horizontal" | "vertical";
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function CheckboxGroupItem(props: {
         store: vm.CheckboxGroupCore<any>;
         item: {
@@ -23271,7 +26038,9 @@ declare module "packages/shadcn/src/modules/checkbox-group" {
             core: vm.CheckboxCore;
         };
         class?: string;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/radio" {
     import { vm } from "packages/timeless/src/index";
@@ -23297,7 +26066,9 @@ declare module "packages/shadcn/src/modules/radio" {
         class?: string;
         itemClass?: string;
         direction?: "horizontal" | "vertical";
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function RadioGroupItem(props: {
         store: vm.RadioGroupCore<any>;
         item: {
@@ -23306,7 +26077,9 @@ declare module "packages/shadcn/src/modules/radio" {
             core: vm.RadioCore;
         };
         class?: string;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/select" {
     import { vm } from "packages/timeless/src/index";
@@ -23399,7 +26172,9 @@ declare module "packages/shadcn/src/modules/tooltip" {
         content?: ViewChildren;
         side?: vm.Side;
         align?: vm.Align;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function TooltipProvider(props: ViewProps, children?: ViewChildren): {
         t: string;
         $elm: any;
@@ -23564,15 +26339,18 @@ declare module "packages/shadcn/src/modules/switch" {
     };
 }
 declare module "packages/shadcn/src/modules/slider" {
+    import { Ref } from "packages/timeless/src/index";
     import { ViewProps } from "packages/timeless/src/index";
     export function Slider(props: ViewProps & {
-        value?: number;
+        value?: number | Ref<number>;
         min?: number;
         max?: number;
         step?: number;
         disabled?: boolean;
         onChange?: (v: number) => void;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/progress" {
     import { vm } from "packages/timeless/src/index";
@@ -23582,7 +26360,9 @@ declare module "packages/shadcn/src/modules/progress" {
         store?: vm.ProgressCore;
         value?: Ref<number> | number;
         max?: number;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/button" {
     import { vm } from "packages/timeless/src/index";
@@ -23623,7 +26403,9 @@ declare module "packages/shadcn/src/modules/menu" {
     import { ViewProps, TimelessElement } from "packages/timeless/src/index";
     export function Menu(props: ViewProps & {
         store: vm.MenuCore;
-    }): TimelessElement<{}, any>;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/dropdown-menu" {
     import { vm } from "packages/timeless/src/index";
@@ -23650,7 +26432,9 @@ declare module "packages/shadcn/src/modules/tabs" {
     export function Tabs(props: ViewProps & {
         store: vm.TabHeaderCore<any>;
         items?: TabItem[];
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/steps" {
     import { vm } from "packages/timeless/src/index";
@@ -23662,7 +26446,9 @@ declare module "packages/shadcn/src/modules/steps" {
     export function Steps(props: ViewProps & {
         store: vm.StepCore;
         items: StepItem[];
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-view" {
     import { vm } from "packages/timeless/src/index";
@@ -23675,22 +26461,38 @@ declare module "packages/shadcn/src/modules/badge" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Badge(props: ViewProps & {
         variant?: "default" | "secondary" | "outline" | "destructive";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/separator" {
     import { ViewProps } from "packages/timeless/src/index";
     export function Separator(props: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/card" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/avatar" {
     import { ui } from "packages/timeless/src/index";
@@ -23701,22 +26503,34 @@ declare module "packages/shadcn/src/modules/avatar" {
         alt?: string;
         size?: Parameters<typeof ui.AvatarPrimitive.Root>[0]["size"];
         fallback?: string;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/skeleton" {
     import { ViewProps } from "packages/timeless/src/index";
-    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/alert" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Alert(props: ViewProps & {
         variant?: "default" | "destructive";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-area" {
-    export function ScrollArea(props: any, children: any): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function ScrollArea(props: any, children: any): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/sheet" {
     import { vm } from "packages/timeless/src/index";
@@ -23737,7 +26551,9 @@ declare module "packages/shadcn/src/modules/sheet" {
     };
 }
 declare module "packages/shadcn/src/modules/aspect-ratio" {
-    export function AspectRatio(props: any, children: any): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function AspectRatio(props: any, children: any): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/accordion" {
     import { vm } from "packages/timeless/src/index";
@@ -23749,39 +26565,57 @@ declare module "packages/shadcn/src/modules/accordion" {
     export function Accordion(props: ViewProps & {
         store: vm.AccordionCore;
         items: AccordionItem[];
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/kbd" {
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
-    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/table" {
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
-    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
 }
 declare module "packages/shadcn/src/modules/form" {
     import { vm } from "packages/timeless/src/index";
     import { ViewProps, ViewChildren } from "packages/timeless/src/index";
     export function Form(props: ViewProps & {
         store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/field" {
     import { vm } from "packages/timeless/src/index";
     import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
-    export function FieldGroup(props: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
-    export function FieldSet(props: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
-    export function FieldLegend(props: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
-    export function FieldDescription(props: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function FieldSeparator(props?: ViewProps & {
         orientation?: "horizontal" | "vertical";
-    }): TimelessElement<{}, any>;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
     export function FieldLabel(props: ViewProps & {
         store?: vm.SingleFieldCore<any>;
         for?: string;
@@ -23792,14 +26626,20 @@ declare module "packages/shadcn/src/modules/field" {
         store?: vm.SingleFieldCore<any>;
         for?: string;
     }, children?: ViewChildren): TimelessElement;
-    export function FieldHelp(props: {}, children?: ViewChildren): TimelessElement<{}, any>;
-    export function FieldError(props: {}, children?: ViewChildren): TimelessElement<{}, any>;
+    export function FieldHelp(props: {}, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldError(props: {}, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
     export function Field(props: ViewProps & {
         store: vm.SingleFieldCore<any>;
         id?: string;
         orientation?: "vertical" | "horizontal";
         inline?: boolean;
-    }, children?: ViewChildren): TimelessElement<{}, any>;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/resizable-panels" {
     import { vm } from "packages/timeless/src/index";
@@ -23807,17 +26647,23 @@ declare module "packages/shadcn/src/modules/resizable-panels" {
     export function ResizablePanels(props: ViewProps & {
         store: vm.ResizablePanelsCore;
         direction?: "horizontal" | "vertical";
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function ResizablePanel(props: ViewProps & {
         store: vm.ResizablePanelCore;
         group: vm.ResizablePanelsCore;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function ResizableHandle(props: ViewProps & {
         store: vm.ResizablePanelsCore;
         panelBefore: vm.ResizablePanelCore;
         panelAfter: vm.ResizablePanelCore;
         withHandle?: boolean;
-    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/waterfall" {
     import { vm } from "packages/timeless/src/index";
@@ -23832,7 +26678,9 @@ declare module "packages/shadcn/src/modules/history-panel" {
     import { ViewProps } from "packages/timeless/src/index";
     export function HistoryPanel(props: ViewProps & {
         store: kit.HistoryCore<string, any>;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/llm-provider-form" {
     import { ViewProps } from "packages/timeless/src/index";
@@ -23885,7 +26733,9 @@ declare module "packages/shadcn/src/modules/llm-provider-form" {
     };
     export function LLMProviderForm(props: ViewProps & {
         store: LLMProviderFormStore;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/sonner" {
     import { vm } from "packages/timeless/src/index";
@@ -23913,7 +26763,9 @@ declare module "packages/shadcn/src/modules/sonner" {
         /** 默认是否展开，false 时 toast 缩小层叠，hover 时展开 */
         expand?: boolean;
     };
-    export function Toaster(props: ToasterProps): TimelessElement<{}, any>;
+    export function Toaster(props: ToasterProps): TimelessElement<{
+        as: string;
+    }, any>;
     export function Toast(props: {
         store: vm.ToastModel;
         position: string;
@@ -23924,7 +26776,9 @@ declare module "packages/shadcn/src/modules/sonner" {
         toastCount: DerivedRef<number>;
         /** For 组件提供的当前列表位置索引（响应式） */
         idx: DerivedRef<number>;
-    }): TimelessElement<{}, any>;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/affix" {
     import { vm } from "packages/timeless/src/index";
@@ -23933,7 +26787,9 @@ declare module "packages/shadcn/src/modules/affix" {
         store: vm.AffixCore;
         offsetTop?: number;
         target?: () => HTMLElement | Window;
-    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
 }
 declare module "packages/shadcn/src/modules/flow" {
     import { vm } from "packages/timeless/src/index";
@@ -23964,12 +26820,16 @@ declare module "packages/shadcn/src/modules/flow" {
         total: number;
         connectable?: boolean;
     }
-    export function FlowHandle(props: FlowHandleViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FlowHandle(props: FlowHandleViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export interface FlowNodeViewProps extends ViewProps {
         store: vm.FlowNodeModel;
         nodeTypes: FlowNodeViewRender;
     }
-    export function FlowNodeView(props: FlowNodeViewProps): import("@timeless/timeless").TimelessElement<{}, any>;
+    export function FlowNodeView(props: FlowNodeViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function FlowEdgeView(props: ViewProps & {
         store: vm.FlowEdgeModel;
     }): ReturnType<typeof SVG.G>;
@@ -23978,14 +26838,22 @@ declare module "packages/shadcn/src/modules/flow" {
         gap?: number;
         size?: number;
         color?: string;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function FlowMinimap(props: ViewProps & {
         store: vm.FlowCanvasModel;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export function FlowControls(props: ViewProps & {
         store: vm.FlowCanvasModel;
-    }): import("@timeless/timeless").TimelessElement<{}, any>;
-    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{}, any>;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
     export const FlowEdge_: typeof FlowEdgeView;
     export const FlowNode_: typeof FlowNodeView;
     export const FlowHandle_: typeof FlowHandle;
@@ -24004,7 +26872,48 @@ declare module "packages/shadcn/src/modules/flow" {
         }
     }
 }
+declare module "packages/shadcn/src/modules/tree" {
+    import { ui, vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tree · shadcn（Tailwind 内联，与 `modules/flow.ts` 同风格）
+     *
+     * 逻辑全在 `vm.TreeCore`，DOM 形状全在 `ui.TreePrimitive`。这里只把 Tailwind
+     * 工具类对进 primitive 的 `TreeClassNames` 槽位，并给出 shadcn 的行高 / 缩进。
+     *
+     * 行高 28px（`h-7`），与移植前 `apps/web-shadcn/src/components/tree.js` 的
+     * `row_height = 28` 一致 —— itemHeight 是渲染器入参，两边必须对得上。
+     *
+     * 有两处没走内联类，放在 `src/index.css`：
+     *   1. 勾选框的勾 / 半选短横线是两张 SVG 底色，Tailwind 的任意值语法里要塞
+     *      data URI（含空格与 `#`）非常易碎；
+     *   2. 落点指示线的定位/显隐要按 primitive 写的 `data-tree-line` 属性分叉，
+     *      用 `.tree-line[data-tree-line="before"]` 比任意变体可读。
+     * 两处都沿用其余三库同一套状态类名（`.is-before` / `.is-after` / `.is-checked`
+     * / `.is-indeterminate`），四库的 DOM 契约因此完全一致。
+     *
+     * 层级引导线（`guide` 槽位）全部走内联工具类，`tree-guide` 只作标记类名
+     * （`tree-` 前缀在插件的保留白名单里），不需要动 `src/index.css`。
+     */
+    export const TREE_CLASSES: ui.TreePrimitive.TreeClassNames;
+    export type TreeProps = Omit<ui.TreePrimitive.TreeRootProps, "classes"> & ViewProps & {
+        store: vm.TreeCore;
+    };
+    /** Tree 的公开入口。primitive 参数原样透传，只补 Tailwind 类名与默认尺寸。 */
+    export function Tree(props: TreeProps): TimelessElement;
+    /** 自定义行渲染时复用的行槽位（`renderRow` 里拿到 props 再交给它）。 */
+    export function TreeRow(props: ui.TreePrimitive.TreeRowProps): TimelessElement;
+    export function TreeCheckbox(props: ui.TreePrimitive.TreeCheckboxProps): TimelessElement;
+    export function TreeIndicator(props?: {
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+    export function TreeEmpty(props?: {
+        text?: string;
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+}
 declare module "packages/shadcn/src/index" {
+    import { Gallery } from "packages/shadcn/src/modules/gallery";
     import { Input } from "packages/shadcn/src/modules/input";
     import { FileDropZone, FileInput } from "packages/shadcn/src/modules/file-picker";
     import { NumberInput } from "packages/shadcn/src/modules/number-input";
@@ -24058,8 +26967,5508 @@ declare module "packages/shadcn/src/index" {
     import { Toaster } from "packages/shadcn/src/modules/sonner";
     import { Affix } from "packages/shadcn/src/modules/affix";
     import { FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/shadcn/src/modules/flow";
+    import { Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES } from "packages/shadcn/src/modules/tree";
     export const TimelessShadcnVersion: any;
-    export { Input, FileInput, FileDropZone, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
+    export { Gallery, Input, FileInput, FileDropZone, NumberInput, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Select, SearchSelect, Link, Cascader, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Popover, Popconfirm, Toast, Toggle, Switch, Slider, Progress, Dialog, Menu, DropdownMenu, ContextMenu, Tabs, Steps, Button, ScrollView, Badge, Separator, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Avatar, Skeleton, Tooltip, TooltipProvider, Alert, AlertTitle, AlertDescription, ScrollArea, Sheet, AspectRatio, Accordion, Kbd, KbdGroup, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Form, ResizablePanels, ResizablePanel, ResizableHandle, Waterfall, HistoryPanel, LLMProviderForm, Toaster, Affix, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES, };
+}
+declare module "packages/weui/src/modules/gallery" {
+    import { vm, type ViewProps } from "packages/timeless/src/index";
+    /** weui visual composition; selection and modal behavior live in shared layers. */
+    export function Gallery(props: ViewProps & {
+        store: vm.GalleryCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/weui/src/modules/button" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Button(props: ViewProps & {
+        store: vm.ButtonCore;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/weui/src/modules/input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Input(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/weui/src/modules/textarea" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Textarea(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/weui/src/modules/checkbox" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Checkbox(props: ViewProps & {
+        store: vm.CheckboxCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/weui/src/modules/switch" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Switch(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/weui/src/modules/toggle" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Toggle(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/weui/src/modules/select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Select(props: ViewProps & {
+        store: vm.SelectCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/weui/src/modules/tabs" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    type TabItem = {
+        value: string;
+        label: string;
+        content?: ViewChildren;
+    };
+    export function Tabs(props: ViewProps & {
+        store: vm.TabHeaderCore<any>;
+        items?: TabItem[];
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/weui/src/modules/dialog" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Dialog(props: ViewProps & {
+        store: vm.DialogCore;
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/weui/src/modules/sheet" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Sheet(props: ViewProps & {
+        store: vm.DialogCore;
+        side?: "right" | "top" | "bottom" | "left";
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/weui/src/modules/toast" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Toast(props: ViewProps & {
+        store: vm.ToastCore;
+    }, children?: ViewChildren): ViewChildren;
+}
+declare module "packages/weui/src/modules/badge" {
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Badge(props: ViewProps & {
+        variant?: "default" | "secondary" | "outline" | "destructive";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/weui/src/modules/separator" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Separator(props: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/weui/src/modules/skeleton" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/weui/src/modules/dropdown-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    export function DropdownMenu(props: ViewProps & {
+        store: vm.DropdownMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/weui/src/modules/card" {
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/weui/src/index" {
+    import { Gallery } from "packages/weui/src/modules/gallery";
+    import { Button } from "packages/weui/src/modules/button";
+    import { Input } from "packages/weui/src/modules/input";
+    import { Textarea } from "packages/weui/src/modules/textarea";
+    import { Checkbox } from "packages/weui/src/modules/checkbox";
+    import { Switch } from "packages/weui/src/modules/switch";
+    import { Toggle } from "packages/weui/src/modules/toggle";
+    import { Select } from "packages/weui/src/modules/select";
+    import { Tabs } from "packages/weui/src/modules/tabs";
+    import { Dialog } from "packages/weui/src/modules/dialog";
+    import { Sheet } from "packages/weui/src/modules/sheet";
+    import { Toast } from "packages/weui/src/modules/toast";
+    import { Badge } from "packages/weui/src/modules/badge";
+    import { Separator } from "packages/weui/src/modules/separator";
+    import { Skeleton } from "packages/weui/src/modules/skeleton";
+    import { DropdownMenu } from "packages/weui/src/modules/dropdown-menu";
+    import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "packages/weui/src/modules/card";
+    export const TimelessWeUIVersion: any;
+    export { Gallery, Button, Input, Textarea, Checkbox, Switch, Toggle, Select, Tabs, Dialog, Sheet, Toast, Badge, Separator, Skeleton, DropdownMenu, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, };
+}
+declare module "packages/bootstrap/src/modules/gallery" {
+    import { vm, type ViewProps } from "packages/timeless/src/index";
+    /** bootstrap visual composition; selection and modal behavior live in shared layers. */
+    export function Gallery(props: ViewProps & {
+        store: vm.GalleryCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/button" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Button(props: ViewProps & {
+        store: vm.ButtonCore;
+        prefix?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Input(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/textarea" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Textarea(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+        showClear?: boolean;
+        showLoading?: boolean;
+        showCount?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/label" {
+    import { LabelProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Label(props: LabelProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/bootstrap/src/modules/checkbox" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Checkbox(props: ViewProps & {
+        store: vm.CheckboxCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/checkbox-group" {
+    import { vm } from "packages/timeless/src/index";
+    export function CheckboxGroup(props: {
+        store: vm.CheckboxGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CheckboxGroupItem(props: {
+        store: vm.CheckboxGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.CheckboxCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/radio" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Radio(props: ViewProps & {
+        store: vm.RadioCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function RadioGroup(props: ViewProps & {
+        store: vm.RadioGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function RadioGroupItem(props: {
+        store: vm.RadioGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.RadioCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/switch" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Switch(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/toggle" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Toggle(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/slider" {
+    import { ViewProps, Ref } from "packages/timeless/src/index";
+    export function Slider(props: ViewProps & {
+        value?: number | Ref<number>;
+        min?: number;
+        max?: number;
+        step?: number;
+        disabled?: boolean;
+        onChange?: (v: number) => void;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/select-shared" {
+    import { vm } from "packages/timeless/src/index";
+    /**
+     * Select 系列的共享渲染逻辑。
+     *
+     * Select 与 SearchSelect 的面板结构完全一致（Viewport > 条目列表 / 空态），
+     * 差别只在触发区。把条目渲染抽到这里，避免两处各写一份。
+     */
+    export function renderSelectOption(select$: vm.SelectCore<any>, option: vm.SelectItemCore<any>): any;
+    export function renderSelectEntry(select$: vm.SelectCore<any>, entry: vm.SelectItemCore<any> | vm.SelectGroupCore<any>): any;
+    /**
+     * 面板内容：Viewport + 加载态 / 条目列表 / 空态。
+     *
+     * 注意：For 必须常驻挂载，不能塞进 Show 的某个分支里。搜索时
+     * startSearch/finishSearch 会让 loading 反复 true/false，一旦 For 处在
+     * 被 Show 切换的分支内，重建时旧列表不会被清理，条目会不断叠加。
+     */
+    export function SelectPanel(props: {
+        store: vm.SelectCore<any>;
+        entries: any;
+        loading?: any;
+        class?: any;
+    }): any;
+}
+declare module "packages/bootstrap/src/modules/select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Select(props: ViewProps & {
+        store: vm.SelectCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/number-input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function NumberInput(props: ViewProps & {
+        store: vm.NumberInputCore;
+        id?: string;
+        showControls?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/progress" {
+    import { vm } from "packages/timeless/src/index";
+    import { Ref, ViewProps } from "packages/timeless/src/index";
+    export function Progress(props: ViewProps & {
+        store?: vm.ProgressCore;
+        value?: Ref<number> | number;
+        max?: number;
+        variant?: string;
+        striped?: boolean;
+        animated?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/avatar" {
+    import { Ref, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Avatar(props: ViewProps & {
+        src: string | Ref<string>;
+        alt?: string;
+        size?: "sm" | "default" | "lg" | "large";
+        fallback?: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/badge" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Badge(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "outline" | "destructive" | "danger" | "success" | "warning" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/separator" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Separator(props: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/skeleton" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/card" {
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/alert" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Alert(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | "destructive" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/kbd" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/link" {
+    import { LinkProps as NativeLinkProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Link(props?: NativeLinkProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/bootstrap/src/modules/aspect-ratio" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function AspectRatio(props?: ViewProps & {
+        ratio?: number;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/scroll-area" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function ScrollArea(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/field" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSeparator(props?: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+        weight?: "normal" | "medium";
+        tone?: "default" | "destructive";
+    }): TimelessElement;
+    export function FieldInlineLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+    }, children?: ViewChildren): TimelessElement;
+    export function Field(props: ViewProps & {
+        store: vm.SingleFieldCore<any>;
+        id?: string;
+        orientation?: "vertical" | "horizontal";
+        inline?: boolean;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/dialog" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Dialog(props: ViewProps & {
+        store: vm.DialogCore;
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function DialogHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogBody(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogFooter(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/sheet" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Sheet(props: ViewProps & {
+        store: vm.DialogCore;
+        side?: "right" | "top" | "bottom" | "left";
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function SheetHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/popper-shared" {
+    import type { ViewStyleProperties } from "packages/timeless/src/index";
+    /**
+     * 浮动层箭头（popover / popconfirm / tooltip 共用）。
+     *
+     * Bootstrap 的箭头是一个 45° 旋转的小方块，贴在被锚定元素那一侧的对边：
+     *   placement=bottom → 箭头在浮层顶部（.is-top）
+     *   placement=top    → 箭头在浮层底部（.is-bottom）
+     *   placement=right  → 箭头在浮层左侧（.is-left）
+     *   placement=left   → 箭头在浮层右侧（.is-right）
+     *
+     * class 负责“贴哪条边 + 隐藏哪两条边框”，style 负责沿交叉轴的偏移
+     * （优先用 popper 给的 arrow.x / arrow.y，退化时按 align 取 50% / 1rem）。
+     */
+    export function makeArrowStyle(popper_state_: any, base: string): {
+        class: import("@timeless/timeless").DerivedRef<string>;
+        style: import("@timeless/timeless").DerivedRef<ViewStyleProperties>;
+    };
+}
+declare module "packages/bootstrap/src/modules/popover" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popover · Bootstrap 5.3
+     *
+     * 类名沿用上游：.popover / .popover-arrow / .popover-header / .popover-body。
+     * Trigger 由 headless 层处理（pointerdown 切换 open），浮层通过 Portal 挂到 body。
+     */
+    export function Popover(props: ViewProps & {
+        store: vm.PopoverCore;
+        title?: ViewChildren;
+        content?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/popconfirm" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popconfirm · Bootstrap 5.3
+     *
+     * Bootstrap 没有 popconfirm，这里沿用 .popover 的视觉语言，用 .popconfirm 作为
+     * 命名空间：.popconfirm / .popconfirm-arrow / .popconfirm-header /
+     * .popconfirm-body / .popconfirm-actions。
+     */
+    export function Popconfirm(props: ViewProps & {
+        store: vm.PopconfirmCore;
+        title?: ViewChildren;
+        description?: ViewChildren;
+        confirmText?: string;
+        cancelText?: string;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/tooltip" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Tooltip(props: ViewProps & {
+        content?: ViewChildren;
+        side?: vm.Side;
+        align?: vm.Align;
+    }, children?: ViewChildren): TimelessElement;
+    export function TooltipProvider(props: ViewProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/bootstrap/src/modules/menu-shared" {
+    export const t: {
+        /** 浮层动画时长（CSS 里面对应 .is-enter / .is-exit 的关键帧） */
+        animation: {
+            in: string;
+            out: string;
+        };
+        subAnimation: {
+            in: string;
+            out: string;
+        };
+        menu: {
+            class: string;
+        };
+        submenu: {
+            class: string;
+        };
+        item: {
+            class: string;
+        };
+        itemHover: {
+            class: string;
+        };
+        itemDisabled: {
+            class: string;
+        };
+        label: {
+            class: string;
+        };
+        separator: {
+            class: string;
+        };
+        submenuArrow: {
+            class: string;
+        };
+        icon: {
+            class: string;
+        };
+        shortcut: {
+            class: string;
+        };
+        check: {
+            class: string;
+        };
+    };
+}
+declare module "packages/bootstrap/src/modules/menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Menu · Bootstrap 5.3
+     *
+     * 常驻（非浮层）菜单，类名沿用上游：.dropdown-menu / .dropdown-item /
+     * .dropdown-divider / .dropdown-header。
+     *
+     * 子菜单（item.menu）通过 .dropdown-submenu 浮层渲染，箭头用 Icon 指示。
+     */
+    export function Menu(props: ViewProps & {
+        store: vm.MenuCore;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export type MenuEntry = vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore;
+    export function renderMenuEntry(item: MenuEntry, Sep: (props: ViewProps) => TimelessElement, Grp: (props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (props: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement): TimelessElement;
+    export function MenuSeparator(_props: ViewProps): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuGroup(props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuItem(props: ViewProps & {
+        store: vm.MenuItemCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function isCheckable(store: vm.MenuItemCore): boolean;
+}
+declare module "packages/bootstrap/src/modules/dropdown-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * DropdownMenu · Bootstrap 5.3
+     *
+     * 结构沿用上游：Trigger + 浮层 Content。类名走 .dropdown-menu / .dropdown-item /
+     * .dropdown-divider / .dropdown-header（由 menu-shared 的 t 常量提供）。
+     * 条目渲染复用 menu.ts 的骨架（renderMenuEntry），因此子菜单、勾选项、
+     * icon / shortcut 的行为三者完全一致。
+     */
+    export function DropdownMenu(props: ViewProps & {
+        store: vm.DropdownMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/bootstrap/src/modules/context-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * ContextMenu · Bootstrap 5.3
+     *
+     * 由右键 / 长按触发（Trigger 内部处理），浮层类名与 DropdownMenu 共用一套
+     * .dropdown-menu 命名空间（Bootstrap 没有独立的 context-menu 样式层）。
+     */
+    export function ContextMenu(props: ViewProps & {
+        store: vm.ContextMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/bootstrap/src/modules/tabs" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tabs · Bootstrap 5.3
+     *
+     * 类名沿用上游：.nav / .nav-tabs / .nav-link（.active 表示当前项）、
+     * 内容区 .tab-content / .tab-pane（.active 表示可见）。
+     *
+     * headless 层的 TabHeaderCore 用 curId 表示当前选中项，这里映射成 .active。
+     */
+    export type TabItem = {
+        value: string;
+        label: string;
+        content?: ViewChildren;
+    };
+    export function Tabs(props: ViewProps & {
+        store: vm.TabHeaderCore<any>;
+        items?: TabItem[];
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/accordion" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Accordion · Bootstrap 5.3
+     *
+     * 类名沿用上游：.accordion / .accordion-item / .accordion-header /
+     * .accordion-button / .accordion-collapse / .accordion-body。
+     *
+     * 三点 headless 约束（决定了这里的写法）：
+     *
+     * 1. Trigger 直接改 store.openItems，不会 emit StateChange。因此展开态不能从
+     *    store.state 派生，必须直接跟随 store.openItems（RefArray）。
+     * 2. Trigger / Item 会把 props 透传，所以动态 class 要挂在 .accordion-item 与
+     *    .accordion-button 上，由 CSS 用后代选择器控制 .accordion-collapse。
+     * 3. Content 会把传入的 class 强制换成 computed，只在「传入字符串」时保留。
+     *    所以 .accordion-collapse 只能是固定字符串类名，不能动态加类。
+     *
+     * 为什么不用 data-state：dataset 的响应式更新目前写错属性名（写成了裸的
+     * `state` 而不是 `data-state`，见 primitive/src/content/box.ts 里对
+     * methods.apply_attr(k, v) 的调用），所以这里统一用 .is-open 类名表达展开态。
+     */
+    export type AccordionItem = {
+        title: ViewChildren;
+        content: ViewChildren;
+    };
+    export function Accordion(props: ViewProps & {
+        store: vm.AccordionCore;
+        items: AccordionItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/steps" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Steps · Bootstrap 5.3
+     *
+     * Bootstrap 没有 steps 组件，这里沿用它的视觉语言（.badge 圆形 + 连接线），
+     * 用 .steps 作为命名空间：.steps / .steps-list / .steps-item /
+     * .steps-indicator / .steps-title / .steps-description / .steps-connector。
+     *
+     * 状态通过 .is-completed / .is-current / .is-upcoming 表达。
+     *
+     * 注意：headless 的 StepsPrimitive.List 会忽略传入的 children 并自行渲染一套
+     * 无 class 的 Item/Indicator 树（Indicator 内部只在有 children 时才输出内容，
+     * 因此编号永远为空）。所以这里只用 Root/Item/Title/Description/Connector 这些
+     * 透传原语，列表本身用 View + For 自己拼装，保证 Bootstrap 类名完整。
+     */
+    export type StepItem = {
+        title: string;
+        description?: string;
+    };
+    export function Steps(props: ViewProps & {
+        store: vm.StepCore;
+        items: StepItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/toast" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Toast · Bootstrap 5.3
+     *
+     * 类名沿用上游：.toast / .toast-header / .toast-body。
+     *
+     * 注意：headless 的 ToastCore 目前没有暴露 state（相关的 getter 全部被注释掉了），
+     * 且 ToastPrimitive.Root 会把 children 原样返回。因此这里不读取 store.state，
+     * 只负责把内容包进作用域内的 .toast 容器；显隐与堆叠交给调用方。
+     */
+    export function Toast(props: ViewProps & {
+        store: vm.ToastCore;
+    }, children?: ViewChildren): ViewChildren;
+}
+declare module "packages/bootstrap/src/modules/table" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Table · Bootstrap 5.3
+     *
+     * 根节点挂 .table，其余部位沿用原生语义标签（thead / tbody / tr / th / td），
+     * 样式在 CSS 里通过 .table > thead > tr > th 这类后代选择器作用域化，
+     * 与 Bootstrap 自身的 table 样式策略一致。
+     */
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/bootstrap/src/modules/form" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * Form · Bootstrap 5.3
+     *
+     * Bootstrap 没有独立的 form 容器样式（表单布局靠 .row / .mb-3 / .form-control
+     * 等组合）。这里与 shadcn 版本保持一致，只做一层透传；字段级的渲染请直接用
+     * Field / FieldSet 系列组件。
+     */
+    export function Form(props: ViewProps & {
+        store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/search-select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * SearchSelect · Bootstrap 5.3
+     *
+     * 触发器沿用 .form-select 的盒子指标，内部换成 .select-search 输入框
+     * （复用 select.css 里的类），下拉面板同样是 .select-content。
+     *
+     * 与 Select 的区别：触发区固定渲染搜索框，展开时把触发器注册为 popper 的
+     * reference，使面板宽度与触发器对齐。
+     */
+    export function SearchSelect<T>(props: ViewProps & {
+        store: vm.SelectCore<T>;
+    }, _children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/file-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * FilePicker · Bootstrap 5.3
+     *
+     * Bootstrap 没有文件拖拽区，这里用 .file-dropzone / .file-input 命名空间，
+     * 内部沿用 .form-control / .visually-hidden 等原生类名。
+     *
+     * FileDropZone 负责拖拽 / 点击选择，FileInput 是紧凑的行内文件输入框。
+     */
+    export function FileDropZone(props: ViewProps & {
+        store: vm.FilePickerCore;
+        tip?: string;
+    }, _children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function FileInput(props: ViewProps & {
+        store: vm.FilePickerCore;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/resizable-panels" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ResizablePanels · Bootstrap 5.3
+     *
+     * Bootstrap 没有分割面板，这里用 .resizable-panels / .resizable-panel /
+     * .resizable-handle 命名空间，视觉上沿用 Bootstrap 的 border / focus-ring。
+     */
+    export function ResizablePanels(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        direction?: "horizontal" | "vertical";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizablePanel(props: ViewProps & {
+        store: vm.ResizablePanelCore;
+        group: vm.ResizablePanelsCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizableHandle(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        panelBefore: vm.ResizablePanelCore;
+        panelAfter: vm.ResizablePanelCore;
+        withHandle?: boolean;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/date-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * DatePicker · Bootstrap 5.3
+     *
+     * 触发器沿用 .form-control 的盒子指标（.datepicker__trigger 补 flex 布局），
+     * 弹层复用 .popover 的表面（背景 / 边框 / 阴影 / 进出场动画），再叠 .datepicker
+     * 的日历网格。网格与单元格走 .datepicker__grid / .datepicker__cell。
+     */
+    export function DatePicker(props: ViewProps & {
+        store: vm.DatePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/date-range-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function DateRangePicker(props: ViewProps & {
+        store: vm.DateRangePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * TimePicker · Bootstrap 5.3
+     *
+     * 触发器沿用 .form-control（.timepicker__trigger 补 flex），弹层复用 .popover。
+     * 时 / 分 / 秒各一列 (.timepicker__column)，列内选项 .timepicker__option，
+     * 选中态 .is-active。列身是 ScrollViewCore，挂载时滚动到当前值。
+     */
+    export function TimePicker(props: ViewProps & {
+        store: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/date-time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * DateTimePicker · Bootstrap 5.3
+     *
+     * 把 DatePickerCore 与 TimePickerCore 组合成一个面板：左侧复用 .datepicker__*
+     * 日历，右侧复用 .timepicker__* 三列滚动选择。弹层仍是 .popover + .datetimepicker。
+     */
+    export function DateTimePicker(props: ViewProps & {
+        date: vm.DatePickerCore;
+        time: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/cascader" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Cascader · Bootstrap 5.3
+     *
+     * 触发器沿用 .form-control（.cascader__trigger 补 flex），弹层复用 .popover。
+     * 逐级面板 .cascader__panel > .cascader__item，展开 / 选中态 .is-active，
+     * 顶部展示已选路径 .cascader__path；开启 search 时渲染搜索框与结果列表。
+     */
+    export function Cascader(props: ViewProps & {
+        store: vm.CascaderCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/bootstrap/src/modules/scroll-view" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ScrollView · Bootstrap 5.3
+     *
+     * 直接用 ScrollViewPrimitive.Root（无需订阅 store 做 class），只补一层
+     * .scroll-view 的细滚动条与滚动行为，风格与 .scroll-area 保持一致。
+     */
+    export function ScrollView(props: ViewProps & {
+        store: vm.ScrollViewCore;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/bootstrap/src/modules/affix" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Affix · Bootstrap 5.3
+     *
+     * 固定定位在滚动超过设定阈值后启用：.affix 承载过渡，固定时加 .is-fixed。
+     * 动态的 position/top 完全由 store 状态决定，因此走内联 style（styleNames）。
+     */
+    export function Affix(props: ViewProps & {
+        store: vm.AffixCore;
+        offsetTop?: number;
+        target?: () => HTMLElement | Window;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/waterfall" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Waterfall · Bootstrap 5.3
+     *
+     * 结构：.waterfall（横向 flex 容器）> .waterfall__column > .waterfall__item。
+     * 列高由 column.state.height 下发，item 的 top/height/bound 由 cell.state 下发，
+     * 均以内联 style 落到 DOM，这里只负责类名、槽位绑定与状态订阅。
+     */
+    export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
+        store: vm.WaterfallModel<T>;
+        render: (payload: T, cell: vm.WaterfallCellModel<T>) => TimelessElement;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/bootstrap/src/modules/tree" {
+    import { ui, vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tree · Bootstrap 5.3
+     *
+     * 逻辑全在 `vm.TreeCore`（折叠 / 勾选 / 拖拽落点），DOM 形状全在
+     * `ui.TreePrimitive`。这里只做一件事：把 Bootstrap 的类名对进 primitive 的
+     * `TreeClassNames` 槽位，并给出 Bootstrap 的行高 / 缩进。
+     *
+     * 类名契约（配合 style/components/tree.css）：
+     *   .tree > .tree__scroll > .tree__row
+     * 行内：.tree__guide(data-tree-guide) / .tree__line(data-tree-line) / .tree__caret
+     *       / .tree__icon / .tree__title / .tree__meta
+     *       / .tree__checkbox > .tree__checkbox-box > .tree__checkbox-indicator
+     * 状态：.is-lifted / .is-drop-into / .is-before / .is-after / .is-selected
+     *       / .is-checked / .is-indeterminate / .is-disabled
+     */
+    export const TREE_CLASSES: ui.TreePrimitive.TreeClassNames;
+    export type TreeProps = Omit<ui.TreePrimitive.TreeRootProps, "classes"> & ViewProps & {
+        store: vm.TreeCore;
+    };
+    /**
+     * Tree 的公开入口。所有 primitive 参数（`itemHeight` / `indent` /
+     * `renderRow` …）原样透传，只补上 Bootstrap 的类名与默认尺寸。
+     */
+    export function Tree(props: TreeProps): TimelessElement;
+    /**
+     * 自定义行渲染时复用的行槽位（`renderRow` 里拿到 `props` 再交给它）。
+     * 需要换图标 / 追加体积之类的业务字段时，用这个而不是重写整个 `Row`。
+     */
+    export function TreeRow(props: ui.TreePrimitive.TreeRowProps): TimelessElement;
+    export function TreeCheckbox(props: ui.TreePrimitive.TreeCheckboxProps): TimelessElement;
+    /** 勾选框里的方框本身（极少单独用，留作插槽覆盖）。 */
+    export function TreeIndicator(props?: {
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+    export function TreeEmpty(props?: {
+        text?: string;
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+}
+declare module "packages/bootstrap/src/modules/flow" {
+    import { vm } from "packages/timeless/src/index";
+    import { SVG, TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    type FlowNodeViewRender = Record<string, (props: {
+        node: vm.FlowNodeModel;
+    }) => ViewChildren>;
+    export interface FlowViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeTypes?: FlowNodeViewRender;
+        showBackground?: boolean;
+        backgroundVariant?: "dots" | "lines" | "cross";
+        showMinimap?: boolean;
+        showControls?: boolean;
+        multiSelect?: boolean;
+        minZoom?: number;
+        maxZoom?: number;
+        nodesDraggable?: boolean;
+        nodesConnectable?: boolean;
+    }
+    export interface FlowHandleViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeId: string;
+        handleId: string;
+        type: "source" | "target";
+        position?: "top" | "right" | "bottom" | "left";
+        index: number;
+        total: number;
+        connectable?: boolean;
+    }
+    /** 节点侧边的连接点。同一侧有多个时按 20px 步长在 `50%` 上下均分。 */
+    export function FlowHandle(props: FlowHandleViewProps): TimelessElement;
+    export interface FlowNodeViewProps extends ViewProps {
+        store: vm.FlowNodeModel;
+        nodeTypes: FlowNodeViewRender;
+    }
+    /**
+     * 一个节点。悬浮时在上方浮出动作条（详情 / 更多 / 失败时的重试）。
+     *
+     * 拖拽用 document 级 mousemove/mouseup（不是 pointer capture）：节点可能在拖拽
+     * 过程中被 `For` 重建，绑在节点上的监听会跟着丢。
+     */
+    export function FlowNodeView(props: FlowNodeViewProps): TimelessElement;
+    /**
+     * 一条边。里面两根同 `d` 的 path：下面那根透明、20px 粗，只为了拿到点击；
+     * 上面那根才是看到的线。`animated` 时挂 `is-animated` 驱动 `stroke-dashoffset`
+     * 流动（keyframes 在各库 flow.css 里按库前缀命名）。
+     */
+    export function FlowEdgeView(props: ViewProps & {
+        store: vm.FlowEdgeModel;
+    }): ReturnType<typeof SVG.G>;
+    export function FlowBackground(props: ViewProps & {
+        variant?: "dots" | "lines" | "cross";
+        gap?: number;
+        size?: number;
+        color?: string;
+    }): TimelessElement;
+    export function FlowMinimap(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowControls(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): TimelessElement;
+    export const FlowEdge_: typeof FlowEdgeView;
+    export const FlowNode_: typeof FlowNodeView;
+    export const FlowHandle_: typeof FlowHandle;
+    global {
+        interface Window {
+            flowConnecting: {
+                nodeId: string;
+                handleId: string;
+                type: "source" | "target";
+                startX: number;
+                startY: number;
+                currentX: number;
+                currentY: number;
+            } | null;
+            flowConnectingLineUpdate: ((path: string, visible: boolean) => void) | null;
+        }
+    }
+}
+declare module "packages/bootstrap/src/index" {
+    import { Gallery } from "packages/bootstrap/src/modules/gallery";
+    import { Button } from "packages/bootstrap/src/modules/button";
+    import { Input } from "packages/bootstrap/src/modules/input";
+    import { Textarea } from "packages/bootstrap/src/modules/textarea";
+    import { Label } from "packages/bootstrap/src/modules/label";
+    import { Checkbox } from "packages/bootstrap/src/modules/checkbox";
+    import { CheckboxGroup, CheckboxGroupItem } from "packages/bootstrap/src/modules/checkbox-group";
+    import { Radio, RadioGroup, RadioGroupItem } from "packages/bootstrap/src/modules/radio";
+    import { Switch } from "packages/bootstrap/src/modules/switch";
+    import { Toggle } from "packages/bootstrap/src/modules/toggle";
+    import { Slider } from "packages/bootstrap/src/modules/slider";
+    import { Select } from "packages/bootstrap/src/modules/select";
+    import { NumberInput } from "packages/bootstrap/src/modules/number-input";
+    import { Progress } from "packages/bootstrap/src/modules/progress";
+    import { Avatar } from "packages/bootstrap/src/modules/avatar";
+    import { Badge } from "packages/bootstrap/src/modules/badge";
+    import { Separator } from "packages/bootstrap/src/modules/separator";
+    import { Skeleton } from "packages/bootstrap/src/modules/skeleton";
+    import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "packages/bootstrap/src/modules/card";
+    import { Alert, AlertTitle, AlertDescription } from "packages/bootstrap/src/modules/alert";
+    import { Kbd, KbdGroup } from "packages/bootstrap/src/modules/kbd";
+    import { Link } from "packages/bootstrap/src/modules/link";
+    import { AspectRatio } from "packages/bootstrap/src/modules/aspect-ratio";
+    import { ScrollArea } from "packages/bootstrap/src/modules/scroll-area";
+    import { Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet } from "packages/bootstrap/src/modules/field";
+    import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose } from "packages/bootstrap/src/modules/dialog";
+    import { Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose } from "packages/bootstrap/src/modules/sheet";
+    import { Popover } from "packages/bootstrap/src/modules/popover";
+    import { Popconfirm } from "packages/bootstrap/src/modules/popconfirm";
+    import { Tooltip, TooltipProvider } from "packages/bootstrap/src/modules/tooltip";
+    import { DropdownMenu } from "packages/bootstrap/src/modules/dropdown-menu";
+    import { ContextMenu } from "packages/bootstrap/src/modules/context-menu";
+    import { Menu } from "packages/bootstrap/src/modules/menu";
+    import { Tabs } from "packages/bootstrap/src/modules/tabs";
+    import { Accordion } from "packages/bootstrap/src/modules/accordion";
+    import { Steps } from "packages/bootstrap/src/modules/steps";
+    import { Toast } from "packages/bootstrap/src/modules/toast";
+    import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/bootstrap/src/modules/table";
+    import { Form } from "packages/bootstrap/src/modules/form";
+    import { SearchSelect } from "packages/bootstrap/src/modules/search-select";
+    import { FileDropZone, FileInput } from "packages/bootstrap/src/modules/file-picker";
+    import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/bootstrap/src/modules/resizable-panels";
+    import { DatePicker } from "packages/bootstrap/src/modules/date-picker";
+    import { DateRangePicker } from "packages/bootstrap/src/modules/date-range-picker";
+    import { TimePicker } from "packages/bootstrap/src/modules/time-picker";
+    import { DateTimePicker } from "packages/bootstrap/src/modules/date-time-picker";
+    import { Cascader } from "packages/bootstrap/src/modules/cascader";
+    import { ScrollView } from "packages/bootstrap/src/modules/scroll-view";
+    import { Affix } from "packages/bootstrap/src/modules/affix";
+    import { Waterfall } from "packages/bootstrap/src/modules/waterfall";
+    import { Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES } from "packages/bootstrap/src/modules/tree";
+    import { FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/bootstrap/src/modules/flow";
+    export const TimelessBootstrapVersion: any;
+    export { Gallery, Button, Input, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Switch, Toggle, Slider, Select, NumberInput, Progress, Avatar, Badge, Separator, Skeleton, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Alert, AlertTitle, AlertDescription, Kbd, KbdGroup, Link, AspectRatio, ScrollArea, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose, Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose, Popover, Popconfirm, Tooltip, TooltipProvider, DropdownMenu, ContextMenu, Menu, Tabs, Accordion, Steps, Toast, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Form, SearchSelect, FileDropZone, FileInput, ResizablePanels, ResizablePanel, ResizableHandle, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Cascader, ScrollView, Affix, Waterfall, Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
+}
+declare module "packages/material/src/modules/gallery" {
+    import { vm, type ViewProps } from "packages/timeless/src/index";
+    /** material visual composition; selection and modal behavior live in shared layers. */
+    export function Gallery(props: ViewProps & {
+        store: vm.GalleryCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/button" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Button(props: ViewProps & {
+        store: vm.ButtonCore;
+        prefix?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 输入框。两种形态：
+     *   outlined（默认）—— 1px --outline 描边，聚焦 2px --primary
+     *   filled         —— --surface-container-highest 填充 + 底部 1px 指示线
+     */
+    export function Input(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+        variant?: "filled" | "outlined";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/textarea" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 多行输入。与 Input 共用 filled / outlined 两种形态。
+     */
+    export function Textarea(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+        variant?: "filled" | "outlined";
+        showClear?: boolean;
+        showLoading?: boolean;
+        showCount?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/label" {
+    import { LabelProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Label(props: LabelProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/material/src/modules/checkbox" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 复选框：18px、2px 圆角，选中填充 --primary。
+     * 注：CheckboxPrimitive.Box 会在 ...rest 之后覆写 dataset，
+     * 因此状态只用 class（.is-checked / .is-disabled / .is-invalid）表达。
+     */
+    export function Checkbox(props: ViewProps & {
+        store: vm.CheckboxCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/checkbox-group" {
+    import { vm } from "packages/timeless/src/index";
+    export function CheckboxGroup(props: {
+        store: vm.CheckboxGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CheckboxGroupItem(props: {
+        store: vm.CheckboxGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.CheckboxCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/radio" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 单选框：20px 圆形，选中内圆 --primary。
+     * 同 Checkbox，状态只用 class 表达（RadioPrimitive.Box 覆写 dataset）。
+     */
+    export function Radio(props: ViewProps & {
+        store: vm.RadioCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function RadioGroup(props: ViewProps & {
+        store: vm.RadioGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function RadioGroupItem(props: {
+        store: vm.RadioGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.RadioCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/switch" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 开关：轨道 52x32、thumb 24px（选中 28px），
+     * 选中轨道 --primary、thumb --on-primary。
+     */
+    export function Switch(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/toggle" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 图标开关（Toggle）。与 Switch 的滑动轨道不同，
+     * 这里用「选中填充 --primary-container」的紧凑外观，和 Switch 区分。
+     */
+    export function Toggle(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/slider" {
+    import { ViewProps, Ref } from "packages/timeless/src/index";
+    /**
+     * Material 3 滑块：轨道 4px、thumb 20px 圆形（--primary），
+     * 已选区用 --primary 填充。
+     */
+    export function Slider(props: ViewProps & {
+        value?: number | Ref<number>;
+        min?: number;
+        max?: number;
+        step?: number;
+        disabled?: boolean;
+        onChange?: (v: number) => void;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 下拉选择：触发器沿用 outlined 输入框的盒子指标，
+     * 面板用 --surface-container 浮层 + --elevation-2 阴影，选中项 --secondary-container。
+     */
+    export function Select(props: ViewProps & {
+        store: vm.SelectCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/number-input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 数字输入：右侧一列上下步进按钮（图标按钮，pill 形反馈）。
+     */
+    export function NumberInput(props: ViewProps & {
+        store: vm.NumberInputCore;
+        id?: string;
+        showControls?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/progress" {
+    import { vm } from "packages/timeless/src/index";
+    import { Ref, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Material 3 线性进度条：轨道 --surface-container-highest、
+     * 指示器 --primary（4px 高、pill 圆角）。
+     */
+    export function Progress(props: ViewProps & {
+        store?: vm.ProgressCore;
+        value?: Ref<number> | number;
+        max?: number;
+        variant?: string;
+        striped?: boolean;
+        animated?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/avatar" {
+    import { Ref, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Avatar(props: ViewProps & {
+        src: string | Ref<string>;
+        alt?: string;
+        size?: "sm" | "default" | "lg" | "large";
+        fallback?: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/badge" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Badge(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "tertiary" | "outline" | "destructive" | "danger" | "error" | "success" | "warning" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/separator" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Separator(props: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/skeleton" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/card" {
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * Material 3 卡片：用 --surface-container-* 做层级填充，
+     * 默认 elevated（--elevation-1）；outlined / filled 通过 class 修饰。
+     */
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/alert" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Alert(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "tertiary" | "success" | "warning" | "danger" | "destructive" | "error" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/kbd" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/link" {
+    import { LinkProps as NativeLinkProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Link(props?: NativeLinkProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/material/src/modules/aspect-ratio" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function AspectRatio(props?: ViewProps & {
+        ratio?: number;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/scroll-area" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function ScrollArea(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/field" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSeparator(props?: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+        weight?: "normal" | "medium";
+        tone?: "default" | "destructive";
+    }): TimelessElement;
+    export function FieldInlineLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+    }, children?: ViewChildren): TimelessElement;
+    export function Field(props: ViewProps & {
+        store: vm.SingleFieldCore<any>;
+        id?: string;
+        orientation?: "vertical" | "horizontal";
+        inline?: boolean;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/dialog" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Dialog(props: ViewProps & {
+        store: vm.DialogCore;
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function DialogHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogBody(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogFooter(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/sheet" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Sheet(props: ViewProps & {
+        store: vm.DialogCore;
+        side?: "right" | "top" | "bottom" | "left";
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function SheetHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/popper-shared" {
+    import type { ViewStyleProperties } from "packages/timeless/src/index";
+    /**
+     * 浮动层箭头（popover / popconfirm 共用）。
+     *
+     * 箭头是一个 45° 旋转的小方块，贴在被锚定元素那一侧的对边：
+     *   placement=bottom → 箭头在浮层顶部（.is-top）
+     *   placement=top    → 箭头在浮层底部（.is-bottom）
+     *   placement=right  → 箭头在浮层左侧（.is-left）
+     *   placement=left   → 箭头在浮层右侧（.is-right）
+     *
+     * class 负责“贴哪条边 + 隐藏哪两条边框”，style 负责沿交叉轴的偏移
+     * （优先用 popper 给的 arrow.x / arrow.y，退化时按 align 取 50% / 1rem）。
+     * 与 bootstrap 版本同构，只有 base 类名（.m3-popover__arrow 等）不同。
+     */
+    export function makeArrowStyle(popper_state_: any, base: string): {
+        class: import("@timeless/timeless").DerivedRef<string>;
+        style: import("@timeless/timeless").DerivedRef<ViewStyleProperties>;
+    };
+}
+declare module "packages/material/src/modules/popover" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popover · Material 3
+     *
+     * 类名：.m3-popover / .m3-popover__arrow / .m3-popover__header / .m3-popover__body。
+     * 浮层用 --surface-container + --elevation-2，12px 圆角（--radius）。
+     * Trigger 由 headless 层处理（pointerdown 切换 open），浮层通过 Portal 挂到 body。
+     */
+    export function Popover(props: ViewProps & {
+        store: vm.PopoverCore;
+        title?: ViewChildren;
+        content?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/popconfirm" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popconfirm · Material 3
+     *
+     * 沿用 popover 的视觉语言，命名空间换成 .m3-popconfirm：
+     *   .m3-popconfirm / .m3-popconfirm__arrow / .m3-popconfirm__header /
+     *   .m3-popconfirm__body / .m3-popconfirm__actions
+     *
+     * 操作按钮直接复用 `.m3-btn` 的形态类（cancel = text，confirm = filled）。
+     */
+    export function Popconfirm(props: ViewProps & {
+        store: vm.PopconfirmCore;
+        title?: ViewChildren;
+        description?: ViewChildren;
+        confirmText?: string;
+        cancelText?: string;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/tooltip" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Tooltip(props: ViewProps & {
+        content?: ViewChildren;
+        side?: vm.Side;
+        align?: vm.Align;
+    }, children?: ViewChildren): TimelessElement;
+    export function TooltipProvider(props: ViewProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/material/src/modules/menu-shared" {
+    export const t: {
+        /** 浮层动画时长（CSS 里面对应 .is-enter / .is-exit 的关键帧） */
+        animation: {
+            in: string;
+            out: string;
+        };
+        subAnimation: {
+            in: string;
+            out: string;
+        };
+        menu: {
+            class: string;
+        };
+        submenu: {
+            class: string;
+        };
+        item: {
+            class: string;
+        };
+        itemHover: {
+            class: string;
+        };
+        itemDisabled: {
+            class: string;
+        };
+        label: {
+            class: string;
+        };
+        separator: {
+            class: string;
+        };
+        submenuArrow: {
+            class: string;
+        };
+        icon: {
+            class: string;
+        };
+        shortcut: {
+            class: string;
+        };
+        check: {
+            class: string;
+        };
+    };
+}
+declare module "packages/material/src/modules/menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Menu · Material 3
+     *
+     * 常驻（非浮层）菜单。类名由 menu-shared 的 t 常量提供：
+     *   .m3-menu / .m3-menu__item / .m3-menu__separator / .m3-menu__label。
+     * 条目 hover / pressed 用 state layer（::before 叠 currentColor）。
+     *
+     * 子菜单（item.menu）通过 .m3-menu--submenu 浮层渲染，箭头用 Icon 指示。
+     */
+    export function Menu(props: ViewProps & {
+        store: vm.MenuCore;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export type MenuEntry = vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore;
+    export function renderMenuEntry(item: MenuEntry, Sep: (props: ViewProps) => TimelessElement, Grp: (props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (props: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement): TimelessElement;
+    export function MenuSeparator(_props: ViewProps): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuGroup(props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuItem(props: ViewProps & {
+        store: vm.MenuItemCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function isCheckable(store: vm.MenuItemCore): boolean;
+}
+declare module "packages/material/src/modules/dropdown-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * DropdownMenu · Material 3
+     *
+     * 结构：Trigger + 浮层 Content。类名走 .m3-menu / .m3-menu__item /
+     * .m3-menu__separator / .m3-menu__label（由 menu-shared 的 t 常量提供）。
+     * 条目渲染复用 menu.ts 的骨架（renderMenuEntry），因此子菜单、勾选项、
+     * icon / shortcut 的行为三者完全一致。
+     */
+    export function DropdownMenu(props: ViewProps & {
+        store: vm.DropdownMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/material/src/modules/context-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * ContextMenu · Material 3
+     *
+     * 由右键 / 长按触发（Trigger 内部处理），浮层类名与 DropdownMenu 共用一套
+     * .m3-menu 命名空间，另加 .m3-menu--context 补充右键菜单特有的尺寸细节。
+     */
+    export function ContextMenu(props: ViewProps & {
+        store: vm.ContextMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/material/src/modules/tabs" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tabs · Material 3
+     *
+     * 类名（`m3-tabs` 命名空间）：
+     *   .m3-tabs > .m3-tabs__list > .m3-tabs__tab(.is-active)
+     *            + .m3-tabs__content > .m3-tabs__panel(.is-active)
+     *
+     * 两种视觉：
+     *   · primary（默认）：active 项底部 3px --primary 指示条；
+     *   · secondary：`m3-tabs--secondary` → active 项为 --secondary-container pill。
+     *
+     * headless 层的 TabHeaderCore 用 curId 表示当前选中项，这里映射成 .is-active。
+     */
+    export type TabItem = {
+        value: string;
+        label: string;
+        content?: ViewChildren;
+    };
+    export function Tabs(props: ViewProps & {
+        store: vm.TabHeaderCore<any>;
+        items?: TabItem[];
+        variant?: "primary" | "secondary";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/accordion" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Accordion · Material 3
+     *
+     * 类名（`m3-accordion` 命名空间）：
+     *   .m3-accordion > .m3-accordion__item(.is-open)
+     *       > .m3-accordion__header > .m3-accordion__trigger(.is-open)
+     *       > .m3-accordion__content > .m3-accordion__body
+     *
+     * M3：item 底色 --surface-container-low；展开态标题用 --primary。
+     *
+     * 三点 headless 约束（决定了这里的写法）：
+     *
+     * 1. Trigger 直接改 store.openItems，不会 emit StateChange。因此展开态不能从
+     *    store.state 派生，必须直接跟随 store.openItems（RefArray）。
+     * 2. Trigger / Item 会把 props 透传，所以动态 class 要挂在 .m3-accordion__item
+     *    与 .m3-accordion__trigger 上，由 CSS 用后代选择器控制 __content。
+     * 3. Content 会把传入的 class 强制换成 computed，只在「传入字符串」时保留。
+     *    所以 .m3-accordion__content 只能是固定字符串类名，不能动态加类。
+     *
+     * 为什么不用 data-state：dataset 的响应式更新目前写错属性名（写成裸的
+     * `state` 而不是 `data-state`），所以这里统一用 .is-open 类名表达展开态。
+     */
+    export type AccordionItem = {
+        title: ViewChildren;
+        content: ViewChildren;
+    };
+    export function Accordion(props: ViewProps & {
+        store: vm.AccordionCore;
+        items: AccordionItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/steps" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Steps · Material 3
+     *
+     * 类名（`m3-steps` 命名空间）：
+     *   .m3-steps > .m3-steps__list > .m3-steps__item
+     *       > .m3-steps__indicator + .m3-steps__text(.m3-steps__title/__description)
+     *       + .m3-steps__connector
+     *
+     * 状态：.is-completed / .is-current / .is-upcoming。
+     * M3：current 用 --primary-container 底 + --primary-container-foreground 字；
+     * completed 用 --primary 实心。
+     *
+     * 注意：headless 的 StepsPrimitive.List 会忽略传入的 children 并自行渲染一套
+     * 无 class 的 Item/Indicator 树（Indicator 内部只在有 children 时才输出内容，
+     * 因此编号永远为空）。所以这里只用 Root/Item/Title/Description/Connector 这些
+     * 透传原语，列表本身用 View + For 自己拼装，保证 Material 类名完整。
+     */
+    export type StepItem = {
+        title: string;
+        description?: string;
+    };
+    export function Steps(props: ViewProps & {
+        store: vm.StepCore;
+        items: StepItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/toast" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Toast · Material 3
+     *
+     * 类名（`m3-toast` 命名空间）：.m3-toast / .m3-toast__header / .m3-toast__body。
+     * M3 配色：--surface-container-high + --elevation-3。
+     *
+     * 注意：headless 的 ToastCore 目前没有暴露 state（相关的 getter 全部被注释掉了），
+     * 且 ToastPrimitive.Root 会把 children 原样返回。因此这里不读取 store.state，
+     * 只负责把内容包进作用域内的 .m3-toast 容器；显隐与堆叠交给调用方。
+     */
+    export function Toast(props: ViewProps & {
+        store: vm.ToastCore;
+    }, children?: ViewChildren): ViewChildren;
+}
+declare module "packages/material/src/modules/table" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Table · Material 3
+     *
+     * 根节点挂 .m3-table，其余部位沿用原生语义标签（thead / tbody / tr / th / td），
+     * 样式在 CSS 里通过 .m3-table > thead > tr > th 这类后代选择器作用域化。
+     * M3：行分割线用 --outline-variant；表头字用 --muted-foreground。
+     */
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/material/src/modules/form" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * Form · Material 3
+     *
+     * M3 没有独立的 form 容器组件（表单布局靠 Field / FieldSet 组合）。
+     * 这里与 shadcn / bootstrap 版本保持一致，只做一层透传；给根节点加 .m3-form
+     * 时会得到一个纵向间距容器。字段级渲染请直接用 Field / FieldSet 系列组件。
+     */
+    export function Form(props: ViewProps & {
+        store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/select-shared" {
+    import { vm } from "packages/timeless/src/index";
+    /**
+     * Select 系列的共享渲染逻辑（Material 3 版）。
+     *
+     * Select 与 SearchSelect 的面板结构完全一致（Viewport > 条目列表 / 空态），
+     * 差别只在触发区。把条目渲染抽到这里，避免两处各写一份。
+     * 类名沿用 select.css 的 `.m3-select__*` 命名空间。
+     */
+    export function renderSelectOption(select$: vm.SelectCore<any>, option: vm.SelectItemCore<any>): any;
+    export function renderSelectEntry(select$: vm.SelectCore<any>, entry: vm.SelectItemCore<any> | vm.SelectGroupCore<any>): any;
+    /**
+     * 面板内容：Viewport + 加载态 / 条目列表 / 空态。
+     *
+     * 注意：For 必须常驻挂载，不能塞进 Show 的某个分支里。搜索时
+     * startSearch/finishSearch 会让 loading 反复 true/false，一旦 For 处在
+     * 被 Show 切换的分支内，重建时旧列表不会被清理，条目会不断叠加。
+     */
+    export function SelectPanel(props: {
+        store: vm.SelectCore<any>;
+        entries: any;
+        loading?: any;
+        class?: any;
+    }): any;
+}
+declare module "packages/material/src/modules/search-select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * SearchSelect · Material 3
+     *
+     * 触发器沿用 .m3-select 的盒子指标，内部换成 .m3-select__search 输入框
+     * （复用 select.css 里的类），下拉面板同样是 .m3-select__content。
+     *
+     * 与 Select 的区别：触发区固定渲染搜索框，展开时把触发器注册为 popper 的
+     * reference，使面板宽度与触发器对齐。
+     */
+    export function SearchSelect<T>(props: ViewProps & {
+        store: vm.SelectCore<T>;
+    }, _children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/file-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * FilePicker · Material 3
+     *
+     * 类名（`m3-file-dropzone` / `m3-file-input` 命名空间）。
+     * FileDropZone 负责拖拽 / 点击选择，FileInput 是紧凑的行内文件输入框。
+     * 视觉：虚线 --outline 描边拖拽区，dragging 用 --primary，invalid 用 --destructive。
+     */
+    export function FileDropZone(props: ViewProps & {
+        store: vm.FilePickerCore;
+        tip?: string;
+    }, _children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function FileInput(props: ViewProps & {
+        store: vm.FilePickerCore;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/resizable-panels" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ResizablePanels · Material 3
+     *
+     * 类名（`m3-resizable` 命名空间）：.m3-resizable / .m3-resizable__panel /
+     * .m3-resizable__handle / .m3-resizable__grip。
+     * 视觉：分割线用 --outline-variant，hover / dragging 用 --primary，
+     * 焦点环沿用 M3 的 --ring-color。
+     */
+    export function ResizablePanels(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        direction?: "horizontal" | "vertical";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizablePanel(props: ViewProps & {
+        store: vm.ResizablePanelCore;
+        group: vm.ResizablePanelsCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizableHandle(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        panelBefore: vm.ResizablePanelCore;
+        panelAfter: vm.ResizablePanelCore;
+        withHandle?: boolean;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/date-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /** 浮层进出场类名（CSS 里对应 .is-enter / .is-exit 的关键帧）。 */
+    export const PICKER_ANIMATION: {
+        in: string;
+        out: string;
+    };
+    /**
+     * DatePicker · Material 3
+     *
+     * 类名：.m3-datepicker（触发器，沿用 outlined 输入框指标）
+     *   + .m3-datepicker__content（浮层：--surface-container-high + --elevation-3 + 28px 圆角）
+     *   + .m3-datepicker__header / __title / __nav / __weekdays / __weekday
+     *   + .m3-datepicker__grid / __week / __cell（40px 圆形 cell）
+     *
+     * cell 状态：.is-active（--primary 填充）/ .is-today（1px --primary 描边）/
+     * .is-outside（相邻月份）。hover / pressed 走 state layer（::before）。
+     */
+    export function DatePicker(props: ViewProps & {
+        store: vm.DatePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    /**
+     * 单个日期 cell 的渲染。date-picker / date-time-picker 两处结构一致，
+     * 只有 block 前缀不同，故抽成共享函数。
+     */
+    export function render_cell(store: any, calendar_state_: any, day: any, block: string): any;
+}
+declare module "packages/material/src/modules/date-range-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * DateRangePicker · Material 3
+     *
+     * 双月面板。类名：.m3-daterangepicker（触发器）+ .m3-daterangepicker__content
+     *   + .m3-daterangepicker__panels / __panel / __header / __title / __nav
+     *   + .m3-daterangepicker__weekdays / __weekday / __grid / __week / __cell。
+     *
+     * cell 状态：.is-in-range（--primary-container 底带）/ .is-range-start /
+     * .is-range-end（--primary 圆形端点）/ .is-today / .is-outside。
+     * 端点之间用 ::before 画连续底带，端头用 pill 圆角。
+     */
+    export function DateRangePicker(props: ViewProps & {
+        store: vm.DateRangePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * 时 / 分 / 秒三列（ScrollViewPrimitive.Root + option 列表）。
+     *
+     * TimePicker 与 DateTimePicker 共用：两者只有外层容器与是否显示秒的差别，
+     * 列本身的结构、选中态与滚动定位完全一致，故抽到此处。
+     * 类名沿用 time-picker.css 的 `.m3-timepicker__columns` / `__column` / `__option`。
+     */
+    export function TimeColumns(props: {
+        store: vm.TimePickerCore;
+        state_: any;
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    /**
+     * TimePicker · Material 3
+     *
+     * 类名：.m3-timepicker（触发器）+ .m3-timepicker__content（浮层，28px 圆角）
+     *   + .m3-timepicker__display（顶部大字号时间）+ .m3-timepicker__columns
+     *   + .m3-timepicker__column（细滚动条）+ .m3-timepicker__option（hover/pressed
+     *     走 state layer）+ .m3-timepicker__footer / __action。
+     */
+    export function TimePicker(props: ViewProps & {
+        store: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/date-time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * DateTimePicker · Material 3
+     *
+     * 由 DatePickerCore + TimePickerCore 组合：左日历右时间列，底部操作条。
+     * 日历部分直接复用 date-picker.css 的 `.m3-datepicker__*` 类；
+     * 时间列复用 time-picker.css / TimeColumns。
+     * 外层类名：.m3-datetimepicker（触发器）+ .m3-datetimepicker__content。
+     */
+    export function DateTimePicker(props: ViewProps & {
+        date: vm.DatePickerCore;
+        time: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/cascader" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Cascader · Material 3
+     *
+     * 类名：.m3-cascader（触发器）+ .m3-cascader__content（浮层，28px 圆角）
+     *   + .m3-cascader__search / __results / __result
+     *   + .m3-cascader__panels / __panel / __item（hover 用 state layer）
+     *   + .m3-cascader__item.is-active（--secondary-container 底）
+     *   + .m3-cascader__path（搜索结果的路径文字）。
+     */
+    export function Cascader(props: ViewProps & {
+        store: vm.CascaderCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/material/src/modules/scroll-view" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ScrollView · Material 3
+     *
+     * 类名：.m3-scroll-view（细滚动条，取自 --outline）。
+     * 直接包 ui.ScrollViewPrimitive.Root：滚动位置、到达底部等行为都由 headless 层
+     * 通过 ScrollViewCore + provider 完成，这里只负责作用域类名。
+     */
+    export function ScrollView(props: ViewProps & {
+        store: vm.ScrollViewCore;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/material/src/modules/affix" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Affix · Material 3
+     *
+     * 类名：.m3-affix（+ 固定态 .is-fixed）。固定时 position/top 由 store 状态决定，
+     * 走内联 style；过渡交给 CSS（--duration-short + --easing-standard）。
+     *
+     * offsetTop 由调用方传入（与 store 的 top 保持一致），用于计算 fixed 时的 top。
+     */
+    export function Affix(props: ViewProps & {
+        store: vm.AffixCore;
+        offsetTop?: number;
+        target?: () => HTMLElement | Window;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/waterfall" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Waterfall · Material 3
+     *
+     * 结构：.m3-waterfall（横向 flex 容器）> .m3-waterfall__column > .m3-waterfall__item。
+     * 列高、放置策略、可视区间都在 WaterfallModel 内计算：列高经 column.state.height、
+     * 格子的 top/height/bound 经 cell.state 以内联 style 落到 DOM，这里只负责类名、
+     * 槽位绑定与状态订阅。容器自身不滚动，滚动交给外层 ScrollView。
+     */
+    export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
+        store: vm.WaterfallModel<T>;
+        render: (payload: T, cell: vm.WaterfallCellModel<T>) => TimelessElement;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/material/src/modules/tree" {
+    import { ui, vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tree · Material 3
+     *
+     * 逻辑全在 `vm.TreeCore`，DOM 形状全在 `ui.TreePrimitive`。这里只把 M3 的类名
+     * 对进 primitive 的 `TreeClassNames` 槽位，并给出 M3 的行高 / 缩进。
+     *
+     * 类名契约（配合 style/components/tree.css）：
+     *   .m3-tree > .m3-tree__scroll > .m3-tree__row
+     * 行内：.m3-tree__guide(data-tree-guide) / .m3-tree__line(data-tree-line)
+     * 状态：.is-lifted / .is-drop-into / .is-before / .is-after / .is-selected
+     *       / .is-checked / .is-indeterminate / .is-disabled
+     */
+    export const TREE_CLASSES: ui.TreePrimitive.TreeClassNames;
+    export type TreeProps = Omit<ui.TreePrimitive.TreeRootProps, "classes"> & ViewProps & {
+        store: vm.TreeCore;
+    };
+    export function Tree(props: TreeProps): TimelessElement;
+    /** 自定义行渲染时复用的行槽位（`renderRow` 里拿到 props 再交给它）。 */
+    export function TreeRow(props: ui.TreePrimitive.TreeRowProps): TimelessElement;
+    export function TreeCheckbox(props: ui.TreePrimitive.TreeCheckboxProps): TimelessElement;
+    export function TreeIndicator(props?: {
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+    export function TreeEmpty(props?: {
+        text?: string;
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+}
+declare module "packages/material/src/modules/flow" {
+    import { vm } from "packages/timeless/src/index";
+    import { SVG, TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    type FlowNodeViewRender = Record<string, (props: {
+        node: vm.FlowNodeModel;
+    }) => ViewChildren>;
+    export interface FlowViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeTypes?: FlowNodeViewRender;
+        showBackground?: boolean;
+        backgroundVariant?: "dots" | "lines" | "cross";
+        showMinimap?: boolean;
+        showControls?: boolean;
+        multiSelect?: boolean;
+        minZoom?: number;
+        maxZoom?: number;
+        nodesDraggable?: boolean;
+        nodesConnectable?: boolean;
+    }
+    export interface FlowHandleViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeId: string;
+        handleId: string;
+        type: "source" | "target";
+        position?: "top" | "right" | "bottom" | "left";
+        index: number;
+        total: number;
+        connectable?: boolean;
+    }
+    /** 节点侧边的连接点。同一侧有多个时按 20px 步长在 `50%` 上下均分。 */
+    export function FlowHandle(props: FlowHandleViewProps): TimelessElement;
+    export interface FlowNodeViewProps extends ViewProps {
+        store: vm.FlowNodeModel;
+        nodeTypes: FlowNodeViewRender;
+    }
+    /**
+     * 一个节点。悬浮时在上方浮出动作条（详情 / 更多 / 失败时的重试）。
+     *
+     * 拖拽用 document 级 mousemove/mouseup（不是 pointer capture）：节点可能在拖拽
+     * 过程中被 `For` 重建，绑在节点上的监听会跟着丢。
+     */
+    export function FlowNodeView(props: FlowNodeViewProps): TimelessElement;
+    /**
+     * 一条边。里面两根同 `d` 的 path：下面那根透明、20px 粗，只为了拿到点击；
+     * 上面那根才是看到的线。`animated` 时挂 `is-animated` 驱动 `stroke-dashoffset`
+     * 流动（keyframes 在各库 flow.css 里按库前缀命名）。
+     */
+    export function FlowEdgeView(props: ViewProps & {
+        store: vm.FlowEdgeModel;
+    }): ReturnType<typeof SVG.G>;
+    export function FlowBackground(props: ViewProps & {
+        variant?: "dots" | "lines" | "cross";
+        gap?: number;
+        size?: number;
+        color?: string;
+    }): TimelessElement;
+    export function FlowMinimap(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowControls(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): TimelessElement;
+    export const FlowEdge_: typeof FlowEdgeView;
+    export const FlowNode_: typeof FlowNodeView;
+    export const FlowHandle_: typeof FlowHandle;
+    global {
+        interface Window {
+            flowConnecting: {
+                nodeId: string;
+                handleId: string;
+                type: "source" | "target";
+                startX: number;
+                startY: number;
+                currentX: number;
+                currentY: number;
+            } | null;
+            flowConnectingLineUpdate: ((path: string, visible: boolean) => void) | null;
+        }
+    }
+}
+declare module "packages/material/src/index" {
+    import { Gallery } from "packages/material/src/modules/gallery";
+    import { Button } from "packages/material/src/modules/button";
+    import { Input } from "packages/material/src/modules/input";
+    import { Textarea } from "packages/material/src/modules/textarea";
+    import { Label } from "packages/material/src/modules/label";
+    import { Checkbox } from "packages/material/src/modules/checkbox";
+    import { CheckboxGroup, CheckboxGroupItem } from "packages/material/src/modules/checkbox-group";
+    import { Radio, RadioGroup, RadioGroupItem } from "packages/material/src/modules/radio";
+    import { Switch } from "packages/material/src/modules/switch";
+    import { Toggle } from "packages/material/src/modules/toggle";
+    import { Slider } from "packages/material/src/modules/slider";
+    import { Select } from "packages/material/src/modules/select";
+    import { NumberInput } from "packages/material/src/modules/number-input";
+    import { Progress } from "packages/material/src/modules/progress";
+    import { Avatar } from "packages/material/src/modules/avatar";
+    import { Badge } from "packages/material/src/modules/badge";
+    import { Separator } from "packages/material/src/modules/separator";
+    import { Skeleton } from "packages/material/src/modules/skeleton";
+    import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "packages/material/src/modules/card";
+    import { Alert, AlertTitle, AlertDescription } from "packages/material/src/modules/alert";
+    import { Kbd, KbdGroup } from "packages/material/src/modules/kbd";
+    import { Link } from "packages/material/src/modules/link";
+    import { AspectRatio } from "packages/material/src/modules/aspect-ratio";
+    import { ScrollArea } from "packages/material/src/modules/scroll-area";
+    import { Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet } from "packages/material/src/modules/field";
+    import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose } from "packages/material/src/modules/dialog";
+    import { Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose } from "packages/material/src/modules/sheet";
+    import { Popover } from "packages/material/src/modules/popover";
+    import { Popconfirm } from "packages/material/src/modules/popconfirm";
+    import { Tooltip, TooltipProvider } from "packages/material/src/modules/tooltip";
+    import { DropdownMenu } from "packages/material/src/modules/dropdown-menu";
+    import { ContextMenu } from "packages/material/src/modules/context-menu";
+    import { Menu } from "packages/material/src/modules/menu";
+    import { Tabs } from "packages/material/src/modules/tabs";
+    import { Accordion } from "packages/material/src/modules/accordion";
+    import { Steps } from "packages/material/src/modules/steps";
+    import { Toast } from "packages/material/src/modules/toast";
+    import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/material/src/modules/table";
+    import { Form } from "packages/material/src/modules/form";
+    import { SearchSelect } from "packages/material/src/modules/search-select";
+    import { FileDropZone, FileInput } from "packages/material/src/modules/file-picker";
+    import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/material/src/modules/resizable-panels";
+    import { DatePicker } from "packages/material/src/modules/date-picker";
+    import { DateRangePicker } from "packages/material/src/modules/date-range-picker";
+    import { TimePicker } from "packages/material/src/modules/time-picker";
+    import { DateTimePicker } from "packages/material/src/modules/date-time-picker";
+    import { Cascader } from "packages/material/src/modules/cascader";
+    import { ScrollView } from "packages/material/src/modules/scroll-view";
+    import { Affix } from "packages/material/src/modules/affix";
+    import { Waterfall } from "packages/material/src/modules/waterfall";
+    import { Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES } from "packages/material/src/modules/tree";
+    import { FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/material/src/modules/flow";
+    export const TimelessMaterialVersion: any;
+    export { Gallery, Button, Input, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Switch, Toggle, Slider, Select, NumberInput, Progress, Avatar, Badge, Separator, Skeleton, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Alert, AlertTitle, AlertDescription, Kbd, KbdGroup, Link, AspectRatio, ScrollArea, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose, Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose, Popover, Popconfirm, Tooltip, TooltipProvider, DropdownMenu, ContextMenu, Menu, Tabs, Accordion, Steps, Toast, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Form, SearchSelect, FileDropZone, FileInput, ResizablePanels, ResizablePanel, ResizableHandle, DatePicker, DateRangePicker, TimePicker, DateTimePicker, Cascader, ScrollView, Affix, Waterfall, Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
+}
+declare module "packages/fluent/src/modules/gallery" {
+    import { vm, type ViewProps } from "packages/timeless/src/index";
+    /** fluent visual composition; selection and modal behavior live in shared layers. */
+    export function Gallery(props: ViewProps & {
+        store: vm.GalleryCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/button" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Button(props: ViewProps & {
+        store: vm.ButtonCore;
+        prefix?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Input(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/textarea" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Textarea(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+        showClear?: boolean;
+        showLoading?: boolean;
+        showCount?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/label" {
+    import { LabelProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Label(props: LabelProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/fluent/src/modules/checkbox" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Checkbox(props: ViewProps & {
+        store: vm.CheckboxCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/checkbox-group" {
+    import { vm } from "packages/timeless/src/index";
+    export function CheckboxGroup(props: {
+        store: vm.CheckboxGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CheckboxGroupItem(props: {
+        store: vm.CheckboxGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.CheckboxCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/radio" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Radio(props: ViewProps & {
+        store: vm.RadioCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function RadioGroup(props: ViewProps & {
+        store: vm.RadioGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function RadioGroupItem(props: {
+        store: vm.RadioGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.RadioCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/switch" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Switch(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/toggle" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Toggle(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/slider" {
+    import { ViewProps, Ref } from "packages/timeless/src/index";
+    export function Slider(props: ViewProps & {
+        value?: number | Ref<number>;
+        min?: number;
+        max?: number;
+        step?: number;
+        disabled?: boolean;
+        onChange?: (v: number) => void;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Select(props: ViewProps & {
+        store: vm.SelectCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/number-input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function NumberInput(props: ViewProps & {
+        store: vm.NumberInputCore;
+        id?: string;
+        showControls?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/progress" {
+    import { vm } from "packages/timeless/src/index";
+    import { Ref, ViewProps } from "packages/timeless/src/index";
+    export function Progress(props: ViewProps & {
+        store?: vm.ProgressCore;
+        value?: Ref<number> | number;
+        max?: number;
+        variant?: string;
+        striped?: boolean;
+        animated?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/avatar" {
+    import { Ref, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Avatar(props: ViewProps & {
+        src: string | Ref<string>;
+        alt?: string;
+        size?: "sm" | "default" | "lg" | "large";
+        fallback?: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/badge" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Badge(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "outline" | "destructive" | "danger" | "success" | "warning" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/separator" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Separator(props: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/skeleton" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/card" {
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/alert" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Alert(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | "destructive" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/kbd" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/link" {
+    import { LinkProps as NativeLinkProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Link(props?: NativeLinkProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/fluent/src/modules/aspect-ratio" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function AspectRatio(props?: ViewProps & {
+        ratio?: number;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/scroll-area" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function ScrollArea(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/field" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSeparator(props?: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+        weight?: "normal" | "medium";
+        tone?: "default" | "destructive";
+    }): TimelessElement;
+    export function FieldInlineLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+    }, children?: ViewChildren): TimelessElement;
+    export function Field(props: ViewProps & {
+        store: vm.SingleFieldCore<any>;
+        id?: string;
+        orientation?: "vertical" | "horizontal";
+        inline?: boolean;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/dialog" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Dialog(props: ViewProps & {
+        store: vm.DialogCore;
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function DialogHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogBody(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogFooter(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/sheet" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Sheet(props: ViewProps & {
+        store: vm.DialogCore;
+        side?: "right" | "top" | "bottom" | "left";
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function SheetHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/popper-shared" {
+    import type { ViewStyleProperties } from "packages/timeless/src/index";
+    /**
+     * 浮动层箭头（popover / popconfirm / tooltip 共用）。
+     *
+     * Fluent 2 的箭头是一个 45° 旋转的小方块（0.5rem），贴在被锚定元素那一侧的对边：
+     *   placement=bottom → 箭头在浮层顶部（.is-top）
+     *   placement=top    → 箭头在浮层底部（.is-bottom）
+     *   placement=right  → 箭头在浮层左侧（.is-left）
+     *   placement=left   → 箭头在浮层右侧（.is-right）
+     *
+     * class 负责“贴哪条边 + 隐藏哪两条边框”，style 负责沿交叉轴的偏移
+     * （优先用 popper 给的 arrow.x / arrow.y，退化时按 align 取 50% / 1rem）。
+     */
+    export function makeArrowStyle(popper_state_: any, base: string): {
+        class: import("@timeless/timeless").DerivedRef<string>;
+        style: import("@timeless/timeless").DerivedRef<ViewStyleProperties>;
+    };
+}
+declare module "packages/fluent/src/modules/popover" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popover · Fluent 2
+     *
+     * 结构：.fl-popover > .fl-popover__arrow / .fl-popover__header / .fl-popover__body。
+     * Trigger 由 headless 层处理（pointerdown 切换 open），浮层通过 Portal 挂到 body。
+     * Fluent 2 特征：1px --stroke2 + --shadow-16。
+     */
+    export function Popover(props: ViewProps & {
+        store: vm.PopoverCore;
+        title?: ViewChildren;
+        content?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/popconfirm" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popconfirm · Fluent 2
+     *
+     * 用 .fl-popconfirm 作为命名空间：
+     *   .fl-popconfirm__arrow / __header / __body / __actions。
+     * 视觉沿用 popover 的 1px --stroke2 + --shadow-16。
+     */
+    export function Popconfirm(props: ViewProps & {
+        store: vm.PopconfirmCore;
+        title?: ViewChildren;
+        description?: ViewChildren;
+        confirmText?: string;
+        cancelText?: string;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/tooltip" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Tooltip(props: ViewProps & {
+        content?: ViewChildren;
+        side?: vm.Side;
+        align?: vm.Align;
+    }, children?: ViewChildren): TimelessElement;
+    export function TooltipProvider(props: ViewProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/fluent/src/modules/menu-shared" {
+    export const t: {
+        /** 浮层动画时长（CSS 里面对应 .is-enter / .is-exit 的关键帧） */
+        animation: {
+            in: string;
+            out: string;
+        };
+        subAnimation: {
+            in: string;
+            out: string;
+        };
+        menu: {
+            class: string;
+        };
+        submenu: {
+            class: string;
+        };
+        item: {
+            class: string;
+        };
+        itemHover: {
+            class: string;
+        };
+        itemDisabled: {
+            class: string;
+        };
+        label: {
+            class: string;
+        };
+        separator: {
+            class: string;
+        };
+        submenuArrow: {
+            class: string;
+        };
+        icon: {
+            class: string;
+        };
+        shortcut: {
+            class: string;
+        };
+        check: {
+            class: string;
+        };
+    };
+}
+declare module "packages/fluent/src/modules/menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Menu · Fluent 2（常驻菜单）
+     *
+     * 类名：.fl-menu / .fl-menu__item / .fl-menu__separator / .fl-menu__label。
+     * 选中/聚焦用左侧 3px --compound-brand 竖条（见 dropdown-menu.css）。
+     *
+     * 子菜单（item.menu）通过 .fl-menu--submenu 浮层渲染，箭头用 Icon 指示。
+     */
+    export function Menu(props: ViewProps & {
+        store: vm.MenuCore;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export type MenuEntry = vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore;
+    export function renderMenuEntry(item: MenuEntry, Sep: (props: ViewProps) => TimelessElement, Grp: (props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (props: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement): TimelessElement;
+    export function MenuSeparator(_props: ViewProps): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuGroup(props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuItem(props: ViewProps & {
+        store: vm.MenuItemCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function isCheckable(store: vm.MenuItemCore): boolean;
+}
+declare module "packages/fluent/src/modules/dropdown-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * DropdownMenu · Fluent 2
+     *
+     * 结构：Trigger + 浮层 Content。类名走 .fl-menu / .fl-menu__item /
+     * .fl-menu__separator / .fl-menu__label（由 menu-shared 的 t 常量提供）。
+     * 条目渲染复用 menu.ts 的骨架（renderMenuEntry），因此子菜单、勾选项、
+     * icon / shortcut 的行为三者完全一致。
+     */
+    export function DropdownMenu(props: ViewProps & {
+        store: vm.DropdownMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/fluent/src/modules/context-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * ContextMenu · Fluent 2
+     *
+     * 由右键 / 长按触发（Trigger 内部处理），浮层类名与 DropdownMenu 共用一套
+     * .fl-menu 命名空间，额外加 .fl-menu--context 表达右键菜单的尺寸/定位。
+     */
+    export function ContextMenu(props: ViewProps & {
+        store: vm.ContextMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/fluent/src/modules/tabs" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tabs · Fluent 2
+     *
+     * 类名：.fl-tabs / .fl-tabs__list / .fl-tabs__tab（.is-active）/ .fl-tabs__content /
+     * .fl-tabs__panel。
+     *
+     * Fluent 2 特征：动画下划线 pill —— 当前项底部 2px --compound-brand 圆角指示条，
+     * 带 transition；hover 用 --surface-1-hover。
+     *
+     * headless 层的 TabHeaderCore 用 curId 表示当前选中项，这里映射成 .is-active。
+     */
+    export type TabItem = {
+        value: string;
+        label: string;
+        content?: ViewChildren;
+    };
+    export function Tabs(props: ViewProps & {
+        store: vm.TabHeaderCore<any>;
+        items?: TabItem[];
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/accordion" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Accordion · Fluent 2
+     *
+     * 类名：.fl-accordion / .fl-accordion__item / .fl-accordion__header /
+     * .fl-accordion__trigger / .fl-accordion__chevron / .fl-accordion__panel /
+     * .fl-accordion__body。分隔用 1px --stroke2，展开态标题字重 600。
+     *
+     * 三点 headless 约束（决定了这里的写法）：
+     *
+     * 1. Trigger 直接改 store.openItems，不会 emit StateChange。因此展开态不能从
+     *    store.state 派生，必须直接跟随 store.openItems（RefArray）。
+     * 2. Trigger / Item 会把 props 透传，所以动态 class 要挂在 .fl-accordion__item 与
+     *    .fl-accordion__trigger 上，由 CSS 用后代选择器控制 .fl-accordion__panel。
+     * 3. Content 会把传入的 class 强制换成 computed，只在「传入字符串」时保留。
+     *    所以 .fl-accordion__panel 只能是固定字符串类名，不能动态加类。
+     *
+     * 为什么不用 data-state：dataset 的响应式更新目前写错属性名（写成了裸的
+     * `state` 而不是 `data-state`），所以这里统一用 .is-open 类名表达展开态。
+     */
+    export type AccordionItem = {
+        title: ViewChildren;
+        content: ViewChildren;
+    };
+    export function Accordion(props: ViewProps & {
+        store: vm.AccordionCore;
+        items: AccordionItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/steps" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Steps · Fluent 2
+     *
+     * 类名：.fl-steps / .fl-steps__list / .fl-steps__item /
+     * .fl-steps__indicator / .fl-steps__text / .fl-steps__title /
+     * .fl-steps__description / .fl-steps__connector。
+     *
+     * Fluent 2 特征：active 用 --compound-brand，completed 用 --success。
+     * 状态通过 .is-completed / .is-current / .is-upcoming 表达。
+     *
+     * 注意：headless 的 StepsPrimitive.List 会忽略传入的 children 并自行渲染一套
+     * 无 class 的 Item/Indicator 树（Indicator 内部只在有 children 时才输出内容，
+     * 因此编号永远为空）。所以这里只用 Root/Item/Title/Description/Connector 这些
+     * 透传原语，列表本身用 View + For 自己拼装，保证 Fluent 类名完整。
+     */
+    export type StepItem = {
+        title: string;
+        description?: string;
+    };
+    export function Steps(props: ViewProps & {
+        store: vm.StepCore;
+        items: StepItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/toast" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Toast(props: ViewProps & {
+        store: vm.ToastCore;
+        variant?: string;
+    }, children?: ViewChildren): ViewChildren;
+}
+declare module "packages/fluent/src/modules/table" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Table · Fluent 2
+     *
+     * 根节点挂 .fl-table，其余部位沿用原生语义标签（thead / tbody / tr / th / td），
+     * 样式在 CSS 里通过 .fl-table > thead > tr > th 这类后代选择器作用域化。
+     * Fluent 2 特征：行分割线 --stroke2，表头字 --colorNeutralForeground3。
+     */
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/fluent/src/modules/form" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * Form · Fluent 2
+     *
+     * Fluent 2 没有独立的 form 容器语义，这里只提供一层纵向布局容器（.fl-form），
+     * 字段级渲染请直接用 Field / FieldSet 系列组件。
+     */
+    export function Form(props: ViewProps & {
+        store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/select-shared" {
+    import { vm } from "packages/timeless/src/index";
+    /**
+     * Select 系列的共享渲染逻辑（Fluent 2 · fl-select__*）。
+     *
+     * Select 与 SearchSelect 的面板结构完全一致（Viewport > 条目列表 / 空态），
+     * 差别只在触发区。把条目渲染抽到这里，避免两处各写一份。
+     */
+    export function renderSelectOption(select$: vm.SelectCore<any>, option: vm.SelectItemCore<any>): any;
+    export function renderSelectEntry(select$: vm.SelectCore<any>, entry: vm.SelectItemCore<any> | vm.SelectGroupCore<any>): any;
+    /**
+     * 面板内容：Viewport + 加载态 / 条目列表 / 空态。
+     *
+     * 注意：For 必须常驻挂载，不能塞进 Show 的某个分支里。搜索时
+     * startSearch/finishSearch 会让 loading 反复 true/false，一旦 For 处在
+     * 被 Show 切换的分支内，重建时旧列表不会被清理，条目会不断叠加。
+     */
+    export function SelectPanel(props: {
+        store: vm.SelectCore<any>;
+        entries: any;
+        loading?: any;
+        class?: any;
+    }): any;
+}
+declare module "packages/fluent/src/modules/search-select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * SearchSelect · Fluent 2
+     *
+     * 触发器沿用 .fl-select 的盒子指标（1px --stroke1 / 4px 圆角 / 32px 高），
+     * 内部换成 .fl-select__search 输入框，下拉面板同样是 .fl-select__content
+     * （样式复用 select.css）。
+     *
+     * 与 Select 的区别：触发区固定渲染搜索框，展开时把触发器注册为 popper 的
+     * reference，使面板宽度与触发器对齐。
+     */
+    export function SearchSelect<T>(props: ViewProps & {
+        store: vm.SelectCore<T>;
+    }, _children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/file-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * FilePicker · Fluent 2
+     *
+     * 用 .fl-file-dropzone / .fl-file-input 命名空间表达 Fluent 的 1px stroke +
+     * 4px 圆角 + 分级阴影。
+     *
+     * FileDropZone 负责拖拽 / 点击选择，FileInput 是紧凑的行内文件输入框。
+     */
+    export function FileDropZone(props: ViewProps & {
+        store: vm.FilePickerCore;
+        tip?: string;
+    }, _children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function FileInput(props: ViewProps & {
+        store: vm.FilePickerCore;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/resizable-panels" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ResizablePanels · Fluent 2
+     *
+     * Fluent 2 的 1px stroke + 4px 圆角 + 分级阴影：
+     *   .fl-resizable / .fl-resizable__panel / .fl-resizable__handle / .fl-resizable__grip
+     */
+    export function ResizablePanels(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        direction?: "horizontal" | "vertical";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizablePanel(props: ViewProps & {
+        store: vm.ResizablePanelCore;
+        group: vm.ResizablePanelsCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizableHandle(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        panelBefore: vm.ResizablePanelCore;
+        panelAfter: vm.ResizablePanelCore;
+        withHandle?: boolean;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/date-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function DateCalendarPanel(props: {
+        store: vm.DatePickerCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DatePicker(props: ViewProps & {
+        store: vm.DatePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/date-range-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function DateRangePicker(props: ViewProps & {
+        store: vm.DateRangePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function formatTempTime(store: vm.TimePickerCore, s: {
+        t_hour: number | null;
+        t_minute: number | null;
+        t_second: number | null;
+    }): string;
+    export function TimePreview(props: {
+        store: vm.TimePickerCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function TimeColumns(props: {
+        store: vm.TimePickerCore;
+        hourview$: vm.ScrollViewCore;
+        minuteview$: vm.ScrollViewCore;
+        secondview$: vm.ScrollViewCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function TimePicker(props: ViewProps & {
+        store: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/date-time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * DateTimePicker · Fluent 2
+     *
+     * 单个触发器 + 浮层内左右两栏：左侧复用 date-picker 的日历面板
+     * （.fl-datepicker__*），右侧复用 time-picker 的三列滚动（.fl-timepicker__*）。
+     * 容器用 .fl-datetimepicker__panes / __pane / __footer。
+     *
+     * date$ 是 DatePickerCore（提供 popover/presence 与日历），time$ 是 TimePickerCore。
+     */
+    export function DateTimePicker(props: ViewProps & {
+        date: vm.DatePickerCore;
+        time: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/cascader" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Cascader · Fluent 2
+     *
+     * 结构：.fl-cascader（触发器）> __value + 清除/箭头
+     *       .fl-cascader__content
+     *         ├─ .fl-cascader__search（可选）
+     *         ├─ .fl-cascader__search-results > .fl-cascader__search-result > .fl-cascader__path
+     *         └─ .fl-cascader__panel × N > .fl-cascader__item（+ .is-active 左侧 3px --compound-brand）
+     *
+     * 触发器与 select 同盒子指标（1px --stroke1、4px 圆角、32px 高）。
+     */
+    export function Cascader(props: ViewProps & {
+        store: vm.CascaderCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/fluent/src/modules/scroll-view" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ScrollView · Fluent 2
+     *
+     * 复用 headless 的 ScrollViewPrimitive.Root（负责尺寸/滚动量上报），
+     * 只负责挂上 .fl-scroll-view 的 Fluent 细滚动条（样式见 scroll-view.css，
+     * 与 .fl-scroll-area 同一套 thumb 规则）。滚动行为/触底回调都在 store 上。
+     */
+    export function ScrollView(props: ViewProps & {
+        store: vm.ScrollViewCore;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/fluent/src/modules/affix" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Affix · Fluent 2
+     *
+     * 滚动到阈值后把内容 fixed 到顶部（.fl-affix.is-fixed）。位置/阈值由
+     * AffixCore 计算，模块只把 store.fixed 映射成类名与内联定位，
+     * 并在固定态用 --duration-fast 过渡（见 affix.css）。
+     *
+     * 挂载时记录元素顶部绝对位置，并监听滚动目标（默认 window）持续上报。
+     */
+    export function Affix(props: ViewProps & {
+        store: vm.AffixCore;
+        offsetTop?: number;
+        target?: () => HTMLElement | Window;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/fluent/src/modules/waterfall" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Waterfall · Fluent 2
+     *
+     * 瀑布流容器：.fl-waterfall > .fl-waterfall__column × N > .fl-waterfall__item。
+     * 列高、放置策略、可视区间都在 WaterfallModel 内计算；模块只把
+     * Fluent 类名挂到 Root / Column / Cell 上，并交给上层 ScrollView 驱动滚动。
+     */
+    export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
+        store: vm.WaterfallModel<T>;
+        render: (payload: T, cell: vm.WaterfallCellModel<T>) => TimelessElement;
+    }): TimelessElement<any, any>;
+}
+declare module "packages/fluent/src/modules/tree" {
+    import { ui, vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tree · Fluent 2
+     *
+     * 逻辑全在 `vm.TreeCore`，DOM 形状全在 `ui.TreePrimitive`。这里只把 Fluent 的
+     * 类名对进 primitive 的 `TreeClassNames` 槽位，并给出 Fluent 的行高 / 缩进。
+     *
+     * 类名契约（配合 style/components/tree.css）：
+     *   .fl-tree > .fl-tree__scroll > .fl-tree__row
+     * 行内：.fl-tree__guide(data-tree-guide) / .fl-tree__line(data-tree-line)
+     * 状态：.is-lifted / .is-drop-into / .is-before / .is-after / .is-selected
+     *       / .is-checked / .is-indeterminate / .is-disabled
+     */
+    export const TREE_CLASSES: ui.TreePrimitive.TreeClassNames;
+    export type TreeProps = Omit<ui.TreePrimitive.TreeRootProps, "classes"> & ViewProps & {
+        store: vm.TreeCore;
+    };
+    /** Tree 的公开入口。primitive 参数原样透传，只补 Fluent 的类名与默认尺寸。 */
+    export function Tree(props: TreeProps): TimelessElement;
+    /** 自定义行渲染时复用的行槽位（`renderRow` 里拿到 props 再交给它）。 */
+    export function TreeRow(props: ui.TreePrimitive.TreeRowProps): TimelessElement;
+    export function TreeCheckbox(props: ui.TreePrimitive.TreeCheckboxProps): TimelessElement;
+    export function TreeIndicator(props?: {
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+    export function TreeEmpty(props?: {
+        text?: string;
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+}
+declare module "packages/fluent/src/modules/flow" {
+    import { vm } from "packages/timeless/src/index";
+    import { SVG, TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    type FlowNodeViewRender = Record<string, (props: {
+        node: vm.FlowNodeModel;
+    }) => ViewChildren>;
+    export interface FlowViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeTypes?: FlowNodeViewRender;
+        showBackground?: boolean;
+        backgroundVariant?: "dots" | "lines" | "cross";
+        showMinimap?: boolean;
+        showControls?: boolean;
+        multiSelect?: boolean;
+        minZoom?: number;
+        maxZoom?: number;
+        nodesDraggable?: boolean;
+        nodesConnectable?: boolean;
+    }
+    export interface FlowHandleViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeId: string;
+        handleId: string;
+        type: "source" | "target";
+        position?: "top" | "right" | "bottom" | "left";
+        index: number;
+        total: number;
+        connectable?: boolean;
+    }
+    /** 节点侧边的连接点。同一侧有多个时按 20px 步长在 `50%` 上下均分。 */
+    export function FlowHandle(props: FlowHandleViewProps): TimelessElement;
+    export interface FlowNodeViewProps extends ViewProps {
+        store: vm.FlowNodeModel;
+        nodeTypes: FlowNodeViewRender;
+    }
+    /**
+     * 一个节点。悬浮时在上方浮出动作条（详情 / 更多 / 失败时的重试）。
+     *
+     * 拖拽用 document 级 mousemove/mouseup（不是 pointer capture）：节点可能在拖拽
+     * 过程中被 `For` 重建，绑在节点上的监听会跟着丢。
+     */
+    export function FlowNodeView(props: FlowNodeViewProps): TimelessElement;
+    /**
+     * 一条边。里面两根同 `d` 的 path：下面那根透明、20px 粗，只为了拿到点击；
+     * 上面那根才是看到的线。`animated` 时挂 `is-animated` 驱动 `stroke-dashoffset`
+     * 流动（keyframes 在各库 flow.css 里按库前缀命名）。
+     */
+    export function FlowEdgeView(props: ViewProps & {
+        store: vm.FlowEdgeModel;
+    }): ReturnType<typeof SVG.G>;
+    export function FlowBackground(props: ViewProps & {
+        variant?: "dots" | "lines" | "cross";
+        gap?: number;
+        size?: number;
+        color?: string;
+    }): TimelessElement;
+    export function FlowMinimap(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowControls(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): TimelessElement;
+    export const FlowEdge_: typeof FlowEdgeView;
+    export const FlowNode_: typeof FlowNodeView;
+    export const FlowHandle_: typeof FlowHandle;
+    global {
+        interface Window {
+            flowConnecting: {
+                nodeId: string;
+                handleId: string;
+                type: "source" | "target";
+                startX: number;
+                startY: number;
+                currentX: number;
+                currentY: number;
+            } | null;
+            flowConnectingLineUpdate: ((path: string, visible: boolean) => void) | null;
+        }
+    }
+}
+declare module "packages/fluent/src/index" {
+    import { Gallery } from "packages/fluent/src/modules/gallery";
+    import { Button } from "packages/fluent/src/modules/button";
+    import { Input } from "packages/fluent/src/modules/input";
+    import { Textarea } from "packages/fluent/src/modules/textarea";
+    import { Label } from "packages/fluent/src/modules/label";
+    import { Checkbox } from "packages/fluent/src/modules/checkbox";
+    import { CheckboxGroup, CheckboxGroupItem } from "packages/fluent/src/modules/checkbox-group";
+    import { Radio, RadioGroup, RadioGroupItem } from "packages/fluent/src/modules/radio";
+    import { Switch } from "packages/fluent/src/modules/switch";
+    import { Toggle } from "packages/fluent/src/modules/toggle";
+    import { Slider } from "packages/fluent/src/modules/slider";
+    import { Select } from "packages/fluent/src/modules/select";
+    import { NumberInput } from "packages/fluent/src/modules/number-input";
+    import { Progress } from "packages/fluent/src/modules/progress";
+    import { Avatar } from "packages/fluent/src/modules/avatar";
+    import { Badge } from "packages/fluent/src/modules/badge";
+    import { Separator } from "packages/fluent/src/modules/separator";
+    import { Skeleton } from "packages/fluent/src/modules/skeleton";
+    import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "packages/fluent/src/modules/card";
+    import { Alert, AlertTitle, AlertDescription } from "packages/fluent/src/modules/alert";
+    import { Kbd, KbdGroup } from "packages/fluent/src/modules/kbd";
+    import { Link } from "packages/fluent/src/modules/link";
+    import { AspectRatio } from "packages/fluent/src/modules/aspect-ratio";
+    import { ScrollArea } from "packages/fluent/src/modules/scroll-area";
+    import { Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet } from "packages/fluent/src/modules/field";
+    import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose } from "packages/fluent/src/modules/dialog";
+    import { Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose } from "packages/fluent/src/modules/sheet";
+    import { Popover } from "packages/fluent/src/modules/popover";
+    import { Popconfirm } from "packages/fluent/src/modules/popconfirm";
+    import { Tooltip, TooltipProvider } from "packages/fluent/src/modules/tooltip";
+    import { DropdownMenu } from "packages/fluent/src/modules/dropdown-menu";
+    import { ContextMenu } from "packages/fluent/src/modules/context-menu";
+    import { Menu } from "packages/fluent/src/modules/menu";
+    import { Tabs } from "packages/fluent/src/modules/tabs";
+    import { Accordion } from "packages/fluent/src/modules/accordion";
+    import { Steps } from "packages/fluent/src/modules/steps";
+    import { Toast } from "packages/fluent/src/modules/toast";
+    import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/fluent/src/modules/table";
+    import { Form } from "packages/fluent/src/modules/form";
+    import { SearchSelect } from "packages/fluent/src/modules/search-select";
+    import { FileDropZone, FileInput } from "packages/fluent/src/modules/file-picker";
+    import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/fluent/src/modules/resizable-panels";
+    import { DatePicker, DateCalendarPanel } from "packages/fluent/src/modules/date-picker";
+    import { DateRangePicker } from "packages/fluent/src/modules/date-range-picker";
+    import { TimePicker, TimeColumns, TimePreview } from "packages/fluent/src/modules/time-picker";
+    import { DateTimePicker } from "packages/fluent/src/modules/date-time-picker";
+    import { Cascader } from "packages/fluent/src/modules/cascader";
+    import { ScrollView } from "packages/fluent/src/modules/scroll-view";
+    import { Affix } from "packages/fluent/src/modules/affix";
+    import { Waterfall } from "packages/fluent/src/modules/waterfall";
+    import { Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES } from "packages/fluent/src/modules/tree";
+    import { FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/fluent/src/modules/flow";
+    export const TimelessFluentVersion: any;
+    export { Gallery, Button, Input, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Switch, Toggle, Slider, Select, NumberInput, Progress, Avatar, Badge, Separator, Skeleton, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Alert, AlertTitle, AlertDescription, Kbd, KbdGroup, Link, AspectRatio, ScrollArea, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose, Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose, Popover, Popconfirm, Tooltip, TooltipProvider, DropdownMenu, ContextMenu, Menu, Tabs, Accordion, Steps, Toast, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Form, SearchSelect, FileDropZone, FileInput, ResizablePanels, ResizablePanel, ResizableHandle, DatePicker, DateCalendarPanel, DateRangePicker, TimePicker, TimeColumns, TimePreview, DateTimePicker, Cascader, ScrollView, Affix, Waterfall, Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
+}
+declare module "packages/animal/src/modules/gallery" {
+    import { vm, type ViewProps } from "packages/timeless/src/index";
+    /** animal visual composition; selection and modal behavior live in shared layers. */
+    export function Gallery(props: ViewProps & {
+        store: vm.GalleryCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/button" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Button(props: ViewProps & {
+        store: vm.ButtonCore;
+        prefix?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Input(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/textarea" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Textarea(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+        showClear?: boolean;
+        showLoading?: boolean;
+        showCount?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/label" {
+    import { LabelProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Label(props: LabelProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/animal/src/modules/checkbox" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Checkbox(props: ViewProps & {
+        store: vm.CheckboxCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/checkbox-group" {
+    import { vm } from "packages/timeless/src/index";
+    export function CheckboxGroup(props: {
+        store: vm.CheckboxGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CheckboxGroupItem(props: {
+        store: vm.CheckboxGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.CheckboxCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/radio" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Radio(props: ViewProps & {
+        store: vm.RadioCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function RadioGroup(props: ViewProps & {
+        store: vm.RadioGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function RadioGroupItem(props: {
+        store: vm.RadioGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.RadioCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/switch" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Switch(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/toggle" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Toggle(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/slider" {
+    import { ViewProps, Ref } from "packages/timeless/src/index";
+    export function Slider(props: ViewProps & {
+        value?: number | Ref<number>;
+        min?: number;
+        max?: number;
+        step?: number;
+        disabled?: boolean;
+        onChange?: (v: number) => void;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Select(props: ViewProps & {
+        store: vm.SelectCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/number-input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function NumberInput(props: ViewProps & {
+        store: vm.NumberInputCore;
+        id?: string;
+        showControls?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/progress" {
+    import { vm } from "packages/timeless/src/index";
+    import { Ref, ViewProps } from "packages/timeless/src/index";
+    export function Progress(props: ViewProps & {
+        store?: vm.ProgressCore;
+        value?: Ref<number> | number;
+        max?: number;
+        variant?: string;
+        striped?: boolean;
+        animated?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/avatar" {
+    import { Ref, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Avatar(props: ViewProps & {
+        src: string | Ref<string>;
+        alt?: string;
+        size?: "sm" | "default" | "lg" | "large";
+        fallback?: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/badge" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Badge(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "outline" | "destructive" | "danger" | "success" | "warning" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/separator" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Separator(props: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/skeleton" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/card" {
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Card(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/alert" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Alert(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | "destructive" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/kbd" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/link" {
+    import { LinkProps as NativeLinkProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Link(props?: NativeLinkProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/animal/src/modules/aspect-ratio" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function AspectRatio(props?: ViewProps & {
+        ratio?: number;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/scroll-area" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function ScrollArea(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/field" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSeparator(props?: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+        weight?: "normal" | "medium";
+        tone?: "default" | "destructive";
+    }): TimelessElement;
+    export function FieldInlineLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+    }, children?: ViewChildren): TimelessElement;
+    export function Field(props: ViewProps & {
+        store: vm.SingleFieldCore<any>;
+        id?: string;
+        orientation?: "vertical" | "horizontal";
+        inline?: boolean;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/dialog" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Dialog(props: ViewProps & {
+        store: vm.DialogCore;
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function DialogHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogBody(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogFooter(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/sheet" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Sheet(props: ViewProps & {
+        store: vm.DialogCore;
+        side?: "right" | "top" | "bottom" | "left";
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function SheetHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/popper-shared" {
+    import type { ViewStyleProperties } from "packages/timeless/src/index";
+    /**
+     * 浮动层箭头（popover / popconfirm / tooltip 共用）。
+     *
+     * Animal Island 的箭头是一个 45° 旋转的小方块（0.5rem），贴在被锚定元素那一侧的对边：
+     *   placement=bottom → 箭头在浮层顶部（.is-top）
+     *   placement=top    → 箭头在浮层底部（.is-bottom）
+     *   placement=right  → 箭头在浮层左侧（.is-left）
+     *   placement=left   → 箭头在浮层右侧（.is-right）
+     *
+     * class 负责“贴哪条边 + 隐藏哪两条边框”，style 负责沿交叉轴的偏移
+     * （优先用 popper 给的 arrow.x / arrow.y，退化时按 align 取 50% / 1rem）。
+     */
+    export function makeArrowStyle(popper_state_: any, base: string): {
+        class: import("@timeless/timeless").DerivedRef<string>;
+        style: import("@timeless/timeless").DerivedRef<ViewStyleProperties>;
+    };
+}
+declare module "packages/animal/src/modules/popover" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popover · Animal Island
+     *
+     * 结构：.animal-popover > .animal-popover__arrow / .animal-popover__header / .animal-popover__body。
+     * Trigger 由 headless 层处理（pointerdown 切换 open），浮层通过 Portal 挂到 body。
+     * Animal Island 特征：奶油纸底 --popover + 2px --border 描边 + --radius-lg（24px）
+     * + 柔和海拔 --shadow-lg；进场 zoom-in，关键帧 animal-popover-in。
+     */
+    export function Popover(props: ViewProps & {
+        store: vm.PopoverCore;
+        title?: ViewChildren;
+        content?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/popconfirm" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popconfirm · Animal Island
+     *
+     * 用 .animal-popconfirm 作为命名空间：
+     *   .animal-popconfirm__arrow / __header / __body / __actions。
+     * 视觉沿用 popover 的奶油纸底 --popover + 2px --border 描边 + --radius-lg（24px）
+     * + 柔和海拔 --shadow-lg；进场 zoom-in，关键帧 animal-popconfirm-in。
+     */
+    export function Popconfirm(props: ViewProps & {
+        store: vm.PopconfirmCore;
+        title?: ViewChildren;
+        description?: ViewChildren;
+        confirmText?: string;
+        cancelText?: string;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/tooltip" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Tooltip(props: ViewProps & {
+        content?: ViewChildren;
+        side?: vm.Side;
+        align?: vm.Align;
+    }, children?: ViewChildren): TimelessElement;
+    export function TooltipProvider(props: ViewProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/animal/src/modules/menu-shared" {
+    export const t: {
+        /** 浮层动画时长（CSS 里面对应 .is-enter / .is-exit 的关键帧） */
+        animation: {
+            in: string;
+            out: string;
+        };
+        subAnimation: {
+            in: string;
+            out: string;
+        };
+        menu: {
+            class: string;
+        };
+        submenu: {
+            class: string;
+        };
+        item: {
+            class: string;
+        };
+        itemHover: {
+            class: string;
+        };
+        itemDisabled: {
+            class: string;
+        };
+        label: {
+            class: string;
+        };
+        separator: {
+            class: string;
+        };
+        submenuArrow: {
+            class: string;
+        };
+        icon: {
+            class: string;
+        };
+        shortcut: {
+            class: string;
+        };
+        check: {
+            class: string;
+        };
+    };
+}
+declare module "packages/animal/src/modules/menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Menu · Animal Island（常驻菜单）
+     *
+     * 类名：.animal-menu / .animal-menu__item / .animal-menu__separator / .animal-menu__label。
+     * 选中/聚焦用左侧 4px 薄荷青（--primary）竖条（三个菜单共用，见 dropdown-menu.css）。
+     *
+     * 子菜单（item.menu）通过 .animal-menu--submenu 浮层渲染，箭头用 Icon 指示。
+     */
+    export function Menu(props: ViewProps & {
+        store: vm.MenuCore;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export type MenuEntry = vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore;
+    export function renderMenuEntry(item: MenuEntry, Sep: (props: ViewProps) => TimelessElement, Grp: (props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (props: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement): TimelessElement;
+    export function MenuSeparator(_props: ViewProps): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuGroup(props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuItem(props: ViewProps & {
+        store: vm.MenuItemCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function isCheckable(store: vm.MenuItemCore): boolean;
+}
+declare module "packages/animal/src/modules/dropdown-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * DropdownMenu · Animal Island
+     *
+     * 结构：Trigger + 浮层 Content。类名走 .animal-menu / .animal-menu__item /
+     * .animal-menu__separator / .animal-menu__label（由 menu-shared 的 t 常量提供）。
+     * 条目渲染复用 menu.ts 的骨架（renderMenuEntry），因此子菜单、勾选项、
+     * icon / shortcut 的行为三者完全一致。
+     */
+    export function DropdownMenu(props: ViewProps & {
+        store: vm.DropdownMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/animal/src/modules/context-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * ContextMenu · Animal Island
+     *
+     * 由右键 / 长按触发（Trigger 内部处理），浮层类名与 DropdownMenu 共用一套
+     * .animal-menu 命名空间，额外加 .animal-menu--context 表达右键菜单的尺寸/定位。
+     */
+    export function ContextMenu(props: ViewProps & {
+        store: vm.ContextMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/animal/src/modules/tabs" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tabs · Animal Island
+     *
+     * 类名：.animal-tabs / .animal-tabs__list / .animal-tabs__tab（.is-active）/ .animal-tabs__content /
+     * .animal-tabs__panel。
+     *
+     * Animal Island 特征：标签条是米色胶囊（--secondary + --radius-pill），当前项是实心
+     * 薄荷青胶囊（--primary 底 + --primary-foreground 字）；hover 用 --accent。
+     *
+     * headless 层的 TabHeaderCore 用 curId 表示当前选中项，这里映射成 .is-active。
+     */
+    export type TabItem = {
+        value: string;
+        label: string;
+        content?: ViewChildren;
+    };
+    export function Tabs(props: ViewProps & {
+        store: vm.TabHeaderCore<any>;
+        items?: TabItem[];
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/accordion" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Accordion · Animal Island
+     *
+     * 类名：.animal-accordion / .animal-accordion__item / .animal-accordion__header /
+     * .animal-accordion__trigger / .animal-accordion__chevron / .animal-accordion__panel /
+     * .animal-accordion__body。项间分隔用 2px --border-subtle；展开面板用
+     * grid-template-rows 0fr→1fr 过渡（--duration-slow --easing-standard），
+     * 展开态标题字重 700。
+     *
+     * 三点 headless 约束（决定了这里的写法）：
+     *
+     * 1. Trigger 直接改 store.openItems，不会 emit StateChange。因此展开态不能从
+     *    store.state 派生，必须直接跟随 store.openItems（RefArray）。
+     * 2. Trigger / Item 会把 props 透传，所以动态 class 要挂在 .animal-accordion__item 与
+     *    .animal-accordion__trigger 上，由 CSS 用后代选择器控制 .animal-accordion__panel。
+     * 3. Content 会把传入的 class 强制换成 computed，只在「传入字符串」时保留。
+     *    所以 .animal-accordion__panel 只能是固定字符串类名，不能动态加类。
+     *
+     * 为什么不用 data-state：dataset 的响应式更新目前写错属性名（写成了裸的
+     * `state` 而不是 `data-state`），所以这里统一用 .is-open 类名表达展开态。
+     */
+    export type AccordionItem = {
+        title: ViewChildren;
+        content: ViewChildren;
+    };
+    export function Accordion(props: ViewProps & {
+        store: vm.AccordionCore;
+        items: AccordionItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/steps" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Steps · Animal Island
+     *
+     * 类名：.animal-steps / .animal-steps__list / .animal-steps__item /
+     * .animal-steps__indicator / .animal-steps__text / .animal-steps__title /
+     * .animal-steps__description / .animal-steps__connector。
+     *
+     * Animal Island 特征：current 用薄荷青 --primary，completed 用 --success。
+     * 状态通过 .is-completed / .is-current / .is-upcoming 表达。
+     *
+     * 注意：headless 的 StepsPrimitive.List 会忽略传入的 children 并自行渲染一套
+     * 无 class 的 Item/Indicator 树（Indicator 内部只在有 children 时才输出内容，
+     * 因此编号永远为空）。所以这里只用 Root/Item/Title/Description/Connector 这些
+     * 透传原语，列表本身用 View + For 自己拼装，保证 .animal-steps__* 类名完整。
+     */
+    export type StepItem = {
+        title: string;
+        description?: string;
+    };
+    export function Steps(props: ViewProps & {
+        store: vm.StepCore;
+        items: StepItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/toast" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Toast(props: ViewProps & {
+        store: vm.ToastCore;
+        variant?: string;
+    }, children?: ViewChildren): ViewChildren;
+}
+declare module "packages/animal/src/modules/table" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Table · Animal Island
+     *
+     * 根节点挂 .animal-table，其余部位沿用原生语义标签（thead / tbody / tr / th / td），
+     * 样式在 CSS 里通过 .animal-table > thead > tr > th 这类后代选择器作用域化。
+     * Animal Island 特征：行分割线 --border-subtle，表头字 --muted-foreground，
+     * 可排序表头 hover 转薄荷青 --primary。
+     */
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/animal/src/modules/form" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * Form · Animal Island
+     *
+     * Animal Island 没有独立的 form 容器语义，这里只提供一层纵向布局容器（.animal-form），
+     * 字段级渲染请直接用 Field / FieldSet 系列组件。
+     */
+    export function Form(props: ViewProps & {
+        store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/select-shared" {
+    import { vm } from "packages/timeless/src/index";
+    /**
+     * Select 系列的共享渲染逻辑（Animal Island · animal-select__*）。
+     *
+     * Select 与 SearchSelect 的面板结构完全一致（Viewport > 条目列表 / 空态），
+     * 差别只在触发区。把条目渲染抽到这里，避免两处各写一份。
+     */
+    export function renderSelectOption(select$: vm.SelectCore<any>, option: vm.SelectItemCore<any>): any;
+    export function renderSelectEntry(select$: vm.SelectCore<any>, entry: vm.SelectItemCore<any> | vm.SelectGroupCore<any>): any;
+    /**
+     * 面板内容：Viewport + 加载态 / 条目列表 / 空态。
+     *
+     * 注意：For 必须常驻挂载，不能塞进 Show 的某个分支里。搜索时
+     * startSearch/finishSearch 会让 loading 反复 true/false，一旦 For 处在
+     * 被 Show 切换的分支内，重建时旧列表不会被清理，条目会不断叠加。
+     */
+    export function SelectPanel(props: {
+        store: vm.SelectCore<any>;
+        entries: any;
+        loading?: any;
+        class?: any;
+    }): any;
+}
+declare module "packages/animal/src/modules/search-select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * SearchSelect · Animal Island
+     *
+     * 触发器沿用 .animal-select 的盒子指标（2.5px --input 描边 / 胶囊圆角 /
+     * --control-height），内部换成 .animal-select__search 输入框，下拉面板同样是
+     * .animal-select__content（样式复用 select.css）。
+     *
+     * 与 Select 的区别：触发区固定渲染搜索框，展开时把触发器注册为 popper 的
+     * reference，使面板宽度与触发器对齐。
+     */
+    export function SearchSelect<T>(props: ViewProps & {
+        store: vm.SelectCore<T>;
+    }, _children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/file-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * FilePicker · Animal Island
+     *
+     * 用 .animal-file-dropzone / .animal-file-input 命名空间表达 Animal Island 的
+     * 2px 描边 + 大圆角 + 柔和阴影；拖拽区用 2px 虚线描边，拖入时转薄荷青。
+     *
+     * FileDropZone 负责拖拽 / 点击选择，FileInput 是紧凑的行内文件输入框。
+     */
+    export function FileDropZone(props: ViewProps & {
+        store: vm.FilePickerCore;
+        tip?: string;
+    }, _children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function FileInput(props: ViewProps & {
+        store: vm.FilePickerCore;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/resizable-panels" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ResizablePanels · Animal Island
+     *
+     * Animal Island 的 2px 描边 + 大圆角 + 柔和阴影：
+     *   .animal-resizable / .animal-resizable__panel / .animal-resizable__handle / .animal-resizable__grip
+     */
+    export function ResizablePanels(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        direction?: "horizontal" | "vertical";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizablePanel(props: ViewProps & {
+        store: vm.ResizablePanelCore;
+        group: vm.ResizablePanelsCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizableHandle(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        panelBefore: vm.ResizablePanelCore;
+        panelAfter: vm.ResizablePanelCore;
+        withHandle?: boolean;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/date-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function DateCalendarPanel(props: {
+        store: vm.DatePickerCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DatePicker(props: ViewProps & {
+        store: vm.DatePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/date-range-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function DateRangePicker(props: ViewProps & {
+        store: vm.DateRangePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function formatTempTime(store: vm.TimePickerCore, s: {
+        t_hour: number | null;
+        t_minute: number | null;
+        t_second: number | null;
+    }): string;
+    export function TimePreview(props: {
+        store: vm.TimePickerCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function TimeColumns(props: {
+        store: vm.TimePickerCore;
+        hourview$: vm.ScrollViewCore;
+        minuteview$: vm.ScrollViewCore;
+        secondview$: vm.ScrollViewCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function TimePicker(props: ViewProps & {
+        store: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/date-time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * DateTimePicker · Animal Island
+     *
+     * 单个触发器 + 浮层内左右两栏：左侧复用 date-picker 的日历面板
+     * （.animal-datepicker__*），右侧复用 time-picker 的三列滚动（.animal-timepicker__*）。
+     * 容器用 .animal-datetimepicker__panes / __pane / __footer。
+     *
+     * date$ 是 DatePickerCore（提供 popover/presence 与日历），time$ 是 TimePickerCore。
+     */
+    export function DateTimePicker(props: ViewProps & {
+        date: vm.DatePickerCore;
+        time: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/cascader" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Cascader · Animal Island
+     *
+     * 结构：.animal-cascader（触发器）> __value + 清除/箭头
+     *       .animal-cascader__content
+     *         ├─ .animal-cascader__search（可选）
+     *         ├─ .animal-cascader__search-results > .animal-cascader__search-result > .animal-cascader__path
+     *         └─ .animal-cascader__panel × N > .animal-cascader__item（+ .is-active 左侧 4px 薄荷青 --primary 指示条）
+     *
+     * 触发器按输入盒处理（2.5px --input 描边、胶囊圆角、--control-height 高）。
+     */
+    export function Cascader(props: ViewProps & {
+        store: vm.CascaderCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/animal/src/modules/scroll-view" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ScrollView · Animal Island
+     *
+     * 复用 headless 的 ScrollViewPrimitive.Root（负责尺寸/滚动量上报），
+     * 只负责挂上 .animal-scroll-view 的细滚动条（样式见 scroll-view.css，
+     * 与 .animal-scroll-area 同一套 thumb 规则）。滚动行为/触底回调都在 store 上。
+     */
+    export function ScrollView(props: ViewProps & {
+        store: vm.ScrollViewCore;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/animal/src/modules/affix" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Affix · Animal Island
+     *
+     * 滚动到阈值后把内容 fixed 到顶部（.animal-affix.is-fixed）。位置/阈值由
+     * AffixCore 计算，模块只把 store.fixed 映射成类名与内联定位，
+     * 并在固定态用 --duration-fast 过渡（见 affix.css）。
+     *
+     * 挂载时记录元素顶部绝对位置，并监听滚动目标（默认 window）持续上报。
+     */
+    export function Affix(props: ViewProps & {
+        store: vm.AffixCore;
+        offsetTop?: number;
+        target?: () => HTMLElement | Window;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/animal/src/modules/waterfall" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Waterfall · Animal Island
+     *
+     * 瀑布流容器：.animal-waterfall > .animal-waterfall__column × N > .animal-waterfall__item。
+     * 列高、放置策略、可视区间都在 WaterfallModel 内计算；模块只把
+     * Animal Island 类名挂到 Root / Column / Cell 上，并交给上层 ScrollView 驱动滚动。
+     */
+    export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
+        store: vm.WaterfallModel<T>;
+        render: (payload: T, cell: vm.WaterfallCellModel<T>) => TimelessElement;
+    }): TimelessElement<any, any>;
+}
+declare module "packages/animal/src/modules/tree" {
+    import { ui, vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tree · Animal Island
+     *
+     * 逻辑全在 `vm.TreeCore`，DOM 形状全在 `ui.TreePrimitive`。这里只把 Animal Island 的
+     * 类名对进 primitive 的 `TreeClassNames` 槽位，并给出本库的行高 / 缩进。
+     *
+     * 类名契约（配合 style/components/tree.css）：
+     *   .animal-tree > .animal-tree__scroll > .animal-tree__row
+     * 行内：.animal-tree__guide(data-tree-guide) / .animal-tree__line(data-tree-line)
+     * 状态：.is-lifted / .is-drop-into / .is-before / .is-after / .is-selected
+     *       / .is-checked / .is-indeterminate / .is-disabled
+     */
+    export const TREE_CLASSES: ui.TreePrimitive.TreeClassNames;
+    export type TreeProps = Omit<ui.TreePrimitive.TreeRootProps, "classes"> & ViewProps & {
+        store: vm.TreeCore;
+    };
+    /** Tree 的公开入口。primitive 参数原样透传，只补 Animal Island 的类名与默认尺寸。 */
+    export function Tree(props: TreeProps): TimelessElement;
+    /** 自定义行渲染时复用的行槽位（`renderRow` 里拿到 props 再交给它）。 */
+    export function TreeRow(props: ui.TreePrimitive.TreeRowProps): TimelessElement;
+    export function TreeCheckbox(props: ui.TreePrimitive.TreeCheckboxProps): TimelessElement;
+    export function TreeIndicator(props?: {
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+    export function TreeEmpty(props?: {
+        text?: string;
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+}
+declare module "packages/animal/src/modules/flow" {
+    import { vm } from "packages/timeless/src/index";
+    import { SVG, TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    type FlowNodeViewRender = Record<string, (props: {
+        node: vm.FlowNodeModel;
+    }) => ViewChildren>;
+    export interface FlowViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeTypes?: FlowNodeViewRender;
+        showBackground?: boolean;
+        backgroundVariant?: "dots" | "lines" | "cross";
+        showMinimap?: boolean;
+        showControls?: boolean;
+        multiSelect?: boolean;
+        minZoom?: number;
+        maxZoom?: number;
+        nodesDraggable?: boolean;
+        nodesConnectable?: boolean;
+    }
+    export interface FlowHandleViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeId: string;
+        handleId: string;
+        type: "source" | "target";
+        position?: "top" | "right" | "bottom" | "left";
+        index: number;
+        total: number;
+        connectable?: boolean;
+    }
+    /** 节点侧边的连接点。同一侧有多个时按 20px 步长在 `50%` 上下均分。 */
+    export function FlowHandle(props: FlowHandleViewProps): TimelessElement;
+    export interface FlowNodeViewProps extends ViewProps {
+        store: vm.FlowNodeModel;
+        nodeTypes: FlowNodeViewRender;
+    }
+    /**
+     * 一个节点。悬浮时在上方浮出动作条（详情 / 更多 / 失败时的重试）。
+     *
+     * 拖拽用 document 级 mousemove/mouseup（不是 pointer capture）：节点可能在拖拽
+     * 过程中被 `For` 重建，绑在节点上的监听会跟着丢。
+     */
+    export function FlowNodeView(props: FlowNodeViewProps): TimelessElement;
+    /**
+     * 一条边。里面两根同 `d` 的 path：下面那根透明、20px 粗，只为了拿到点击；
+     * 上面那根才是看到的线。`animated` 时挂 `is-animated` 驱动 `stroke-dashoffset`
+     * 流动（keyframes 在各库 flow.css 里按库前缀命名）。
+     */
+    export function FlowEdgeView(props: ViewProps & {
+        store: vm.FlowEdgeModel;
+    }): ReturnType<typeof SVG.G>;
+    export function FlowBackground(props: ViewProps & {
+        variant?: "dots" | "lines" | "cross";
+        gap?: number;
+        size?: number;
+        color?: string;
+    }): TimelessElement;
+    export function FlowMinimap(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowControls(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): TimelessElement;
+    export const FlowEdge_: typeof FlowEdgeView;
+    export const FlowNode_: typeof FlowNodeView;
+    export const FlowHandle_: typeof FlowHandle;
+    global {
+        interface Window {
+            flowConnecting: {
+                nodeId: string;
+                handleId: string;
+                type: "source" | "target";
+                startX: number;
+                startY: number;
+                currentX: number;
+                currentY: number;
+            } | null;
+            flowConnectingLineUpdate: ((path: string, visible: boolean) => void) | null;
+        }
+    }
+}
+declare module "packages/animal/src/index" {
+    import { Gallery } from "packages/animal/src/modules/gallery";
+    import { Button } from "packages/animal/src/modules/button";
+    import { Input } from "packages/animal/src/modules/input";
+    import { Textarea } from "packages/animal/src/modules/textarea";
+    import { Label } from "packages/animal/src/modules/label";
+    import { Checkbox } from "packages/animal/src/modules/checkbox";
+    import { CheckboxGroup, CheckboxGroupItem } from "packages/animal/src/modules/checkbox-group";
+    import { Radio, RadioGroup, RadioGroupItem } from "packages/animal/src/modules/radio";
+    import { Switch } from "packages/animal/src/modules/switch";
+    import { Toggle } from "packages/animal/src/modules/toggle";
+    import { Slider } from "packages/animal/src/modules/slider";
+    import { Select } from "packages/animal/src/modules/select";
+    import { NumberInput } from "packages/animal/src/modules/number-input";
+    import { Progress } from "packages/animal/src/modules/progress";
+    import { Avatar } from "packages/animal/src/modules/avatar";
+    import { Badge } from "packages/animal/src/modules/badge";
+    import { Separator } from "packages/animal/src/modules/separator";
+    import { Skeleton } from "packages/animal/src/modules/skeleton";
+    import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "packages/animal/src/modules/card";
+    import { Alert, AlertTitle, AlertDescription } from "packages/animal/src/modules/alert";
+    import { Kbd, KbdGroup } from "packages/animal/src/modules/kbd";
+    import { Link } from "packages/animal/src/modules/link";
+    import { AspectRatio } from "packages/animal/src/modules/aspect-ratio";
+    import { ScrollArea } from "packages/animal/src/modules/scroll-area";
+    import { Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet } from "packages/animal/src/modules/field";
+    import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose } from "packages/animal/src/modules/dialog";
+    import { Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose } from "packages/animal/src/modules/sheet";
+    import { Popover } from "packages/animal/src/modules/popover";
+    import { Popconfirm } from "packages/animal/src/modules/popconfirm";
+    import { Tooltip, TooltipProvider } from "packages/animal/src/modules/tooltip";
+    import { DropdownMenu } from "packages/animal/src/modules/dropdown-menu";
+    import { ContextMenu } from "packages/animal/src/modules/context-menu";
+    import { Menu } from "packages/animal/src/modules/menu";
+    import { Tabs } from "packages/animal/src/modules/tabs";
+    import { Accordion } from "packages/animal/src/modules/accordion";
+    import { Steps } from "packages/animal/src/modules/steps";
+    import { Toast } from "packages/animal/src/modules/toast";
+    import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/animal/src/modules/table";
+    import { Form } from "packages/animal/src/modules/form";
+    import { SearchSelect } from "packages/animal/src/modules/search-select";
+    import { FileDropZone, FileInput } from "packages/animal/src/modules/file-picker";
+    import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/animal/src/modules/resizable-panels";
+    import { DatePicker, DateCalendarPanel } from "packages/animal/src/modules/date-picker";
+    import { DateRangePicker } from "packages/animal/src/modules/date-range-picker";
+    import { TimePicker, TimeColumns, TimePreview } from "packages/animal/src/modules/time-picker";
+    import { DateTimePicker } from "packages/animal/src/modules/date-time-picker";
+    import { Cascader } from "packages/animal/src/modules/cascader";
+    import { ScrollView } from "packages/animal/src/modules/scroll-view";
+    import { Affix } from "packages/animal/src/modules/affix";
+    import { Waterfall } from "packages/animal/src/modules/waterfall";
+    import { Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES } from "packages/animal/src/modules/tree";
+    import { FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/animal/src/modules/flow";
+    export const TimelessAnimalVersion: any;
+    export { Gallery, Button, Input, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Switch, Toggle, Slider, Select, NumberInput, Progress, Avatar, Badge, Separator, Skeleton, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Alert, AlertTitle, AlertDescription, Kbd, KbdGroup, Link, AspectRatio, ScrollArea, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose, Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose, Popover, Popconfirm, Tooltip, TooltipProvider, DropdownMenu, ContextMenu, Menu, Tabs, Accordion, Steps, Toast, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Form, SearchSelect, FileDropZone, FileInput, ResizablePanels, ResizablePanel, ResizableHandle, DatePicker, DateCalendarPanel, DateRangePicker, TimePicker, TimeColumns, TimePreview, DateTimePicker, Cascader, ScrollView, Affix, Waterfall, Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
+}
+declare module "packages/findrssui/src/modules/findrssui" {
+    import { Fragment } from "packages/timeless/src/index";
+    function source_value(value: any, fallback: any): any;
+    function subscribe_source(source: any, handler: any): any;
+    function dispose_all(unlistens: any): void;
+    /** 数组 / 单节点统一成 children 数组（Timeless 不展开嵌套数组）。 */
+    function as_children(value: any): any[];
+    /**
+     * `autocomplete` 只认 on/off：布尔 false 被直接序列化成 `autocomplete="false"` 时，
+     * 浏览器会按非法值处理、退回默认（= 开）。这里统一成合法值，`undefined` 表示不写属性。
+     * @param {unknown} value
+     * @returns {string | undefined}
+     */
+    function normalize_autocomplete(value: any): string;
+    function ButtonViewModel(props?: {}): {
+        store: any;
+        destroy: () => void;
+    };
+    function Button(props?: {}, children?: any[]): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any> | {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    function InputViewModel(props?: {}): {
+        store: any;
+        destroy: () => void;
+    };
+    function Input(props?: {}): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    function Textarea(props?: {}): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    function Card(props?: {}, children?: any[]): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    function Badge(props?: {}, children?: any[]): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    function Alert(props?: {}, children?: any[]): {
+        t: string;
+        $elm: any;
+        state: {
+            value: boolean;
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        destroy(): void;
+        _hmr_dispose(): void;
+    };
+    function Separator(props?: {}, children?: any[]): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    /** Checkbox / Radio 共用的布尔状态；View 只负责把状态同步到原生 input。 */
+    function ChoiceViewModel(props?: {}): {
+        state: {
+            checked: import("@timeless/timeless").Ref<boolean>;
+            disabled: import("@timeless/timeless").Ref<boolean>;
+        };
+        methods: {
+            set_checked: (value: any) => boolean;
+        };
+        destroy(): void;
+    };
+    function Checkbox(props?: {}, children?: any[]): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    function Radio(props?: {}, children?: any[]): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    /**
+     * 开关。状态交给 `vm.SwitchCore`，但轨道节点是**自己渲染**的——
+     * Timeless 的 `ui.SwitchPrimitive.Root` 有两处会直接把开关做坏（都已实测）：
+     *   1. 挂载期它把布尔属性 `String()` 化：`disabled: false` 落成 `disabled="false"`，
+     *      而 `<button>` 只要出现 `disabled` 属性就真的禁用 —— 页面一加载所有开关都点不动；
+     *   2. 它的 `dataset` 挂载期不写、patch 期又漏掉 `data-` 前缀（写成 `checked=""`），
+     *      于是 `data-checked` 永远停在初始值，点开关视觉状态不变。
+     * 自己写反而更短，而且走的是标准 ARIA 模式：`<div role="switch" tabindex="0">` +
+     * `aria-checked` 字符串（`"true"/"false"`，挂载与 patch 都正确）+ `aria-disabled`，
+     * 禁用**不用 `disabled` 属性**（`toggle()` 里自己挡），因为 `<div>` 上的 `disabled` 本来
+     * 就没有语义、只会把「属性该不该存在」这件事搞复杂。视觉状态由 CSS 读 `[aria-checked="true"]`。
+     * @param {object} props `checked` / `disabled` 可以是 ref；`label` 是纯文本，**不绑点击**
+     *   （避免与轨道自身的 onClick 双触发），需要「点文字也能切」请调用方包一层自行防冒泡。
+     */
+    function Switch(props?: {}): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    function Avatar(props?: {}): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    function Tabs(props?: {}): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    /** Timeless Tree 的 FindRSS 主题入口；树状态与虚拟列表完全复用 TreeCore/TreePrimitive。 */
+    function Tree(props?: {}): any;
+    namespace Tree {
+        var Row: typeof TreeRow;
+    }
+    /** 自定义业务行只填槽位，不重写 Timeless Tree 的行交互。 */
+    function TreeRow(props?: {}): any;
+    export { Alert, Avatar, Badge, Button, ButtonViewModel, Card, Checkbox, ChoiceViewModel, Input, InputViewModel, Radio, Separator, Switch, Tabs, Tree, Textarea, Alert as FRAlert, Badge as FRBadge, Button as FRButton, Card as FRCard, Input as FRInput, Separator as FRSeparator, Fragment, as_children, dispose_all, normalize_autocomplete, source_value, subscribe_source, };
+}
+declare module "packages/findrssui/src/modules/findrssui-layer" {
+    import { type TimelessElement } from "packages/timeless/src/index";
+    /**
+     * 模态对话框。`open` 受控（ref 或普通值），`onClose` 在用户主动关闭（X / 遮罩 / Esc）时触发一次。
+     *
+     * 两个「能不能关」是分开的，与 Radix 一致：
+     *   - `closable`：是否渲染右上角 X（默认 true）；
+     *   - `maskClosable`：点遮罩 / 按 Esc 是否关闭（默认 true，映射到 DialogCore 的 `closeable`）。
+     * Timeless 的 DismissableLayerCore 只监听 pointerdown（LayerManager 里没有键盘分支），
+     * 所以 Esc 由本组件自己挂 document keydown 补上。
+     *
+     * 定位全在 CSS：遮罩 `position: fixed; inset: 0`，内容 `position: fixed` 居中——
+     * 这与 Timeless weui 的 `.weui-dialog` 是同一套做法，不要改回 flex 居中
+     * （Content 与 Overlay 是兄弟节点，不是父子，grid/flex 居中无从生效）。
+     */
+    function Dialog(props?: {}, children?: any[]): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    /**
+     * 下拉菜单。**自实现**，刻意不接 `vm.DropdownMenuCore`：
+     * 那套 core 把开合、定位、子菜单都挂在 `MenuCore` 的 popper + Presence 上（Trigger 靠
+     * `get$children()` 找第一个 view 当 reference），在无 hover 的桌面预览与静态截图环境里
+     * 契约不成立、定位还依赖平台适配。这里只需要「一个按钮 + 一个贴边浮层」。
+     *
+     * 已知取舍（catalog 里也如实标注）：无子菜单、无方向键导航、无焦点陷阱。
+     * @param {object} props `trigger` 节点；`items` 形如 `[{ id, label, icon?, disabled?, danger?, onClick }]`，
+     *   传 `{ type: "separator" }` 即渲染一条分隔线；`align` = start/end，`side` = bottom/top。
+     */
+    function DropdownMenu(props?: {}): TimelessElement;
+    /**
+     * Toast 宿主。**生产页面没有挂载它**（`pages/**` 本次零改动），所以 `Toast.show()` 目前
+     * 只在组件库预览里可见——挂一行 `<Toast/>` 到页面根部即生效，属后续接线。
+     * `duration <= 0` 表示不自动消失。
+     */
+    function Toast(props?: {}): TimelessElement<{
+        as: string;
+    }, any>;
+    namespace Toast {
+        var show: (message: any, options: any) => string;
+        var success: (message: any, options?: {}) => string;
+        var error: (message: any, options?: {}) => string;
+        var warning: (message: any, options?: {}) => string;
+        var info: (message: any, options?: {}) => string;
+        var dismiss: (id: any) => void;
+        var clear: () => void;
+    }
+    export { Dialog, DropdownMenu, Toast };
+}
+declare module "packages/findrssui/src/index" {
+    import { Alert, Avatar, Badge, Button, ButtonViewModel, Card, Checkbox, ChoiceViewModel, Input, InputViewModel, Radio, Separator, Switch, Tabs, Textarea, Tree, FRAlert, FRBadge, FRButton, FRCard, FRInput, FRSeparator } from "packages/findrssui/src/modules/findrssui";
+    import { Dialog, DropdownMenu, Toast } from "packages/findrssui/src/modules/findrssui-layer";
+    export const TimelessFindRSSUIVersion: any;
+    export { Alert, Avatar, Badge, Button, ButtonViewModel, Card, Checkbox, ChoiceViewModel, Input, InputViewModel, Radio, Separator, Switch, Tabs, Tree, Textarea, Dialog, DropdownMenu, Toast, FRAlert, FRBadge, FRButton, FRCard, FRInput, FRSeparator, };
 }
 
 // === Package module aliases ===
@@ -24072,6 +32481,12 @@ declare module "@timeless/shadcn" { export * from "packages/shadcn/src/index"; }
 declare module "@timeless/inner-icons" { export * from "packages/icons/src/index"; }
 declare module "@timeless/ui-primitive" { export * from "packages/ui-primitive/src/index"; }
 declare module "@timeless/inner-vm" { export * from "packages/ui-vm/src/index"; }
+declare module "@timeless/weui" { export * from "packages/weui/src/index"; }
+declare module "@timeless/bootstrap" { export * from "packages/bootstrap/src/index"; }
+declare module "@timeless/material" { export * from "packages/material/src/index"; }
+declare module "@timeless/fluent" { export * from "packages/fluent/src/index"; }
+declare module "@timeless/animal" { export * from "packages/animal/src/index"; }
+declare module "@timeless/findrssui" { export * from "packages/findrssui/src/index"; }
 
 // === Timeless namespace ===
 declare const Timeless: {
@@ -24082,6 +32497,12 @@ declare const Timeless: {
   icons: typeof import("@timeless/inner-icons");
   ui: typeof import("@timeless/ui-primitive");
   vm: typeof import("@timeless/inner-vm");
+  weui: typeof import("@timeless/weui");
+  bootstrap: typeof import("@timeless/bootstrap");
+  material: typeof import("@timeless/material");
+  fluent: typeof import("@timeless/fluent");
+  animal: typeof import("@timeless/animal");
+  findrssui: typeof import("@timeless/findrssui");
   [key: string]: any;
 };
 
@@ -24107,6 +32528,7 @@ declare const Img: typeof import("@timeless/timeless").Img;
 declare const KeepAlive: typeof import("@timeless/timeless").KeepAlive;
 declare const LazyView: typeof import("@timeless/timeless").LazyView;
 declare const ListView: typeof import("@timeless/timeless").ListView;
+declare const ListViewV2: typeof import("@timeless/timeless").ListViewV2;
 declare const ListenerManager: typeof import("@timeless/timeless").ListenerManager;
 declare const Logger: typeof import("@timeless/timeless").Logger;
 declare const Match: typeof import("@timeless/timeless").Match;
@@ -24132,13 +32554,20 @@ declare const SplitView: typeof import("@timeless/timeless").SplitView;
 declare const Style: typeof import("@timeless/timeless").Style;
 declare const Subscriber: typeof import("@timeless/timeless").Subscriber;
 declare const SubscriberWithId: typeof import("@timeless/timeless").SubscriberWithId;
+declare const Swiper: typeof import("@timeless/timeless").Swiper;
+declare const SwiperItem: typeof import("@timeless/timeless").SwiperItem;
 declare const TabPane: typeof import("@timeless/timeless").TabPane;
 declare const TabView: typeof import("@timeless/timeless").TabView;
+declare const TableCaption: typeof import("@timeless/timeless").TableCaption;
+declare const TableFooter: typeof import("@timeless/timeless").TableFooter;
+declare const TableV2: typeof import("@timeless/timeless").TableV2;
 declare const Text: typeof import("@timeless/timeless").Text;
 declare const TimelessRefArray: typeof import("@timeless/timeless").TimelessRefArray;
 declare const TreeSelect: typeof import("@timeless/timeless").TreeSelect;
+declare const Version: typeof import("@timeless/timeless").Version;
 declare const View: typeof import("@timeless/timeless").View;
 declare const Webview: typeof import("@timeless/timeless").Webview;
+declare const Window: typeof import("@timeless/timeless").Window;
 declare const WindowView: typeof import("@timeless/timeless").WindowView;
 declare const _current_disposables: typeof import("@timeless/timeless")._current_disposables;
 declare const classNames: typeof import("@timeless/timeless").classNames;
@@ -24146,6 +32575,8 @@ declare const clearIcons: typeof import("@timeless/timeless").clearIcons;
 declare const combine: typeof import("@timeless/timeless").combine;
 declare const computed: typeof import("@timeless/timeless").computed;
 declare const createContext: typeof import("@timeless/timeless").createContext;
+declare const createListViewV2Model: typeof import("@timeless/timeless").createListViewV2Model;
+declare const createTableV2Model: typeof import("@timeless/timeless").createTableV2Model;
 declare const debounce: typeof import("@timeless/timeless").debounce;
 declare const defineModel: typeof import("@timeless/timeless").defineModel;
 declare const derive: typeof import("@timeless/timeless").derive;
@@ -24219,6 +32650,12 @@ declare const ChannelSentMessage: typeof import("@timeless/inner-kit").ChannelSe
 declare const ChannelState: typeof import("@timeless/inner-kit").ChannelState;
 declare const ChannelStatus: typeof import("@timeless/inner-kit").ChannelStatus;
 declare const ClipboardModel: typeof import("@timeless/inner-kit").ClipboardModel;
+declare const HLSPlayerCore: typeof import("@timeless/inner-kit").HLSPlayerCore;
+declare const HLSPlayerMountOptions: typeof import("@timeless/inner-kit").HLSPlayerMountOptions;
+declare const HLSPlayerReason: typeof import("@timeless/inner-kit").HLSPlayerReason;
+declare const HLSPlayerSession: typeof import("@timeless/inner-kit").HLSPlayerSession;
+declare const HLSPlayerState: typeof import("@timeless/inner-kit").HLSPlayerState;
+declare const HLSPlayerStatus: typeof import("@timeless/inner-kit").HLSPlayerStatus;
 declare const HistoryCore: typeof import("@timeless/inner-kit").HistoryCore;
 declare const HttpClientCore: typeof import("@timeless/inner-kit").HttpClientCore;
 declare const ListCore: typeof import("@timeless/inner-kit").ListCore;
@@ -24281,6 +32718,7 @@ declare const FlowHandle: typeof import("@timeless/shadcn").FlowHandle;
 declare const FlowMinimap: typeof import("@timeless/shadcn").FlowMinimap;
 declare const FlowNodeView: typeof import("@timeless/shadcn").FlowNodeView;
 declare const Form: typeof import("@timeless/shadcn").Form;
+declare const Gallery: typeof import("@timeless/shadcn").Gallery;
 declare const HistoryPanel: typeof import("@timeless/shadcn").HistoryPanel;
 declare const Input: typeof import("@timeless/shadcn").Input;
 declare const Kbd: typeof import("@timeless/shadcn").Kbd;
@@ -24308,6 +32746,7 @@ declare const Skeleton: typeof import("@timeless/shadcn").Skeleton;
 declare const Slider: typeof import("@timeless/shadcn").Slider;
 declare const Steps: typeof import("@timeless/shadcn").Steps;
 declare const Switch: typeof import("@timeless/shadcn").Switch;
+declare const TREE_CLASSES: typeof import("@timeless/shadcn").TREE_CLASSES;
 declare const TableBody: typeof import("@timeless/shadcn").TableBody;
 declare const TableCell: typeof import("@timeless/shadcn").TableCell;
 declare const TableHead: typeof import("@timeless/shadcn").TableHead;
@@ -24322,6 +32761,11 @@ declare const Toaster: typeof import("@timeless/shadcn").Toaster;
 declare const Toggle: typeof import("@timeless/shadcn").Toggle;
 declare const Tooltip: typeof import("@timeless/shadcn").Tooltip;
 declare const TooltipProvider: typeof import("@timeless/shadcn").TooltipProvider;
+declare const Tree: typeof import("@timeless/shadcn").Tree;
+declare const TreeCheckbox: typeof import("@timeless/shadcn").TreeCheckbox;
+declare const TreeEmpty: typeof import("@timeless/shadcn").TreeEmpty;
+declare const TreeIndicator: typeof import("@timeless/shadcn").TreeIndicator;
+declare const TreeRow: typeof import("@timeless/shadcn").TreeRow;
 declare const Waterfall: typeof import("@timeless/shadcn").Waterfall;
 
 // @timeless/inner-icons
@@ -24330,6 +32774,9 @@ declare const ArrowDownToLine: typeof import("@timeless/inner-icons").ArrowDownT
 declare const ArrowLeft: typeof import("@timeless/inner-icons").ArrowLeft;
 declare const ArrowRight: typeof import("@timeless/inner-icons").ArrowRight;
 declare const Bolt: typeof import("@timeless/inner-icons").Bolt;
+declare const BookUser: typeof import("@timeless/inner-icons").BookUser;
+declare const Bot: typeof import("@timeless/inner-icons").Bot;
+declare const Box: typeof import("@timeless/inner-icons").Box;
 declare const Braces: typeof import("@timeless/inner-icons").Braces;
 declare const Calendar: typeof import("@timeless/inner-icons").Calendar;
 declare const Check: typeof import("@timeless/inner-icons").Check;
@@ -24351,11 +32798,14 @@ declare const Download: typeof import("@timeless/inner-icons").Download;
 declare const Ellipsis: typeof import("@timeless/inner-icons").Ellipsis;
 declare const EllipsisVertical: typeof import("@timeless/inner-icons").EllipsisVertical;
 declare const ExternalLink: typeof import("@timeless/inner-icons").ExternalLink;
+declare const Eye: typeof import("@timeless/inner-icons").Eye;
 declare const File: typeof import("@timeless/inner-icons").File;
 declare const FileBox: typeof import("@timeless/inner-icons").FileBox;
+declare const FileCode: typeof import("@timeless/inner-icons").FileCode;
 declare const FileImage: typeof import("@timeless/inner-icons").FileImage;
 declare const FileLock: typeof import("@timeless/inner-icons").FileLock;
 declare const FilePlay: typeof import("@timeless/inner-icons").FilePlay;
+declare const FileSearch: typeof import("@timeless/inner-icons").FileSearch;
 declare const FileStack: typeof import("@timeless/inner-icons").FileStack;
 declare const FileSymlink: typeof import("@timeless/inner-icons").FileSymlink;
 declare const FileText: typeof import("@timeless/inner-icons").FileText;
@@ -24367,7 +32817,9 @@ declare const FolderClosed: typeof import("@timeless/inner-icons").FolderClosed;
 declare const FolderOpen: typeof import("@timeless/inner-icons").FolderOpen;
 declare const Funnel: typeof import("@timeless/inner-icons").Funnel;
 declare const Gauge: typeof import("@timeless/inner-icons").Gauge;
+declare const GitBranch: typeof import("@timeless/inner-icons").GitBranch;
 declare const GitFork: typeof import("@timeless/inner-icons").GitFork;
+declare const Globe: typeof import("@timeless/inner-icons").Globe;
 declare const Grid3x3: typeof import("@timeless/inner-icons").Grid3x3;
 declare const HardDrive: typeof import("@timeless/inner-icons").HardDrive;
 declare const HardDriveDownload: typeof import("@timeless/inner-icons").HardDriveDownload;
@@ -24379,16 +32831,23 @@ declare const Library: typeof import("@timeless/inner-icons").Library;
 declare const ListFilter: typeof import("@timeless/inner-icons").ListFilter;
 declare const Loader: typeof import("@timeless/inner-icons").Loader;
 declare const LoaderCircle: typeof import("@timeless/inner-icons").LoaderCircle;
+declare const Maximize: typeof import("@timeless/inner-icons").Maximize;
 declare const Menu: typeof import("@timeless/inner-icons").Menu;
+declare const MessageCircle: typeof import("@timeless/inner-icons").MessageCircle;
 declare const MessageSquareMore: typeof import("@timeless/inner-icons").MessageSquareMore;
+declare const Minus: typeof import("@timeless/inner-icons").Minus;
 declare const Moon: typeof import("@timeless/inner-icons").Moon;
+declare const Music: typeof import("@timeless/inner-icons").Music;
 declare const PanelLeft: typeof import("@timeless/inner-icons").PanelLeft;
+declare const Paperclip: typeof import("@timeless/inner-icons").Paperclip;
 declare const Pause: typeof import("@timeless/inner-icons").Pause;
+declare const PenLine: typeof import("@timeless/inner-icons").PenLine;
 declare const Play: typeof import("@timeless/inner-icons").Play;
 declare const Plus: typeof import("@timeless/inner-icons").Plus;
 declare const RadioTower: typeof import("@timeless/inner-icons").RadioTower;
 declare const RefreshCcw: typeof import("@timeless/inner-icons").RefreshCcw;
 declare const RefreshCw: typeof import("@timeless/inner-icons").RefreshCw;
+declare const RobotArm: typeof import("@timeless/inner-icons").RobotArm;
 declare const RotateCcw: typeof import("@timeless/inner-icons").RotateCcw;
 declare const Rss: typeof import("@timeless/inner-icons").Rss;
 declare const Save: typeof import("@timeless/inner-icons").Save;
@@ -24398,6 +32857,7 @@ declare const Server: typeof import("@timeless/inner-icons").Server;
 declare const Settings: typeof import("@timeless/inner-icons").Settings;
 declare const Square: typeof import("@timeless/inner-icons").Square;
 declare const SquareArrowDown: typeof import("@timeless/inner-icons").SquareArrowDown;
+declare const SquarePen: typeof import("@timeless/inner-icons").SquarePen;
 declare const Sun: typeof import("@timeless/inner-icons").Sun;
 declare const Table: typeof import("@timeless/inner-icons").Table;
 declare const Trash: typeof import("@timeless/inner-icons").Trash;
@@ -24430,6 +32890,7 @@ declare const ErrorBoundaryPrimitive: typeof import("@timeless/ui-primitive").Er
 declare const FieldPrimitive: typeof import("@timeless/ui-primitive").FieldPrimitive;
 declare const FilePickerPrimitive: typeof import("@timeless/ui-primitive").FilePickerPrimitive;
 declare const FlowPrimitive: typeof import("@timeless/ui-primitive").FlowPrimitive;
+declare const GalleryPrimitive: typeof import("@timeless/ui-primitive").GalleryPrimitive;
 declare const HeadPrimitive: typeof import("@timeless/ui-primitive").HeadPrimitive;
 declare const ImagePrimitive: typeof import("@timeless/ui-primitive").ImagePrimitive;
 declare const InputPrimitive: typeof import("@timeless/ui-primitive").InputPrimitive;
@@ -24463,6 +32924,7 @@ declare const ToastPrimitive: typeof import("@timeless/ui-primitive").ToastPrimi
 declare const TogglePrimitive: typeof import("@timeless/ui-primitive").TogglePrimitive;
 declare const TooltipPrimitive: typeof import("@timeless/ui-primitive").TooltipPrimitive;
 declare const Transition: typeof import("@timeless/ui-primitive").Transition;
+declare const TreePrimitive: typeof import("@timeless/ui-primitive").TreePrimitive;
 declare const VideoPlayerPrimitive: typeof import("@timeless/ui-primitive").VideoPlayerPrimitive;
 declare const WaterfallPrimitive: typeof import("@timeless/ui-primitive").WaterfallPrimitive;
 
@@ -24484,6 +32946,8 @@ declare const CheckboxGroupCore: typeof import("@timeless/inner-vm").CheckboxGro
 declare const ClickOutsideModel: typeof import("@timeless/inner-vm").ClickOutsideModel;
 declare const CollectionCore: typeof import("@timeless/inner-vm").CollectionCore;
 declare const ContextMenuCore: typeof import("@timeless/inner-vm").ContextMenuCore;
+declare const DEFAULT_WINDOW_BASE_Z: typeof import("@timeless/inner-vm").DEFAULT_WINDOW_BASE_Z;
+declare const DEFAULT_WINDOW_STEP_Z: typeof import("@timeless/inner-vm").DEFAULT_WINDOW_STEP_Z;
 declare const DatePickerCore: typeof import("@timeless/inner-vm").DatePickerCore;
 declare const DateRangePickerCore: typeof import("@timeless/inner-vm").DateRangePickerCore;
 declare const DialogCore: typeof import("@timeless/inner-vm").DialogCore;
@@ -24504,6 +32968,7 @@ declare const FlowNodeModel: typeof import("@timeless/inner-vm").FlowNodeModel;
 declare const FocusScopeCore: typeof import("@timeless/inner-vm").FocusScopeCore;
 declare const FormCore: typeof import("@timeless/inner-vm").FormCore;
 declare const FormFieldCore: typeof import("@timeless/inner-vm").FormFieldCore;
+declare const GalleryCore: typeof import("@timeless/inner-vm").GalleryCore;
 declare const ImageCore: typeof import("@timeless/inner-vm").ImageCore;
 declare const ImageInListCore: typeof import("@timeless/inner-vm").ImageInListCore;
 declare const ImageStep: typeof import("@timeless/inner-vm").ImageStep;
@@ -24546,6 +33011,7 @@ declare const SimpleSelectCore: typeof import("@timeless/inner-vm").SimpleSelect
 declare const SingleFieldCore: typeof import("@timeless/inner-vm").SingleFieldCore;
 declare const SonnerCore: typeof import("@timeless/inner-vm").SonnerCore;
 declare const StepCore: typeof import("@timeless/inner-vm").StepCore;
+declare const SwiperCore: typeof import("@timeless/inner-vm").SwiperCore;
 declare const SwitchCore: typeof import("@timeless/inner-vm").SwitchCore;
 declare const TabHeaderCore: typeof import("@timeless/inner-vm").TabHeaderCore;
 declare const TabsCore: typeof import("@timeless/inner-vm").TabsCore;
@@ -24561,7 +33027,6 @@ declare const TreeCore: typeof import("@timeless/inner-vm").TreeCore;
 declare const TreeNodeEditModel: typeof import("@timeless/inner-vm").TreeNodeEditModel;
 declare const TreeSelectModel: typeof import("@timeless/inner-vm").TreeSelectModel;
 declare const TreeSelectNodeModel: typeof import("@timeless/inner-vm").TreeSelectNodeModel;
-declare const Utils: typeof import("@timeless/inner-vm").Utils;
 declare const VideoPlayerCore: typeof import("@timeless/inner-vm").VideoPlayerCore;
 declare const WaterfallCellModel: typeof import("@timeless/inner-vm").WaterfallCellModel;
 declare const WaterfallColumnModel: typeof import("@timeless/inner-vm").WaterfallColumnModel;
@@ -24569,19 +33034,41 @@ declare const WaterfallModel: typeof import("@timeless/inner-vm").WaterfallModel
 declare const WindowBodyModel: typeof import("@timeless/inner-vm").WindowBodyModel;
 declare const WindowFooterModel: typeof import("@timeless/inner-vm").WindowFooterModel;
 declare const WindowHeaderModel: typeof import("@timeless/inner-vm").WindowHeaderModel;
+declare const WindowManager: typeof import("@timeless/inner-vm").WindowManager;
 declare const WindowModel: typeof import("@timeless/inner-vm").WindowModel;
 declare const Z_INDEX_NEST_GAP: typeof import("@timeless/inner-vm").Z_INDEX_NEST_GAP;
+declare const assignIds: typeof import("@timeless/inner-vm").assignIds;
+declare const assignPaths: typeof import("@timeless/inner-vm").assignPaths;
 declare const base: typeof import("@timeless/inner-vm").base;
+declare const buildTreeFromPaths: typeof import("@timeless/inner-vm").buildTreeFromPaths;
 declare const clamp: typeof import("@timeless/inner-vm").clamp;
+declare const cloneKeepIds: typeof import("@timeless/inner-vm").cloneKeepIds;
+declare const cloneNodes: typeof import("@timeless/inner-vm").cloneNodes;
+declare const collectDirectoryKeys: typeof import("@timeless/inner-vm").collectDirectoryKeys;
+declare const collectSubtreeKeys: typeof import("@timeless/inner-vm").collectSubtreeKeys;
 declare const computePositionInItemAlignedMode: typeof import("@timeless/inner-vm").computePositionInItemAlignedMode;
 declare const computeZIndex: typeof import("@timeless/inner-vm").computeZIndex;
+declare const countChildren: typeof import("@timeless/inner-vm").countChildren;
+declare const countFiles: typeof import("@timeless/inner-vm").countFiles;
 declare const damping: typeof import("@timeless/inner-vm").damping;
+declare const describeDrop: typeof import("@timeless/inner-vm").describeDrop;
+declare const flattenTree: typeof import("@timeless/inner-vm").flattenTree;
 declare const getAngleByPoints: typeof import("@timeless/inner-vm").getAngleByPoints;
 declare const getGlobalLayerManager: typeof import("@timeless/inner-vm").getGlobalLayerManager;
 declare const getPoint: typeof import("@timeless/inner-vm").getPoint;
 declare const getPopperPlatform: typeof import("@timeless/inner-vm").getPopperPlatform;
 declare const initGlobalPointerListener: typeof import("@timeless/inner-vm").initGlobalPointerListener;
+declare const isDirectory: typeof import("@timeless/inner-vm").isDirectory;
+declare const isTreeEmpty: typeof import("@timeless/inner-vm").isTreeEmpty;
+declare const locate: typeof import("@timeless/inner-vm").locate;
+declare const moveNode: typeof import("@timeless/inner-vm").moveNode;
+declare const nodeLabel: typeof import("@timeless/inner-vm").nodeLabel;
+declare const noop: typeof import("@timeless/inner-vm").noop;
 declare const onCreateScrollView: typeof import("@timeless/inner-vm").onCreateScrollView;
+declare const plainTree: typeof import("@timeless/inner-vm").plainTree;
 declare const preventDefault: typeof import("@timeless/inner-vm").preventDefault;
+declare const remapCollapsedIds: typeof import("@timeless/inner-vm").remapCollapsedIds;
 declare const resetGlobalLayerManager: typeof import("@timeless/inner-vm").resetGlobalLayerManager;
 declare const setPopperPlatform: typeof import("@timeless/inner-vm").setPopperPlatform;
+declare const shouldExpandTarget: typeof import("@timeless/inner-vm").shouldExpandTarget;
+declare const sortTree: typeof import("@timeless/inner-vm").sortTree;

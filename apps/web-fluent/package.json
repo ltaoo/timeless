@@ -1,0 +1,13 @@
+{
+  "name": "@timeless/web-fluent",
+  "version": "1.0.0",
+  "description": "Fluent 2 component gallery for @timeless/fluent",
+  "type": "module",
+  "scripts": {
+    "dev": "timeless frontend"
+  },
+  "devDependencies": {
+    "@timeless/cli": "workspace:*",
+    "@timeless/inner-types": "workspace:*"
+  }
+}

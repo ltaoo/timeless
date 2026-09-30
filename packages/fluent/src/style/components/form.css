@@ -1,0 +1,34 @@
+/* ==========================================================================
+   Fluent 2 · Form
+   --------------------------------------------------------------------------
+   Form 组件只加一个纵向布局容器类（.fl-form）。Fluent 2 的字段级语义交给
+   Field / FieldSet 组件；这里提供一点可选布局钩子 + 字段错误/帮助文案样式。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer);
+  width: 100%;
+}
+
+[data-tt-style="fluent"] .fl-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-sm);
+  align-items: flex-end;
+}
+
+[data-tt-style="fluent"] .fl-form__error {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--destructive-subtle-foreground);
+}
+
+[data-tt-style="fluent"] .fl-form__help {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+}

@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Fluent 2 · Link（.fl-link）
+   品牌链接色（--colorBrandForegroundLink），hover 加下划线。
+   base.css 已给作用域内的 <a> 兜底，这里是显式类名版本。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-link {
+  color: var(--colorBrandForegroundLink);
+  text-decoration: none;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-link:hover {
+  color: var(--colorBrandForegroundLinkHover);
+  text-decoration: underline;
+}
+
+[data-tt-style="fluent"] .fl-link:active {
+  color: var(--colorBrandForegroundLinkPressed);
+}
+
+[data-tt-style="fluent"] .fl-link:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-link.is-disabled,
+[data-tt-style="fluent"] .fl-link[aria-disabled="true"],
+[data-tt-style="fluent"] .fl-link[data-disabled="true"] {
+  color: var(--foreground-disabled);
+  text-decoration: none;
+  cursor: not-allowed;
+  pointer-events: none;
+}

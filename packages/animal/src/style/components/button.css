@@ -1,0 +1,309 @@
+/* ==========================================================================
+   Animal Island · Button（.animal-btn）
+   --------------------------------------------------------------------------
+   上游 Button 的硬指标（见 docs/design-system/design-tokens.md）：
+
+     · 胶囊形：border-radius 恒为 50px（--radius-pill），描边 2px（--border-width）
+     · primary 用**像素堆叠立体阴影** `0 5px 0 0`（--shadow-btn），
+       hover 抬到 `0 6px`、active 压到 `0 1px`
+     · default / dashed / text / link 只用**柔和高度阴影**（--shadow-sm / --shadow），
+       **不**套立体阴影 —— 上游文档明确警告全量套用会让界面「过重、过游戏化」
+     · hover 上浮 translateY(-1px)，active 下压 translateY(2px)
+     · 焦点是黄色描边，永不用蓝色
+     · transition 0.25s cubic-bezier(0.4,0,0.2,1)
+
+   变体由 module 层映射：animal-btn--default / --primary / --dashed / --text /
+   --link，另有 --ghost 与 --danger 修饰、--success / --warning / --info 状态色。
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-btn {
+  --btn-height: 45px;
+  --btn-padding-x: 20px;
+  --btn-font-size: var(--font-size);
+  --btn-radius: var(--radius-pill);
+  --btn-color: var(--foreground);
+  --btn-bg: var(--surface-1);
+  --btn-border: var(--border);
+  --btn-shadow: var(--shadow-sm);
+  --btn-hover-color: var(--primary);
+  --btn-hover-bg: var(--surface-1);
+  --btn-hover-border: var(--primary);
+  --btn-hover-shadow: var(--shadow);
+  --btn-hover-lift: -1px;
+  --btn-active-color: var(--primary-pressed);
+  --btn-active-bg: var(--surface-1);
+  --btn-active-border: var(--primary-pressed);
+  --btn-active-shadow: var(--shadow-sm);
+  --btn-active-lift: 0;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacer-sm);
+  height: var(--btn-height);
+  min-width: var(--btn-height);
+  padding: 0 var(--btn-padding-x);
+  font-family: var(--font-sans);
+  font-size: var(--btn-font-size);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--btn-color);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--btn-bg);
+  border: var(--border-width) solid var(--btn-border);
+  border-radius: var(--btn-radius);
+  outline: none;
+  box-shadow: var(--btn-shadow);
+  transition: all var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-btn:hover:not(:disabled):not(.is-disabled) {
+  color: var(--btn-hover-color);
+  background-color: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border);
+  box-shadow: var(--btn-hover-shadow);
+  transform: translateY(var(--btn-hover-lift));
+}
+
+[data-tt-style="animal"] .animal-btn:active:not(:disabled):not(.is-disabled) {
+  color: var(--btn-active-color);
+  background-color: var(--btn-active-bg);
+  border-color: var(--btn-active-border);
+  box-shadow: var(--btn-active-shadow);
+  transform: translateY(var(--btn-active-lift));
+}
+
+/* 焦点：黄色描边（--ring = --animal-focus-yellow） */
+[data-tt-style="animal"] .animal-btn:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-btn:disabled,
+[data-tt-style="animal"] .animal-btn[data-disabled="true"],
+[data-tt-style="animal"] .animal-btn.is-disabled {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  box-shadow: none;
+}
+
+/* --- 尺寸：32 / 45 / 48 --- */
+[data-tt-style="animal"] .animal-btn--sm {
+  --btn-height: var(--control-height-sm);
+  --btn-padding-x: 16px;
+  --btn-font-size: var(--font-size-sm);
+  --btn-radius: var(--radius-sm);
+}
+
+[data-tt-style="animal"] .animal-btn--lg {
+  --btn-height: var(--control-height-lg);
+  --btn-padding-x: 32px;
+  --btn-font-size: var(--font-size-lg);
+  --btn-radius: var(--radius-lg);
+}
+
+[data-tt-style="animal"] .animal-btn--icon {
+  --btn-padding-x: 0;
+  width: var(--btn-height);
+}
+
+/* --- default：奶油纸底 + 柔和高度阴影 --- */
+[data-tt-style="animal"] .animal-btn--default {
+  --btn-bg: var(--surface-1);
+  --btn-border: var(--border);
+}
+
+/* --- primary：奶油纸底 + 像素堆叠立体阴影（上游招牌） --- */
+[data-tt-style="animal"] .animal-btn--primary {
+  --btn-color: var(--btn-primary-fg);
+  --btn-bg: var(--btn-primary-bg);
+  --btn-border: var(--btn-primary-bg);
+  --btn-shadow: 0 5px 0 0 var(--shadow-btn);
+  --btn-hover-color: var(--btn-primary-fg);
+  --btn-hover-bg: var(--btn-primary-bg);
+  --btn-hover-border: var(--btn-primary-bg);
+  --btn-hover-shadow: 0 6px 0 0 var(--shadow-btn);
+  --btn-active-color: var(--btn-primary-fg);
+  --btn-active-bg: var(--btn-primary-bg);
+  --btn-active-border: var(--btn-primary-bg);
+  --btn-active-shadow: 0 1px 0 0 var(--shadow-btn);
+  --btn-active-lift: 2px;
+}
+
+/* --- dashed：虚线描边，不加立体阴影 --- */
+[data-tt-style="animal"] .animal-btn--dashed {
+  --btn-bg: var(--surface-1);
+  --btn-border: var(--border);
+  --btn-hover-shadow: var(--shadow-sm);
+  --btn-active-shadow: var(--shadow-sm);
+
+  border-style: dashed;
+}
+
+/* --- text：无底无描边，hover 出现次级底 --- */
+[data-tt-style="animal"] .animal-btn--text {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-shadow: none;
+  --btn-hover-color: var(--foreground);
+  --btn-hover-bg: var(--secondary);
+  --btn-hover-border: transparent;
+  --btn-hover-shadow: none;
+  --btn-active-color: var(--foreground);
+  --btn-active-bg: color-mix(in srgb, var(--secondary) 88%, var(--foreground));
+  --btn-active-border: transparent;
+  --btn-active-shadow: none;
+}
+
+/* --- link：品牌色文字，hover 降低不透明度 --- */
+[data-tt-style="animal"] .animal-btn--link {
+  --btn-color: var(--primary);
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-shadow: none;
+  --btn-hover-color: var(--primary-hover);
+  --btn-hover-bg: transparent;
+  --btn-hover-border: transparent;
+  --btn-hover-shadow: none;
+  --btn-hover-lift: 0;
+  --btn-active-color: var(--primary-pressed);
+  --btn-active-bg: transparent;
+  --btn-active-border: transparent;
+  --btn-active-shadow: none;
+}
+
+[data-tt-style="animal"] .animal-btn--link:hover:not(:disabled):not(
+    .is-disabled
+  ) {
+  opacity: 0.85;
+}
+
+/* --- ghost：全透明，hover 才出现品牌浅底 --- */
+[data-tt-style="animal"] .animal-btn--ghost {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  --btn-shadow: none;
+  --btn-hover-bg: transparent;
+  --btn-hover-border: transparent;
+  --btn-hover-shadow: none;
+  --btn-active-bg: transparent;
+  --btn-active-border: transparent;
+  --btn-active-shadow: none;
+}
+
+[data-tt-style="animal"] .animal-btn--ghost.animal-btn--primary {
+  --btn-color: var(--primary);
+  --btn-hover-color: var(--primary-hover);
+  --btn-hover-border: var(--primary-hover);
+  --btn-hover-bg: color-mix(in srgb, var(--primary) 8%, transparent);
+  --btn-active-color: var(--primary-pressed);
+  --btn-active-border: var(--primary-pressed);
+  --btn-active-bg: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+/* --- danger：primary 形态走红底 + 红色立体阴影，其余形态只换描边/文字 --- */
+[data-tt-style="animal"] .animal-btn--danger {
+  --btn-color: var(--destructive);
+  --btn-border: var(--destructive);
+  --btn-hover-color: var(--destructive);
+  --btn-hover-border: var(--destructive-subtle-foreground);
+  --btn-active-color: var(--destructive);
+  --btn-active-border: var(--destructive-subtle-foreground);
+}
+
+[data-tt-style="animal"] .animal-btn--danger.animal-btn--primary {
+  --btn-color: var(--destructive-foreground);
+  --btn-bg: var(--destructive);
+  --btn-border: var(--destructive);
+  --btn-shadow: 0 5px 0 0 var(--destructive-subtle-foreground);
+  --btn-hover-color: var(--destructive-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--destructive) 88%, white);
+  --btn-hover-border: color-mix(in srgb, var(--destructive) 88%, white);
+  --btn-hover-shadow: 0 6px 0 0 var(--destructive-subtle-foreground);
+  --btn-active-color: var(--destructive-foreground);
+  --btn-active-bg: var(--destructive-subtle-foreground);
+  --btn-active-border: var(--destructive-subtle-foreground);
+  --btn-active-shadow: 0 1px 0 0 var(--destructive-subtle-foreground);
+  --btn-active-lift: 2px;
+}
+
+/* --- 状态色实心（上游主线没有，为画廊补齐，仍走 token + 柔和阴影） --- */
+[data-tt-style="animal"] .animal-btn--success {
+  --btn-color: var(--success-foreground);
+  --btn-bg: var(--success);
+  --btn-border: var(--success);
+  --btn-hover-color: var(--success-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--success) 88%, white);
+  --btn-hover-border: color-mix(in srgb, var(--success) 88%, white);
+  --btn-active-color: var(--success-foreground);
+  --btn-active-bg: var(--success-subtle-foreground);
+  --btn-active-border: var(--success-subtle-foreground);
+}
+
+[data-tt-style="animal"] .animal-btn--warning {
+  --btn-color: var(--warning-foreground);
+  --btn-bg: var(--warning);
+  --btn-border: var(--warning);
+  --btn-hover-color: var(--warning-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--warning) 88%, white);
+  --btn-hover-border: color-mix(in srgb, var(--warning) 88%, white);
+  --btn-active-color: var(--warning-foreground);
+  --btn-active-bg: var(--warning-subtle-foreground);
+  --btn-active-border: var(--warning-subtle-foreground);
+}
+
+[data-tt-style="animal"] .animal-btn--info {
+  --btn-color: var(--info-foreground);
+  --btn-bg: var(--info);
+  --btn-border: var(--info);
+  --btn-hover-color: var(--info-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--info) 88%, white);
+  --btn-hover-border: color-mix(in srgb, var(--info) 88%, white);
+  --btn-active-color: var(--info-foreground);
+  --btn-active-bg: var(--info-subtle-foreground);
+  --btn-active-border: var(--info-subtle-foreground);
+}
+
+/* --- block：撑满整行 --- */
+[data-tt-style="animal"] .animal-btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* --- loading：显示 spinner 并禁用交互 --- */
+[data-tt-style="animal"] .animal-btn.is-loading,
+[data-tt-style="animal"] .animal-btn[data-loading="true"] {
+  cursor: default;
+  pointer-events: none;
+}
+
+[data-tt-style="animal"] .animal-btn .animal-btn__spinner {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: animal-spin 1s linear infinite;
+}
+
+@keyframes animal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-btn,
+  [data-tt-style="animal"] .animal-btn .animal-btn__spinner {
+    transition: none;
+    animation: none;
+  }
+}

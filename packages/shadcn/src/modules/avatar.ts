@@ -34,15 +34,19 @@ export function Avatar(
       ui.AvatarPrimitive.Image({
         src,
         alt,
-        class: "aspect-square h-full w-full object-cover",
+        // relative + z-1：图片层要压在兜底层之上（两层都在定位层里，DOM 靠后的
+        // Fallback 默认会盖住图片）。
+        class: "aspect-square h-full w-full object-cover relative z-1",
         onLoadingStatusChange: () => {
           // Image handles visibility internally based on error state
         },
       }),
       ui.AvatarPrimitive.Fallback(
         {
+          // absolute inset-0：兜底层脱离 flex 流铺满盒子。留在流里的话它那份
+          // h-full w-full 会和图片抢宽度，图片被挤扁。
           class:
-            "flex h-full w-full items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-medium",
+            "flex absolute inset-0 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-medium",
         },
         children ?? [fallback || (alt ? alt.charAt(0).toUpperCase() : "?")],
       ),

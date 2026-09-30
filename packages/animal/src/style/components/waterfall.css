@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Animal Island · Waterfall（.animal-waterfall）
+   --------------------------------------------------------------------------
+   WaterfallPrimitive.Root 自带一层匿名内层容器（position: relative +
+   computed 高度），列是它的子元素，因此用 `.animal-waterfall > div` 把内层
+   变成横向 flex 行；列宽由 flex 均分，列间距由 WaterfallModel 的 gutter
+   在计算 top/height 时预留，不在 CSS 里再加 gap。
+
+   · .animal-waterfall          滚动容器（Root，内联 overflow-y:auto; height:100%）
+   · .animal-waterfall__column  一列（内联 position:relative + 高度）
+   · .animal-waterfall__item    单元格（内联 position:absolute + top/height）
+
+   Animal Island 视觉：
+     · 细滚动条：thumb 用暖棕 --border-strong，hover 加深到 --foreground
+     · 单元格统一按 --radius 圆角裁切，让图片/内容贴合本库的圆角语言
+     · 容器本身不画框；外套 .animal-card / .animal-panel 时由外层提供描边
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-waterfall {
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* 嵌在外部 ScrollView 里使用时解除 Root 自带的滚动与高度（内联 style 需要
+   !important 才能覆盖），滚动量由外层 ScrollViewCore 回传给 WaterfallModel。 */
+[data-tt-style="animal"] .animal-waterfall.is-embedded {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* Root 内部有一层匿名容器（position:relative + computed 高度），列是它的
+   子元素；把这一层变成横向 flex 行。选择器同时对「没有包装层」的结构安全：
+   此时命中的是列本身，而列里只有绝对定位的单元格，改成 flex 无副作用。 */
+[data-tt-style="animal"] .animal-waterfall > div {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+[data-tt-style="animal"] .animal-waterfall::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-tt-style="animal"] .animal-waterfall::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-tt-style="animal"] .animal-waterfall::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="animal"] .animal-waterfall::-webkit-scrollbar-thumb:hover {
+  background-color: var(--foreground);
+}
+
+[data-tt-style="animal"] .animal-waterfall__column {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+[data-tt-style="animal"] .animal-waterfall__item {
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: var(--radius);
+}
+
+[data-tt-style="animal"] .animal-waterfall:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-waterfall.is-disabled,
+[data-tt-style="animal"] .animal-waterfall[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-waterfall {
+    scroll-behavior: auto;
+  }
+}

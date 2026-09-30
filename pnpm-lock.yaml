@@ -292,6 +292,42 @@ importers:
         specifier: workspace:^
         version: link:../../packages/timeless-tui
 
+  apps/web-animal:
+    devDependencies:
+      '@timeless/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      '@timeless/inner-types':
+        specifier: workspace:*
+        version: link:../../packages/types
+
+  apps/web-bootstrap:
+    devDependencies:
+      '@timeless/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      '@timeless/inner-types':
+        specifier: workspace:*
+        version: link:../../packages/types
+
+  apps/web-fluent:
+    devDependencies:
+      '@timeless/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      '@timeless/inner-types':
+        specifier: workspace:*
+        version: link:../../packages/types
+
+  apps/web-material:
+    devDependencies:
+      '@timeless/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      '@timeless/inner-types':
+        specifier: workspace:*
+        version: link:../../packages/types
+
   apps/web-primitive:
     dependencies:
       better-sqlite3:
@@ -487,6 +523,16 @@ importers:
 
   packages/analytics: {}
 
+  packages/animal:
+    dependencies:
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/base:
     dependencies:
       mitt:
@@ -516,6 +562,16 @@ importers:
       dayjs:
         specifier: ^1.11.19
         version: 1.11.19
+
+  packages/bootstrap:
+    dependencies:
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/chart: {}
 
@@ -549,6 +605,26 @@ importers:
       vite:
         specifier: ^6.3.5
         version: 6.4.1(@types/node@25.0.9)(jiti@2.6.1)(less@4.6.7)(lightningcss@1.32.0)(terser@5.46.0)(yaml@2.8.3)
+
+  packages/findrssui:
+    dependencies:
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/fluent:
+    dependencies:
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/icons:
     devDependencies:
@@ -588,6 +664,16 @@ importers:
       tailwindcss:
         specifier: ^3.0.0 || ^4.0.0
         version: 4.2.2
+
+  packages/material:
+    dependencies:
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/primitive:
     dependencies:

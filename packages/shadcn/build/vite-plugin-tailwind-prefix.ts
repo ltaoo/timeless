@@ -14,6 +14,14 @@ const customClassNames = new Set([
   "cn-rtl-flip",
   "dark",
   "flow-node-content",
+  // 状态类名：四套样式库的 DOM 契约统一用 `.is-*`（见 tree / flow 的
+  // `TreeClassNames` 与 `packages/shadcn/src/index.css`），走的是库自己的 CSS
+  // 而不是 Tailwind 工具类，加前缀会让选择器对不上。
+  "is-after",
+  "is-animated",
+  "is-before",
+  "is-checked",
+  "is-indeterminate",
   "no-scrollbar",
   "overlay-scrollbar",
   "scroll-view",
@@ -109,6 +117,7 @@ function shouldPreserveUtility(utility: string) {
     value.startsWith("cn-") ||
     value.startsWith("t-") ||
     value.startsWith("flow-") ||
+    value.startsWith("tree-") ||
     value.includes("__")
   );
 }
@@ -239,11 +248,14 @@ function prefixClassStrings(code: string, id: string) {
   }
 
   function collectClassRoots(node: ts.Node) {
-    if (
-      ts.isPropertyAssignment(node) &&
-      propertyNameText(node.name) === "class"
-    ) {
-      mark(node.initializer);
+    if (ts.isPropertyAssignment(node)) {
+      // `class` 是常规单值；`classes` 是给 headless primitive 的**槽位表**
+      // （`modules/tree.ts` 的 TreeClassNames：每一格都是类名字符串）。
+      // 两者都可能是类名来源，都要顺着走进去。
+      const name = propertyNameText(node.name);
+      if (name === "class" || name === "classes") {
+        mark(node.initializer);
+      }
     }
     ts.forEachChild(node, collectClassRoots);
   }
@@ -353,6 +365,7 @@ function shouldPreserveCssClassName(className: string) {
     utility.startsWith("cn-") ||
     utility.startsWith("t-") ||
     utility.startsWith("flow-") ||
+    utility.startsWith("tree-") ||
     utility.includes("__")
   );
 }

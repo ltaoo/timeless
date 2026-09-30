@@ -1,0 +1,202 @@
+/* ==========================================================================
+   Fluent 2 · DropdownMenu / ContextMenu / static Menu
+   --------------------------------------------------------------------------
+   三个模块共用同一套类名（见 modules/menu-shared.ts 的 t 常量）：
+     .fl-menu / .fl-menu__item / .fl-menu__separator / .fl-menu__label
+     .fl-menu--submenu / .fl-menu__icon / .fl-menu__shortcut
+     .fl-menu__check / .fl-menu__arrow
+   特征：4px 圆角 + 1px --stroke1 + --shadow-16；行 hover 用 --surface-1-hover，
+   行聚焦/选中用左侧 3px --compound-brand 竖条（Fluent 的 menu 指示条）。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-menu {
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  max-height: var(--tt-menu-max-height, 20rem);
+  overflow: hidden auto;
+  padding: 4px;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  text-align: left;
+  list-style: none;
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-16);
+  outline: 0;
+}
+
+/* --- 条目 --- */
+[data-tt-style="fluent"] .fl-menu__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px 6px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground);
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+/* 左侧 3px 品牌竖条：hover / 聚焦 / 展开时出现 */
+[data-tt-style="fluent"] .fl-menu__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  transform: translateY(-50%);
+  background-color: var(--compound-brand);
+  border-radius: var(--radius-pill);
+  transition: height var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-menu__item:hover,
+[data-tt-style="fluent"] .fl-menu__item.is-focused {
+  color: var(--accent-foreground);
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="fluent"] .fl-menu__item:hover::before,
+[data-tt-style="fluent"] .fl-menu__item.is-focused::before {
+  height: 60%;
+}
+
+[data-tt-style="fluent"] .fl-menu__item:active {
+  background-color: var(--surface-1-pressed);
+}
+
+[data-tt-style="fluent"] .fl-menu__item.is-disabled,
+[data-tt-style="fluent"] .fl-menu__item[data-disabled],
+[data-tt-style="fluent"] .fl-menu__item:disabled {
+  color: var(--foreground-disabled);
+  pointer-events: none;
+  background-color: transparent;
+}
+
+[data-tt-style="fluent"] .fl-menu__item.is-disabled::before,
+[data-tt-style="fluent"] .fl-menu__item[data-disabled]::before {
+  height: 0;
+}
+
+[data-tt-style="fluent"] .fl-menu__item:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -1px;
+}
+
+/* 勾选位 / 图标位 / 快捷键 / 子菜单箭头 */
+[data-tt-style="fluent"] .fl-menu__check {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--compound-brand);
+}
+
+[data-tt-style="fluent"] .fl-menu__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-menu__shortcut {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.02em;
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-menu__arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-menu__shortcut + .fl-menu__arrow {
+  margin-left: 4px;
+}
+
+/* --- 分组标题 / 分隔线 --- */
+[data-tt-style="fluent"] .fl-menu__label {
+  display: block;
+  padding: 6px 12px 2px;
+  margin-bottom: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--fontWeightSemibold);
+  color: var(--foreground-3);
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-menu__separator {
+  height: 0;
+  margin: 4px 0;
+  overflow: hidden;
+  border-top: var(--strokeWidthThin) solid var(--stroke2);
+}
+
+/* --- 子菜单浮层 --- */
+[data-tt-style="fluent"] .fl-menu--submenu {
+  min-width: 9rem;
+}
+
+/* --- 动画（DropdownMenu / ContextMenu / Menu 的浮层） --- */
+[data-tt-style="fluent"] .fl-menu.is-enter {
+  animation: fl-menu-in var(--duration-fast) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-menu.is-exit {
+  animation: fl-menu-out var(--duration-faster) var(--easing-accelerate) both;
+}
+
+@keyframes fl-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fl-menu-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-menu__item,
+  [data-tt-style="fluent"] .fl-menu__item::before {
+    transition: none;
+  }
+}

@@ -1,0 +1,127 @@
+/* ==========================================================================
+   animal-island-ui — 第一层 token（上游原始名，逐字照抄）
+   --------------------------------------------------------------------------
+   名字与取值来自上游 guokaigdg/animal-island-ui 的编译期 variables.less 与
+   产物 themes/default.less（两者互为「源 ↔ 产物」）。
+
+   ⚠️ 这 48 个是**公开契约**：上游用户已有的 `--animal-*` 覆盖写法必须继续生效，
+   所以只可照抄，不可重命名、不可加后缀。
+
+   ⚠️ 上游**没有提供暗色主题**（variables.less / themes/default.less 都只有一套
+   亮色），所以本文件不写暗色分支，本库切暗色时保持亮色外观 —— 详见
+   THEME_DESIGN.md「暗色」一节。
+
+   为什么挂在 [data-tt-style="animal"] 而不是 :root：
+  见 THEME_PACKAGE_GUIDE.md §4.4 —— 作用域属性让本库可与 bootstrap / material /
+  上游真实框架同页共存。
+   ========================================================================== */
+
+[data-tt-style="animal"] {
+  /* ---------- Color ---------- */
+  --animal-primary-color: #19c8b9;
+  --animal-primary-color-hover: #3dd4c6;
+  --animal-primary-color-active: #50b9ab;
+  --animal-primary-color-bg: #e6f9f6;
+
+  --animal-success-color: #6fba2c;
+  --animal-success-color-hover: #85cc45;
+  --animal-success-color-active: #5a9e1e;
+
+  --animal-warning-color: #f5c31c;
+  --animal-warning-color-hover: #f7d04a;
+  --animal-warning-color-active: #dba90e;
+
+  --animal-error-color: #e05a5a;
+  --animal-error-color-hover: #e87878;
+  --animal-error-color-active: #c94444;
+
+  /* ---------- Neutral ---------- */
+  --animal-text-color: #794f27;
+  --animal-text-color-secondary: #9f927d;
+  /* 上游瑕疵：default.less 把 muted 也映射到 @text-color，与 --animal-text-color
+     同值（design-tokens.md 里写的是另一个棕色）。此处**照抄产物**，不改写成文档值。 */
+  --animal-text-color-muted: #794f27;
+  --animal-text-color-disabled: #c4b89e;
+
+  --animal-border-color: #dcd8d1;
+  --animal-border-color-hover: #827157;
+  --animal-border-color-light: #e8e2d6;
+
+  --animal-bg-color: #f8f8f0;
+  --animal-bg-color-secondary: #f0e8d8;
+  --animal-bg-color-disabled: #f0ece2;
+
+  /* ---------- Overlay ---------- */
+  --animal-mask-bg: rgba(0, 0, 0, 0.35);
+
+  /* ---------- Typography ---------- */
+  /* 上游此处带 `!important`（variables.less 里 @font-family 的末尾）。映射进
+     自定义属性时 `!important` 无意义且会让 token 难以被应用覆盖，故**有意去掉**。
+     唯一的字段级偏离，见 THEME_DESIGN.md。 */
+  --animal-font-family: Nunito, "Noto Sans SC", -apple-system, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --animal-font-size-sm: 12px;
+  --animal-font-size-base: 14px;
+  --animal-font-size-lg: 16px;
+  --animal-line-height-base: 1.5715;
+
+  /* ---------- Spacing ---------- */
+  --animal-spacing-xs: 4px;
+  --animal-spacing-sm: 8px;
+  --animal-spacing-md: 12px;
+  --animal-spacing-lg: 16px;
+  --animal-spacing-xl: 24px;
+
+  /* ---------- Border ---------- */
+  --animal-border-radius-sm: 16px;
+  --animal-border-radius-base: 18px;
+  --animal-border-radius-lg: 24px;
+  --animal-border-width: 2px;
+
+  /* ---------- Shadow ---------- */
+  --animal-shadow-sm: 0 2px 4px 0 rgba(61, 52, 40, 0.06);
+  --animal-shadow-base: 0 3px 10px 0 rgba(61, 52, 40, 0.1);
+  --animal-shadow-lg: 0 8px 24px 0 rgba(61, 52, 40, 0.14);
+
+  /* ---------- Motion ---------- */
+  --animal-motion-duration-fast: 0.15s;
+  --animal-motion-duration-base: 0.25s;
+  --animal-motion-duration-slow: 0.35s;
+  --animal-motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---------- Size ---------- */
+  --animal-height-sm: 32px;
+  --animal-height-base: 40px;
+  --animal-height-lg: 48px;
+
+  /* ========================================================================
+     上游「独立实现契约」里声明、但打包产物 themes/default.less **漏掉**的 token。
+     （来源：docs/design-system/css-variables.md）
+
+     补它们的理由：立体阴影 / 黄色焦点 / 胶囊圆角是本风格最有辨识度的部分，
+     不补就只能把 #bdaea0 这类值硬编码进组件 CSS、无法被应用覆盖。
+
+     ⚠️ 只补**产物没有的**。与产物同名但取值不同的那批（--animal-border /
+     --animal-primary / --animal-text / --animal-bg / --animal-success /
+     --animal-warning / --animal-error / --animal-radius / --animal-ease /
+     --animal-duration* / --animal-text-muted / …）一律**不定义**，
+     以 `-color` / `-base` 后缀的产物名称为准。
+     ======================================================================== */
+
+  --animal-radius-pill: 50px;
+
+  --animal-shadow-btn: #bdaea0;
+  --animal-shadow-input: #d4c9b4;
+  --animal-shadow-switch: #5a9e1e;
+
+  /* 契约里写 #ffcc00，但编译期 variables.less 是 `@focus-yellow: @warning-color`
+     = #f5c31c。按「以 variables.less + 产物 default.less 为准」的裁决取其值。 */
+  --animal-focus-yellow: #f5c31c;
+  --animal-focus-yellow-d: #e0b800;
+
+  --animal-text-body: #725d42;
+  --animal-bg-content: rgb(247, 243, 223);
+  --animal-bg-input: #fffbe7;
+  --animal-bg-input-disabled: #ece8dc;
+  --animal-border-input: #c4b89e;
+}

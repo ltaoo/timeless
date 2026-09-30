@@ -1,0 +1,60 @@
+/* ==========================================================================
+   Material 3 · Table
+   根节点 .m3-table，其余部位用原生语义标签（thead/tbody/tr/th/td），
+   通过后代选择器作用域化。M3：行分割线 --outline-variant；表头字
+   --muted-foreground（label-large）；行 hover 用 state layer。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-table {
+  width: 100%;
+  margin-bottom: var(--spacer);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--foreground);
+  vertical-align: top;
+  caption-side: bottom;
+  border-collapse: collapse;
+}
+
+[data-tt-style="material"] .m3-table > :not(caption) > * > * {
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+[data-tt-style="material"] .m3-table > thead {
+  vertical-align: bottom;
+}
+
+[data-tt-style="material"] .m3-table > thead > tr > th {
+  font-size: var(--label-size);
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-align: left;
+  letter-spacing: 0.02em;
+}
+
+[data-tt-style="material"] .m3-table > tbody > tr {
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-table > tbody > tr:hover > * {
+  background-color: color-mix(in srgb, var(--foreground) var(--state-hover), transparent);
+}
+
+[data-tt-style="material"] .m3-table > tbody > tr:last-child > * {
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="material"] .m3-table > caption {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-table > tbody > tr {
+    transition: none;
+  }
+}

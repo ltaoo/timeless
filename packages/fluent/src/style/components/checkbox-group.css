@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Fluent 2 · CheckboxGroup（.fl-checkbox-group）
+   Fluent 的选项组是纵向 8px 间距的堆叠，横向时 16px 间距并允许换行。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="fluent"] .fl-checkbox-group--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+[data-tt-style="fluent"] .fl-checkbox-group__item {
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="fluent"] .fl-checkbox-group__item:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+[data-tt-style="fluent"] .fl-checkbox-group__item.is-disabled {
+  cursor: not-allowed;
+}

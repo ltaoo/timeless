@@ -1,0 +1,108 @@
+/* ==========================================================================
+   Fluent 2 · Popconfirm
+   --------------------------------------------------------------------------
+   沿用 popover 的视觉语言，命名空间换成 .fl-popconfirm：
+   结构：.fl-popconfirm > __arrow / __header / __body / __actions
+   特征：1px --stroke2 + --shadow-16 + 4px 圆角。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-popconfirm {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 20rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--strokeWidthThin) solid var(--stroke2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-16);
+  outline: 0;
+}
+
+[data-tt-style="fluent"] .fl-popconfirm__header {
+  padding: 0.75rem 0.875rem 0.25rem;
+  font-size: var(--font-size);
+  font-weight: var(--fontWeightSemibold);
+  color: var(--popover-foreground);
+}
+
+[data-tt-style="fluent"] .fl-popconfirm__body {
+  padding: 0 0.875rem 0.75rem;
+  line-height: var(--lineHeightBase300);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="fluent"] .fl-popconfirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0 0.875rem 0.875rem;
+}
+
+[data-tt-style="fluent"] .fl-popconfirm__actions .fl-btn {
+  margin: 0;
+}
+
+/* --- 箭头（与 popover 同构） --- */
+[data-tt-style="fluent"] .fl-popconfirm__arrow {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--popover);
+  border: var(--strokeWidthThin) solid var(--stroke2);
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-popconfirm__arrow.is-top {
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="fluent"] .fl-popconfirm__arrow.is-bottom {
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+
+[data-tt-style="fluent"] .fl-popconfirm__arrow.is-left {
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+
+[data-tt-style="fluent"] .fl-popconfirm__arrow.is-right {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+/* --- 动画 --- */
+[data-tt-style="fluent"] .fl-popconfirm.is-enter {
+  animation: fl-popconfirm-in var(--duration-normal) var(--easing-decelerate) both;
+}
+
+[data-tt-style="fluent"] .fl-popconfirm.is-exit {
+  animation: fl-popconfirm-out var(--duration-faster) var(--easing-accelerate) both;
+}
+
+@keyframes fl-popconfirm-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fl-popconfirm-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}

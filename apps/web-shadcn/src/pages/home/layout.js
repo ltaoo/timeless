@@ -5,7 +5,7 @@ import { projects } from "@/pages/project/data.js";
  * @param {ViewComponentProps} props
  */
 export default function HomeLayoutView(props) {
-  const sidemenu$ = Timeless.RouteMenusModel({
+  const sidemenu$ = Timeless.kit.RouteMenusModel({
     view: props.view,
     history: props.history,
     menus: [
@@ -351,7 +351,7 @@ export default function HomeLayoutView(props) {
       {
         size: "auto",
         content() {
-          return KeepAliveSubViews(props);
+          return Timeless.ui.KeepAliveSubViews(props);
         },
       },
     ],

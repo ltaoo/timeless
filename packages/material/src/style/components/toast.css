@@ -1,0 +1,38 @@
+/* ==========================================================================
+   Material 3 · Toast（snackbar 风格）
+   类名：.m3-toast / .m3-toast__header / .m3-toast__body。
+   M3：--surface-container-high 底 + --elevation-3 + 4px 圆角（--radius-sm）。
+   headless 的 ToastCore 没有暴露 state，容器只负责外观，显隐/堆叠交给调用方。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-toast {
+  display: flex;
+  flex-direction: column;
+  width: 22rem;
+  max-width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  pointer-events: auto;
+  background-color: var(--surface-container-high);
+  background-clip: padding-box;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--elevation-3);
+}
+
+[data-tt-style="material"] .m3-toast__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  padding: 0.75rem 1rem 0;
+  font-size: var(--label-size);
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-toast__body {
+  padding: 0.5rem 1rem 0.75rem;
+  color: var(--muted-foreground);
+  overflow-wrap: break-word;
+}

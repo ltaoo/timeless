@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Bootstrap 5.3 · DateRangePicker（.datepicker.is-range）
+   基础外观与 .datepicker 完全一致（见 date-picker.css），这里只补双月布局与
+   区间态：.is-in-range 用 cell 的 ::before 画横向色带，起点 / 终点由
+   .is-range-start / .is-range-end 决定圆角，内层 .datepicker__cell-inner 抬高
+   数字层级。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .datepicker.is-range {
+  width: auto;
+  max-width: none;
+  padding: 0;
+}
+
+[data-tt-style="bootstrap"] .datepicker__calendars {
+  display: flex;
+  align-items: flex-start;
+}
+
+[data-tt-style="bootstrap"] .datepicker__panel {
+  width: 17.5rem;
+  padding: 0.75rem;
+}
+
+[data-tt-style="bootstrap"] .datepicker__panel + .datepicker__panel {
+  border-left: var(--bs-border-width) solid var(--border);
+}
+
+/* --- 区间色带 --- */
+[data-tt-style="bootstrap"] .datepicker__cell.is-in-range {
+  background: transparent;
+  border-radius: 0;
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell.is-in-range::before {
+  content: "";
+  position: absolute;
+  inset: 0.125rem 0;
+  background-color: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell.is-range-start::before {
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell.is-range-end::before {
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell:not(.is-in-range):hover::before {
+  content: none;
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell-inner {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.12s ease-in-out, color 0.12s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .datepicker.is-range .datepicker__cell:hover {
+  background: transparent;
+}
+
+[data-tt-style="bootstrap"]
+  .datepicker.is-range
+  .datepicker__cell:hover
+  .datepicker__cell-inner {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell.is-range-start .datepicker__cell-inner,
+[data-tt-style="bootstrap"] .datepicker__cell.is-range-end .datepicker__cell-inner {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+
+[data-tt-style="bootstrap"] .datepicker__cell.is-in-range .datepicker__cell-inner.is-in {
+  color: var(--primary);
+  font-weight: 500;
+}

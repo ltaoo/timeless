@@ -1,0 +1,89 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Steps
+   Bootstrap 没有 steps 组件，这里沿用它的视觉语言（圆形编号 + 连接线）：
+   结构：.steps > .steps-list > .steps-item
+          > .steps-indicator + .steps-text(.steps-title/.steps-description)
+          + .steps-connector
+   状态：.is-completed / .is-current / .is-upcoming
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .steps {
+  display: block;
+  width: 100%;
+}
+
+[data-tt-style="bootstrap"] .steps-list {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+[data-tt-style="bootstrap"] .steps-item {
+  display: flex;
+  flex: 1 1 0%;
+  align-items: flex-start;
+  gap: var(--spacer-sm);
+  position: relative;
+}
+
+[data-tt-style="bootstrap"] .steps-indicator {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--muted-foreground);
+  background-color: var(--background);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-pill);
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .steps-item.is-completed .steps-indicator {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .steps-item.is-current .steps-indicator {
+  color: var(--primary);
+  background-color: var(--background);
+  border-color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .steps-text {
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.25rem;
+  min-width: 0;
+}
+
+[data-tt-style="bootstrap"] .steps-title {
+  font-size: var(--font-size);
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+[data-tt-style="bootstrap"] .steps-description {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="bootstrap"] .steps-connector {
+  flex: 1 1 auto;
+  align-self: flex-start;
+  height: 2px;
+  min-width: 1rem;
+  margin: calc(1rem - 1px) var(--spacer-sm) 0;
+  background-color: var(--border);
+  transition: background-color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .steps-connector.is-completed {
+  background-color: var(--primary);
+}

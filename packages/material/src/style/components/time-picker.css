@@ -1,0 +1,274 @@
+/* ==========================================================================
+   Material 3 · TimePicker（触发器 .m3-timepicker + 面板 .m3-timepicker__content）
+   --------------------------------------------------------------------------
+   面板顶部是 --display-large 的等宽时间读数，下面时/分（/秒）三列。
+   列由 ScrollViewPrimitive 驱动，行高 36px（必须与模块里的 ITEM_HEIGHT 一致，
+   否则滚动定位会偏），可见高度 5 行 = 180px。
+   选项按钮 hover / pressed 走 state layer（::before），选中 .is-active 填
+   --primary-container + 前景 --primary-container-foreground。
+   ========================================================================== */
+
+/* --- 触发器 --- */
+[data-tt-style="material"] .m3-timepicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: left;
+  background-color: transparent;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-timepicker:hover {
+  border-color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-timepicker:focus-within,
+[data-tt-style="material"] .m3-timepicker.is-open {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+[data-tt-style="material"] .m3-timepicker.is-disabled,
+[data-tt-style="material"] .m3-timepicker[data-disabled] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="material"] .m3-timepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="material"] .m3-timepicker__value.is-placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="material"] .m3-timepicker__icon,
+[data-tt-style="material"] .m3-timepicker__clear {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="material"] .m3-timepicker__icon.is-open {
+  color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-timepicker__clear {
+  cursor: pointer;
+}
+
+[data-tt-style="material"] .m3-timepicker__clear:hover {
+  color: var(--foreground);
+}
+
+/* --- 浮层 --- */
+[data-tt-style="material"] .m3-timepicker__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: var(--foreground);
+  background-color: var(--surface-container-high);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-3);
+  outline: none;
+}
+
+[data-tt-style="material"] .m3-timepicker__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--surface-container-highest);
+  border-radius: var(--radius-lg);
+}
+
+[data-tt-style="material"] .m3-timepicker__display {
+  font-family: var(--font-mono);
+  font-size: var(--title-size);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--primary);
+  text-align: center;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- 三列 --- */
+[data-tt-style="material"] .m3-timepicker__columns {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+[data-tt-style="material"] .m3-timepicker__column {
+  position: relative;
+  width: 3.5rem;
+  height: 11.25rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y proximity;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+
+[data-tt-style="material"] .m3-timepicker__column::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+[data-tt-style="material"] .m3-timepicker__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 2.25rem;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  isolation: isolate;
+  transition:
+    color var(--duration-short) var(--easing-standard),
+    background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-timepicker__option::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--foreground);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-timepicker__option:hover::before {
+  opacity: var(--state-hover);
+}
+
+[data-tt-style="material"] .m3-timepicker__option:active::before {
+  opacity: var(--state-pressed);
+}
+
+[data-tt-style="material"] .m3-timepicker__option.is-active,
+[data-tt-style="material"] .m3-timepicker__option.is-active:hover {
+  color: var(--primary-container-foreground);
+}
+
+[data-tt-style="material"] .m3-timepicker__option.is-active::before {
+  background-color: var(--primary-container);
+  opacity: 1;
+}
+
+[data-tt-style="material"] .m3-timepicker__option:disabled,
+[data-tt-style="material"] .m3-timepicker__option.is-disabled {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+}
+
+/* --- 底部操作 --- */
+[data-tt-style="material"] .m3-timepicker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+[data-tt-style="material"] .m3-timepicker__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4rem;
+  height: var(--control-height-sm);
+  padding: 0 1rem;
+  font-family: var(--font-sans);
+  font-size: var(--label-size);
+  font-weight: 500;
+  color: var(--primary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-timepicker__action:hover {
+  background-color: color-mix(in srgb, var(--primary) var(--state-hover), transparent);
+}
+
+[data-tt-style="material"] .m3-timepicker__action:active {
+  background-color: color-mix(in srgb, var(--primary) var(--state-pressed), transparent);
+}
+
+[data-tt-style="material"] .m3-timepicker__action--confirm {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-timepicker__action--confirm:hover {
+  background-color: color-mix(in srgb, var(--primary) 92%, var(--foreground));
+}
+
+/* --- 进出场 --- */
+[data-tt-style="material"] .m3-timepicker__content.is-enter {
+  animation: m3-timepicker-in var(--duration-medium) var(--easing-emphasized) both;
+}
+
+[data-tt-style="material"] .m3-timepicker__content.is-exit {
+  animation: m3-timepicker-out var(--duration-short) var(--easing-standard) both;
+}
+
+@keyframes m3-timepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes m3-timepicker-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}

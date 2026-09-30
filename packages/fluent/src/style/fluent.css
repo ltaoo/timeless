@@ -1,0 +1,66 @@
+/* Fluent 2 样式入口。
+   顺序要求：tokens → alias → base → components。
+   base 里的作用域重置依赖 alias 已完成定义。 */
+
+@import "./tokens.css";
+@import "./alias.css";
+@import "./base.css";
+
+/* --- Tier 1 基础 --- */
+@import "./components/button.css";
+@import "./components/input.css";
+@import "./components/textarea.css";
+@import "./components/label.css";
+@import "./components/checkbox.css";
+@import "./components/checkbox-group.css";
+@import "./components/radio.css";
+@import "./components/switch.css";
+@import "./components/toggle.css";
+@import "./components/slider.css";
+@import "./components/select.css";
+@import "./components/number-input.css";
+@import "./components/progress.css";
+@import "./components/avatar.css";
+@import "./components/badge.css";
+@import "./components/separator.css";
+@import "./components/skeleton.css";
+@import "./components/card.css";
+@import "./components/alert.css";
+@import "./components/kbd.css";
+@import "./components/link.css";
+@import "./components/aspect-ratio.css";
+@import "./components/scroll-area.css";
+@import "./components/field.css";
+
+/* --- Tier 2 浮层 / 导航 / 数据 --- */
+@import "./components/dialog.css";
+@import "./components/sheet.css";
+@import "./components/popover.css";
+@import "./components/popconfirm.css";
+@import "./components/tooltip.css";
+@import "./components/dropdown-menu.css";
+@import "./components/context-menu.css";
+@import "./components/menu.css";
+@import "./components/tabs.css";
+@import "./components/accordion.css";
+@import "./components/steps.css";
+@import "./components/toast.css";
+@import "./components/table.css";
+@import "./components/form.css";
+@import "./components/search-select.css";
+@import "./components/file-picker.css";
+@import "./components/resizable-panels.css";
+
+/* --- Tier 3 高级 --- */
+@import "./components/date-picker.css";
+@import "./components/date-range-picker.css";
+@import "./components/time-picker.css";
+@import "./components/date-time-picker.css";
+@import "./components/cascader.css";
+@import "./components/scroll-view.css";
+@import "./components/affix.css";
+@import "./components/waterfall.css";
+@import "./components/tree.css";
+@import "./components/flow.css";
+
+@import "./components/gallery.css";

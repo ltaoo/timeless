@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Material 3 · Separator
+   1px --outline-variant 分隔线。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-separator {
+  flex-shrink: 0;
+  border: 0;
+  background-color: var(--outline-variant);
+}
+
+[data-tt-style="material"] .m3-separator--horizontal {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 0;
+}
+
+[data-tt-style="material"] .m3-separator--vertical {
+  display: block;
+  width: 1px;
+  height: 100%;
+  align-self: stretch;
+  margin: 0;
+}
+
+[data-tt-style="material"] .m3-separator.is-disabled,
+[data-tt-style="material"] .m3-separator[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+}

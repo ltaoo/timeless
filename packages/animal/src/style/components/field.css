@@ -1,0 +1,138 @@
+/* ==========================================================================
+   Animal Island · Field（.animal-field 家族）
+   --------------------------------------------------------------------------
+   把 label / description / help / error / 分组抽成一组布局类，DOM 形状与
+   headless 层的 Field 原语对齐，表面换成 animal 的暖棕文字与羊皮纸。
+
+   Animal Island 视觉：
+     · 纯布局：纵向 gap --spacer-xs；水平朝向 label 与控件同行
+     · label 600 字重暖棕（--foreground），#is-normal 降到 500
+     · 帮助 / 描述用弱化前景（--muted-foreground）
+     · 错误（.is-invalid / [data-invalid]）统一换 --destructive
+     · 分隔线沿用 separator.css 的 2px --border-subtle
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-xs);
+  width: 100%;
+  color: var(--foreground);
+}
+
+[data-tt-style="animal"] .animal-field--horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacer);
+}
+
+/* 字段非法时 label 也跟着变红 */
+[data-tt-style="animal"] .animal-field[data-invalid="true"] .animal-field__label,
+[data-tt-style="animal"] .animal-field[data-invalid] .animal-field__label,
+[data-tt-style="animal"] .animal-field[data-invalid="true"] .animal-field__inline-label,
+[data-tt-style="animal"] .animal-field[data-invalid] .animal-field__inline-label {
+  color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-field__label {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: var(--line-height);
+  letter-spacing: 0.01em;
+  color: var(--foreground);
+  user-select: none;
+}
+
+[data-tt-style="animal"] .animal-field__label.is-normal {
+  font-weight: 500;
+}
+
+[data-tt-style="animal"] .animal-field__label.is-invalid,
+[data-tt-style="animal"] .animal-field__inline-label.is-invalid {
+  color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-field__inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* label 在 inline 布局里排在控件之后 */
+[data-tt-style="animal"] .animal-field__label.is-inline {
+  order: 1;
+}
+
+[data-tt-style="animal"] .animal-field__label.is-disabled,
+[data-tt-style="animal"] .animal-field__inline-label.is-disabled {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="animal"] .animal-field__description,
+[data-tt-style="animal"] .animal-field__help {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-field__error {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: var(--line-height);
+  color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-field__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-lg);
+  width: 100%;
+}
+
+[data-tt-style="animal"] .animal-field__set {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+[data-tt-style="animal"] .animal-field__legend {
+  margin: 0 0 var(--spacer-xs);
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 700;
+  line-height: var(--line-height);
+  letter-spacing: 0.02em;
+  color: var(--foreground);
+}
+
+/* FieldSeparator 复用 .animal-separator，这里只补 layout 间距 */
+[data-tt-style="animal"] .animal-field__separator[data-orientation="horizontal"] {
+  margin: var(--spacer) 0;
+}
+
+[data-tt-style="animal"] .animal-field__separator[data-orientation="vertical"] {
+  margin: 0 var(--spacer);
+}
+
+[data-tt-style="animal"] .animal-field:focus-within .animal-field__label {
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-field__label {
+    transition: none;
+  }
+}

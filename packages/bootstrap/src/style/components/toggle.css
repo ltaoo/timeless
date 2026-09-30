@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Toggle
+   上游没有独立的「开关按钮」样式（按钮组切换用 .btn-check + .btn），
+   这里沿用 .form-switch 的机制但换一套更紧凑的描边外观，与 Switch 区分。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .toggle {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 2.5em;
+  height: 1.25em;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+  background-color: var(--background);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .toggle:hover {
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--border));
+}
+
+[data-tt-style="bootstrap"] .toggle:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .toggle:active {
+  box-shadow: var(--shadow-inset);
+}
+
+[data-tt-style="bootstrap"] .toggle[data-checked],
+[data-tt-style="bootstrap"] .toggle.is-checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .toggle[data-checked]:hover,
+[data-tt-style="bootstrap"] .toggle.is-checked:hover {
+  border-color: color-mix(in srgb, var(--primary) 80%, black);
+}
+
+[data-tt-style="bootstrap"] .toggle[data-checked]:focus-visible,
+[data-tt-style="bootstrap"] .toggle.is-checked:focus-visible {
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .toggle[disabled],
+[data-tt-style="bootstrap"] .toggle[data-disabled],
+[data-tt-style="bootstrap"] .toggle.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+[data-tt-style="bootstrap"] .toggle-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0.125em;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background-color: var(--muted-foreground);
+  transform: translateY(-50%);
+  transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out;
+  pointer-events: none;
+}
+
+[data-tt-style="bootstrap"] .toggle[data-checked] .toggle-thumb,
+[data-tt-style="bootstrap"] .toggle.is-checked .toggle-thumb {
+  background-color: var(--primary-foreground);
+  transform: translate(1.25em, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .toggle,
+  [data-tt-style="bootstrap"] .toggle-thumb {
+    transition: none;
+  }
+}

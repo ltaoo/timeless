@@ -1,0 +1,26 @@
+/* ==========================================================================
+   Fluent 2 · SearchSelect
+   --------------------------------------------------------------------------
+   触发器复用 .fl-select 的盒子指标，内部换成 .fl-select__search 输入框；
+   输入框 / 图标 / 下拉面板的样式由 select.css 提供（同名类），
+   这里只补充搜索场景特有的差异。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-select.fl-select--search {
+  cursor: text;
+}
+
+[data-tt-style="fluent"] .fl-select.fl-select--search .fl-select__search {
+  min-width: 0;
+}
+
+/* 面板宽度通过 inline style 的 min-width 与触发器对齐（见 modules/search-select.ts） */
+
+[data-tt-style="fluent"] .fl-select.fl-select--search.is-disabled {
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-select.fl-select--search.is-disabled .fl-select__search {
+  cursor: not-allowed;
+  pointer-events: none;
+}

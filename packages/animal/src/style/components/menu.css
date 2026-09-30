@@ -1,0 +1,39 @@
+/* ==========================================================================
+   Animal Island · Menu（常驻菜单外壳）
+   --------------------------------------------------------------------------
+   menu.ts 渲染的是「一直在页面上」的 .animal-menu--static，不能像 DropdownMenu
+   那样被 popper 定位（否则会脱离文档流盖在触发元素上）。
+
+   因此这里只负责把常驻菜单还原成普通块级盒子，并修正它的定位/滚动：
+     · 条目 / 分组 / 分隔线 / 勾选 / 图标 / 快捷键 / 子菜单箭头，以及
+       左侧薄荷青（--primary）聚焦竖条与 is-enter/is-exit 关键帧，
+       都由 dropdown-menu.css 统一提供（三个菜单组件共用同一套 t 类名）
+     · 常驻根菜单本身不裁剪：overflow: visible，让子菜单以浮层形式溢出
+     · 常驻菜单里的子菜单浮层仍需要滚动与浮层阴影（--shadow-lg）
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-menu--static {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  width: auto;
+  min-width: 12rem;
+  max-height: min(20rem, 60vh);
+  overflow: visible;
+  box-shadow: var(--shadow);
+}
+
+/* 常驻菜单里的子菜单浮层仍然需要滚动与浮层阴影 */
+[data-tt-style="animal"] .animal-menu--static .animal-menu--submenu {
+  max-height: min(20rem, 60vh);
+  overflow: hidden auto;
+  box-shadow: var(--shadow-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-menu--static .animal-menu--submenu.is-enter,
+  [data-tt-style="animal"] .animal-menu--static .animal-menu--submenu.is-exit {
+    animation: none;
+  }
+}

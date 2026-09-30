@@ -1,0 +1,27 @@
+/* ==========================================================================
+   Fluent 2 · Affix（.fl-affix）
+   --------------------------------------------------------------------------
+   位置/阈值由 AffixCore 计算，模块把 store.fixed 映射成 .is-fixed 与内联定位。
+   固定态用 --duration-fast + --easing-standard 过渡，跟随滚动不闪烁。
+   固定时补一层 --surface-1 底，避免内容从下方透出。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-affix {
+  position: relative;
+  z-index: 1;
+  transition: top var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-affix.is-fixed {
+  z-index: 10;
+  background-color: var(--surface-1);
+  box-shadow: var(--shadow-8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-affix {
+    transition: none;
+  }
+}

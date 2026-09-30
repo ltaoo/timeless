@@ -1,0 +1,43 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Link（.link）
+   上游链接样式挂在 <a> 上（base.css 已还原），这里提供一个显式类名，
+   并补齐禁用态与焦点环。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .link {
+  color: var(--bs-link-color);
+  text-decoration: underline;
+  text-underline-offset: 0.125em;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .link:hover {
+  color: var(--bs-link-hover-color);
+}
+
+[data-tt-style="bootstrap"] .link:active {
+  color: color-mix(in srgb, var(--bs-link-color) 80%, black);
+}
+
+[data-tt-style="bootstrap"] .link:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+[data-tt-style="bootstrap"] .link.is-disabled,
+[data-tt-style="bootstrap"] .link[aria-disabled="true"],
+[data-tt-style="bootstrap"] .link[data-disabled="true"] {
+  color: var(--muted-foreground);
+  text-decoration: none;
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .link {
+    transition: none;
+  }
+}

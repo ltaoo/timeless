@@ -1,0 +1,128 @@
+/* ==========================================================================
+   Fluent 2 · DateTimePicker（.fl-datetimepicker）
+   --------------------------------------------------------------------------
+   单个触发器 + 一个浮层里左右两栏：左侧复用 date-picker 的日历面板
+   （.fl-datepicker__*，由 date-picker.css 提供外观），右侧复用 time-picker
+   的三列滚动（.fl-timepicker__*，由 time-picker.css 提供外观）。
+   这里只负责容器：.fl-datetimepicker__panes / __pane / __footer。
+
+   浮层与其它 picker 同规格：surface-1 + 1px --stroke1 + 8px 圆角 + shadow-16。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-datetimepicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 20px;
+  color: var(--foreground);
+  text-align: left;
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker:hover {
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker.is-open,
+[data-tt-style="fluent"] .fl-datetimepicker:focus-within {
+  border-bottom-color: var(--compound-brand);
+  box-shadow: inset 0 -2px 0 var(--compound-brand);
+  outline: none;
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker__value.is-placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+}
+
+/* --- 浮层 --- */
+[data-tt-style="fluent"] .fl-datetimepicker__content {
+  position: relative;
+  display: inline-block;
+  width: max-content;
+  overflow: hidden;
+  color: var(--popover-foreground);
+  background-color: var(--surface-1);
+  border: var(--strokeWidthThin) solid var(--stroke1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-16);
+  outline: none;
+  animation: fl-datetimepicker-in var(--duration-normal) var(--easing-decelerate)
+    both;
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker__panes {
+  display: flex;
+  align-items: stretch;
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker__pane {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker__pane.is-left {
+  padding: 12px;
+}
+
+[data-tt-style="fluent"] .fl-datetimepicker__pane.is-right {
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+  border-left: var(--strokeWidthThin) solid var(--stroke2);
+}
+
+/* --- 底部操作条 --- */
+[data-tt-style="fluent"] .fl-datetimepicker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: var(--surface-2);
+  border-top: var(--strokeWidthThin) solid var(--stroke2);
+}
+
+@keyframes fl-datetimepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-datetimepicker,
+  [data-tt-style="fluent"] .fl-datetimepicker__content {
+    transition: none;
+    animation: none;
+  }
+}

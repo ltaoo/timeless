@@ -1,0 +1,60 @@
+/* ==========================================================================
+   Animal Island · Label（.animal-label）
+   --------------------------------------------------------------------------
+   Label 是原生 <label> 的外观层（见 modules/label.ts），没有自己的状态逻辑，
+   只负责排版与颜色。
+
+   Animal Island 视觉：
+     · 暖棕正文色（--foreground）、Nunito 字体、字重 600（标题级）
+     · 无额外外边距（由外层 Field / 表单 gap 控制）
+     · 禁用转 --foreground-disabled；非法转 --destructive
+     · .animal-label__required 是可选的必填星标钩子（模块不主动输出，与 fluent 契约同名）
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-label {
+  display: inline-block;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: 600;
+  line-height: var(--line-height);
+  letter-spacing: 0.01em;
+  color: var(--foreground);
+  user-select: none;
+}
+
+/* --- 禁用 --- */
+[data-tt-style="animal"] .animal-label.is-disabled,
+[data-tt-style="animal"] .animal-label[data-disabled="true"],
+[data-tt-style="animal"] .animal-label[aria-disabled="true"] {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+/* --- 非法 --- */
+[data-tt-style="animal"] .animal-label.is-invalid,
+[data-tt-style="animal"] .animal-label[data-invalid="true"],
+[data-tt-style="animal"] .animal-label[aria-invalid="true"] {
+  color: var(--destructive);
+}
+
+/* --- 可选必填星标（布局钩子） --- */
+[data-tt-style="animal"] .animal-label__required {
+  margin-left: 2px;
+  font-weight: 700;
+  color: var(--destructive);
+}
+
+/* --- 可聚焦 label（tabindex 场景） --- */
+[data-tt-style="animal"] .animal-label:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-label {
+    transition: none;
+  }
+}

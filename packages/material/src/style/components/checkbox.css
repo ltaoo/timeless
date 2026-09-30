@@ -1,0 +1,92 @@
+/* ==========================================================================
+   Material 3 · Checkbox
+   18px 方框、2px 圆角；选中填充 --primary。状态用 class 表达
+   （.is-checked / .is-disabled / .is-invalid），因为 primitive 会覆写 dataset。
+   ========================================================================== */
+
+[data-tt-style="material"] .m3-checkbox {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  vertical-align: middle;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 14px 14px;
+  border: 2px solid var(--muted-foreground);
+  border-radius: 2px;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-short) var(--easing-standard),
+    border-color var(--duration-short) var(--easing-standard),
+    box-shadow var(--duration-short) var(--easing-standard);
+}
+
+[data-tt-style="material"] .m3-checkbox:hover {
+  border-color: var(--foreground);
+}
+
+[data-tt-style="material"] .m3-checkbox:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring-color);
+}
+
+[data-tt-style="material"] .m3-checkbox.is-checked,
+[data-tt-style="material"] .m3-checkbox[data-checked] {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+
+[data-tt-style="material"] .m3-checkbox.is-checked:hover,
+[data-tt-style="material"] .m3-checkbox[data-checked]:hover {
+  background-color: var(--primary);
+}
+
+[data-tt-style="material"] .m3-checkbox.is-invalid,
+[data-tt-style="material"] .m3-checkbox[aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+[data-tt-style="material"] .m3-checkbox:disabled,
+[data-tt-style="material"] .m3-checkbox[data-disabled],
+[data-tt-style="material"] .m3-checkbox.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+/* --- 行布局 + 标签 --- */
+[data-tt-style="material"] .m3-checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.5rem;
+}
+
+[data-tt-style="material"] .m3-checkbox-label {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="material"] .m3-checkbox-label.is-disabled,
+[data-tt-style="material"] .m3-checkbox-label[data-disabled="true"] {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="material"] .m3-checkbox {
+    transition: none;
+  }
+}

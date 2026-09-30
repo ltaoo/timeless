@@ -1,0 +1,189 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Dialog（.modal 系列）
+   结构：.modal-backdrop + .modal > .modal-dialog > .modal-content
+         > .modal-header/.modal-title/.modal-body/.modal-footer + .btn-close
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background-color: #000;
+  opacity: 0.5;
+}
+
+[data-tt-style="bootstrap"] .modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1051;
+  overflow: hidden auto;
+  outline: 0;
+}
+
+[data-tt-style="bootstrap"] .modal-dialog {
+  position: relative;
+  width: auto;
+  max-width: 32rem;
+  margin: 1.75rem auto;
+}
+
+[data-tt-style="bootstrap"] .modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 3.5rem);
+}
+
+[data-tt-style="bootstrap"] .modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--foreground);
+  background-color: var(--background);
+  background-clip: padding-box;
+  border: var(--bs-border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  outline: 0;
+}
+
+[data-tt-style="bootstrap"] .modal-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: 1rem;
+  border-bottom: var(--bs-border-width) solid var(--border);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+[data-tt-style="bootstrap"] .modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: var(--line-height);
+}
+
+/* 无标题时 .btn-close 也要贴右，而不是被 flex-start 留在左侧 */
+[data-tt-style="bootstrap"] .modal-header .btn-close {
+  margin-left: auto;
+}
+
+[data-tt-style="bootstrap"] .modal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 1rem;
+}
+
+[data-tt-style="bootstrap"] .modal-footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0.75rem 1rem;
+  border-top: var(--bs-border-width) solid var(--border);
+  border-bottom-right-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
+}
+
+[data-tt-style="bootstrap"] .modal-footer .btn {
+  margin: 0;
+}
+
+/* 关闭按钮：用 mask 代替 Bootstrap 的 SVG 背景，随 currentColor 适配暗色 */
+[data-tt-style="bootstrap"] .btn-close {
+  box-sizing: content-box;
+  width: 1em;
+  height: 1em;
+  padding: 0.25em;
+  color: var(--foreground);
+  background-color: currentColor;
+  border: 0;
+  border-radius: var(--radius-sm);
+  opacity: 0.5;
+  cursor: pointer;
+  -webkit-mask: var(--tt-close-icon) center / 1em 1em no-repeat;
+  mask: var(--tt-close-icon) center / 1em 1em no-repeat;
+  transition: opacity 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .btn-close:hover {
+  opacity: 0.75;
+}
+
+[data-tt-style="bootstrap"] .btn-close:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+  opacity: 0.75;
+}
+
+[data-tt-style="bootstrap"] {
+  --tt-close-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e");
+}
+
+/* --- 动画：is-enter / is-exit（供 Presence 的 animationend 使用） --- */
+[data-tt-style="bootstrap"] .modal-backdrop.is-enter {
+  animation: bs-backdrop-in 0.15s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .modal-backdrop.is-exit {
+  animation: bs-backdrop-out 0.15s ease-in both;
+}
+
+[data-tt-style="bootstrap"] .modal-dialog.is-enter {
+  animation: bs-modal-dialog-in 0.3s ease-out both;
+}
+
+[data-tt-style="bootstrap"] .modal-dialog.is-exit {
+  animation: bs-modal-dialog-out 0.2s ease-in both;
+}
+
+@keyframes bs-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bs-backdrop-out {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes bs-modal-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1.5rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bs-modal-dialog-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-1rem) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .btn-close {
+    transition: none;
+  }
+}

@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Animal Island · Progress（.animal-progress）
+   --------------------------------------------------------------------------
+   结构：.animal-progress > .animal-progress__bar（宽度由 module 内联 style 给）。
+
+   Animal Island 视觉：
+     · 轨道是浅羊皮纸凹槽：2px --border-subtle 描边 + pill 圆角 + 内缩
+     · 填充段用薄荷青 --primary（品牌色），过渡 width
+     · 变体换状态色：--success / --warning / --danger / --info
+     · 斜条纹动画名 animal-progress-stripes（45° 白色条纹，12px 一循环）
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  background-color: var(--surface-2);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="animal"] .animal-progress__bar {
+  display: block;
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: inherit;
+  transition: width var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-progress__bar--success {
+  background-color: var(--success);
+}
+
+[data-tt-style="animal"] .animal-progress__bar--warning {
+  background-color: var(--warning);
+}
+
+[data-tt-style="animal"] .animal-progress__bar--danger {
+  background-color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-progress__bar--info {
+  background-color: var(--info);
+}
+
+[data-tt-style="animal"] .animal-progress__bar--striped {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.25) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.25) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 12px 12px;
+}
+
+[data-tt-style="animal"] .animal-progress__bar--animated {
+  animation: animal-progress-stripes 1s linear infinite;
+}
+
+@keyframes animal-progress-stripes {
+  from {
+    background-position: 12px 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-progress__bar {
+    transition: none;
+  }
+
+  [data-tt-style="animal"] .animal-progress__bar--animated {
+    animation: none;
+  }
+}

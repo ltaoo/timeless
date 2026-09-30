@@ -1,0 +1,370 @@
+/* ==========================================================================
+   Animal Island · TimePicker（.animal-timepicker + 时/分/秒三列滚动）
+   --------------------------------------------------------------------------
+   结构：.animal-timepicker（触发器）> __value + 图标/清除
+         .animal-timepicker__content > __panel
+           ├─ __preview   当前临时时间
+           ├─ __columns > __column × 3 > __scroll > __option
+           └─ __footer > __action
+
+   Animal Island 视觉：
+     · 触发器与 date-picker 同盒子指标（2.5px --input 描边、胶囊圆角）
+     · 浮层是羊皮纸浮层 + 2px --border 描边 + --radius-lg + --shadow-lg
+     · 预览数字用 900 字重（上游「数字强调」），颜色取薄荷青 --primary
+     · 每列一个 __scroll（ScrollViewPrimitive，固定 160px 高、5 行），
+       行高严格 32px —— time-picker.ts 的 scrollToIndex 依赖这个常量
+     · 选中项 .is-active 用左侧 4px 薄荷青（--primary）指示条，与 Menu 同源
+       （替换了 Fluent 的 3px --compound-brand 竖条）
+     · 焦点是黄色描边，永不用蓝色
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-timepicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 var(--spacer);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+  background-color: var(--input-bg);
+  border: var(--border-width-input) solid var(--input);
+  border-radius: var(--radius-pill);
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-timepicker:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+[data-tt-style="animal"] .animal-timepicker:active {
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-timepicker.is-open,
+[data-tt-style="animal"] .animal-timepicker:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--accent);
+  outline: none;
+}
+
+[data-tt-style="animal"] .animal-timepicker:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-tt-style="animal"] .animal-timepicker[aria-invalid="true"],
+[data-tt-style="animal"] .animal-timepicker.is-invalid {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px var(--destructive-subtle);
+}
+
+[data-tt-style="animal"] .animal-timepicker.is-disabled,
+[data-tt-style="animal"] .animal-timepicker[disabled],
+[data-tt-style="animal"] .animal-timepicker[data-disabled="true"] {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+  background-color: var(--input-bg-disabled);
+  border-color: var(--border-subtle);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-tt-style="animal"] .animal-timepicker.is-loading {
+  pointer-events: none;
+  opacity: var(--disabled-opacity);
+}
+
+[data-tt-style="animal"] .animal-timepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="animal"] .animal-timepicker__value.is-placeholder {
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="animal"] .animal-timepicker__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  margin-left: auto;
+  color: var(--muted-foreground);
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-timepicker.is-open .animal-timepicker__icon,
+[data-tt-style="animal"] .animal-timepicker:hover .animal-timepicker__icon {
+  color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-timepicker__clear {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 0;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-timepicker__clear:hover {
+  color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-timepicker__clear:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* --- 浮层 --- */
+[data-tt-style="animal"] .animal-timepicker__content {
+  position: relative;
+  display: inline-block;
+  width: max-content;
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  outline: none;
+  animation: animal-timepicker-in var(--duration-normal) var(--easing-standard)
+    both;
+}
+
+[data-tt-style="animal"] .animal-timepicker__panel {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacer);
+}
+
+[data-tt-style="animal"] .animal-timepicker__preview {
+  padding: var(--spacer-xs) 0 var(--spacer);
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+  text-align: center;
+}
+
+/* --- 三列滚动 --- */
+[data-tt-style="animal"] .animal-timepicker__columns {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+/* 列宽必须是确定值：浮层用 width:max-content，若列是 flex:1 1 0 会让
+   max-content 在「列 → ScrollView → 100% 宽行」的环里无限放大。 */
+[data-tt-style="animal"] .animal-timepicker__column {
+  flex: 0 0 auto;
+  width: 72px;
+  min-width: 72px;
+}
+
+[data-tt-style="animal"] .animal-timepicker__column.is-bordered {
+  border-left: var(--border-width) solid var(--border-subtle);
+}
+
+[data-tt-style="animal"] .animal-timepicker__scroll {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+  scroll-snap-type: y proximity;
+}
+
+[data-tt-style="animal"] .animal-timepicker__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-tt-style="animal"] .animal-timepicker__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-tt-style="animal"] .animal-timepicker__scroll::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-pill);
+}
+
+/* 选项：固定 32px 行高（与 time-picker.ts 的 ITEM_HEIGHT 一致）。
+   列为原生 <button>，直接落到元素规则（--btn-* 只对 .animal-btn 生效）。 */
+[data-tt-style="animal"] .animal-timepicker__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--foreground);
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  scroll-snap-align: center;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-timepicker__option:hover {
+  color: var(--accent-foreground);
+  background-color: var(--accent);
+}
+
+[data-tt-style="animal"] .animal-timepicker__option:active {
+  background-color: var(--secondary);
+}
+
+[data-tt-style="animal"] .animal-timepicker__option:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -1px;
+}
+
+/* 左侧 4px 薄荷青竖条（与 .animal-menu__item 同规则） */
+[data-tt-style="animal"] .animal-timepicker__option::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 4px;
+  height: 0;
+  background-color: var(--primary);
+  border-radius: var(--radius-pill);
+  transform: translateY(-50%);
+  transition: height var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-timepicker__option.is-active::before {
+  height: 60%;
+}
+
+[data-tt-style="animal"] .animal-timepicker__option.is-active,
+[data-tt-style="animal"] .animal-timepicker__option.is-active:hover {
+  color: var(--primary);
+  font-weight: 700;
+  background-color: transparent;
+}
+
+/* --- 底部操作 --- */
+[data-tt-style="animal"] .animal-timepicker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding-top: var(--spacer);
+  margin-top: var(--spacer-xs);
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+/* 底部操作为原生 <button>（不是 .animal-btn），同样直接落到元素规则 */
+[data-tt-style="animal"] .animal-timepicker__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--control-height-sm);
+  padding: 0 var(--spacer);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--foreground);
+  cursor: pointer;
+  background-color: var(--surface-1);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-timepicker__action:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+[data-tt-style="animal"] .animal-timepicker__action:active {
+  transform: translateY(1px);
+}
+
+[data-tt-style="animal"] .animal-timepicker__action:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+
+[data-tt-style="animal"] .animal-timepicker__action.is-primary {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="animal"] .animal-timepicker__action.is-primary:hover {
+  color: var(--primary-foreground);
+  background-color: color-mix(in srgb, var(--primary) 88%, white);
+  border-color: color-mix(in srgb, var(--primary) 88%, white);
+}
+
+[data-tt-style="animal"] .animal-timepicker__action.is-primary:active {
+  background-color: var(--primary-pressed);
+  border-color: var(--primary-pressed);
+}
+
+[data-tt-style="animal"] .animal-timepicker__action:disabled,
+[data-tt-style="animal"] .animal-timepicker__action.is-disabled {
+  cursor: not-allowed;
+  opacity: var(--disabled-opacity);
+  transform: none;
+}
+
+@keyframes animal-timepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-timepicker,
+  [data-tt-style="animal"] .animal-timepicker__icon,
+  [data-tt-style="animal"] .animal-timepicker__clear,
+  [data-tt-style="animal"] .animal-timepicker__option,
+  [data-tt-style="animal"] .animal-timepicker__option::before,
+  [data-tt-style="animal"] .animal-timepicker__action,
+  [data-tt-style="animal"] .animal-timepicker__content {
+    transition: none;
+    animation: none;
+  }
+}

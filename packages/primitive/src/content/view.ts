@@ -55,7 +55,7 @@ export type ViewProps = Omit<BoxProps, "onPointerDown" | "onPointerUp"> & {
 };
 
 /** Internal state for View */
-type ViewState = {};
+type ViewState = { as: string };
 
 /**
  * Creates a View component - the primary container.
@@ -72,7 +72,7 @@ export function View(
   const { onPointerDown, onPointerMove, onPointerUp, ...rest } = props;
 
   let $elm: any = null;
-  let box$ = Box(rest, {});
+  let box$ = Box(rest, { as: rest.as && /^[a-z][a-z0-9-]*$/i.test(rest.as) ? rest.as : "div" });
 
   const state = box$.state;
   const events = box$.events;

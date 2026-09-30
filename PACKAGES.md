@@ -9,7 +9,7 @@ Timeless 是一个**平台无关的前端框架**，核心理念是"一次编写
 3. **无头 UI 状态机** — 60+ 组件的交互逻辑，与平台和样式完全解耦
 4. **现成业务套件** — 路由、HTTP 请求、数据持久化、导航等开箱即用
 5. **多平台渲染器** — DOM / SSR / Canvas / Native / TUI 五种渲染目标
-6. **多设计系统** — shadcn/ui 和 WeChat WeUI 两套带样式组件库
+6. **多设计系统** — shadcn/ui、WeChat WeUI、Bootstrap 5.3、Material 3、Fluent 2、animal-island-ui 六套带样式组件库，外加一个由 findrss-reader 迁入的业务组件库 `@timeless/findrssui`
 
 ## 架构分层
 
@@ -176,7 +176,7 @@ function Counter() {
 | `form` | `FormCore` | 字段校验、提交、重置 |
 | `toast` | `ToastCore` | 消息队列、自动关闭 |
 | `tabs` | `TabsCore` | 激活标签、面板切换 |
-| `tree` | `TreeCore` | 展开/折叠、勾选、拖拽 |
+| `tree` | `TreeCore` | 展开/折叠、虚拟行（`rows`）、勾选（父子联动 + 半选）、拖拽落点判定 |
 | `calendar` | `CalendarCore` | 日期选择、范围、月/年切换 |
 | `input` | `InputCore` | 值、校验、焦点、格式化 |
 | `scroll-view` | `ScrollViewCore` | 滚动位置、边界检测 |
@@ -407,6 +407,12 @@ import "tailwindcss/tailwind.css";
 
 **依赖**：`timeless`、`ui-primitive`、`inner-vm`、`inner-icons`、`tailwindcss` (peer)
 
+**设计规范**：token 分层（`:root` → `@theme inline` → 工具类）、`tt-` 前缀机制与白名单、
+暗色双选择器、应用内覆盖 token 的方式、`@layer base` 全局规则注意事项 ——
+见 [`packages/shadcn/THEME_DESIGN.md`](./packages/shadcn/THEME_DESIGN.md)。
+
+**文档站**：`pnpm run docs --lib=shadcn` → <http://127.0.0.1:3400>（示例应用 `apps/web-shadcn`）。
+
 ---
 
 ### `@timeless/weui` — 微信设计系统
@@ -419,6 +425,130 @@ import "tailwindcss/tailwind.css";
 `Button`、`Input`、`Checkbox`、`Switch`、`Dialog`、`Sheet`、`Toast`、`Tabs`、`Card`……
 
 **依赖**：`timeless`、`ui-primitive`、`inner-vm`、`inner-icons`
+
+**设计规范**：`--weui-*` 命名与数字后缀语义、4 个预设（light/dark/care-light/care-dark）
+与派发选择器优先级表、`vars/` 与 `less-vars/` 同步要求、5 个 Less mixin、
+组件级 token、**未定义变量缺口清单** ——
+见 [`packages/weui/THEME_DESIGN.md`](./packages/weui/THEME_DESIGN.md)。
+
+**文档站**：`pnpm run docs --lib=weui` → <http://127.0.0.1:3405>（示例应用 `apps/web-weui`）。
+
+---
+
+### `@timeless/bootstrap` — Bootstrap 5.3 设计系统
+
+**组合**：`timeless` + `ui-primitive` + `inner-vm` + `inner-icons`
+
+**职责**：Bootstrap 5.3 风格组件库。纯 CSS + 作用域类名，**无 Tailwind、无 Less**。
+
+**关键导出**：与 shadcn/weui 同名的组件集（`Button`、`Input`、`Card`、`Dialog`、
+`Tabs`、`Select`、`Table`、`Steps`、`Toast`……），覆盖 Tier1–Tier3 组件清单。
+
+**作用域**：所有 token 与样式挂在 `[data-tt-style="bootstrap"]` 下，
+可与其它作用域库共存。类名沿用上游命名（`.btn` / `.btn-primary`）。
+
+**依赖**：`timeless`、`ui-primitive`、`inner-vm`、`inner-icons`
+
+**设计规范**：见 [`packages/bootstrap/THEME_DESIGN.md`](./packages/bootstrap/THEME_DESIGN.md)。
+
+**文档站**：`pnpm run docs --lib=bootstrap` → <http://127.0.0.1:3401>（示例应用 `apps/web-bootstrap`）。
+
+---
+
+### `@timeless/material` — Material 3 设计系统
+
+**组合**：`timeless` + `ui-primitive` + `inner-vm` + `inner-icons`
+
+**职责**：Material 3 风格组件库。纯 CSS + 作用域类名，色调调色板按静态值落库
+（不引入运行时生成算法）。
+
+**关键导出**：与 shadcn/weui 同名的组件集，覆盖 Tier1–Tier3 组件清单。
+
+**作用域**：`[data-tt-style="material"]`，类名 `m3-*`。
+
+**依赖**：`timeless`、`ui-primitive`、`inner-vm`、`inner-icons`
+
+**设计规范**：见 [`packages/material/THEME_DESIGN.md`](./packages/material/THEME_DESIGN.md)。
+
+**文档站**：`pnpm run docs --lib=material` → <http://127.0.0.1:3402>（示例应用 `apps/web-material`）。
+
+---
+
+### `@timeless/fluent` — Fluent 2 设计系统
+
+**组合**：`timeless` + `ui-primitive` + `inner-vm` + `inner-icons`
+
+**职责**：Fluent 2 / Windows 风格组件库。纯 CSS + 作用域类名。
+
+**关键导出**：与 shadcn/weui 同名的组件集，覆盖 Tier1–Tier3 组件清单。
+
+**作用域**：`[data-tt-style="fluent"]`，类名 `fl-*`。
+
+**依赖**：`timeless`、`ui-primitive`、`inner-vm`、`inner-icons`
+
+**设计规范**：见 [`packages/fluent/THEME_DESIGN.md`](./packages/fluent/THEME_DESIGN.md)。
+
+**文档站**：`pnpm run docs --lib=fluent` → <http://127.0.0.1:3403>（示例应用 `apps/web-fluent`）。
+
+---
+
+### `@timeless/animal` — animal-island-ui 风格设计系统
+
+**组合**：`timeless` + `ui-primitive` + `inner-vm` + `inner-icons`
+
+**职责**：animal-island-ui（岛屿 / 田园）风格组件库。薄荷青主色 + 奶油羊皮纸底 +
+暖棕文字、2px 描边、胶囊控件、primary 按钮的 `0 5px 0 0` 像素堆叠立体阴影、
+永不用蓝的黄色焦点环。纯 CSS + 作用域类名，**只做亮色**（上游未提供暗色主题）。
+
+**关键导出**：与 shadcn/weui 同名的组件集，覆盖 Tier1–Tier3 组件清单。
+
+**作用域**：`[data-tt-style="animal"]`，类名 `animal-*`。第一层 token 照抄上游
+`--animal-*`（上游用户已有的覆盖写法继续生效）。
+
+**内嵌字体**：Nunito + Noto Sans SC 的可变字体子集（2 个 woff2，共 348 KB），
+随 CSS 平铺发布，见 [`packages/animal/THEME_DESIGN.md`](./packages/animal/THEME_DESIGN.md) §9。
+
+**文档站**：`pnpm run docs --lib=animal` → <http://127.0.0.1:3404>（示例应用 `apps/web-animal`）。
+
+**依赖**：`timeless`、`ui-primitive`、`inner-vm`、`inner-icons`
+
+**设计规范**：见 [`packages/animal/THEME_DESIGN.md`](./packages/animal/THEME_DESIGN.md)。
+
+**新增样式库的完整流程**：见根目录
+[`THEME_PACKAGE_GUIDE.md`](./THEME_PACKAGE_GUIDE.md)。
+
+---
+
+### `@timeless/findrssui` — findrss-reader 的业务组件库
+
+**组合**：`timeless`（只 external 它，不互相 import）
+
+**职责**：findrss 阅读端自有的组件库（Button / Input / Card / Tabs / Tree / Dialog /
+DropdownMenu / Toast / …，约 25 个导出）。从 `findrss-reader/frontend/src/components/` 整体
+迁入——**不是**上面那六套的"又一个视觉层"：它自带实现、只有暗色一套预设、走 `--frui-*` token +
+`frui-*` 类名且**不做属性作用域**（与 shadcn/weui 同属全局型）。
+
+**关键导出**：与 shadcn 同名的组件集，另含 `ButtonViewModel` / `InputViewModel` /
+`ChoiceViewModel` 三个核心构造器与 `FR*` 旧别名。`Tree` 行的槽位含 `guide`
+（`.frui-tree-guide`，层级引导竖线，位置由 `TreePrimitive` 按层内联 `left`）与七个拖拽槽位
+（`is-lifted` / `is-drop-into` / `frui-tree-line` + `is-before`·`is-after` / `frui-tree-ghost`；
+顺序由宿主 `TreeCore.onMove(info, { order })` 回传并持久化，本包只管样式）。本包的
+`Tree` 打开了 `TreePrimitive.Root` 的 `ghostRow`：跟手浮层是**被拖行自身的 DOM 快照**
+（含宿主 `renderRow` 填的头像 / 未读等槽位，宽高与原行一致），而不是默认的紧凑卡片。
+`Tree` 用 `...rest` 透传，所以 `TreePrimitive.Root` 新加的行级右键钩子
+`onRowContextMenu(node | null, event)`（命中测试由框架做，空白处回传 `null`）无需改本包即可被宿主用上。
+
+**消费方式**：原仓 findrss-reader 引的是**构建产物**（复制的 UMD + CSS，不是源码），
+加载顺序必须排在 tree 运行时之后（产物在求值期读
+`Timeless.FindRSSTree?.TreePrimitive || Timeless.ui.TreePrimitive`）。
+
+**文档站**：没有——它的画廊是 findrss 仓自己的 `preview/`（`preview/server.js`，
+端口 8791）。
+
+**设计规范**：见 [`packages/findrssui/THEME_DESIGN.md`](./packages/findrssui/THEME_DESIGN.md)。
+
+**迁入的完整说明**（与作用域样式库的差别、升级流程）：见
+[`THEME_PACKAGE_GUIDE.md`](./THEME_PACKAGE_GUIDE.md) §13。
 
 ---
 
@@ -561,11 +691,16 @@ import { render, View, Text, ref } from "@timeless/vanillalite";
    ▼    ▼            ▼              ▼          ▼
  dom  native  ssr/canvas/tui   ui-primitive  a2ui
                                    │
-                              ┌────┴────┐
-                              ▼         ▼
-                           shadcn     weui
-                        (Tailwind)  (Less/WeChat)
+                    ┌──────────────┼──────────────┬───────────┬──────────┐
+                    ▼              ▼              ▼           ▼          ▼
+                 shadcn         weui         bootstrap   material   fluent   animal
+               (Tailwind)   (Less/WeChat)    (纯 CSS      (纯 CSS     (纯 CSS   (纯 CSS
+                                            作用域)       作用域)     作用域)   作用域)
 ```
+
+`shadcn` / `weui` 是**全局型**样式（含 `*` / `body` 规则），一个页面只加载一套；
+`bootstrap` / `material` / `fluent` / `animal` 走 `[data-tt-style="<lib>"]` 作用域，
+**四套可同页共存**（已实测互不干扰）。
 
 ## 给用户的选择指南
 
@@ -576,6 +711,11 @@ import { render, View, Text, ref } from "@timeless/vanillalite";
 | Web 应用 + 业务套件 | `timeless` + `timeless-dom` + `provider-web` |
 | 带样式的 Web 应用 | `shadcn`（含以上所有） |
 | 微信风格 Web 应用 | `weui`（含以上所有） |
+| Bootstrap 5.3 风格 Web 应用 | `bootstrap`（含 `timeless` + `ui-primitive` + `inner-vm`） |
+| Material 3 风格 Web 应用 | `material`（含 `timeless` + `ui-primitive` + `inner-vm`） |
+| Fluent 2 风格 Web 应用 | `fluent`（含 `timeless` + `ui-primitive` + `inner-vm`） |
+| animal-island-ui 田园风格 Web 应用 | `animal`（含 `timeless` + `ui-primitive` + `inner-vm`，仅亮色） |
+| 同一产品切换多套风格 | `bootstrap` + `material` + `fluent` + `animal`（作用域隔离，可共存） |
 | SSR 应用 | `timeless` + `timeless-ssr` + `cli` |
 | 桌面应用 (Tauri) | `timeless` + `timeless-native` + `provider-tauri` |
 | 微信小程序 | `timeless` + `provider-weapp` |

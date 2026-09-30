@@ -1,0 +1,45 @@
+/* ==========================================================================
+   animal-island-ui — 内嵌字体
+   --------------------------------------------------------------------------
+   Nunito（拉丁主字体）+ Noto Sans SC（中文），各落成**一个可变字体（wght 轴）**
+   文件而不是每个字重一份静态实例 —— 上游用到的档位是 Nunito 500/700/900、
+   Noto 400/500/700，六份静态子集共 544KB，超出 400KB 预算；变量字体把同一批
+   轮廓的 gvar 增量合并存放，两份共 348KB，且 600 之类的中间字重也能真实渲染
+   （静态方案下会退到最近的 700 做合成加粗）。
+
+   中文是**按本仓库用到的字符集**子集化的（933 个 CJK 表意字，而非上游那种整包
+   1.1MB/字重），未收录的生僻字优雅回退到字体栈里的系统字体（PingFang SC /
+   Microsoft YaHei）。
+
+   @font-face 是**顶级 at-rule**，没有选择器、无法作用域化，所以这里只按
+   THEME_PACKAGE_GUIDE.md §4.5 的「命名隔离」原则处理 —— 字体族名 `Nunito` /
+   `Noto Sans SC` 是上游公开契约，保持不变（改了应用就取不到）。
+
+   子集化命令与 OFL 授权见 THEME_DESIGN.md。
+
+   为什么每个 url() 都带 `?no-inline`：本包用 vite 的 **lib 模式**（build.lib）打包，
+   而 vite 在 lib 模式下**无条件把资源内联成 base64**（`shouldInline()` 里
+   `if (environment.config.build.lib) return true;`，早于 assetsInlineLimit 判断）。
+   不加这个查询串，2 个 woff2 会被塞进 CSS，产物会多出 ~470KB 的 base64，平铺在
+   dist 的字体文件与 dev.js 的 keepFiles 白名单也就全无意义。`?no-inline` 命中
+   vite 的 `noInlineRE = /[?&]no-inline\b/`，强制走文件产出；查询串不会进入最终
+   文件名，产物仍是 `animal-nunito.woff2` / `animal-noto.woff2` 原名。
+   ========================================================================== */
+
+/* ---------- Nunito（拉丁字符主字体，wght 200–1000） ---------- */
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("../assets/fonts/animal-nunito.woff2?no-inline") format("woff2");
+}
+
+/* ---------- Noto Sans SC（中文 + 拉丁兜底，wght 100–900） ---------- */
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/animal-noto.woff2?no-inline") format("woff2");
+}

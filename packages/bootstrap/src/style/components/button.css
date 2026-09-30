@@ -1,0 +1,283 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Button
+   类名沿用上游（.btn / .btn-primary / .btn-outline-primary / .btn-sm / .btn-lg），
+   视觉参数通过 --btn-* 局部变量驱动，与 Bootstrap 的实现方式一致。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .btn {
+  --btn-padding-x: 0.75rem;
+  --btn-padding-y: 0.375rem;
+  --btn-font-size: var(--font-size);
+  --btn-line-height: 1.5;
+  --btn-color: var(--foreground);
+  --btn-bg: transparent;
+  --btn-border-color: transparent;
+  --btn-radius: var(--radius);
+  --btn-hover-color: var(--btn-color);
+  --btn-hover-bg: transparent;
+  --btn-hover-border-color: transparent;
+  --btn-active-color: var(--btn-hover-color);
+  --btn-active-bg: var(--btn-hover-bg);
+  --btn-active-border-color: var(--btn-hover-border-color);
+  --btn-disabled-color: var(--btn-color);
+  --btn-disabled-bg: var(--btn-bg);
+  --btn-disabled-border-color: var(--btn-border-color);
+  --btn-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 1px 1px rgba(0, 0, 0, 0.075);
+  --btn-focus-rgb: 13, 110, 253;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  font-family: var(--font-sans);
+  font-size: var(--btn-font-size);
+  font-weight: 400;
+  line-height: var(--btn-line-height);
+  color: var(--btn-color);
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  border: var(--bs-border-width) solid var(--btn-border-color);
+  border-radius: var(--btn-radius);
+  background-color: var(--btn-bg);
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+[data-tt-style="bootstrap"] .btn:hover {
+  color: var(--btn-hover-color);
+  background-color: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border-color);
+}
+
+[data-tt-style="bootstrap"] .btn:focus-visible {
+  color: var(--btn-hover-color);
+  background-color: var(--btn-hover-bg);
+  border-color: var(--btn-hover-border-color);
+  outline: 0;
+  box-shadow: 0 0 0 var(--bs-focus-ring-width)
+    rgba(var(--btn-focus-rgb), 0.5);
+}
+
+[data-tt-style="bootstrap"] .btn:active {
+  color: var(--btn-active-color);
+  background-color: var(--btn-active-bg);
+  border-color: var(--btn-active-border-color);
+  box-shadow: var(--bs-box-shadow-inset);
+}
+
+[data-tt-style="bootstrap"] .btn:disabled,
+[data-tt-style="bootstrap"] .btn[data-disabled="true"],
+[data-tt-style="bootstrap"] .btn.is-disabled {
+  color: var(--btn-disabled-color);
+  background-color: var(--btn-disabled-bg);
+  border-color: var(--btn-disabled-border-color);
+  opacity: var(--disabled-opacity);
+  box-shadow: none;
+}
+
+/* --- loading：显示 spinner 时禁用交互 --- */
+[data-tt-style="bootstrap"] .btn.is-loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+[data-tt-style="bootstrap"] .btn .btn__spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: bs-spin 1s linear infinite;
+}
+
+@keyframes bs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- 尺寸 --- */
+[data-tt-style="bootstrap"] .btn-sm {
+  --btn-padding-y: 0.25rem;
+  --btn-padding-x: 0.5rem;
+  --btn-font-size: var(--font-size-sm);
+  --btn-radius: var(--radius-sm);
+}
+
+[data-tt-style="bootstrap"] .btn-lg {
+  --btn-padding-y: 0.5rem;
+  --btn-padding-x: 1rem;
+  --btn-font-size: 1.25rem;
+  --btn-radius: var(--radius-lg);
+}
+
+/* 只有图标按钮 */
+[data-tt-style="bootstrap"] .btn-icon {
+  --btn-padding-x: 0.5rem;
+  aspect-ratio: 1;
+}
+
+/* --- 实心变体 --- */
+[data-tt-style="bootstrap"] .btn-primary {
+  --btn-color: var(--primary-foreground);
+  --btn-bg: var(--primary);
+  --btn-border-color: var(--primary);
+  --btn-hover-color: var(--primary-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--primary) 85%, black);
+  --btn-hover-border-color: color-mix(in srgb, var(--primary) 80%, black);
+  --btn-active-bg: color-mix(in srgb, var(--primary) 80%, black);
+  --btn-active-border-color: color-mix(in srgb, var(--primary) 75%, black);
+  --btn-focus-rgb: 13, 110, 253;
+}
+
+[data-tt-style="bootstrap"] .btn-secondary {
+  --btn-color: var(--secondary-foreground);
+  --btn-bg: var(--secondary);
+  --btn-border-color: var(--secondary);
+  --btn-hover-color: var(--secondary-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--secondary) 85%, black);
+  --btn-hover-border-color: color-mix(in srgb, var(--secondary) 80%, black);
+  --btn-active-bg: color-mix(in srgb, var(--secondary) 80%, black);
+  --btn-active-border-color: color-mix(in srgb, var(--secondary) 75%, black);
+  --btn-focus-rgb: 108, 117, 125;
+}
+
+[data-tt-style="bootstrap"] .btn-success {
+  --btn-color: var(--success-foreground);
+  --btn-bg: var(--success);
+  --btn-border-color: var(--success);
+  --btn-hover-color: var(--success-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--success) 85%, black);
+  --btn-hover-border-color: color-mix(in srgb, var(--success) 80%, black);
+  --btn-active-bg: color-mix(in srgb, var(--success) 80%, black);
+  --btn-active-border-color: color-mix(in srgb, var(--success) 75%, black);
+  --btn-focus-rgb: 25, 135, 84;
+}
+
+[data-tt-style="bootstrap"] .btn-danger {
+  --btn-color: var(--destructive-foreground);
+  --btn-bg: var(--destructive);
+  --btn-border-color: var(--destructive);
+  --btn-hover-color: var(--destructive-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--destructive) 85%, black);
+  --btn-hover-border-color: color-mix(in srgb, var(--destructive) 80%, black);
+  --btn-active-bg: color-mix(in srgb, var(--destructive) 80%, black);
+  --btn-active-border-color: color-mix(in srgb, var(--destructive) 75%, black);
+  --btn-focus-rgb: 220, 53, 69;
+}
+
+[data-tt-style="bootstrap"] .btn-warning {
+  --btn-color: var(--warning-foreground);
+  --btn-bg: var(--warning);
+  --btn-border-color: var(--warning);
+  --btn-hover-color: var(--warning-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--warning) 85%, black);
+  --btn-hover-border-color: color-mix(in srgb, var(--warning) 80%, black);
+  --btn-active-bg: color-mix(in srgb, var(--warning) 80%, black);
+  --btn-active-border-color: color-mix(in srgb, var(--warning) 75%, black);
+  --btn-focus-rgb: 255, 193, 7;
+}
+
+[data-tt-style="bootstrap"] .btn-info {
+  --btn-color: var(--info-foreground);
+  --btn-bg: var(--info);
+  --btn-border-color: var(--info);
+  --btn-hover-color: var(--info-foreground);
+  --btn-hover-bg: color-mix(in srgb, var(--info) 85%, black);
+  --btn-hover-border-color: color-mix(in srgb, var(--info) 80%, black);
+  --btn-active-bg: color-mix(in srgb, var(--info) 80%, black);
+  --btn-active-border-color: color-mix(in srgb, var(--info) 75%, black);
+  --btn-focus-rgb: 13, 202, 240;
+}
+
+[data-tt-style="bootstrap"] .btn-light {
+  --btn-color: #000;
+  --btn-bg: var(--bs-light);
+  --btn-border-color: var(--bs-light);
+  --btn-hover-color: #000;
+  --btn-hover-bg: #d3d4d5;
+  --btn-hover-border-color: #c6c7c8;
+  --btn-active-bg: #c6c7c8;
+  --btn-active-border-color: #babbbc;
+  --btn-focus-rgb: 211, 212, 213;
+}
+
+[data-tt-style="bootstrap"] .btn-dark {
+  --btn-color: #fff;
+  --btn-bg: var(--bs-dark);
+  --btn-border-color: var(--bs-dark);
+  --btn-hover-color: #fff;
+  --btn-hover-bg: #1c1f23;
+  --btn-hover-border-color: #1a1e21;
+  --btn-active-bg: #1a1e21;
+  --btn-active-border-color: #191c1f;
+  --btn-focus-rgb: 66, 70, 73;
+}
+
+[data-tt-style="bootstrap"] .btn-link {
+  --btn-color: var(--bs-link-color);
+  --btn-bg: transparent;
+  --btn-border-color: transparent;
+  --btn-hover-color: var(--bs-link-hover-color);
+  --btn-hover-bg: transparent;
+  --btn-hover-border-color: transparent;
+  --btn-active-bg: transparent;
+  --btn-active-border-color: transparent;
+  --btn-shadow: none;
+  text-decoration: underline;
+}
+
+[data-tt-style="bootstrap"] .btn-link:hover {
+  text-decoration: underline;
+}
+
+/* --- 描边变体 --- */
+[data-tt-style="bootstrap"] .btn-outline-primary {
+  --btn-color: var(--primary);
+  --btn-bg: transparent;
+  --btn-border-color: var(--primary);
+  --btn-hover-color: var(--primary-foreground);
+  --btn-hover-bg: var(--primary);
+  --btn-hover-border-color: var(--primary);
+  --btn-active-bg: var(--primary);
+  --btn-active-border-color: var(--primary);
+}
+
+[data-tt-style="bootstrap"] .btn-outline-secondary {
+  --btn-color: var(--secondary);
+  --btn-bg: transparent;
+  --btn-border-color: var(--secondary);
+  --btn-hover-color: var(--secondary-foreground);
+  --btn-hover-bg: var(--secondary);
+  --btn-hover-border-color: var(--secondary);
+  --btn-active-bg: var(--secondary);
+  --btn-active-border-color: var(--secondary);
+}
+
+[data-tt-style="bootstrap"] .btn-outline-danger {
+  --btn-color: var(--destructive);
+  --btn-bg: transparent;
+  --btn-border-color: var(--destructive);
+  --btn-hover-color: var(--destructive-foreground);
+  --btn-hover-bg: var(--destructive);
+  --btn-hover-border-color: var(--destructive);
+  --btn-active-bg: var(--destructive);
+  --btn-active-border-color: var(--destructive);
+}
+
+[data-tt-style="bootstrap"] .btn-outline-success {
+  --btn-color: var(--success);
+  --btn-bg: transparent;
+  --btn-border-color: var(--success);
+  --btn-hover-color: var(--success-foreground);
+  --btn-hover-bg: var(--success);
+  --btn-hover-border-color: var(--success);
+  --btn-active-bg: var(--success);
+  --btn-active-border-color: var(--success);
+}

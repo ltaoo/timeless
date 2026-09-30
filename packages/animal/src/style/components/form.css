@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Animal Island · Form（.animal-form）
+   --------------------------------------------------------------------------
+   Form 组件只加一个纵向布局容器类（.animal-form）。Animal Island 的字段级语义
+   交给 Field / FieldSet 组件；这里提供布局钩子 + 字段错误/帮助文案样式。
+
+   Animal Island 视觉：
+     · 纯布局容器：奶油纸底、纵向间距 --spacer，不自带描边（层次由内部字段承担）
+     · 错误文案用 --destructive，帮助文案用 --muted-foreground
+     · 字段禁用请用 base.css 的作用域禁用契约（[disabled] / [data-disabled] / .is-disabled）
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer);
+  width: 100%;
+  color: var(--foreground);
+}
+
+/* --- 可选布局钩子（与 fluent 契约同名，模块本身不主动输出） --- */
+[data-tt-style="animal"] .animal-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-sm);
+  align-items: flex-end;
+}
+
+[data-tt-style="animal"] .animal-form__error {
+  display: block;
+  margin-top: var(--spacer-xs);
+  font-size: var(--font-size-sm);
+  color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-form__help {
+  display: block;
+  margin-top: var(--spacer-xs);
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+/* 非法字段：紧随其后的帮助文案切换成警示红（字段自身的 invalid 由其 CSS 负责） */
+[data-tt-style="animal"] .animal-form [aria-invalid="true"] ~ .animal-form__help,
+[data-tt-style="animal"] .animal-form [data-invalid="true"] ~ .animal-form__help {
+  color: var(--destructive);
+}
+
+[data-tt-style="animal"] .animal-form__row:hover {
+  color: var(--foreground);
+}
+
+[data-tt-style="animal"] .animal-form__row:focus-within {
+  color: var(--foreground);
+}
+
+/* 禁用字段组：整段降不透明度并禁指针 */
+[data-tt-style="animal"] .animal-form[aria-disabled="true"],
+[data-tt-style="animal"] .animal-form.is-disabled,
+[data-tt-style="animal"] .animal-form[data-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-form,
+  [data-tt-style="animal"] .animal-form__row,
+  [data-tt-style="animal"] .animal-form__error,
+  [data-tt-style="animal"] .animal-form__help {
+    transition: none;
+  }
+}

@@ -1,0 +1,92 @@
+/* ==========================================================================
+   Fluent 2 · Toggle（.fl-toggle）
+   --------------------------------------------------------------------------
+   Fluent 主线没有独立的 Toggle，这里沿用开关机制但换一套更紧凑的轨道
+   （36×20、thumb 12px）并用 --brand-fill 填充，与 Switch 区分。
+   ========================================================================== */
+
+[data-tt-style="fluent"] .fl-toggle {
+  --toggle-track: var(--surface-1);
+  --toggle-border: var(--stroke1);
+  --toggle-thumb: var(--foreground-3);
+
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 36px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background-color: var(--toggle-track);
+  border: var(--strokeWidthThin) solid var(--toggle-border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="fluent"] .fl-toggle:hover {
+  --toggle-border: var(--stroke1-hover);
+}
+
+[data-tt-style="fluent"] .fl-toggle:active {
+  --toggle-border: var(--stroke1-pressed);
+}
+
+[data-tt-style="fluent"] .fl-toggle:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="fluent"] .fl-toggle[data-checked],
+[data-tt-style="fluent"] .fl-toggle.is-checked {
+  --toggle-track: var(--brand-fill);
+  --toggle-border: var(--brand-fill);
+  --toggle-thumb: var(--colorNeutralForegroundOnBrand);
+}
+
+[data-tt-style="fluent"] .fl-toggle.is-checked:hover {
+  --toggle-track: var(--brand-fill-hover);
+  --toggle-border: var(--brand-fill-hover);
+}
+
+[data-tt-style="fluent"] .fl-toggle.is-checked:active {
+  --toggle-track: var(--brand-fill-pressed);
+  --toggle-border: var(--brand-fill-pressed);
+}
+
+[data-tt-style="fluent"] .fl-toggle[disabled],
+[data-tt-style="fluent"] .fl-toggle[data-disabled],
+[data-tt-style="fluent"] .fl-toggle.is-disabled {
+  --toggle-track: var(--surface-disabled);
+  --toggle-border: var(--stroke-disabled);
+  --toggle-thumb: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="fluent"] .fl-toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--toggle-thumb);
+  transform: translateX(0);
+  transition: transform var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+  pointer-events: none;
+}
+
+[data-tt-style="fluent"] .fl-toggle[data-checked] .fl-toggle__thumb,
+[data-tt-style="fluent"] .fl-toggle.is-checked .fl-toggle__thumb {
+  transform: translateX(16px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="fluent"] .fl-toggle,
+  [data-tt-style="fluent"] .fl-toggle__thumb {
+    transition: none;
+  }
+}

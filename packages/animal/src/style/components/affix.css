@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Animal Island · Affix（.animal-affix）
+   --------------------------------------------------------------------------
+   位置/阈值由 AffixCore 计算，模块把 store.fixed 映射成 .is-fixed 与内联定位。
+   Animal Island 视觉：
+     · 常态只是一个普通块，不画框
+     · 固定态（.is-fixed）补一层奶油纸面（--card）与柔和高度阴影（--shadow-sm），
+       避免内容从下方透出；顶部不加描边，避免固定/非固定切换时高度突变
+     · 固定态用 --duration-fast + --easing-standard 过渡，跟随滚动不闪烁
+   ========================================================================== */
+
+[data-tt-style="animal"] .animal-affix {
+  position: relative;
+  z-index: 1;
+  transition: top var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="animal"] .animal-affix.is-fixed {
+  z-index: 10;
+  background-color: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 固定态里若含可交互元素，聚焦仍走黄色环（永不用蓝色） */
+[data-tt-style="animal"] .animal-affix.is-fixed:focus-visible,
+[data-tt-style="animal"] .animal-affix.is-fixed:focus-within {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="animal"] .animal-affix {
+    transition: none;
+  }
+}

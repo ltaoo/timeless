@@ -1,0 +1,67 @@
+/* ==========================================================================
+   Bootstrap 5.3 · Radio（.form-check / .form-check-input / .form-check-label）
+   与 Checkbox 共用 .form-check-input 盒子，额外挂 .form-check-radio 圆形修饰，
+   覆盖 checkbox.css 里的勾，改为 primary 填充 + 白色圆点。
+   ========================================================================== */
+
+[data-tt-style="bootstrap"] .form-check-radio {
+  border-radius: var(--radius-pill);
+}
+
+[data-tt-style="bootstrap"] .form-check-radio[data-checked],
+[data-tt-style="bootstrap"] .form-check-radio.is-checked {
+  --form-check-bg: var(--primary);
+  --form-check-border: var(--primary);
+  background-image: none;
+}
+
+[data-tt-style="bootstrap"] .form-check-radio[data-checked]::after,
+[data-tt-style="bootstrap"] .form-check-radio.is-checked::after {
+  content: "";
+  display: block;
+  width: 0.5em;
+  height: 0.5em;
+  margin: auto;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary-foreground);
+}
+
+[data-tt-style="bootstrap"] .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="bootstrap"] .radio-group-horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+[data-tt-style="bootstrap"] .radio-group-item {
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+[data-tt-style="bootstrap"] .radio-group-item:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+[data-tt-style="bootstrap"] .radio-group-item.is-disabled {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+[data-tt-style="bootstrap"] .radio-group-item.is-disabled .form-check-label {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="bootstrap"] .form-check-radio,
+  [data-tt-style="bootstrap"] .radio-group-item {
+    transition: none;
+  }
+}
