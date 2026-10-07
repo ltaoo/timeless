@@ -1,0 +1,33 @@
+/* Lucky · skeleton; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-skeleton {
+  display: block;
+  background-color: var(--surface-3);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    color-mix(in srgb, var(--foreground) 7%, transparent) 50%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  background-position: 150% 0;
+  border-radius: var(--radius);
+  animation: lucky-shimmer 1.6s var(--easing-standard) infinite;
+}
+
+[data-tt-style="lucky"] .lucky-skeleton.is-rounded,
+[data-tt-style="lucky"] .lucky-skeleton.lucky-skeleton--circle {
+  border-radius: var(--radius-pill);
+}
+
+@keyframes lucky-shimmer {
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-skeleton {
+    animation: none;
+  }
+}

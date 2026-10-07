@@ -1,0 +1,39 @@
+/* Lucky · tooltip; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-tooltip {
+  --tt-tooltip-bg: var(--surface-inverted);
+  --tt-tooltip-color: var(--inverted-foreground);
+  z-index: 1080;
+  display: block;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-style: normal;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+  text-align: start;
+  text-decoration: none;
+  white-space: normal;
+  opacity: 1;
+  pointer-events: none;
+}
+
+[data-tt-style="lucky"] .lucky-tooltip__inner {
+  max-width: 15rem;
+  padding: 6px 10px;
+  color: var(--tt-tooltip-color);
+  text-align: center;
+  background-color: var(--tt-tooltip-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-8);
+}
+
+[data-tt-style="lucky"] .lucky-tooltip__arrow {
+  position: absolute;
+  left: 50%;
+  bottom: -0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--tt-tooltip-bg);
+  transform: translateX(-50%) rotate(45deg);
+  pointer-events: none;
+}

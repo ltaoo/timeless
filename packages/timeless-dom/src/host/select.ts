@@ -38,13 +38,6 @@ export function DOMSelect(props: {
       $elm.appendChild(r.$fragment);
       common$.methods.setupEventListener(props.elm.events);
 
-      $elm.addEventListener("change", function (event) {
-        // console.log(event.target.value);
-        if (props.elm.events?.onChange) {
-          props.elm.events?.onChange(event);
-        }
-      });
-
       // const r2 = common$.methods.buildChildren(elm.state.option_elements);
       // const $popper_content = document.createElement("div");
       // $popper_content.style.cssText = "padding: 0 8px; background-color: #fff;";

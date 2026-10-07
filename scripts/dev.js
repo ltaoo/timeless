@@ -28,6 +28,7 @@ const publicDir = path.join(playgroundDir, "public", "timeless", version);
 
 // Map of package names to their artifact paths and destination filenames
 const artifacts = [
+  { pkg: "lucky", src: "packages/lucky/dist/timeless.lucky.umd.min.js", dest: "timeless.lucky.umd.min.js" },
   {
     pkg: "timeless",
     src: "packages/timeless/dist/timeless.umd.min.js",
@@ -103,6 +104,7 @@ const buildRelations = {
     "material",
     "fluent",
     "animal",
+    "lucky",
     "timeless-dom",
   ],
 };
@@ -138,6 +140,8 @@ function copyArtifacts() {
     "timeless.fluent.css",
     "timeless.animal.umd.min.js",
     "timeless.animal.css",
+    "timeless.lucky.umd.min.js",
+    "timeless.lucky.css",
     // animal 的 webfont（两族各一个可变字体）。**必须列在这里**：copyArtifacts
     // 会删除 dist/timeless/<ver>/ 与 public/timeless/<ver>/ 里所有不在白名单的
     // 文件，漏了会表现为「本地打开没字体、重新构建又好一阵」。
@@ -165,6 +169,7 @@ function copyArtifacts() {
     "material",
     "fluent",
     "animal",
+    "lucky",
   ]);
   // animal 的 CSS 用 url("./animal-*.woff2") 相对引用同层平铺的字体子集。
   // 只拷 .css 不拷 .woff2，画廊里就会「样式对、字体错（掉到系统字体）」，

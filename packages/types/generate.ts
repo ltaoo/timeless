@@ -83,6 +83,12 @@ const PACKAGES: {
     globals: false,
   },
   {
+    name: "@timeless/lucky",
+    entry: "packages/lucky/src/index.ts",
+    namespace: "lucky",
+    globals: false,
+  },
+  {
     name: "@timeless/animal",
     entry: "packages/animal/src/index.ts",
     namespace: "animal",
@@ -121,6 +127,7 @@ const BASE_COMPILER_OPTIONS: ts.CompilerOptions = {
     "@timeless/material": ["packages/material/src/index.ts"],
     "@timeless/fluent": ["packages/fluent/src/index.ts"],
     "@timeless/animal": ["packages/animal/src/index.ts"],
+    "@timeless/lucky": ["packages/lucky/src/index.ts"],
     "@timeless/findrssui": ["packages/findrssui/src/index.ts"],
     "@timeless/timeless": ["packages/timeless/src/index.ts"],
     "@timeless/ui-primitive": ["packages/ui-primitive/src/index.ts"],

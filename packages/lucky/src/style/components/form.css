@@ -1,0 +1,28 @@
+/* Lucky · form; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer);
+  width: 100%;
+}
+
+[data-tt-style="lucky"] .lucky-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-sm);
+  align-items: flex-end;
+}
+
+[data-tt-style="lucky"] .lucky-form__error {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--destructive-subtle-foreground);
+}
+
+[data-tt-style="lucky"] .lucky-form__help {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+}

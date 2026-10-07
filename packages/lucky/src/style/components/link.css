@@ -1,0 +1,32 @@
+/* Lucky · link; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-link {
+  color: var(--link-color);
+  text-decoration: none;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-link:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+[data-tt-style="lucky"] .lucky-link:active {
+  color: var(--link-pressed);
+}
+
+[data-tt-style="lucky"] .lucky-link:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="lucky"] .lucky-link.is-disabled,
+[data-tt-style="lucky"] .lucky-link[aria-disabled="true"],
+[data-tt-style="lucky"] .lucky-link[data-disabled="true"] {
+  color: var(--foreground-disabled);
+  text-decoration: none;
+  cursor: not-allowed;
+  pointer-events: none;
+}

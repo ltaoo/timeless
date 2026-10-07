@@ -1,0 +1,55 @@
+/* Lucky · card; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-card {
+  --card-padding: var(--spacer);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--card-foreground);
+  background-color: var(--surface-1);
+  border: var(--border-width) solid var(--stroke2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-4);
+  transition: background-color var(--duration-normal) var(--easing-standard),
+    box-shadow var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-card:hover {
+  background-color: var(--surface-1-hover);
+  box-shadow: var(--shadow-8);
+}
+
+[data-tt-style="lucky"] .lucky-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--card-padding) var(--card-padding) 0;
+}
+
+[data-tt-style="lucky"] .lucky-card__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height);
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-card__description {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="lucky"] .lucky-card__content {
+  flex: 1 1 auto;
+  padding: var(--card-padding);
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-card__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  padding: 0 var(--card-padding) var(--card-padding);
+}

@@ -1,0 +1,27 @@
+/* Lucky · checkbox-group; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-sm);
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="lucky"] .lucky-checkbox-group--horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--spacer-lg);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox-group__item {
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox-group__item:focus-within {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 2px;
+}
+
+[data-tt-style="lucky"] .lucky-checkbox-group__item.is-disabled {
+  cursor: not-allowed;
+}

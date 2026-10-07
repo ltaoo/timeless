@@ -60,21 +60,6 @@ export function DOMFilePicker(props: {
       common$.methods.set$elm($elm);
       common$.methods.applyState(props.elm.state, { initial: true });
       common$.methods.setupEventListener(props.elm.events);
-      const events = props.elm.events;
-      if (events) {
-        if (events.onChange) {
-          $elm.addEventListener("change", events.onChange);
-        }
-        if (events.onFocus) {
-          $elm.addEventListener("focus", events.onFocus);
-        }
-        if (events.onBlur) {
-          $elm.addEventListener("blur", events.onBlur);
-        }
-        if (events.onKeyDown) {
-          $elm.addEventListener("keydown", events.onKeyDown);
-        }
-      }
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLInputElement) {

@@ -1,0 +1,26 @@
+/* Lucky · aspect-ratio; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-ratio {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+[data-tt-style="lucky"] .lucky-ratio__inner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+[data-tt-style="lucky"] .lucky-ratio__inner > img,
+[data-tt-style="lucky"] .lucky-ratio__inner > video,
+[data-tt-style="lucky"] .lucky-ratio__inner > iframe,
+[data-tt-style="lucky"] .lucky-ratio__inner > canvas,
+[data-tt-style="lucky"] .lucky-ratio__inner > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -1,0 +1,27 @@
+/* Lucky · label; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-label {
+  display: inline-block;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--label-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  user-select: none;
+}
+
+[data-tt-style="lucky"] .lucky-label.is-disabled,
+[data-tt-style="lucky"] .lucky-label[data-disabled="true"],
+[data-tt-style="lucky"] .lucky-label[aria-disabled="true"] {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="lucky"] .lucky-label.is-invalid {
+  color: var(--destructive);
+}
+
+[data-tt-style="lucky"] .lucky-label .lucky-label__required {
+  margin-left: 2px;
+  color: var(--destructive);
+}

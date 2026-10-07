@@ -5836,8 +5836,34 @@ declare module "packages/icons/src/asn/arrow-right" {
     };
     export default _default_3;
 }
-declare module "packages/icons/src/asn/bolt" {
+declare module "packages/icons/src/asn/bell" {
     const _default_4: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-bell preview-icon";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M10.268 21a2 2 0 0 0 3.464 0";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326";
+            };
+        }];
+    };
+    export default _default_4;
+}
+declare module "packages/icons/src/asn/bolt" {
+    const _default_5: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5862,10 +5888,10 @@ declare module "packages/icons/src/asn/bolt" {
             };
         }];
     };
-    export default _default_4;
+    export default _default_5;
 }
 declare module "packages/icons/src/asn/book-user" {
-    const _default_5: {
+    const _default_6: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5895,10 +5921,10 @@ declare module "packages/icons/src/asn/book-user" {
             };
         }];
     };
-    export default _default_5;
+    export default _default_6;
 }
 declare module "packages/icons/src/asn/bot" {
-    const _default_6: {
+    const _default_7: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5945,10 +5971,10 @@ declare module "packages/icons/src/asn/bot" {
             };
         }];
     };
-    export default _default_6;
+    export default _default_7;
 }
 declare module "packages/icons/src/asn/box" {
-    const _default_7: {
+    const _default_8: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -5976,10 +6002,10 @@ declare module "packages/icons/src/asn/box" {
             };
         }];
     };
-    export default _default_7;
+    export default _default_8;
 }
 declare module "packages/icons/src/asn/braces" {
-    const _default_8: {
+    const _default_9: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6002,10 +6028,10 @@ declare module "packages/icons/src/asn/braces" {
             };
         }];
     };
-    export default _default_8;
+    export default _default_9;
 }
 declare module "packages/icons/src/asn/calendar" {
-    const _default_9: {
+    const _default_10: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6042,10 +6068,10 @@ declare module "packages/icons/src/asn/calendar" {
             };
         }];
     };
-    export default _default_9;
+    export default _default_10;
 }
 declare module "packages/icons/src/asn/check" {
-    const _default_10: {
+    const _default_11: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6063,10 +6089,10 @@ declare module "packages/icons/src/asn/check" {
             };
         }];
     };
-    export default _default_10;
+    export default _default_11;
 }
 declare module "packages/icons/src/asn/chevron-down" {
-    const _default_11: {
+    const _default_12: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6084,10 +6110,10 @@ declare module "packages/icons/src/asn/chevron-down" {
             };
         }];
     };
-    export default _default_11;
+    export default _default_12;
 }
 declare module "packages/icons/src/asn/chevron-left" {
-    const _default_12: {
+    const _default_13: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6105,10 +6131,10 @@ declare module "packages/icons/src/asn/chevron-left" {
             };
         }];
     };
-    export default _default_12;
+    export default _default_13;
 }
 declare module "packages/icons/src/asn/chevron-right" {
-    const _default_13: {
+    const _default_14: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6126,10 +6152,10 @@ declare module "packages/icons/src/asn/chevron-right" {
             };
         }];
     };
-    export default _default_13;
+    export default _default_14;
 }
 declare module "packages/icons/src/asn/chevron-up" {
-    const _default_14: {
+    const _default_15: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6147,10 +6173,10 @@ declare module "packages/icons/src/asn/chevron-up" {
             };
         }];
     };
-    export default _default_14;
+    export default _default_15;
 }
 declare module "packages/icons/src/asn/circle-alert" {
-    const _default_15: {
+    const _default_16: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6186,10 +6212,10 @@ declare module "packages/icons/src/asn/circle-alert" {
             };
         }];
     };
-    export default _default_15;
+    export default _default_16;
 }
 declare module "packages/icons/src/asn/circle-arrow-down" {
-    const _default_16: {
+    const _default_17: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6219,10 +6245,10 @@ declare module "packages/icons/src/asn/circle-arrow-down" {
             };
         }];
     };
-    export default _default_16;
+    export default _default_17;
 }
 declare module "packages/icons/src/asn/circle-ellipsis" {
-    const _default_17: {
+    const _default_18: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6257,10 +6283,10 @@ declare module "packages/icons/src/asn/circle-ellipsis" {
             };
         }];
     };
-    export default _default_17;
+    export default _default_18;
 }
 declare module "packages/icons/src/asn/circle-x" {
-    const _default_18: {
+    const _default_19: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6290,10 +6316,10 @@ declare module "packages/icons/src/asn/circle-x" {
             };
         }];
     };
-    export default _default_18;
+    export default _default_19;
 }
 declare module "packages/icons/src/asn/clock-3" {
-    const _default_19: {
+    const _default_20: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6318,10 +6344,10 @@ declare module "packages/icons/src/asn/clock-3" {
             };
         }];
     };
-    export default _default_19;
+    export default _default_20;
 }
 declare module "packages/icons/src/asn/clock-arrow-down" {
-    const _default_20: {
+    const _default_21: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6354,10 +6380,10 @@ declare module "packages/icons/src/asn/clock-arrow-down" {
             };
         }];
     };
-    export default _default_20;
+    export default _default_21;
 }
 declare module "packages/icons/src/asn/clock" {
-    const _default_21: {
+    const _default_22: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6382,10 +6408,10 @@ declare module "packages/icons/src/asn/clock" {
             };
         }];
     };
-    export default _default_21;
+    export default _default_22;
 }
 declare module "packages/icons/src/asn/cloud-download" {
-    const _default_22: {
+    const _default_23: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6413,10 +6439,10 @@ declare module "packages/icons/src/asn/cloud-download" {
             };
         }];
     };
-    export default _default_22;
+    export default _default_23;
 }
 declare module "packages/icons/src/asn/copy" {
-    const _default_23: {
+    const _default_24: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6444,10 +6470,10 @@ declare module "packages/icons/src/asn/copy" {
             };
         }];
     };
-    export default _default_23;
+    export default _default_24;
 }
 declare module "packages/icons/src/asn/corner-down-right" {
-    const _default_24: {
+    const _default_25: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6470,10 +6496,10 @@ declare module "packages/icons/src/asn/corner-down-right" {
             };
         }];
     };
-    export default _default_24;
+    export default _default_25;
 }
 declare module "packages/icons/src/asn/download" {
-    const _default_25: {
+    const _default_26: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6501,10 +6527,10 @@ declare module "packages/icons/src/asn/download" {
             };
         }];
     };
-    export default _default_25;
+    export default _default_26;
 }
 declare module "packages/icons/src/asn/ellipsis-vertical" {
-    const _default_26: {
+    const _default_27: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6538,10 +6564,10 @@ declare module "packages/icons/src/asn/ellipsis-vertical" {
             };
         }];
     };
-    export default _default_26;
+    export default _default_27;
 }
 declare module "packages/icons/src/asn/ellipsis" {
-    const _default_27: {
+    const _default_28: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6575,10 +6601,10 @@ declare module "packages/icons/src/asn/ellipsis" {
             };
         }];
     };
-    export default _default_27;
+    export default _default_28;
 }
 declare module "packages/icons/src/asn/external-link" {
-    const _default_28: {
+    const _default_29: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6606,10 +6632,10 @@ declare module "packages/icons/src/asn/external-link" {
             };
         }];
     };
-    export default _default_28;
+    export default _default_29;
 }
 declare module "packages/icons/src/asn/eye" {
-    const _default_29: {
+    const _default_30: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6634,10 +6660,10 @@ declare module "packages/icons/src/asn/eye" {
             };
         }];
     };
-    export default _default_29;
+    export default _default_30;
 }
 declare module "packages/icons/src/asn/file-box" {
-    const _default_30: {
+    const _default_31: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6675,10 +6701,10 @@ declare module "packages/icons/src/asn/file-box" {
             };
         }];
     };
-    export default _default_30;
+    export default _default_31;
 }
 declare module "packages/icons/src/asn/file-code" {
-    const _default_31: {
+    const _default_32: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6711,10 +6737,10 @@ declare module "packages/icons/src/asn/file-code" {
             };
         }];
     };
-    export default _default_31;
+    export default _default_32;
 }
 declare module "packages/icons/src/asn/file-image" {
-    const _default_32: {
+    const _default_33: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6749,10 +6775,10 @@ declare module "packages/icons/src/asn/file-image" {
             };
         }];
     };
-    export default _default_32;
+    export default _default_33;
 }
 declare module "packages/icons/src/asn/file-lock" {
-    const _default_33: {
+    const _default_34: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6789,10 +6815,10 @@ declare module "packages/icons/src/asn/file-lock" {
             };
         }];
     };
-    export default _default_33;
+    export default _default_34;
 }
 declare module "packages/icons/src/asn/file-play" {
-    const _default_34: {
+    const _default_35: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6820,10 +6846,10 @@ declare module "packages/icons/src/asn/file-play" {
             };
         }];
     };
-    export default _default_34;
+    export default _default_35;
 }
 declare module "packages/icons/src/asn/file-search" {
-    const _default_35: {
+    const _default_36: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6858,10 +6884,10 @@ declare module "packages/icons/src/asn/file-search" {
             };
         }];
     };
-    export default _default_35;
+    export default _default_36;
 }
 declare module "packages/icons/src/asn/file-stack" {
-    const _default_36: {
+    const _default_37: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6889,10 +6915,10 @@ declare module "packages/icons/src/asn/file-stack" {
             };
         }];
     };
-    export default _default_36;
+    export default _default_37;
 }
 declare module "packages/icons/src/asn/file-symlink" {
-    const _default_37: {
+    const _default_38: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6920,10 +6946,10 @@ declare module "packages/icons/src/asn/file-symlink" {
             };
         }];
     };
-    export default _default_37;
+    export default _default_38;
 }
 declare module "packages/icons/src/asn/file-text" {
-    const _default_38: {
+    const _default_39: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -6961,10 +6987,10 @@ declare module "packages/icons/src/asn/file-text" {
             };
         }];
     };
-    export default _default_38;
+    export default _default_39;
 }
 declare module "packages/icons/src/asn/file-video-camera" {
-    const _default_39: {
+    const _default_40: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7001,10 +7027,10 @@ declare module "packages/icons/src/asn/file-video-camera" {
             };
         }];
     };
-    export default _default_39;
+    export default _default_40;
 }
 declare module "packages/icons/src/asn/file-volume" {
-    const _default_40: {
+    const _default_41: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7037,10 +7063,10 @@ declare module "packages/icons/src/asn/file-volume" {
             };
         }];
     };
-    export default _default_40;
+    export default _default_41;
 }
 declare module "packages/icons/src/asn/file" {
-    const _default_41: {
+    const _default_42: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7063,10 +7089,10 @@ declare module "packages/icons/src/asn/file" {
             };
         }];
     };
-    export default _default_41;
+    export default _default_42;
 }
 declare module "packages/icons/src/asn/film" {
-    const _default_42: {
+    const _default_43: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7123,10 +7149,10 @@ declare module "packages/icons/src/asn/film" {
             };
         }];
     };
-    export default _default_42;
+    export default _default_43;
 }
 declare module "packages/icons/src/asn/folder-closed" {
-    const _default_43: {
+    const _default_44: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7149,10 +7175,10 @@ declare module "packages/icons/src/asn/folder-closed" {
             };
         }];
     };
-    export default _default_43;
+    export default _default_44;
 }
 declare module "packages/icons/src/asn/folder-open" {
-    const _default_44: {
+    const _default_45: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7170,10 +7196,10 @@ declare module "packages/icons/src/asn/folder-open" {
             };
         }];
     };
-    export default _default_44;
+    export default _default_45;
 }
 declare module "packages/icons/src/asn/folder" {
-    const _default_45: {
+    const _default_46: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7191,10 +7217,10 @@ declare module "packages/icons/src/asn/folder" {
             };
         }];
     };
-    export default _default_45;
+    export default _default_46;
 }
 declare module "packages/icons/src/asn/funnel" {
-    const _default_46: {
+    const _default_47: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7212,10 +7238,10 @@ declare module "packages/icons/src/asn/funnel" {
             };
         }];
     };
-    export default _default_46;
+    export default _default_47;
 }
 declare module "packages/icons/src/asn/gauge" {
-    const _default_47: {
+    const _default_48: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7238,10 +7264,10 @@ declare module "packages/icons/src/asn/gauge" {
             };
         }];
     };
-    export default _default_47;
+    export default _default_48;
 }
 declare module "packages/icons/src/asn/git-branch" {
-    const _default_48: {
+    const _default_49: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7273,10 +7299,10 @@ declare module "packages/icons/src/asn/git-branch" {
             };
         }];
     };
-    export default _default_48;
+    export default _default_49;
 }
 declare module "packages/icons/src/asn/git-fork" {
-    const _default_49: {
+    const _default_50: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7320,10 +7346,10 @@ declare module "packages/icons/src/asn/git-fork" {
             };
         }];
     };
-    export default _default_49;
+    export default _default_50;
 }
 declare module "packages/icons/src/asn/globe" {
-    const _default_50: {
+    const _default_51: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7353,10 +7379,10 @@ declare module "packages/icons/src/asn/globe" {
             };
         }];
     };
-    export default _default_50;
+    export default _default_51;
 }
 declare module "packages/icons/src/asn/grid-3x3" {
-    const _default_51: {
+    const _default_52: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7398,10 +7424,10 @@ declare module "packages/icons/src/asn/grid-3x3" {
             };
         }];
     };
-    export default _default_51;
+    export default _default_52;
 }
 declare module "packages/icons/src/asn/hard-drive-download" {
-    const _default_52: {
+    const _default_53: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7443,10 +7469,10 @@ declare module "packages/icons/src/asn/hard-drive-download" {
             };
         }];
     };
-    export default _default_52;
+    export default _default_53;
 }
 declare module "packages/icons/src/asn/hard-drive" {
-    const _default_53: {
+    const _default_54: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7479,10 +7505,10 @@ declare module "packages/icons/src/asn/hard-drive" {
             };
         }];
     };
-    export default _default_53;
+    export default _default_54;
 }
 declare module "packages/icons/src/asn/history" {
-    const _default_54: {
+    const _default_55: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7510,10 +7536,10 @@ declare module "packages/icons/src/asn/history" {
             };
         }];
     };
-    export default _default_54;
+    export default _default_55;
 }
 declare module "packages/icons/src/asn/house" {
-    const _default_55: {
+    const _default_56: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7536,10 +7562,10 @@ declare module "packages/icons/src/asn/house" {
             };
         }];
     };
-    export default _default_55;
+    export default _default_56;
 }
 declare module "packages/icons/src/asn/image" {
-    const _default_56: {
+    const _default_57: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7574,10 +7600,10 @@ declare module "packages/icons/src/asn/image" {
             };
         }];
     };
-    export default _default_56;
+    export default _default_57;
 }
 declare module "packages/icons/src/asn/inbox" {
-    const _default_57: {
+    const _default_58: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7600,10 +7626,10 @@ declare module "packages/icons/src/asn/inbox" {
             };
         }];
     };
-    export default _default_57;
+    export default _default_58;
 }
 declare module "packages/icons/src/asn/library" {
-    const _default_58: {
+    const _default_59: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7636,10 +7662,10 @@ declare module "packages/icons/src/asn/library" {
             };
         }];
     };
-    export default _default_58;
+    export default _default_59;
 }
 declare module "packages/icons/src/asn/list-filter" {
-    const _default_59: {
+    const _default_60: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7667,10 +7693,56 @@ declare module "packages/icons/src/asn/list-filter" {
             };
         }];
     };
-    export default _default_59;
+    export default _default_60;
+}
+declare module "packages/icons/src/asn/list" {
+    const _default_61: {
+        readonly tag: "svg";
+        readonly attrs: {
+            readonly viewBox: "0 0 24 24";
+            readonly fill: "none";
+            readonly stroke: "currentColor";
+            readonly "stroke-width": "2";
+            readonly "stroke-linecap": "round";
+            readonly "stroke-linejoin": "round";
+            readonly class: "lucide lucide-list preview-icon";
+        };
+        readonly children: readonly [{
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 5h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 12h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M3 19h.01";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 5h13";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 12h13";
+            };
+        }, {
+            readonly tag: "path";
+            readonly attrs: {
+                readonly d: "M8 19h13";
+            };
+        }];
+    };
+    export default _default_61;
 }
 declare module "packages/icons/src/asn/loader-circle" {
-    const _default_60: {
+    const _default_62: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7688,10 +7760,10 @@ declare module "packages/icons/src/asn/loader-circle" {
             };
         }];
     };
-    export default _default_60;
+    export default _default_62;
 }
 declare module "packages/icons/src/asn/loader" {
-    const _default_61: {
+    const _default_63: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7744,10 +7816,10 @@ declare module "packages/icons/src/asn/loader" {
             };
         }];
     };
-    export default _default_61;
+    export default _default_63;
 }
 declare module "packages/icons/src/asn/maximize" {
-    const _default_62: {
+    const _default_64: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7780,10 +7852,10 @@ declare module "packages/icons/src/asn/maximize" {
             };
         }];
     };
-    export default _default_62;
+    export default _default_64;
 }
 declare module "packages/icons/src/asn/menu" {
-    const _default_63: {
+    const _default_65: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7811,10 +7883,10 @@ declare module "packages/icons/src/asn/menu" {
             };
         }];
     };
-    export default _default_63;
+    export default _default_65;
 }
 declare module "packages/icons/src/asn/message-circle" {
-    const _default_64: {
+    const _default_66: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7832,10 +7904,10 @@ declare module "packages/icons/src/asn/message-circle" {
             };
         }];
     };
-    export default _default_64;
+    export default _default_66;
 }
 declare module "packages/icons/src/asn/message-square-more" {
-    const _default_65: {
+    const _default_67: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7868,10 +7940,10 @@ declare module "packages/icons/src/asn/message-square-more" {
             };
         }];
     };
-    export default _default_65;
+    export default _default_67;
 }
 declare module "packages/icons/src/asn/minus" {
-    const _default_66: {
+    const _default_68: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7889,10 +7961,10 @@ declare module "packages/icons/src/asn/minus" {
             };
         }];
     };
-    export default _default_66;
+    export default _default_68;
 }
 declare module "packages/icons/src/asn/moon" {
-    const _default_67: {
+    const _default_69: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7910,10 +7982,10 @@ declare module "packages/icons/src/asn/moon" {
             };
         }];
     };
-    export default _default_67;
+    export default _default_69;
 }
 declare module "packages/icons/src/asn/music" {
-    const _default_68: {
+    const _default_70: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7945,10 +8017,10 @@ declare module "packages/icons/src/asn/music" {
             };
         }];
     };
-    export default _default_68;
+    export default _default_70;
 }
 declare module "packages/icons/src/asn/panel-left" {
-    const _default_69: {
+    const _default_71: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7975,10 +8047,10 @@ declare module "packages/icons/src/asn/panel-left" {
             };
         }];
     };
-    export default _default_69;
+    export default _default_71;
 }
 declare module "packages/icons/src/asn/paperclip" {
-    const _default_70: {
+    const _default_72: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -7996,10 +8068,10 @@ declare module "packages/icons/src/asn/paperclip" {
             };
         }];
     };
-    export default _default_70;
+    export default _default_72;
 }
 declare module "packages/icons/src/asn/pause" {
-    const _default_71: {
+    const _default_73: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8030,10 +8102,10 @@ declare module "packages/icons/src/asn/pause" {
             };
         }];
     };
-    export default _default_71;
+    export default _default_73;
 }
 declare module "packages/icons/src/asn/pen-line" {
-    const _default_72: {
+    const _default_74: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8056,10 +8128,10 @@ declare module "packages/icons/src/asn/pen-line" {
             };
         }];
     };
-    export default _default_72;
+    export default _default_74;
 }
 declare module "packages/icons/src/asn/play" {
-    const _default_73: {
+    const _default_75: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8077,10 +8149,10 @@ declare module "packages/icons/src/asn/play" {
             };
         }];
     };
-    export default _default_73;
+    export default _default_75;
 }
 declare module "packages/icons/src/asn/plus" {
-    const _default_74: {
+    const _default_76: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8103,10 +8175,10 @@ declare module "packages/icons/src/asn/plus" {
             };
         }];
     };
-    export default _default_74;
+    export default _default_76;
 }
 declare module "packages/icons/src/asn/radio-tower" {
-    const _default_75: {
+    const _default_77: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8156,10 +8228,10 @@ declare module "packages/icons/src/asn/radio-tower" {
             };
         }];
     };
-    export default _default_75;
+    export default _default_77;
 }
 declare module "packages/icons/src/asn/refresh-ccw" {
-    const _default_76: {
+    const _default_78: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8192,10 +8264,10 @@ declare module "packages/icons/src/asn/refresh-ccw" {
             };
         }];
     };
-    export default _default_76;
+    export default _default_78;
 }
 declare module "packages/icons/src/asn/refresh-cw" {
-    const _default_77: {
+    const _default_79: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8228,10 +8300,10 @@ declare module "packages/icons/src/asn/refresh-cw" {
             };
         }];
     };
-    export default _default_77;
+    export default _default_79;
 }
 declare module "packages/icons/src/asn/robot-arm" {
-    const _default_78: {
+    const _default_80: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8276,10 +8348,10 @@ declare module "packages/icons/src/asn/robot-arm" {
             };
         }];
     };
-    export default _default_78;
+    export default _default_80;
 }
 declare module "packages/icons/src/asn/rotate-ccw" {
-    const _default_79: {
+    const _default_81: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8302,10 +8374,10 @@ declare module "packages/icons/src/asn/rotate-ccw" {
             };
         }];
     };
-    export default _default_79;
+    export default _default_81;
 }
 declare module "packages/icons/src/asn/rss" {
-    const _default_80: {
+    const _default_82: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8335,10 +8407,10 @@ declare module "packages/icons/src/asn/rss" {
             };
         }];
     };
-    export default _default_80;
+    export default _default_82;
 }
 declare module "packages/icons/src/asn/save" {
-    const _default_81: {
+    const _default_83: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8366,10 +8438,10 @@ declare module "packages/icons/src/asn/save" {
             };
         }];
     };
-    export default _default_81;
+    export default _default_83;
 }
 declare module "packages/icons/src/asn/scroll-text" {
-    const _default_82: {
+    const _default_84: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8402,10 +8474,10 @@ declare module "packages/icons/src/asn/scroll-text" {
             };
         }];
     };
-    export default _default_82;
+    export default _default_84;
 }
 declare module "packages/icons/src/asn/search" {
-    const _default_83: {
+    const _default_85: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8430,10 +8502,10 @@ declare module "packages/icons/src/asn/search" {
             };
         }];
     };
-    export default _default_83;
+    export default _default_85;
 }
 declare module "packages/icons/src/asn/server" {
-    const _default_84: {
+    const _default_86: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8482,10 +8554,10 @@ declare module "packages/icons/src/asn/server" {
             };
         }];
     };
-    export default _default_84;
+    export default _default_86;
 }
 declare module "packages/icons/src/asn/settings" {
-    const _default_85: {
+    const _default_87: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8510,10 +8582,10 @@ declare module "packages/icons/src/asn/settings" {
             };
         }];
     };
-    export default _default_85;
+    export default _default_87;
 }
 declare module "packages/icons/src/asn/square-arrow-down" {
-    const _default_86: {
+    const _default_88: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8545,10 +8617,10 @@ declare module "packages/icons/src/asn/square-arrow-down" {
             };
         }];
     };
-    export default _default_86;
+    export default _default_88;
 }
 declare module "packages/icons/src/asn/square-pen" {
-    const _default_87: {
+    const _default_89: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8571,10 +8643,10 @@ declare module "packages/icons/src/asn/square-pen" {
             };
         }];
     };
-    export default _default_87;
+    export default _default_89;
 }
 declare module "packages/icons/src/asn/square" {
-    const _default_88: {
+    const _default_90: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8596,10 +8668,10 @@ declare module "packages/icons/src/asn/square" {
             };
         }];
     };
-    export default _default_88;
+    export default _default_90;
 }
 declare module "packages/icons/src/asn/sun" {
-    const _default_89: {
+    const _default_91: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8659,10 +8731,10 @@ declare module "packages/icons/src/asn/sun" {
             };
         }];
     };
-    export default _default_89;
+    export default _default_91;
 }
 declare module "packages/icons/src/asn/table" {
-    const _default_90: {
+    const _default_92: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8699,10 +8771,10 @@ declare module "packages/icons/src/asn/table" {
             };
         }];
     };
-    export default _default_90;
+    export default _default_92;
 }
 declare module "packages/icons/src/asn/trash-2" {
-    const _default_91: {
+    const _default_93: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8740,10 +8812,10 @@ declare module "packages/icons/src/asn/trash-2" {
             };
         }];
     };
-    export default _default_91;
+    export default _default_93;
 }
 declare module "packages/icons/src/asn/trash" {
-    const _default_92: {
+    const _default_94: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8771,10 +8843,10 @@ declare module "packages/icons/src/asn/trash" {
             };
         }];
     };
-    export default _default_92;
+    export default _default_94;
 }
 declare module "packages/icons/src/asn/undo-2" {
-    const _default_93: {
+    const _default_95: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8797,10 +8869,10 @@ declare module "packages/icons/src/asn/undo-2" {
             };
         }];
     };
-    export default _default_93;
+    export default _default_95;
 }
 declare module "packages/icons/src/asn/upload" {
-    const _default_94: {
+    const _default_96: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8828,10 +8900,10 @@ declare module "packages/icons/src/asn/upload" {
             };
         }];
     };
-    export default _default_94;
+    export default _default_96;
 }
 declare module "packages/icons/src/asn/user" {
-    const _default_95: {
+    const _default_97: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8856,10 +8928,10 @@ declare module "packages/icons/src/asn/user" {
             };
         }];
     };
-    export default _default_95;
+    export default _default_97;
 }
 declare module "packages/icons/src/asn/users" {
-    const _default_96: {
+    const _default_98: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8894,10 +8966,10 @@ declare module "packages/icons/src/asn/users" {
             };
         }];
     };
-    export default _default_96;
+    export default _default_98;
 }
 declare module "packages/icons/src/asn/video" {
-    const _default_97: {
+    const _default_99: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8924,10 +8996,10 @@ declare module "packages/icons/src/asn/video" {
             };
         }];
     };
-    export default _default_97;
+    export default _default_99;
 }
 declare module "packages/icons/src/asn/wrench" {
-    const _default_98: {
+    const _default_100: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8945,10 +9017,10 @@ declare module "packages/icons/src/asn/wrench" {
             };
         }];
     };
-    export default _default_98;
+    export default _default_100;
 }
 declare module "packages/icons/src/asn/x" {
-    const _default_99: {
+    const _default_101: {
         readonly tag: "svg";
         readonly attrs: {
             readonly viewBox: "0 0 24 24";
@@ -8971,13 +9043,14 @@ declare module "packages/icons/src/asn/x" {
             };
         }];
     };
-    export default _default_99;
+    export default _default_101;
 }
 declare module "packages/icons/src/asn/index" {
     export { default as Activity } from "packages/icons/src/asn/activity";
     export { default as ArrowDownToLine } from "packages/icons/src/asn/arrow-down-to-line";
     export { default as ArrowLeft } from "packages/icons/src/asn/arrow-left";
     export { default as ArrowRight } from "packages/icons/src/asn/arrow-right";
+    export { default as Bell } from "packages/icons/src/asn/bell";
     export { default as Bolt } from "packages/icons/src/asn/bolt";
     export { default as BookUser } from "packages/icons/src/asn/book-user";
     export { default as Bot } from "packages/icons/src/asn/bot";
@@ -9034,6 +9107,7 @@ declare module "packages/icons/src/asn/index" {
     export { default as Inbox } from "packages/icons/src/asn/inbox";
     export { default as Library } from "packages/icons/src/asn/library";
     export { default as ListFilter } from "packages/icons/src/asn/list-filter";
+    export { default as List } from "packages/icons/src/asn/list";
     export { default as LoaderCircle } from "packages/icons/src/asn/loader-circle";
     export { default as Loader } from "packages/icons/src/asn/loader";
     export { default as Maximize } from "packages/icons/src/asn/maximize";
@@ -9167,6 +9241,29 @@ declare module "packages/icons/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "m12 5 7 7-7 7";
+                };
+            }];
+        };
+        bell: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-bell preview-icon";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M10.268 21a2 2 0 0 0 3.464 0";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326";
                 };
             }];
         };
@@ -10832,6 +10929,49 @@ declare module "packages/icons/src/index" {
                 readonly tag: "path";
                 readonly attrs: {
                     readonly d: "M9 19h6";
+                };
+            }];
+        };
+        list: {
+            readonly tag: "svg";
+            readonly attrs: {
+                readonly viewBox: "0 0 24 24";
+                readonly fill: "none";
+                readonly stroke: "currentColor";
+                readonly "stroke-width": "2";
+                readonly "stroke-linecap": "round";
+                readonly "stroke-linejoin": "round";
+                readonly class: "lucide lucide-list preview-icon";
+            };
+            readonly children: readonly [{
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 5h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 12h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M3 19h.01";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 5h13";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 12h13";
+                };
+            }, {
+                readonly tag: "path";
+                readonly attrs: {
+                    readonly d: "M8 19h13";
                 };
             }];
         };
@@ -21148,6 +21288,11 @@ declare module "packages/kit/src/storage/index" {
         }> & StorageCoreProps<T>);
         get<K extends keyof T>(key: K, defaultValue?: T[K]): T[K];
         set: (key: keyof T, value: unknown) => void;
+        /**
+         * 落盘 + 通知，防抖只为合并密集写入。落盘时读的是 `this.values` 的最新快照，
+         * 所以同一个窗口内对不同 key 的多次 `set` 不会互相丢弃（旧实现把早先那次整个丢掉）。
+         */
+        private persist;
         merge: <K extends keyof T>(key: K, values: Partial<T[K]>, extra?: Partial<{
             reverse: boolean;
             limit: number;
@@ -21449,28 +21594,55 @@ declare module "packages/kit/src/http_client/index" {
         headers?: Record<string, string>;
         debug?: boolean;
     };
+    type HttpClientMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+    /** `fetch` 的入参：URL 已由调用方拼好（`get` 会补 hostname + query）。 */
+    export type HttpClientFetchOptions = {
+        url: unknown;
+        method: HttpClientMethod;
+        id?: string;
+        data?: JSONObject | FormData;
+        headers?: Record<string, string | number>;
+        cache?: RequestCache;
+        signal?: AbortSignal;
+        keepalive?: boolean;
+    };
+    /**
+     * `fetch` 的返回信封：原生 `Response` 的关键字段 + 已解析的 JSON 数据。
+     * provider 不因非 2xx 抛错，状态判定交给 `send`。
+     */
+    export type HttpClientFetchResult<T> = {
+        ok?: boolean;
+        status?: number;
+        data: T;
+        json?: () => Promise<unknown>;
+    };
+    type HttpClientSendExtra = Partial<{
+        query: Record<string, string | number | undefined>;
+        headers: Record<string, string | number>;
+        id: string;
+        cache: RequestCache;
+        signal: AbortSignal;
+        keepalive: boolean;
+    }>;
     export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
         hostname: string;
         headers: Record<string, string>;
         debug: boolean;
         constructor(props?: HttpClientCoreProps);
-        get<T>(endpoint: unknown, query?: Record<string, string | number | undefined>, extra?: Partial<{
-            headers: Record<string, string | number>;
-            id: string;
-        }>): Promise<Result<T>>;
-        post<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: Partial<{
-            headers: Record<string, string | number>;
-            id: string;
-        }>): Promise<Result<T>>;
-        fetch<T>(options: {
-            url: unknown;
-            method: "GET" | "POST";
-            id?: string;
-            data?: JSONObject | FormData;
-            headers?: Record<string, string | number>;
-        }): Promise<{
-            data: T;
-        }>;
+        /**
+         * 把「方法 + 端点 + body」跑成 `Result<T>`。状态与错误体的判定都收敛在这里：
+         *   - provider 返回的信封 `ok === false` → `Result.Err(服务端文案 || HTTP N, status, data)`；
+         *   - 传输层抛错（老 provider 的非 2xx、网络错误）→ `Result.Err(message, err.response?.status, ...)`。
+         * 老 provider 回 axios 响应时没有 `.ok`（`undefined === false` 不成立），仍走成功分支。
+         */
+        private send;
+        get<T>(endpoint: unknown, query?: Record<string, string | number | undefined>, extra?: HttpClientSendExtra): Promise<Result<T>>;
+        post<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: HttpClientSendExtra): Promise<Result<T>>;
+        put<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: HttpClientSendExtra): Promise<Result<T>>;
+        patch<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: HttpClientSendExtra): Promise<Result<T>>;
+        /** DELETE 不带 body（与 findrss 的 `request.del(path, options)` 对应）。 */
+        del<T>(endpoint: unknown, extra?: HttpClientSendExtra): Promise<Result<T>>;
+        fetch<T>(options: HttpClientFetchOptions): Promise<HttpClientFetchResult<T>>;
         cancel(id: string): import("@timeless/inner-base").Resp<null>;
         setHeaders(headers: Record<string, string>): void;
         appendHeaders(headers: Record<string, string>): void;
@@ -22454,13 +22626,24 @@ declare module "packages/kit/src/request/utils" {
     export type RequestPayload<T> = {
         hostname?: string;
         url: string;
-        method: "POST" | "GET" | "DELETE" | "PUT";
+        method: "POST" | "GET" | "DELETE" | "PUT" | "PATCH";
         query?: any;
         params?: any;
         body?: any;
         headers?: Record<string, string | number>;
+        /** 透传给 HttpClientCore 的 fetch 选项（见 HttpClientSendExtra）。 */
+        cache?: RequestCache;
+        signal?: AbortSignal;
+        keepalive?: boolean;
         process?: (v: any) => T;
     };
+    /** get/post/put/del 的可选参数：headers 与三个 fetch 透传字段。 */
+    type RequestExtra = Partial<{
+        headers: Record<string, string | number>;
+        cache: RequestCache;
+        signal: AbortSignal;
+        keepalive: boolean;
+    }>;
     /**
      * GetRespTypeFromRequestPayload
      * T extends RequestPayload
@@ -22478,13 +22661,14 @@ declare module "packages/kit/src/request/utils" {
      * 3. headers
      */
     export const request: {
-        get<T>(endpoint: string, query?: Record<string, string | number | boolean | null | undefined>, extra?: Partial<{
-            headers: Record<string, string | number>;
-        }>): RequestPayload<T>;
+        get<T>(endpoint: string, query?: Record<string, string | number | boolean | null | undefined>, extra?: RequestExtra): RequestPayload<T>;
         /** 构建请求参数 */
-        post<T>(url: unknown, body?: any, extra?: Partial<{
-            headers: Record<string, string | number>;
-        }>): RequestPayload<T>;
+        post<T>(url: unknown, body?: any, extra?: RequestExtra): RequestPayload<T>;
+        /** 与 post 同构，只是方法为 PUT。 */
+        put<T>(url: unknown, body?: any, extra?: RequestExtra): RequestPayload<T>;
+        patch<T>(url: unknown, body?: any, extra?: RequestExtra): RequestPayload<T>;
+        /** DELETE **不带 body**（与 findrss 的 `request.del(url, extra)` 对应）。 */
+        del<T>(url: unknown, extra?: RequestExtra): RequestPayload<T>;
     };
     export function request_factory(opt?: Partial<{
         hostnames: Partial<{
@@ -22506,9 +22690,48 @@ declare module "packages/kit/src/request/utils" {
         setDebug(debug: boolean): void;
         get<T>(endpoint: string, query?: Record<string, string | number | boolean>, extra?: Partial<{
             headers: Record<string, string | number>;
+            cache: RequestCache;
+            signal: AbortSignal;
+            keepalive: boolean;
         }>): RequestPayload<T>;
         post<T>(url: unknown, body?: any, extra?: Partial<{
             headers: Record<string, string | number>;
+            cache: RequestCache;
+            signal: AbortSignal;
+            keepalive: boolean;
+        }>): RequestPayload<T>;
+        put<T>(url: unknown, body?: any, extra?: Partial<{
+            headers: Record<string, string | number>;
+            cache: RequestCache;
+            signal: AbortSignal;
+            keepalive: boolean;
+        }>): RequestPayload<T>;
+        patch<T>(url: unknown, body?: any, extra?: Partial<{
+            headers: Record<string, string | number>;
+            cache: RequestCache;
+            signal: AbortSignal;
+            keepalive: boolean;
+        }>): {
+            hostname: string;
+            headers: {
+                [x: string]: string | number;
+            };
+            process: (v: any) => any;
+            url: string;
+            method: "POST" | "GET" | "DELETE" | "PUT" | "PATCH";
+            query?: any;
+            params?: any;
+            body?: any;
+            /** 透传给 HttpClientCore 的 fetch 选项（见 HttpClientSendExtra）。 */
+            cache?: RequestCache;
+            signal?: AbortSignal;
+            keepalive?: boolean;
+        };
+        del<T>(url: unknown, extra?: Partial<{
+            headers: Record<string, string | number>;
+            cache: RequestCache;
+            signal: AbortSignal;
+            keepalive: boolean;
         }>): RequestPayload<T>;
     };
 }
@@ -22555,6 +22778,11 @@ declare module "packages/kit/src/request/index" {
         client?: HttpClientCore;
         loading?: boolean;
         delay?: null | number;
+        /**
+         * 在途去重，默认 true（与历史行为一致）。写路径、可能重入的读要显式关掉：
+         * 去重会把 body 不同的一次写静默吞掉，也会让重入的读拿到外层那个还在跑的 promise。
+         */
+        dedupe?: boolean;
         defaultResponse?: P;
         process?: ProcessFunction<Result<UnpackedRequestPayload<ReturnType<F>>>, P>;
         onSuccess?: (v: UnpackedResult<P>) => void;
@@ -22563,6 +22791,7 @@ declare module "packages/kit/src/request/index" {
         onCanceled?: () => void;
         beforeRequest?: () => void;
         onLoading?: (loading: boolean) => void;
+        onStateChange?: (state: RequestState<UnpackedResult<P>>) => void;
     };
     export function onRequestCreated(h: (v: RequestCore<any>) => void): void;
     export type TheResponseOfRequestCore<T extends RequestCore<any, any>> = NonNullable<T["response"]>;
@@ -22593,6 +22822,8 @@ declare module "packages/kit/src/request/index" {
         initial: boolean;
         /** 处于请求中的 promise */
         pending: Promise<Result<P>> | null;
+        /** 是否对在途请求去重（默认 true）。false 时既不读也不写 `pending`。 */
+        dedupe: boolean;
         /** 调用 run 方法暂存的参数 */
         args: Parameters<F>;
         /** 请求的响应 */
@@ -22642,7 +22873,7 @@ declare module "packages/kit/src/index" {
     export type { OriginalRouteConfigure, PageKeysType, PathnameKey, RouteConfig, RouteConfigure, BuildRoutesPageKeys, ConfigureForPageKeys, } from "packages/kit/src/route_view/utils";
     export { ListCore } from "packages/kit/src/list/index";
     export { RequestCore, type RequestPayload } from "packages/kit/src/request/index";
-    export { request_factory } from "packages/kit/src/request/utils";
+    export { request, request_factory } from "packages/kit/src/request/utils";
 }
 declare module "packages/ui-primitive/src/core" {
     export * from "packages/reactive/src/index";
@@ -31046,6 +31277,1287 @@ declare module "packages/fluent/src/index" {
     export const TimelessFluentVersion: any;
     export { Gallery, Button, Input, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Switch, Toggle, Slider, Select, NumberInput, Progress, Avatar, Badge, Separator, Skeleton, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Alert, AlertTitle, AlertDescription, Kbd, KbdGroup, Link, AspectRatio, ScrollArea, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose, Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose, Popover, Popconfirm, Tooltip, TooltipProvider, DropdownMenu, ContextMenu, Menu, Tabs, Accordion, Steps, Toast, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Form, SearchSelect, FileDropZone, FileInput, ResizablePanels, ResizablePanel, ResizableHandle, DatePicker, DateCalendarPanel, DateRangePicker, TimePicker, TimeColumns, TimePreview, DateTimePicker, Cascader, ScrollView, Affix, Waterfall, Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
 }
+declare module "packages/lucky/src/modules/price" {
+    import { ViewProps } from "packages/timeless/src/index";
+    /** Amount is an integer number of CNY cents, preventing floating-point totals. */
+    export function formatPrice(amount: number): string;
+    export function Price(props: ViewProps & {
+        amount: number;
+        currency?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/button" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Button(props: ViewProps & {
+        store: vm.ButtonCore;
+        prefix?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/option-chip" {
+    import { vm, ViewProps, ViewChildren, Ref } from "packages/timeless/src/index";
+    /** Controlled selection; click/loading/disabled behavior is supplied by ButtonCore. */
+    export function OptionChip(props: ViewProps & {
+        store: vm.ButtonCore;
+        selected?: boolean | Ref<boolean>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/gallery" {
+    import { vm, type ViewProps } from "packages/timeless/src/index";
+    /** lucky visual composition; selection and modal behavior live in shared layers. */
+    export function Gallery(props: ViewProps & {
+        store: vm.GalleryCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Input(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/textarea" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Textarea(props: ViewProps & {
+        store: vm.InputCore<any>;
+        id?: string;
+        showClear?: boolean;
+        showLoading?: boolean;
+        showCount?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/label" {
+    import { LabelProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Label(props: LabelProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/lucky/src/modules/checkbox" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Checkbox(props: ViewProps & {
+        store: vm.CheckboxCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/checkbox-group" {
+    import { vm } from "packages/timeless/src/index";
+    export function CheckboxGroup(props: {
+        store: vm.CheckboxGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CheckboxGroupItem(props: {
+        store: vm.CheckboxGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.CheckboxCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/radio" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Radio(props: ViewProps & {
+        store: vm.RadioCore;
+        id?: string;
+        invalid?: boolean;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+    export function RadioGroup(props: ViewProps & {
+        store: vm.RadioGroupCore<any>;
+        class?: string;
+        itemClass?: string;
+        direction?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function RadioGroupItem(props: {
+        store: vm.RadioGroupCore<any>;
+        item: {
+            label: string;
+            value: any;
+            core: vm.RadioCore;
+        };
+        class?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/switch" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Switch(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/toggle" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Toggle(props: ViewProps & {
+        store: vm.SwitchCore;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/slider" {
+    import { ViewProps, Ref } from "packages/timeless/src/index";
+    export function Slider(props: Omit<ViewProps, "onChange"> & {
+        value?: number | Ref<number>;
+        min?: number;
+        max?: number;
+        step?: number;
+        disabled?: boolean;
+        onChange?: (v: number) => void;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Select(props: ViewProps & {
+        store: vm.SelectCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/number-input" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function NumberInput(props: ViewProps & {
+        store: vm.NumberInputCore;
+        id?: string;
+        showControls?: boolean;
+        invalid?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/progress" {
+    import { vm } from "packages/timeless/src/index";
+    import { Ref, ViewProps } from "packages/timeless/src/index";
+    export function Progress(props: ViewProps & {
+        store?: vm.ProgressCore;
+        value?: Ref<number> | number;
+        max?: number;
+        variant?: string;
+        striped?: boolean;
+        animated?: boolean;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/avatar" {
+    import { Ref, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Avatar(props: ViewProps & {
+        src: string | Ref<string>;
+        alt?: string;
+        size?: "sm" | "default" | "lg" | "large";
+        fallback?: string;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/badge" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Badge(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "outline" | "destructive" | "danger" | "success" | "warning" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/separator" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Separator(props: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/skeleton" {
+    import { ViewProps } from "packages/timeless/src/index";
+    export function Skeleton(props: ViewProps): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/card" {
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Card(props: ViewProps & {
+        variant?: "surface" | "profile" | "member";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardContent(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function CardFooter(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/alert" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Alert(props: ViewProps & {
+        variant?: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | "destructive" | "info";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertTitle(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function AlertDescription(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/kbd" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Kbd(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function KbdGroup(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/link" {
+    import { LinkProps as NativeLinkProps, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export function Link(props?: NativeLinkProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/lucky/src/modules/aspect-ratio" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function AspectRatio(props?: ViewProps & {
+        ratio?: number;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/scroll-area" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function ScrollArea(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/field" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren, TimelessElement } from "packages/timeless/src/index";
+    export function FieldGroup(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSet(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLegend(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldDescription(props: ViewProps, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldSeparator(props?: ViewProps & {
+        orientation?: "horizontal" | "vertical";
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export function FieldLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+        weight?: "normal" | "medium";
+        tone?: "default" | "destructive";
+    }): TimelessElement;
+    export function FieldInlineLabel(props: ViewProps & {
+        store?: vm.SingleFieldCore<any>;
+        for?: string;
+    }, children?: ViewChildren): TimelessElement;
+    export function Field(props: ViewProps & {
+        store: vm.SingleFieldCore<any>;
+        id?: string;
+        orientation?: "vertical" | "horizontal";
+        inline?: boolean;
+    }, children?: ViewChildren): TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/dialog" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Dialog(props: ViewProps & {
+        store: vm.DialogCore;
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function DialogHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogBody(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogFooter(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DialogClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/sheet" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Sheet(props: ViewProps & {
+        store: vm.DialogCore;
+        side?: "right" | "top" | "bottom" | "left";
+        zIndex?: number;
+    }, children?: ViewChildren | (() => ViewChildren)): {
+        t: string;
+        $elm: any;
+        state: {
+            children: (TimelessElement | null)[];
+        };
+        children: any[];
+        onMounted(event: MountedEvent): void;
+        onUnmounted(): void;
+    };
+    export function SheetHeader(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetTitle(props: ViewProps & {
+        store?: vm.DialogCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function SheetClose(props: ViewProps & {
+        store: vm.DialogCore;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/popper-shared" {
+    import type { ViewStyleProperties } from "packages/timeless/src/index";
+    /**
+     * 浮动层箭头（popover / popconfirm / tooltip 共用）。
+     *
+     * Lucky 的箭头是一个 45° 旋转的小方块（0.5rem），贴在被锚定元素那一侧的对边：
+     *   placement=bottom → 箭头在浮层顶部（.is-top）
+     *   placement=top    → 箭头在浮层底部（.is-bottom）
+     *   placement=right  → 箭头在浮层左侧（.is-left）
+     *   placement=left   → 箭头在浮层右侧（.is-right）
+     *
+     * class 负责“贴哪条边 + 隐藏哪两条边框”，style 负责沿交叉轴的偏移
+     * （优先用 popper 给的 arrow.x / arrow.y，退化时按 align 取 50% / 1rem）。
+     */
+    export function makeArrowStyle(popper_state_: any, base: string): {
+        class: import("@timeless/timeless").DerivedRef<string>;
+        style: import("@timeless/timeless").DerivedRef<ViewStyleProperties>;
+    };
+}
+declare module "packages/lucky/src/modules/popover" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popover · Lucky
+     *
+     * 结构：.lucky-popover > .lucky-popover__arrow / .lucky-popover__header / .lucky-popover__body。
+     * Trigger 由 headless 层处理（pointerdown 切换 open），浮层通过 Portal 挂到 body。
+     * Lucky 特征：1px --stroke2 + --shadow-16。
+     */
+    export function Popover(props: ViewProps & {
+        store: vm.PopoverCore;
+        title?: ViewChildren;
+        content?: ViewChildren;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/popconfirm" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Popconfirm · Lucky
+     *
+     * 用 .lucky-popconfirm 作为命名空间：
+     *   .lucky-popconfirm__arrow / __header / __body / __actions。
+     * 视觉沿用 popover 的 1px --stroke2 + --shadow-16。
+     */
+    export function Popconfirm(props: ViewProps & {
+        store: vm.PopconfirmCore;
+        title?: ViewChildren;
+        description?: ViewChildren;
+        confirmText?: string;
+        cancelText?: string;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/tooltip" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    export function Tooltip(props: ViewProps & {
+        content?: ViewChildren;
+        side?: vm.Side;
+        align?: vm.Align;
+    }, children?: ViewChildren): TimelessElement;
+    export function TooltipProvider(props: ViewProps, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/lucky/src/modules/menu-shared" {
+    export const t: {
+        /** 浮层动画时长（CSS 里面对应 .is-enter / .is-exit 的关键帧） */
+        animation: {
+            in: string;
+            out: string;
+        };
+        subAnimation: {
+            in: string;
+            out: string;
+        };
+        menu: {
+            class: string;
+        };
+        submenu: {
+            class: string;
+        };
+        item: {
+            class: string;
+        };
+        itemHover: {
+            class: string;
+        };
+        itemDisabled: {
+            class: string;
+        };
+        label: {
+            class: string;
+        };
+        separator: {
+            class: string;
+        };
+        submenuArrow: {
+            class: string;
+        };
+        icon: {
+            class: string;
+        };
+        shortcut: {
+            class: string;
+        };
+        check: {
+            class: string;
+        };
+    };
+}
+declare module "packages/lucky/src/modules/menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Menu · Lucky（常驻菜单）
+     *
+     * 类名：.lucky-menu / .lucky-menu__item / .lucky-menu__separator / .lucky-menu__label。
+     * 选中/聚焦用左侧 3px --compound-brand 竖条（见 dropdown-menu.css）。
+     *
+     * 子菜单（item.menu）通过 .lucky-menu--submenu 浮层渲染，箭头用 Icon 指示。
+     */
+    export function Menu(props: ViewProps & {
+        store: vm.MenuCore;
+    }): TimelessElement<{
+        as: string;
+    }, any>;
+    export type MenuEntry = vm.MenuItemCore | vm.MenuSeparatorCore | vm.MenuGroupCore;
+    export function renderMenuEntry(item: MenuEntry, Sep: (props: ViewProps) => TimelessElement, Grp: (props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (props: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement): TimelessElement;
+    export function MenuSeparator(_props: ViewProps): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuGroup(props: ViewProps & {
+        store: vm.MenuGroupCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function MenuItem(props: ViewProps & {
+        store: vm.MenuItemCore;
+    }, renderEntry?: (item: MenuEntry, Sep: (p: ViewProps) => TimelessElement, Grp: (p: ViewProps & {
+        store: vm.MenuGroupCore;
+    }) => TimelessElement, Itm: (p: ViewProps & {
+        store: vm.MenuItemCore;
+    }) => TimelessElement) => TimelessElement): TimelessElement<{
+        as: string;
+    }, any>;
+    export function isCheckable(store: vm.MenuItemCore): boolean;
+}
+declare module "packages/lucky/src/modules/dropdown-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * DropdownMenu · Lucky
+     *
+     * 结构：Trigger + 浮层 Content。类名走 .lucky-menu / .lucky-menu__item /
+     * .lucky-menu__separator / .lucky-menu__label（由 menu-shared 的 t 常量提供）。
+     * 条目渲染复用 menu.ts 的骨架（renderMenuEntry），因此子菜单、勾选项、
+     * icon / shortcut 的行为三者完全一致。
+     */
+    export function DropdownMenu(props: ViewProps & {
+        store: vm.DropdownMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/lucky/src/modules/context-menu" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps, TimelessElement } from "packages/timeless/src/index";
+    /**
+     * ContextMenu · Lucky
+     *
+     * 由右键 / 长按触发（Trigger 内部处理），浮层类名与 DropdownMenu 共用一套
+     * .lucky-menu 命名空间，额外加 .lucky-menu--context 表达右键菜单的尺寸/定位。
+     */
+    export function ContextMenu(props: ViewProps & {
+        store: vm.ContextMenuCore;
+    }, children?: ViewChildren): TimelessElement;
+}
+declare module "packages/lucky/src/modules/tabs" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tabs · Lucky
+     *
+     * 类名：.lucky-tabs / .lucky-tabs__list / .lucky-tabs__tab（.is-active）/ .lucky-tabs__content /
+     * .lucky-tabs__panel。
+     *
+     * Lucky 特征：动画下划线 pill —— 当前项底部 2px --compound-brand 圆角指示条，
+     * 带 transition；hover 用 --surface-1-hover。
+     *
+     * headless 层的 TabHeaderCore 用 curId 表示当前选中项，这里映射成 .is-active。
+     */
+    export type TabItem = {
+        value: string;
+        label: string;
+        content?: ViewChildren;
+    };
+    export function Tabs(props: ViewProps & {
+        store: vm.TabHeaderCore<any>;
+        items?: TabItem[];
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/accordion" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Accordion · Lucky
+     *
+     * 类名：.lucky-accordion / .lucky-accordion__item / .lucky-accordion__header /
+     * .lucky-accordion__trigger / .lucky-accordion__chevron / .lucky-accordion__panel /
+     * .lucky-accordion__body。分隔用 1px --stroke2，展开态标题字重 600。
+     *
+     * 三点 headless 约束（决定了这里的写法）：
+     *
+     * 1. Trigger 直接改 store.openItems，不会 emit StateChange。因此展开态不能从
+     *    store.state 派生，必须直接跟随 store.openItems（RefArray）。
+     * 2. Trigger / Item 会把 props 透传，所以动态 class 要挂在 .lucky-accordion__item 与
+     *    .lucky-accordion__trigger 上，由 CSS 用后代选择器控制 .lucky-accordion__panel。
+     * 3. Content 会把传入的 class 强制换成 computed，只在「传入字符串」时保留。
+     *    所以 .lucky-accordion__panel 只能是固定字符串类名，不能动态加类。
+     *
+     * 为什么不用 data-state：dataset 的响应式更新目前写错属性名（写成了裸的
+     * `state` 而不是 `data-state`），所以这里统一用 .is-open 类名表达展开态。
+     */
+    export type AccordionItem = {
+        title: ViewChildren;
+        content: ViewChildren;
+    };
+    export function Accordion(props: ViewProps & {
+        store: vm.AccordionCore;
+        items: AccordionItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/steps" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Steps · Lucky
+     *
+     * 类名：.lucky-steps / .lucky-steps__list / .lucky-steps__item /
+     * .lucky-steps__indicator / .lucky-steps__text / .lucky-steps__title /
+     * .lucky-steps__description / .lucky-steps__connector。
+     *
+     * Lucky 特征：active 用 --compound-brand，completed 用 --success。
+     * 状态通过 .is-completed / .is-current / .is-upcoming 表达。
+     *
+     * 注意：headless 的 StepsPrimitive.List 会忽略传入的 children 并自行渲染一套
+     * 无 class 的 Item/Indicator 树（Indicator 内部只在有 children 时才输出内容，
+     * 因此编号永远为空）。所以这里只用 Root/Item/Title/Description/Connector 这些
+     * 透传原语，列表本身用 View + For 自己拼装，保证 Fluent 类名完整。
+     */
+    export type StepItem = {
+        title: string;
+        description?: string;
+    };
+    export function Steps(props: ViewProps & {
+        store: vm.StepCore;
+        items: StepItem[];
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/toast" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    export function Toast(props: ViewProps & {
+        store: vm.ToastCore;
+        variant?: string;
+    }, children?: ViewChildren): ViewChildren;
+}
+declare module "packages/lucky/src/modules/table" {
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Table · Lucky
+     *
+     * 根节点挂 .lucky-table，其余部位沿用原生语义标签（thead / tbody / tr / th / td），
+     * 样式在 CSS 里通过 .lucky-table > thead > tr > th 这类后代选择器作用域化。
+     * Lucky 特征：行分割线 --stroke2，表头字 --colorNeutralForeground3。
+     */
+    export function Table(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHeader(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableBody(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableRow(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableHead(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+    export function TableCell(props: ViewProps, children?: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/lucky/src/modules/form" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * Form · Lucky
+     *
+     * Lucky 没有独立的 form 容器语义，这里只提供一层纵向布局容器（.lucky-form），
+     * 字段级渲染请直接用 Field / FieldSet 系列组件。
+     */
+    export function Form(props: ViewProps & {
+        store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/select-shared" {
+    import { vm } from "packages/timeless/src/index";
+    /**
+     * Select 系列的共享渲染逻辑（Lucky · lucky-select__*）。
+     *
+     * Select 与 SearchSelect 的面板结构完全一致（Viewport > 条目列表 / 空态），
+     * 差别只在触发区。把条目渲染抽到这里，避免两处各写一份。
+     */
+    export function renderSelectOption(select$: vm.SelectCore<any>, option: vm.SelectItemCore<any>): any;
+    export function renderSelectEntry(select$: vm.SelectCore<any>, entry: vm.SelectItemCore<any> | vm.SelectGroupCore<any>): any;
+    /**
+     * 面板内容：Viewport + 加载态 / 条目列表 / 空态。
+     *
+     * 注意：For 必须常驻挂载，不能塞进 Show 的某个分支里。搜索时
+     * startSearch/finishSearch 会让 loading 反复 true/false，一旦 For 处在
+     * 被 Show 切换的分支内，重建时旧列表不会被清理，条目会不断叠加。
+     */
+    export function SelectPanel(props: {
+        store: vm.SelectCore<any>;
+        entries: any;
+        loading?: any;
+        class?: any;
+    }): any;
+}
+declare module "packages/lucky/src/modules/search-select" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * SearchSelect · Lucky
+     *
+     * 触发器沿用 .lucky-select 的盒子指标（1px --stroke1 / 4px 圆角 / 32px 高），
+     * 内部换成 .lucky-select__search 输入框，下拉面板同样是 .lucky-select__content
+     * （样式复用 select.css）。
+     *
+     * 与 Select 的区别：触发区固定渲染搜索框，展开时把触发器注册为 popper 的
+     * reference，使面板宽度与触发器对齐。
+     */
+    export function SearchSelect<T>(props: ViewProps & {
+        store: vm.SelectCore<T>;
+    }, _children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/file-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps, ViewChildren } from "packages/timeless/src/index";
+    /**
+     * FilePicker · Lucky
+     *
+     * 用 .lucky-file-dropzone / .lucky-file-input 命名空间表达 Fluent 的 1px stroke +
+     * 4px 圆角 + 分级阴影。
+     *
+     * FileDropZone 负责拖拽 / 点击选择，FileInput 是紧凑的行内文件输入框。
+     */
+    export function FileDropZone(props: ViewProps & {
+        store: vm.FilePickerCore;
+        tip?: string;
+    }, _children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function FileInput(props: ViewProps & {
+        store: vm.FilePickerCore;
+        id?: string;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/resizable-panels" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ResizablePanels · Lucky
+     *
+     * Lucky 的 1px stroke + 4px 圆角 + 分级阴影：
+     *   .lucky-resizable / .lucky-resizable__panel / .lucky-resizable__handle / .lucky-resizable__grip
+     */
+    export function ResizablePanels(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        direction?: "horizontal" | "vertical";
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizablePanel(props: ViewProps & {
+        store: vm.ResizablePanelCore;
+        group: vm.ResizablePanelsCore;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function ResizableHandle(props: ViewProps & {
+        store: vm.ResizablePanelsCore;
+        panelBefore: vm.ResizablePanelCore;
+        panelAfter: vm.ResizablePanelCore;
+        withHandle?: boolean;
+    }, children?: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/date-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function DateCalendarPanel(props: {
+        store: vm.DatePickerCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function DatePicker(props: ViewProps & {
+        store: vm.DatePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/date-range-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function DateRangePicker(props: ViewProps & {
+        store: vm.DateRangePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    export function formatTempTime(store: vm.TimePickerCore, s: {
+        t_hour: number | null;
+        t_minute: number | null;
+        t_second: number | null;
+    }): string;
+    export function TimePreview(props: {
+        store: vm.TimePickerCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function TimeColumns(props: {
+        store: vm.TimePickerCore;
+        hourview$: vm.ScrollViewCore;
+        minuteview$: vm.ScrollViewCore;
+        secondview$: vm.ScrollViewCore;
+        class?: any;
+    }): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+    export function TimePicker(props: ViewProps & {
+        store: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/date-time-picker" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * DateTimePicker · Lucky
+     *
+     * 单个触发器 + 浮层内左右两栏：左侧复用 date-picker 的日历面板
+     * （.lucky-datepicker__*），右侧复用 time-picker 的三列滚动（.lucky-timepicker__*）。
+     * 容器用 .lucky-datetimepicker__panes / __pane / __footer。
+     *
+     * date$ 是 DatePickerCore（提供 popover/presence 与日历），time$ 是 TimePickerCore。
+     */
+    export function DateTimePicker(props: ViewProps & {
+        date: vm.DatePickerCore;
+        time: vm.TimePickerCore;
+        id?: string;
+        placeholder?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/cascader" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewProps } from "packages/timeless/src/index";
+    /**
+     * Cascader · Lucky
+     *
+     * 结构：.lucky-cascader（触发器）> __value + 清除/箭头
+     *       .lucky-cascader__content
+     *         ├─ .lucky-cascader__search（可选）
+     *         ├─ .lucky-cascader__search-results > .lucky-cascader__search-result > .lucky-cascader__path
+     *         └─ .lucky-cascader__panel × N > .lucky-cascader__item（+ .is-active 左侧 3px --compound-brand）
+     *
+     * 触发器与 select 同盒子指标（1px --stroke1、4px 圆角、32px 高）。
+     */
+    export function Cascader(props: ViewProps & {
+        store: vm.CascaderCore<any>;
+        id?: string;
+    }): {
+        t: string;
+        $elm: any;
+        state: import("packages/primitive/src/content/box").BoxState & {
+            rendered: boolean;
+            children: import("@timeless/timeless").TimelessElement[];
+        };
+        children: import("@timeless/timeless").TimelessElement<any, any>[];
+        append(node: any): void;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+    };
+}
+declare module "packages/lucky/src/modules/scroll-view" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * ScrollView · Lucky
+     *
+     * 复用 headless 的 ScrollViewPrimitive.Root（负责尺寸/滚动量上报），
+     * 只负责挂上 .lucky-scroll-view 的 Fluent 细滚动条（样式见 scroll-view.css，
+     * 与 .lucky-scroll-area 同一套 thumb 规则）。滚动行为/触底回调都在 store 上。
+     */
+    export function ScrollView(props: ViewProps & {
+        store: vm.ScrollViewCore;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<any, any>;
+}
+declare module "packages/lucky/src/modules/affix" {
+    import { vm } from "packages/timeless/src/index";
+    import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Affix · Lucky
+     *
+     * 滚动到阈值后把内容 fixed 到顶部（.lucky-affix.is-fixed）。位置/阈值由
+     * AffixCore 计算，模块只把 store.fixed 映射成类名与内联定位，
+     * 并在固定态用 --duration-fast 过渡（见 affix.css）。
+     *
+     * 挂载时记录元素顶部绝对位置，并监听滚动目标（默认 window）持续上报。
+     */
+    export function Affix(props: ViewProps & {
+        store: vm.AffixCore;
+        offsetTop?: number;
+        target?: () => HTMLElement | Window;
+    }, children: ViewChildren): import("@timeless/timeless").TimelessElement<{
+        as: string;
+    }, any>;
+}
+declare module "packages/lucky/src/modules/waterfall" {
+    import { vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Waterfall · Lucky
+     *
+     * 瀑布流容器：.lucky-waterfall > .lucky-waterfall__column × N > .lucky-waterfall__item。
+     * 列高、放置策略、可视区间都在 WaterfallModel 内计算；模块只把
+     * Fluent 类名挂到 Root / Column / Cell 上，并交给上层 ScrollView 驱动滚动。
+     */
+    export function Waterfall<T extends Record<string, unknown>>(props: ViewProps & {
+        store: vm.WaterfallModel<T>;
+        render: (payload: T, cell: vm.WaterfallCellModel<T>) => TimelessElement;
+    }): TimelessElement<any, any>;
+}
+declare module "packages/lucky/src/modules/tree" {
+    import { ui, vm } from "packages/timeless/src/index";
+    import { TimelessElement, ViewProps } from "packages/timeless/src/index";
+    /**
+     * Tree · Lucky
+     *
+     * 逻辑全在 `vm.TreeCore`，DOM 形状全在 `ui.TreePrimitive`。这里只把 Fluent 的
+     * 类名对进 primitive 的 `TreeClassNames` 槽位，并给出 Fluent 的行高 / 缩进。
+     *
+     * 类名契约（配合 style/components/tree.css）：
+     *   .lucky-tree > .lucky-tree__scroll > .lucky-tree__row
+     * 行内：.lucky-tree__guide(data-tree-guide) / .lucky-tree__line(data-tree-line)
+     * 状态：.is-lifted / .is-drop-into / .is-before / .is-after / .is-selected
+     *       / .is-checked / .is-indeterminate / .is-disabled
+     */
+    export const TREE_CLASSES: ui.TreePrimitive.TreeClassNames;
+    export type TreeProps = Omit<ui.TreePrimitive.TreeRootProps, "classes"> & ViewProps & {
+        store: vm.TreeCore;
+    };
+    /** Tree 的公开入口。primitive 参数原样透传，只补 Fluent 的类名与默认尺寸。 */
+    export function Tree(props: TreeProps): TimelessElement;
+    /** 自定义行渲染时复用的行槽位（`renderRow` 里拿到 props 再交给它）。 */
+    export function TreeRow(props: ui.TreePrimitive.TreeRowProps): TimelessElement;
+    export function TreeCheckbox(props: ui.TreePrimitive.TreeCheckboxProps): TimelessElement;
+    export function TreeIndicator(props?: {
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+    export function TreeEmpty(props?: {
+        text?: string;
+        classes?: ui.TreePrimitive.TreeClassNames;
+    }): TimelessElement;
+}
+declare module "packages/lucky/src/modules/flow" {
+    import { vm } from "packages/timeless/src/index";
+    import { SVG, TimelessElement, ViewChildren, ViewProps } from "packages/timeless/src/index";
+    type FlowNodeViewRender = Record<string, (props: {
+        node: vm.FlowNodeModel;
+    }) => ViewChildren>;
+    export interface FlowViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeTypes?: FlowNodeViewRender;
+        showBackground?: boolean;
+        backgroundVariant?: "dots" | "lines" | "cross";
+        showMinimap?: boolean;
+        showControls?: boolean;
+        multiSelect?: boolean;
+        minZoom?: number;
+        maxZoom?: number;
+        nodesDraggable?: boolean;
+        nodesConnectable?: boolean;
+    }
+    export interface FlowHandleViewProps extends ViewProps {
+        store: vm.FlowCanvasModel;
+        nodeId: string;
+        handleId: string;
+        type: "source" | "target";
+        position?: "top" | "right" | "bottom" | "left";
+        index: number;
+        total: number;
+        connectable?: boolean;
+    }
+    /** 节点侧边的连接点。同一侧有多个时按 20px 步长在 `50%` 上下均分。 */
+    export function FlowHandle(props: FlowHandleViewProps): TimelessElement;
+    export interface FlowNodeViewProps extends ViewProps {
+        store: vm.FlowNodeModel;
+        nodeTypes: FlowNodeViewRender;
+    }
+    /**
+     * 一个节点。悬浮时在上方浮出动作条（详情 / 更多 / 失败时的重试）。
+     *
+     * 拖拽用 document 级 mousemove/mouseup（不是 pointer capture）：节点可能在拖拽
+     * 过程中被 `For` 重建，绑在节点上的监听会跟着丢。
+     */
+    export function FlowNodeView(props: FlowNodeViewProps): TimelessElement;
+    /**
+     * 一条边。里面两根同 `d` 的 path：下面那根透明、20px 粗，只为了拿到点击；
+     * 上面那根才是看到的线。`animated` 时挂 `is-animated` 驱动 `stroke-dashoffset`
+     * 流动（keyframes 在各库 flow.css 里按库前缀命名）。
+     */
+    export function FlowEdgeView(props: ViewProps & {
+        store: vm.FlowEdgeModel;
+    }): ReturnType<typeof SVG.G>;
+    export function FlowBackground(props: ViewProps & {
+        variant?: "dots" | "lines" | "cross";
+        gap?: number;
+        size?: number;
+        color?: string;
+    }): TimelessElement;
+    export function FlowMinimap(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowControls(props: ViewProps & {
+        store: vm.FlowCanvasModel;
+    }): TimelessElement;
+    export function FlowCanvasView(props: FlowViewProps, children?: ViewChildren): TimelessElement;
+    export const FlowEdge_: typeof FlowEdgeView;
+    export const FlowNode_: typeof FlowNodeView;
+    export const FlowHandle_: typeof FlowHandle;
+    global {
+        interface Window {
+            flowConnecting: {
+                nodeId: string;
+                handleId: string;
+                type: "source" | "target";
+                startX: number;
+                startY: number;
+                currentX: number;
+                currentY: number;
+            } | null;
+            flowConnectingLineUpdate: ((path: string, visible: boolean) => void) | null;
+        }
+    }
+}
+declare module "packages/lucky/src/index" {
+    import { Price, formatPrice } from "packages/lucky/src/modules/price";
+    import { OptionChip } from "packages/lucky/src/modules/option-chip";
+    import { Gallery } from "packages/lucky/src/modules/gallery";
+    import { Button } from "packages/lucky/src/modules/button";
+    import { Input } from "packages/lucky/src/modules/input";
+    import { Textarea } from "packages/lucky/src/modules/textarea";
+    import { Label } from "packages/lucky/src/modules/label";
+    import { Checkbox } from "packages/lucky/src/modules/checkbox";
+    import { CheckboxGroup, CheckboxGroupItem } from "packages/lucky/src/modules/checkbox-group";
+    import { Radio, RadioGroup, RadioGroupItem } from "packages/lucky/src/modules/radio";
+    import { Switch } from "packages/lucky/src/modules/switch";
+    import { Toggle } from "packages/lucky/src/modules/toggle";
+    import { Slider } from "packages/lucky/src/modules/slider";
+    import { Select } from "packages/lucky/src/modules/select";
+    import { NumberInput } from "packages/lucky/src/modules/number-input";
+    import { Progress } from "packages/lucky/src/modules/progress";
+    import { Avatar } from "packages/lucky/src/modules/avatar";
+    import { Badge } from "packages/lucky/src/modules/badge";
+    import { Separator } from "packages/lucky/src/modules/separator";
+    import { Skeleton } from "packages/lucky/src/modules/skeleton";
+    import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "packages/lucky/src/modules/card";
+    import { Alert, AlertTitle, AlertDescription } from "packages/lucky/src/modules/alert";
+    import { Kbd, KbdGroup } from "packages/lucky/src/modules/kbd";
+    import { Link } from "packages/lucky/src/modules/link";
+    import { AspectRatio } from "packages/lucky/src/modules/aspect-ratio";
+    import { ScrollArea } from "packages/lucky/src/modules/scroll-area";
+    import { Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet } from "packages/lucky/src/modules/field";
+    import { Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose } from "packages/lucky/src/modules/dialog";
+    import { Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose } from "packages/lucky/src/modules/sheet";
+    import { Popover } from "packages/lucky/src/modules/popover";
+    import { Popconfirm } from "packages/lucky/src/modules/popconfirm";
+    import { Tooltip, TooltipProvider } from "packages/lucky/src/modules/tooltip";
+    import { DropdownMenu } from "packages/lucky/src/modules/dropdown-menu";
+    import { ContextMenu } from "packages/lucky/src/modules/context-menu";
+    import { Menu } from "packages/lucky/src/modules/menu";
+    import { Tabs } from "packages/lucky/src/modules/tabs";
+    import { Accordion } from "packages/lucky/src/modules/accordion";
+    import { Steps } from "packages/lucky/src/modules/steps";
+    import { Toast } from "packages/lucky/src/modules/toast";
+    import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "packages/lucky/src/modules/table";
+    import { Form } from "packages/lucky/src/modules/form";
+    import { SearchSelect } from "packages/lucky/src/modules/search-select";
+    import { FileDropZone, FileInput } from "packages/lucky/src/modules/file-picker";
+    import { ResizablePanels, ResizablePanel, ResizableHandle } from "packages/lucky/src/modules/resizable-panels";
+    import { DatePicker, DateCalendarPanel } from "packages/lucky/src/modules/date-picker";
+    import { DateRangePicker } from "packages/lucky/src/modules/date-range-picker";
+    import { TimePicker, TimeColumns, TimePreview } from "packages/lucky/src/modules/time-picker";
+    import { DateTimePicker } from "packages/lucky/src/modules/date-time-picker";
+    import { Cascader } from "packages/lucky/src/modules/cascader";
+    import { ScrollView } from "packages/lucky/src/modules/scroll-view";
+    import { Affix } from "packages/lucky/src/modules/affix";
+    import { Waterfall } from "packages/lucky/src/modules/waterfall";
+    import { Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES } from "packages/lucky/src/modules/tree";
+    import { FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls } from "packages/lucky/src/modules/flow";
+    export const TimelessLuckyVersion: any;
+    export { Price, formatPrice, OptionChip, Gallery, Button, Input, Textarea, Label, Checkbox, CheckboxGroup, CheckboxGroupItem, Radio, RadioGroup, RadioGroupItem, Switch, Toggle, Slider, Select, NumberInput, Progress, Avatar, Badge, Separator, Skeleton, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Alert, AlertTitle, AlertDescription, Kbd, KbdGroup, Link, AspectRatio, ScrollArea, Field, FieldDescription, FieldGroup, FieldLabel, FieldInlineLabel, FieldLegend, FieldSeparator, FieldSet, Dialog, DialogHeader, DialogTitle, DialogBody, DialogFooter, DialogClose, Sheet, SheetHeader, SheetTitle, SheetBody, SheetClose, Popover, Popconfirm, Tooltip, TooltipProvider, DropdownMenu, ContextMenu, Menu, Tabs, Accordion, Steps, Toast, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Form, SearchSelect, FileDropZone, FileInput, ResizablePanels, ResizablePanel, ResizableHandle, DatePicker, DateCalendarPanel, DateRangePicker, TimePicker, TimeColumns, TimePreview, DateTimePicker, Cascader, ScrollView, Affix, Waterfall, Tree, TreeRow, TreeCheckbox, TreeIndicator, TreeEmpty, TREE_CLASSES, FlowCanvasView, FlowNodeView, FlowHandle, FlowEdgeView, FlowBackground, FlowMinimap, FlowControls, };
+}
 declare module "packages/animal/src/modules/gallery" {
     import { vm, type ViewProps } from "packages/timeless/src/index";
     /** animal visual composition; selection and modal behavior live in shared layers. */
@@ -32485,6 +33997,7 @@ declare module "@timeless/weui" { export * from "packages/weui/src/index"; }
 declare module "@timeless/bootstrap" { export * from "packages/bootstrap/src/index"; }
 declare module "@timeless/material" { export * from "packages/material/src/index"; }
 declare module "@timeless/fluent" { export * from "packages/fluent/src/index"; }
+declare module "@timeless/lucky" { export * from "packages/lucky/src/index"; }
 declare module "@timeless/animal" { export * from "packages/animal/src/index"; }
 declare module "@timeless/findrssui" { export * from "packages/findrssui/src/index"; }
 
@@ -32501,6 +34014,7 @@ declare const Timeless: {
   bootstrap: typeof import("@timeless/bootstrap");
   material: typeof import("@timeless/material");
   fluent: typeof import("@timeless/fluent");
+  lucky: typeof import("@timeless/lucky");
   animal: typeof import("@timeless/animal");
   findrssui: typeof import("@timeless/findrssui");
   [key: string]: any;
@@ -32672,6 +34186,7 @@ declare const SocketMessageMeta: typeof import("@timeless/inner-kit").SocketMess
 declare const SocketOpenOptions: typeof import("@timeless/inner-kit").SocketOpenOptions;
 declare const StorageCore: typeof import("@timeless/inner-kit").StorageCore;
 declare const buildRoutes: typeof import("@timeless/inner-kit").buildRoutes;
+declare const request: typeof import("@timeless/inner-kit").request;
 declare const request_factory: typeof import("@timeless/inner-kit").request_factory;
 
 // @timeless/shadcn
@@ -32773,6 +34288,7 @@ declare const Activity: typeof import("@timeless/inner-icons").Activity;
 declare const ArrowDownToLine: typeof import("@timeless/inner-icons").ArrowDownToLine;
 declare const ArrowLeft: typeof import("@timeless/inner-icons").ArrowLeft;
 declare const ArrowRight: typeof import("@timeless/inner-icons").ArrowRight;
+declare const Bell: typeof import("@timeless/inner-icons").Bell;
 declare const Bolt: typeof import("@timeless/inner-icons").Bolt;
 declare const BookUser: typeof import("@timeless/inner-icons").BookUser;
 declare const Bot: typeof import("@timeless/inner-icons").Bot;
@@ -32828,6 +34344,7 @@ declare const House: typeof import("@timeless/inner-icons").House;
 declare const Image: typeof import("@timeless/inner-icons").Image;
 declare const Inbox: typeof import("@timeless/inner-icons").Inbox;
 declare const Library: typeof import("@timeless/inner-icons").Library;
+declare const List: typeof import("@timeless/inner-icons").List;
 declare const ListFilter: typeof import("@timeless/inner-icons").ListFilter;
 declare const Loader: typeof import("@timeless/inner-icons").Loader;
 declare const LoaderCircle: typeof import("@timeless/inner-icons").LoaderCircle;

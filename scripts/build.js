@@ -33,6 +33,7 @@ const BUILD_ORDER = [
   "material",
   "fluent",
   "animal",
+  "lucky",
   "findrssui",
 ];
 
@@ -53,6 +54,8 @@ const ARTIFACTS = [
   ["material", "timeless.material.css"],
   ["fluent", "timeless.fluent.umd.min.js"],
   ["fluent", "timeless.fluent.css"],
+  ["lucky", "timeless.lucky.umd.min.js"],
+  ["lucky", "timeless.lucky.css"],
   ["animal", "timeless.animal.umd.min.js"],
   ["animal", "timeless.animal.css"],
   // animal 的 webfont 子集是**独立文件**（vite 的 lib 模式默认会把资源内联成
@@ -88,6 +91,7 @@ const LOAD_PROFILES = {
     "timeless.material.umd.min.js",
     "timeless.fluent.umd.min.js",
     "timeless.animal.umd.min.js",
+    "timeless.lucky.umd.min.js",
   ],
   // findrss-reader 自有组件库。它的 CSS 没有 `*` / `body` 级重置，只在
   // `:root` 上挂 `--frui-*`，因此与 shadcn/weui 不冲突；这里只作**清单记录**，

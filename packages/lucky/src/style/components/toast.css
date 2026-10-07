@@ -1,0 +1,59 @@
+/* Lucky · toast; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-toast {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 22rem;
+  max-width: 100%;
+  padding-left: 3px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  pointer-events: auto;
+  background-color: var(--surface-1);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--stroke2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-16);
+  overflow: hidden;
+}
+
+
+[data-tt-style="lucky"] .lucky-toast::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--primary);
+}
+
+[data-tt-style="lucky"] .lucky-toast--success::before {
+  background-color: var(--success);
+}
+
+[data-tt-style="lucky"] .lucky-toast--warning::before {
+  background-color: var(--warning);
+}
+
+[data-tt-style="lucky"] .lucky-toast--danger::before {
+  background-color: var(--destructive);
+}
+
+[data-tt-style="lucky"] .lucky-toast__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  padding: 10px 12px 4px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-toast__body {
+  padding: 0 12px 12px;
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground-2);
+  word-wrap: break-word;
+}

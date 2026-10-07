@@ -1,0 +1,82 @@
+/* Lucky · slider; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+  padding: 0;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+[data-tt-style="lucky"] .lucky-slider__track {
+  position: relative;
+  flex-grow: 1;
+  width: 100%;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background-color: var(--stroke-accessible);
+}
+
+[data-tt-style="lucky"] .lucky-slider__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary);
+  transition: width var(--duration-faster) linear;
+}
+
+[data-tt-style="lucky"] .lucky-slider__thumb {
+  width: 20px;
+  height: 20px;
+  border: var(--border-width) solid var(--stroke-accessible);
+  border-radius: 50%;
+  background-color: var(--surface-1);
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-slider:hover .lucky-slider__thumb {
+  border-color: var(--primary-hover);
+}
+
+[data-tt-style="lucky"] .lucky-slider:active .lucky-slider__thumb {
+  border-color: var(--primary-pressed);
+}
+
+[data-tt-style="lucky"] .lucky-slider__thumb:focus-visible,
+[data-tt-style="lucky"] .lucky-slider:focus-visible .lucky-slider__thumb {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="lucky"] .lucky-slider[disabled],
+[data-tt-style="lucky"] .lucky-slider[data-disabled="true"],
+[data-tt-style="lucky"] .lucky-slider.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+[data-tt-style="lucky"] .lucky-slider[disabled] .lucky-slider__thumb,
+[data-tt-style="lucky"] .lucky-slider.is-disabled .lucky-slider__thumb {
+  border-color: var(--stroke-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="lucky"] .lucky-slider.is-invalid .lucky-slider__fill,
+[data-tt-style="lucky"] .lucky-slider[aria-invalid="true"] .lucky-slider__fill {
+  background-color: var(--destructive);
+}
+
+[data-tt-style="lucky"] .lucky-slider.is-invalid .lucky-slider__thumb,
+[data-tt-style="lucky"] .lucky-slider[aria-invalid="true"] .lucky-slider__thumb {
+  border-color: var(--destructive);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-slider__fill,
+  [data-tt-style="lucky"] .lucky-slider__thumb {
+    transition: none;
+  }
+}

@@ -1,0 +1,300 @@
+/* Lucky · flow; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-flow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+}
+
+[data-tt-style="lucky"] .lucky-flow__background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+[data-tt-style="lucky"] .lucky-flow__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+
+
+[data-tt-style="lucky"] .lucky-flow__edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+
+[data-tt-style="lucky"] .lucky-flow__edge-hit {
+  fill: none;
+  stroke: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+[data-tt-style="lucky"] .lucky-flow__edge {
+  fill: none;
+  pointer-events: none;
+  stroke: var(--stroke1);
+}
+
+[data-tt-style="lucky"] .lucky-flow__edge.is-selected {
+  stroke: var(--primary);
+}
+
+[data-tt-style="lucky"] .lucky-flow__connecting-path {
+  fill: none;
+  stroke: var(--primary);
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+
+[data-tt-style="lucky"] .lucky-flow__edge.is-animated {
+  stroke-dasharray: 6 4;
+  animation: lucky-flow-dash 0.6s linear infinite;
+}
+
+
+
+[data-tt-style="lucky"] .lucky-flow__node {
+  position: absolute;
+  box-sizing: border-box;
+  min-width: 68px;
+  background: var(--surface-1);
+  color: var(--foreground);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-4);
+  user-select: none;
+  cursor: move;
+  transition: box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-flow__node.is-dragging {
+  box-shadow: var(--shadow-16);
+}
+
+
+[data-tt-style="lucky"] .lucky-flow__node.is-selected {
+  border-color: var(--primary);
+  box-shadow:
+    inset 0 0 0 1px var(--primary),
+    var(--shadow-4);
+}
+
+
+[data-tt-style="lucky"] .lucky-flow__node.is-pending {
+  border-color: var(--stroke2);
+}
+[data-tt-style="lucky"] .lucky-flow__node.is-running {
+  background: var(--warning-subtle);
+  border-color: var(--warning);
+  color: var(--warning-subtle-foreground);
+  animation: lucky-flow-pulse 1.6s ease-in-out infinite;
+}
+[data-tt-style="lucky"] .lucky-flow__node.is-completed {
+  background: var(--success-subtle);
+  border-color: var(--success);
+  color: var(--success-subtle-foreground);
+}
+[data-tt-style="lucky"] .lucky-flow__node.is-failed {
+  background: var(--destructive-subtle);
+  border-color: var(--destructive);
+  color: var(--destructive-subtle-foreground);
+}
+[data-tt-style="lucky"] .lucky-flow__node.is-skipped {
+  background: var(--info-subtle);
+  border-color: var(--info-foreground);
+  color: var(--info-subtle-foreground);
+}
+
+[data-tt-style="lucky"] .lucky-flow__node-body {
+  padding: 0.5rem 1rem;
+}
+
+[data-tt-style="lucky"] .lucky-flow__node-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  white-space: nowrap;
+}
+
+[data-tt-style="lucky"] .lucky-flow__node-desc {
+  font-size: var(--font-size-xs);
+  text-align: center;
+  color: var(--foreground-3);
+}
+
+
+
+[data-tt-style="lucky"] .lucky-flow__node-actions {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 0.375rem;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-16);
+  white-space: nowrap;
+}
+
+[data-tt-style="lucky"] .lucky-flow__action {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground-2);
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-flow__action:hover {
+  background: var(--surface-1-hover);
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-flow__action.is-danger {
+  color: var(--destructive);
+}
+
+[data-tt-style="lucky"] .lucky-flow__action.is-danger:hover {
+  background: var(--destructive-subtle);
+  color: var(--destructive-subtle-foreground);
+}
+
+
+
+[data-tt-style="lucky"] .lucky-flow__handle {
+  position: absolute;
+  box-sizing: border-box;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--surface-1);
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+  transition: transform var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-flow__handle.is-source {
+  background: var(--primary);
+}
+
+[data-tt-style="lucky"] .lucky-flow__handle.is-target {
+  background: var(--primary);
+}
+
+[data-tt-style="lucky"] .lucky-flow__handle:hover {
+  transform: translate(-50%, -50%) scale(1.25);
+  cursor: crosshair;
+}
+
+[data-tt-style="lucky"] .lucky-flow__handle.is-disabled {
+  opacity: var(--disabled-opacity);
+  background: var(--surface-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="lucky"] .lucky-flow__handle.is-disabled:hover {
+  transform: translate(-50%, -50%);
+}
+
+
+
+[data-tt-style="lucky"] .lucky-flow__controls {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--surface-1);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-8);
+}
+
+[data-tt-style="lucky"] .lucky-flow__control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-flow__control:hover {
+  background: var(--surface-1-hover);
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-flow__minimap {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 50;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-8);
+  cursor: pointer;
+}
+
+[data-tt-style="lucky"] .lucky-flow__minimap-node {
+  position: absolute;
+  background: var(--foreground-3);
+  border-radius: var(--radius-sm);
+}
+
+[data-tt-style="lucky"] .lucky-flow__minimap-node.is-selected {
+  background: var(--primary);
+}
+
+
+@keyframes lucky-flow-dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+@keyframes lucky-flow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-flow__edge.is-animated,
+  [data-tt-style="lucky"] .lucky-flow__node.is-running {
+    animation: none;
+  }
+}

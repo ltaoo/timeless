@@ -26,6 +26,7 @@ const DOC_SITES = {
   fluent: { app: "web-fluent", port: 3403 },
   animal: { app: "web-animal", port: 3404 },
   weui: { app: "web-weui", port: 3405 },
+  lucky: { app: "web-lucky", port: 3406 },
 };
 
 const LIB_NAMES = Object.keys(DOC_SITES);
@@ -39,6 +40,7 @@ const ARTIFACT_PACKAGES = [
   "material",
   "fluent",
   "animal",
+  "lucky",
   "timeless-dom",
   "provider-web",
   "utils",

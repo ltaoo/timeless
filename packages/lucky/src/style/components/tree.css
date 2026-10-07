@@ -1,0 +1,278 @@
+/* Lucky · tree; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-tree {
+  --tree-row-height: 32px;
+  --tree-row-radius: var(--radius-md);
+
+  display: block;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-tree__scroll {
+  position: relative;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.25rem;
+  background: var(--surface-1);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-lg);
+}
+
+
+
+[data-tt-style="lucky"] .lucky-tree__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  box-sizing: border-box;
+  height: var(--tree-row-height);
+  padding-right: 0.5rem;
+  border-radius: var(--tree-row-radius);
+  color: var(--foreground);
+  user-select: none;
+  cursor: default;
+  transition:
+    background-color var(--duration-faster) var(--easing-standard),
+    color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-tree__row:hover {
+  background-color: var(--surface-1-hover);
+}
+
+
+[data-tt-style="lucky"] .lucky-tree__row.is-selected {
+  background-color: var(--surface-3);
+  color: var(--primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+
+[data-tt-style="lucky"] .lucky-tree__row.is-lifted {
+  opacity: 0.4;
+}
+
+
+[data-tt-style="lucky"] .lucky-tree__row.is-drop-into {
+  background-color: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+[data-tt-style="lucky"] .lucky-tree__row.is-disabled {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+
+
+
+[data-tt-style="lucky"] .lucky-tree__guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--stroke2);
+  pointer-events: none;
+}
+
+
+
+
+[data-tt-style="lucky"] .lucky-tree__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: left center;
+}
+
+[data-tt-style="lucky"] .lucky-tree__line[data-tree-line="before"] {
+  top: -1px;
+}
+
+[data-tt-style="lucky"] .lucky-tree__line[data-tree-line="after"] {
+  bottom: -1px;
+}
+
+[data-tt-style="lucky"] .lucky-tree__line.is-before,
+[data-tt-style="lucky"] .lucky-tree__line.is-after {
+  opacity: 1;
+  animation: lucky-tree-line-in var(--duration-fast) var(--easing-decelerate);
+}
+
+
+
+[data-tt-style="lucky"] .lucky-tree__caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+[data-tt-style="lucky"] .lucky-tree__caret:hover {
+  background-color: var(--surface-1-hover);
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-tree__caret-icon {
+  display: block;
+  pointer-events: none;
+  transition: transform var(--duration-fast) var(--easing-decelerate);
+}
+
+[data-tt-style="lucky"] .lucky-tree__icon {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="lucky"] .lucky-tree__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--font-size-sm);
+}
+
+[data-tt-style="lucky"] .lucky-tree__meta {
+  flex: none;
+  font-size: var(--font-size-xs);
+  color: var(--foreground-3);
+  font-variant-numeric: tabular-nums;
+}
+
+
+
+
+[data-tt-style="lucky"] .lucky-tree__checkbox {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+[data-tt-style="lucky"] .lucky-tree__checkbox-box {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--stroke-accessible);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  transition:
+    background-color var(--duration-faster) var(--easing-standard),
+    border-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-tree__checkbox:hover .lucky-tree__checkbox-box {
+  border-color: var(--stroke-accessible);
+  background: var(--surface-1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-tree__checkbox-indicator {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px 12px;
+}
+
+[data-tt-style="lucky"] .lucky-tree__checkbox.is-checked .lucky-tree__checkbox-box,
+[data-tt-style="lucky"]
+  .lucky-tree__checkbox.is-indeterminate
+  .lucky-tree__checkbox-box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="lucky"]
+  .lucky-tree__checkbox.is-checked
+  .lucky-tree__checkbox-indicator {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+
+
+[data-tt-style="lucky"]
+  .lucky-tree__checkbox.is-indeterminate
+  .lucky-tree__checkbox-indicator {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+}
+
+
+
+[data-tt-style="lucky"] .lucky-tree__empty {
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+[data-tt-style="lucky"] .lucky-tree__hint {
+  padding: 0.25rem 0.5rem 0;
+  font-size: var(--font-size-xs);
+  color: var(--foreground-3);
+}
+
+
+
+
+[data-tt-style="lucky"] .lucky-tree__ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  max-width: 16rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--stroke2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-16);
+  font-size: var(--font-size-sm);
+  pointer-events: none;
+  will-change: transform;
+}
+
+[data-tt-style="lucky"] .lucky-tree__ghost-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+@keyframes lucky-tree-line-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-tree__line.is-before,
+  [data-tt-style="lucky"] .lucky-tree__line.is-after {
+    animation: none;
+  }
+
+  [data-tt-style="lucky"] .lucky-tree__caret-icon {
+    transition: none;
+  }
+}

@@ -53,24 +53,6 @@ export function DOMTextarea(props: {
         $elm.disabled = props.elm.state.disabled;
       }
       common$.methods.setupEventListener(props.elm.events);
-      const events = props.elm.events;
-      if (events) {
-        if (events.onInput) {
-          $elm.addEventListener("input", events.onInput);
-        }
-        if (events.onChange) {
-          $elm.addEventListener("change", events.onChange);
-        }
-        if (events.onFocus) {
-          $elm.addEventListener("focus", events.onFocus);
-        }
-        if (events.onBlur) {
-          $elm.addEventListener("blur", events.onBlur);
-        }
-        if (events.onKeyDown) {
-          $elm.addEventListener("keydown", events.onKeyDown);
-        }
-      }
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLElement) {

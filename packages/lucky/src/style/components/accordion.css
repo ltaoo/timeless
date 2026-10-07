@@ -1,0 +1,95 @@
+/* Lucky · accordion; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-accordion {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: var(--border-width) solid var(--stroke2);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+[data-tt-style="lucky"] .lucky-accordion__item {
+  color: var(--foreground);
+  background-color: var(--surface-1);
+}
+
+[data-tt-style="lucky"] .lucky-accordion__item + .lucky-accordion__item {
+  border-top: var(--border-width) solid var(--stroke2);
+}
+
+[data-tt-style="lucky"] .lucky-accordion__header {
+  margin: 0;
+}
+
+[data-tt-style="lucky"] .lucky-accordion__trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+  color: var(--foreground-2);
+  text-align: left;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-accordion__trigger:hover {
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-accordion__trigger.is-open {
+  color: var(--foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+[data-tt-style="lucky"] .lucky-accordion__trigger:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+  z-index: 3;
+}
+
+[data-tt-style="lucky"] .lucky-accordion__chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  order: 1;
+  margin-left: auto;
+  color: var(--foreground-3);
+  transition: transform var(--duration-normal) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-accordion__trigger.is-open .lucky-accordion__chevron {
+  transform: rotate(180deg);
+}
+
+[data-tt-style="lucky"] .lucky-accordion__item:not(.is-open) .lucky-accordion__panel {
+  display: none;
+}
+
+[data-tt-style="lucky"] .lucky-accordion__item.is-open .lucky-accordion__panel {
+  display: block;
+}
+
+[data-tt-style="lucky"] .lucky-accordion__body {
+  padding: 0 16px 16px;
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-accordion__trigger,
+  [data-tt-style="lucky"] .lucky-accordion__chevron {
+    transition: none;
+  }
+}

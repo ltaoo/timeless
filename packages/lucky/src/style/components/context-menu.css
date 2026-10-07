@@ -1,0 +1,7 @@
+/* Lucky · context-menu; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-menu--context {
+  min-width: 11rem;
+  
+  max-height: min(20rem, 60vh);
+  overflow: hidden auto;
+}

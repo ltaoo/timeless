@@ -9,7 +9,7 @@ Timeless 是一个**平台无关的前端框架**，核心理念是"一次编写
 3. **无头 UI 状态机** — 60+ 组件的交互逻辑，与平台和样式完全解耦
 4. **现成业务套件** — 路由、HTTP 请求、数据持久化、导航等开箱即用
 5. **多平台渲染器** — DOM / SSR / Canvas / Native / TUI 五种渲染目标
-6. **多设计系统** — shadcn/ui、WeChat WeUI、Bootstrap 5.3、Material 3、Fluent 2、animal-island-ui 六套带样式组件库，外加一个由 findrss-reader 迁入的业务组件库 `@timeless/findrssui`
+6. **多设计系统** — shadcn/ui、WeChat WeUI、Bootstrap 5.3、Material 3、Fluent 2、animal-island-ui、Lucky 七套带样式组件库，外加一个由 findrss-reader 迁入的业务组件库 `@timeless/findrssui`
 
 ## 架构分层
 
@@ -491,6 +491,13 @@ import "tailwindcss/tailwind.css";
 **文档站**：`pnpm run docs --lib=fluent` → <http://127.0.0.1:3403>（示例应用 `apps/web-fluent`）。
 
 ---
+
+### `@timeless/lucky` — Lucky 小程序截图设计参考
+
+62 个来源变量、完整通用组件及 Price / OptionChip；深蓝胶囊按钮、白色卡片、淡蓝我的背景、橙色价格。
+作用域 `[data-tt-style="lucky"]`，仅浅色，无外部字体。复用 Timeless primitive / vm，不含应用业务状态。
+设计规范见 [`packages/lucky/THEME_DESIGN.md`](./packages/lucky/THEME_DESIGN.md)。
+文档站：`pnpm run docs --lib=lucky` → http://127.0.0.1:3406（`apps/web-lucky`）。
 
 ### `@timeless/animal` — animal-island-ui 风格设计系统
 

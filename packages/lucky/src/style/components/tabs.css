@@ -1,0 +1,98 @@
+/* Lucky · tabs; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+[data-tt-style="lucky"] .lucky-tabs__list {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+  border-bottom: var(--border-width) solid var(--stroke2);
+}
+
+[data-tt-style="lucky"] .lucky-tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+  color: var(--foreground-3);
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard);
+}
+
+
+[data-tt-style="lucky"] .lucky-tabs__tab::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 0;
+  height: 2px;
+  transform: translateX(-50%);
+  background-color: var(--primary);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-normal) var(--easing-decelerate);
+}
+
+[data-tt-style="lucky"] .lucky-tabs__tab:hover {
+  color: var(--foreground);
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-tabs__tab:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -2px;
+}
+
+[data-tt-style="lucky"] .lucky-tabs__tab.is-active {
+  color: var(--foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+[data-tt-style="lucky"] .lucky-tabs__tab.is-active::after {
+  width: 100%;
+}
+
+[data-tt-style="lucky"] .lucky-tabs__tab[disabled],
+[data-tt-style="lucky"] .lucky-tabs__tab.is-disabled {
+  color: var(--foreground-disabled);
+  pointer-events: none;
+}
+
+[data-tt-style="lucky"] .lucky-tabs__content {
+  flex: 1 1 auto;
+  padding: 12px 0;
+}
+
+[data-tt-style="lucky"] .lucky-tabs__panel {
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground-2);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-tabs__tab,
+  [data-tt-style="lucky"] .lucky-tabs__tab::after {
+    transition: none;
+  }
+}

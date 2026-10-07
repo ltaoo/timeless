@@ -7,6 +7,34 @@ import {
 
 import { viewStyleToCssText } from "./style";
 
+const native_events = {
+  "onClick": "click",
+  "onDoubleClick": "dblclick",
+  "onMouseDown": "mousedown",
+  "onMouseUp": "mouseup",
+  "onMouseMove": "mousemove",
+  "onPointerDown": "pointerdown",
+  "onPointerUp": "pointerup",
+  "onInput": "input",
+  "onChange": "change",
+  "onFocus": "focus",
+  "onBlur": "blur",
+  "onKeyDown": "keydown",
+  "onKeyUp": "keyup",
+  "onContextMenu": "contextmenu",
+  "onMouseEnter": "mouseenter",
+  "onMouseLeave": "mouseleave",
+  "onDragStart": "dragstart",
+  "onDrag": "drag",
+  "onDragEnd": "dragend",
+  "onDragEnter": "dragenter",
+  "onDragOver": "dragover",
+  "onDragLeave": "dragleave",
+  "onDrop": "drop",
+  "onAnimationEnd": "animationend",
+  "onWheel": "wheel"
+};
+
 let _batch_mode = false;
 let _pending_mounted: (() => void)[] = [];
 let _raf_scheduled = false;
@@ -252,68 +280,8 @@ export function HostElement(props: {
       if (!events || !$elm || $elm.nodeType === 3) {
         return;
       }
-      if (events.onClick) {
-        $elm.addEventListener("click", events.onClick);
-      }
-      if (events.onDoubleClick) {
-        $elm.addEventListener("dblclick", events.onDoubleClick);
-      }
-      if (events.onMouseDown) {
-        $elm.addEventListener("mousedown", events.onMouseDown);
-      }
-      if (events.onMouseUp) {
-        $elm.addEventListener("mouseup", events.onMouseUp);
-      }
-      if (events.onPointerDown) {
-        $elm.addEventListener("pointerdown", events.onPointerDown);
-      }
-      if (events.onPointerUp) {
-        $elm.addEventListener("pointerup", events.onPointerUp);
-      }
-      if (events.onFocus) {
-        $elm.addEventListener("focus", events.onFocus);
-      }
-      if (events.onBlur) {
-        $elm.addEventListener("blur", events.onBlur);
-      }
-      if (events.onKeyDown) {
-        $elm.addEventListener("keydown", events.onKeyDown);
-      }
-      if (events.onContextMenu) {
-        $elm.addEventListener("contextmenu", events.onContextMenu);
-      }
-      if (events.onMouseEnter) {
-        $elm.addEventListener("mouseenter", events.onMouseEnter);
-      }
-      if (events.onMouseLeave) {
-        $elm.addEventListener("mouseleave", events.onMouseLeave);
-      }
-      if (events.onDragStart) {
-        $elm.addEventListener("dragstart", events.onDragStart);
-      }
-      if (events.onDrag) {
-        $elm.addEventListener("drag", events.onDrag);
-      }
-      if (events.onDragEnd) {
-        $elm.addEventListener("dragend", events.onDragEnd);
-      }
-      if (events.onDragEnter) {
-        $elm.addEventListener("dragenter", events.onDragEnter);
-      }
-      if (events.onDragOver) {
-        $elm.addEventListener("dragover", events.onDragOver);
-      }
-      if (events.onDragLeave) {
-        $elm.addEventListener("dragleave", events.onDragLeave);
-      }
-      if (events.onDrop) {
-        $elm.addEventListener("drop", events.onDrop);
-      }
-      if (events.onAnimationEnd) {
-        $elm.addEventListener("animationend", events.onAnimationEnd);
-      }
-      if (events.onWheel) {
-        $elm.addEventListener("wheel", events.onWheel);
+      for (const [name, type] of Object.entries(native_events)) {
+        if (events[name]) $elm.addEventListener(type, events[name]);
       }
       if (events.onExpose) {
         _exposure_cleanup = observe_exposure($elm, (entry) => {
@@ -328,62 +296,8 @@ export function HostElement(props: {
         return;
       }
       _events = events;
-      if (events.onClick) {
-        $elm.removeEventListener("click", events.onClick);
-      }
-      if (events.onDoubleClick) {
-        $elm.removeEventListener("dblclick", events.onDoubleClick);
-      }
-      if (events.onMouseDown) {
-        $elm.removeEventListener("mousedown", events.onMouseDown);
-      }
-      if (events.onMouseUp) {
-        $elm.removeEventListener("mouseup", events.onMouseUp);
-      }
-      if (events.onPointerDown) {
-        $elm.removeEventListener("pointerdown", events.onPointerDown);
-      }
-      if (events.onFocus) {
-        $elm.removeEventListener("focus", events.onFocus);
-      }
-      if (events.onBlur) {
-        $elm.removeEventListener("blur", events.onBlur);
-      }
-      if (events.onKeyDown) {
-        $elm.removeEventListener("keydown", events.onKeyDown);
-      }
-      if (events.onContextMenu) {
-        $elm.removeEventListener("contextmenu", events.onContextMenu);
-      }
-      if (events.onMouseEnter) {
-        $elm.removeEventListener("mouseenter", events.onMouseEnter);
-      }
-      if (events.onMouseLeave) {
-        $elm.removeEventListener("mouseleave", events.onMouseLeave);
-      }
-      if (events.onDragStart) {
-        $elm.removeEventListener("dragstart", events.onDragStart);
-      }
-      if (events.onDrag) {
-        $elm.removeEventListener("drag", events.onDrag);
-      }
-      if (events.onDragEnd) {
-        $elm.removeEventListener("dragend", events.onDragEnd);
-      }
-      if (events.onDragEnter) {
-        $elm.removeEventListener("dragenter", events.onDragEnter);
-      }
-      if (events.onDragOver) {
-        $elm.removeEventListener("dragover", events.onDragOver);
-      }
-      if (events.onDragLeave) {
-        $elm.removeEventListener("dragleave", events.onDragLeave);
-      }
-      if (events.onDrop) {
-        $elm.removeEventListener("drop", events.onDrop);
-      }
-      if (events.onAnimationEnd) {
-        $elm.removeEventListener("animationend", events.onAnimationEnd);
+      for (const [name, type] of Object.entries(native_events)) {
+        if (events[name]) $elm.removeEventListener(type, events[name]);
       }
     },
     applyState(

@@ -1,0 +1,24 @@
+{
+  "name": "@timeless/web-timeless",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Timeless rewrite of the legacy SolidJS clipboard application",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@timeless/shadcn": "workspace:^",
+    "@timeless/timeless": "workspace:^",
+    "@timeless/timeless-dom": "workspace:^"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.2.2",
+    "@timeless/inner-vite-plugin": "workspace:^",
+    "tailwindcss": "4.2.2",
+    "vite": "8.0.0-beta.16"
+  }
+}

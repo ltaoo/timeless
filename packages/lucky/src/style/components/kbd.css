@@ -1,0 +1,27 @@
+/* Lucky · kbd; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: 1;
+  color: var(--foreground-2);
+  white-space: nowrap;
+  background-color: var(--surface-3);
+  border: var(--border-width) solid var(--stroke2);
+  border-bottom-width: var(--ring-width);
+  border-radius: var(--radius-sm);
+  user-select: none;
+}
+
+[data-tt-style="lucky"] .lucky-kbd-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

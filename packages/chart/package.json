@@ -1,6 +1,6 @@
 {
   "name": "@timeless/inner-chart",
-  "version": "0.34.0",
+  "version": "0.34.2",
   "description": "Host-neutral chart state for Timeless",
   "main": "dist/index.js",
   "module": "dist/timeless.chart.esm.js",

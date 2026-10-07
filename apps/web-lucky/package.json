@@ -1,0 +1,13 @@
+{
+  "name": "@timeless/web-lucky",
+  "version": "1.0.0",
+  "description": "Lucky component gallery for @timeless/lucky",
+  "type": "module",
+  "scripts": {
+    "dev": "timeless frontend"
+  },
+  "devDependencies": {
+    "@timeless/cli": "workspace:*",
+    "@timeless/inner-types": "workspace:*"
+  }
+}

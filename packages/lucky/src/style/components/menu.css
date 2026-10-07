@@ -1,0 +1,19 @@
+/* Lucky · menu; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-menu--static {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: column;
+  width: auto;
+  min-width: 12rem;
+  max-height: min(20rem, 60vh);
+  overflow: visible;
+  box-shadow: var(--shadow-4);
+}
+
+
+[data-tt-style="lucky"] .lucky-menu--static .lucky-menu--submenu {
+  max-height: min(20rem, 60vh);
+  overflow: hidden auto;
+  box-shadow: var(--shadow-16);
+}

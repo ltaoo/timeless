@@ -1,0 +1,230 @@
+{
+  "version": "1.0.0",
+  "status": "active",
+  "updated_at": "2026-10-03",
+  "agent": {
+    "skill": "design",
+    "instructions": "Read this contract before UI edits; use its tokens, update new components, and verify implementation against the contract."
+  },
+  "sources": [
+    "THEME_DESIGN.md",
+    "src/tokens.json",
+    "../../../lucky/.design",
+    "../../../lucky/design-system/DESIGN.md"
+  ],
+  "intent": {
+    "reference": "Screenshot-derived Lucky Mini Program home, account and ordering pages.",
+    "treatment": "utilitarian",
+    "signature": "Large photographic campaign image, deep-blue actions, pale profile header, orange prices, floating pill navigation."
+  },
+  "themes": {
+    "single": "light"
+  },
+  "policy": {
+    "if_missing": "invent_with_note",
+    "hierarchy": [
+      "typography",
+      "spacing",
+      "contrast",
+      "color"
+    ]
+  },
+  "constraints": {
+    "always": [
+      "Use shared Timeless primitives and stores",
+      "Scope CSS under data-tt-style=lucky",
+      "Use semantic aliases in components",
+      "Preserve screenshot token values",
+      "Keyboard focus and reduced motion"
+    ],
+    "never": [
+      "External fonts or CDN dependencies",
+      "Browser automation",
+      "Invent official dark-theme values",
+      "Import another theme package"
+    ]
+  },
+  "tokens": {
+    "lucky": {
+      "color": {
+        "brand": "#0921a4",
+        "brandSoft": "#f3f4fe",
+        "page": "#f5f5f5",
+        "surface": "#ffffff",
+        "profile": "#e6e9f6",
+        "text": "#333333",
+        "textStrong": "#111111",
+        "textSecondary": "#666666",
+        "textMuted": "#999999",
+        "line": "#eeeeee",
+        "price": "#ff5427",
+        "gold": "#c1a174",
+        "goldSoft": "#f1e2c7",
+        "member": "#262b30",
+        "memberText": "#dbb065",
+        "link": "#246fff",
+        "wechat": "#2aad36"
+      },
+      "font": {
+        "body": "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+        "number": "\"Arial Narrow\", Impact, sans-serif",
+        "utility": "ui-monospace, SFMono-Regular, monospace"
+      },
+      "fontSize": {
+        "caption": 11,
+        "helper": 12,
+        "label": 13,
+        "body": 14,
+        "large": 16,
+        "section": 18,
+        "title": 22,
+        "price": 24,
+        "display": 28
+      },
+      "weight": {
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      },
+      "lineHeight": {
+        "tight": 1.2,
+        "body": 1.5
+      },
+      "space": {
+        "xs": 4,
+        "sm": 8,
+        "md": 12,
+        "lg": 16,
+        "xl": 20,
+        "xxl": 24,
+        "section": 32
+      },
+      "radius": {
+        "tag": 3,
+        "small": 8,
+        "card": 12,
+        "option": 14,
+        "profileCard": 26,
+        "pill": 999
+      },
+      "size": {
+        "page": 414,
+        "touch": 44,
+        "nav": 58,
+        "navInset": 12,
+        "option": 46,
+        "quantity": 28,
+        "avatar": 74,
+        "safeBottom": 24,
+        "purchaseBar": 130
+      },
+      "border": {
+        "hairline": 1,
+        "selected": 1
+      },
+      "opacity": {
+        "disabled": 0.45
+      },
+      "motion": {
+        "fast": "120ms",
+        "normal": "180ms"
+      }
+    }
+  },
+  "components": {
+    "homeHero": {
+      "aspectRatio": "414 / 287",
+      "source": "login/04-one-click-login.png"
+    },
+    "profileHeader": {
+      "background": "color/profile",
+      "avatar": "size/avatar",
+      "padding": "space/xxl"
+    },
+    "surfaceCard": {
+      "background": "color/surface",
+      "radius": "radius/card",
+      "padding": "space/lg"
+    },
+    "profileCard": {
+      "radius": "radius/profileCard"
+    },
+    "optionChip": {
+      "height": "size/option",
+      "radius": "radius/option",
+      "selectedFill": "color/brandSoft",
+      "selectedStroke": "color/brand"
+    },
+    "primaryButton": {
+      "height": "size/touch",
+      "background": "color/brand",
+      "radius": "radius/pill"
+    },
+    "secondaryButton": {
+      "background": "color/goldSoft",
+      "text": "color/textStrong"
+    },
+    "bottomNav": {
+      "height": "size/nav",
+      "inset": "size/navInset",
+      "radius": "radius/pill",
+      "active": "color/brand"
+    },
+    "quantityStepper": {
+      "size": "size/quantity"
+    },
+    "price": {
+      "family": "font/number",
+      "color": "color/price",
+      "size": "fontSize/price"
+    },
+    "pageHeader": {
+      "height": 64,
+      "sticky": true,
+      "backTarget": "explicit parent page"
+    },
+    "loginPanel": {
+      "background": "color/surface",
+      "primary": "color/brand",
+      "oneClick": "color/wechat",
+      "consentRequired": true
+    },
+    "segmentedTabs": {
+      "track": "color/brand",
+      "selected": "color/surface",
+      "radius": "radius/pill"
+    },
+    "couponCard": {
+      "price": "color/price",
+      "action": "color/goldSoft",
+      "separation": "dashed"
+    },
+    "settingSwitch": {
+      "track": "color/brand",
+      "thumb": "color/surface",
+      "ariaRole": "switch"
+    },
+    "addressForm": {
+      "labelWidth": 54,
+      "rowHeight": 49,
+      "validation": "contact, 11-digit demo phone, address"
+    },
+    "historyCard": {
+      "productImage": 72,
+      "price": "font/number",
+      "status": "explicit demo/sample"
+    }
+  },
+  "patterns": {
+    "lucky": {
+      "treatment": "utilitarian",
+      "referenceWidth": 414,
+      "screenshotScale": 2,
+      "layout": "One scrollable mobile column; home has three service entries, profile has four asset counters, order uses grouped selection chips and a sticky purchase bar.",
+      "evidence": "Brand, profile and selected option fills sampled from source PNGs; spacing, type sizes and radii are inferred visual measurements. Confirmation step is a prototype inference, not a captured production screen.",
+      "signature": "Large photographic campaign image, deep-blue actions, pale profile header, orange prices, floating pill navigation."
+    }
+  },
+  "locked": []
+}

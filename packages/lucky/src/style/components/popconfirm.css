@@ -1,0 +1,101 @@
+/* Lucky · popconfirm; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-popconfirm {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  max-width: 20rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--stroke2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-16);
+  outline: 0;
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm__header {
+  padding: 0.75rem 0.875rem 0.25rem;
+  font-size: var(--font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--popover-foreground);
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm__body {
+  padding: 0 0.875rem 0.75rem;
+  line-height: var(--line-height);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0 0.875rem 0.875rem;
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm__actions .lucky-btn {
+  margin: 0;
+}
+
+
+[data-tt-style="lucky"] .lucky-popconfirm__arrow {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--popover);
+  border: var(--border-width) solid var(--stroke2);
+  pointer-events: none;
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm__arrow.is-top {
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm__arrow.is-bottom {
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm__arrow.is-left {
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm__arrow.is-right {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+
+[data-tt-style="lucky"] .lucky-popconfirm.is-enter {
+  animation: lucky-popconfirm-in var(--duration-normal) var(--easing-decelerate) both;
+}
+
+[data-tt-style="lucky"] .lucky-popconfirm.is-exit {
+  animation: lucky-popconfirm-out var(--duration-faster) var(--easing-accelerate) both;
+}
+
+@keyframes lucky-popconfirm-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lucky-popconfirm-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}

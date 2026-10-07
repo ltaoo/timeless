@@ -1,0 +1,99 @@
+/* Lucky · field; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-field--horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacer);
+}
+
+[data-tt-style="lucky"] .lucky-field[data-invalid="true"] .lucky-field__label,
+[data-tt-style="lucky"] .lucky-field[data-invalid] .lucky-field__label {
+  color: var(--destructive);
+}
+
+[data-tt-style="lucky"] .lucky-field__label {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  user-select: none;
+}
+
+[data-tt-style="lucky"] .lucky-field__label.is-normal {
+  font-weight: var(--font-weight-regular);
+}
+
+[data-tt-style="lucky"] .lucky-field__label.is-invalid,
+[data-tt-style="lucky"] .lucky-field__inline-label.is-invalid {
+  color: var(--destructive);
+}
+
+[data-tt-style="lucky"] .lucky-field__inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="lucky"] .lucky-field__label.is-disabled,
+[data-tt-style="lucky"] .lucky-field__inline-label.is-disabled {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="lucky"] .lucky-field__description,
+[data-tt-style="lucky"] .lucky-field__help {
+  font-size: var(--font-size-sm);
+  color: var(--foreground-3);
+}
+
+[data-tt-style="lucky"] .lucky-field__error {
+  font-size: var(--font-size-sm);
+  color: var(--destructive);
+}
+
+[data-tt-style="lucky"] .lucky-field__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-lg);
+  width: 100%;
+}
+
+[data-tt-style="lucky"] .lucky-field__set {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+[data-tt-style="lucky"] .lucky-field__legend {
+  margin: 0 0 4px;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height);
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-field__separator[data-orientation="horizontal"] {
+  margin: 12px 0;
+}
+
+[data-tt-style="lucky"] .lucky-field__separator[data-orientation="vertical"] {
+  margin: 0 12px;
+}

@@ -4,6 +4,7 @@ import activity from "./asn/activity";
 import arrowDownToLine from "./asn/arrow-down-to-line";
 import arrowLeft from "./asn/arrow-left";
 import arrowRight from "./asn/arrow-right";
+import bell from "./asn/bell";
 import bolt from "./asn/bolt";
 import bookUser from "./asn/book-user";
 import bot from "./asn/bot";
@@ -60,6 +61,7 @@ import image from "./asn/image";
 import inbox from "./asn/inbox";
 import library from "./asn/library";
 import listFilter from "./asn/list-filter";
+import list from "./asn/list";
 import loaderCircle from "./asn/loader-circle";
 import loader from "./asn/loader";
 import maximize from "./asn/maximize";
@@ -106,6 +108,7 @@ export const iconRegistry = {
   "arrow-down-to-line": arrowDownToLine,
   "arrow-left": arrowLeft,
   "arrow-right": arrowRight,
+  "bell": bell,
   "bolt": bolt,
   "book-user": bookUser,
   "bot": bot,
@@ -162,6 +165,7 @@ export const iconRegistry = {
   "inbox": inbox,
   "library": library,
   "list-filter": listFilter,
+  "list": list,
   "loader-circle": loaderCircle,
   "loader": loader,
   "maximize": maximize,

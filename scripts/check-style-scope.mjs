@@ -28,6 +28,7 @@ const SCOPED_LIBS = {
   material: "packages/material/dist/timeless.material.css",
   fluent: "packages/fluent/dist/timeless.fluent.css",
   animal: "packages/animal/dist/timeless.animal.css",
+  lucky: "packages/lucky/dist/timeless.lucky.css",
 };
 
 /**

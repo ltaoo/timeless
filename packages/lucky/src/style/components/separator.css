@@ -1,0 +1,26 @@
+/* Lucky · separator; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-separator {
+  flex-shrink: 0;
+  border: 0;
+  background-color: var(--stroke2);
+}
+
+[data-tt-style="lucky"] .lucky-separator--horizontal {
+  display: block;
+  width: 100%;
+  height: var(--border-width);
+  margin: 0;
+}
+
+[data-tt-style="lucky"] .lucky-separator--vertical {
+  display: block;
+  width: var(--border-width);
+  height: 100%;
+  align-self: stretch;
+  margin: 0;
+}
+
+[data-tt-style="lucky"] .lucky-separator.is-disabled,
+[data-tt-style="lucky"] .lucky-separator[data-disabled="true"] {
+  opacity: 0.5;
+}

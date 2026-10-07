@@ -1,0 +1,113 @@
+/* Lucky · checkbox; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-check {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  min-height: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+[data-tt-style="lucky"] .lucky-checkbox {
+  --checkbox-bg: var(--surface-1);
+  --checkbox-border: var(--stroke-accessible);
+
+  position: relative;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background-color: var(--checkbox-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+  border: var(--border-width) solid var(--checkbox-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+
+[data-tt-style="lucky"] .lucky-checkbox::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 3px;
+  width: 5px;
+  height: 9px;
+  border: solid var(--primary-foreground);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox:hover {
+  --checkbox-border: var(--primary-hover);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox:active {
+  --checkbox-border: var(--primary-pressed);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="lucky"] .lucky-checkbox[data-checked],
+[data-tt-style="lucky"] .lucky-checkbox.is-checked {
+  --checkbox-bg: var(--primary);
+  --checkbox-border: var(--primary);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox.is-checked::after {
+  transform: rotate(45deg) scale(1);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox.is-checked:hover {
+  --checkbox-bg: var(--primary-hover);
+  --checkbox-border: var(--primary-hover);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox.is-checked:active {
+  --checkbox-bg: var(--primary-pressed);
+  --checkbox-border: var(--primary-pressed);
+}
+
+[data-tt-style="lucky"] .lucky-checkbox[disabled],
+[data-tt-style="lucky"] .lucky-checkbox[data-disabled],
+[data-tt-style="lucky"] .lucky-checkbox.is-disabled {
+  --checkbox-bg: var(--surface-disabled);
+  --checkbox-border: var(--stroke-disabled);
+  cursor: not-allowed;
+}
+
+[data-tt-style="lucky"] .lucky-checkbox.is-invalid,
+[data-tt-style="lucky"] .lucky-checkbox[aria-invalid="true"] {
+  --checkbox-border: var(--destructive);
+}
+
+[data-tt-style="lucky"] .lucky-check__label {
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-tt-style="lucky"] .lucky-check__label.is-disabled,
+[data-tt-style="lucky"] .lucky-check__label[data-disabled="true"] {
+  color: var(--foreground-disabled);
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-checkbox,
+  [data-tt-style="lucky"] .lucky-checkbox::after {
+    transition: none;
+  }
+}

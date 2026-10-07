@@ -1,0 +1,118 @@
+/* Lucky · date-time-picker; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-datetimepicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 20px;
+  color: var(--foreground);
+  text-align: left;
+  background-color: var(--surface-1);
+  border: var(--border-width) solid var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker:hover {
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker.is-open,
+[data-tt-style="lucky"] .lucky-datetimepicker:focus-within {
+  border-bottom-color: var(--primary);
+  box-shadow: inset 0 -2px 0 var(--primary);
+  outline: none;
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker__value.is-placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+}
+
+
+[data-tt-style="lucky"] .lucky-datetimepicker__content {
+  position: relative;
+  display: inline-block;
+  width: max-content;
+  overflow: hidden;
+  color: var(--popover-foreground);
+  background-color: var(--surface-1);
+  border: var(--border-width) solid var(--stroke1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-16);
+  outline: none;
+  animation: lucky-datetimepicker-in var(--duration-normal) var(--easing-decelerate)
+    both;
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker__panes {
+  display: flex;
+  align-items: stretch;
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker__pane {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker__pane.is-left {
+  padding: var(--spacer);
+}
+
+[data-tt-style="lucky"] .lucky-datetimepicker__pane.is-right {
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--spacer);
+  border-left: var(--border-width) solid var(--stroke2);
+}
+
+
+[data-tt-style="lucky"] .lucky-datetimepicker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 10px 12px;
+  background-color: var(--surface-2);
+  border-top: var(--border-width) solid var(--stroke2);
+}
+
+@keyframes lucky-datetimepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-datetimepicker,
+  [data-tt-style="lucky"] .lucky-datetimepicker__content {
+    transition: none;
+    animation: none;
+  }
+}

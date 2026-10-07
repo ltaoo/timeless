@@ -1,0 +1,27 @@
+/* Screenshot-derived treatments applied after the shared component structure. */
+[data-tt-style="lucky"] .lucky-btn { --btn-radius: var(--radius-pill); --btn-padding-x: var(--spacer-lg); }
+[data-tt-style="lucky"] .lucky-btn--secondary {
+  --btn-bg: var(--secondary); --btn-color: var(--secondary-foreground); --btn-border: transparent;
+  --btn-hover-bg: color-mix(in srgb, var(--secondary) 85%, white); --btn-hover-color: var(--secondary-foreground); --btn-hover-border: transparent;
+  --btn-pressed-bg: color-mix(in srgb, var(--secondary) 90%, black); --btn-pressed-color: var(--secondary-foreground); --btn-pressed-border: transparent;
+}
+[data-tt-style="lucky"] .lucky-card { --card-padding: var(--spacer-lg); border: 0; border-radius: var(--radius-lg); background: var(--card); box-shadow: none; }
+[data-tt-style="lucky"] .lucky-card:hover { background: var(--card); box-shadow: none; }
+[data-tt-style="lucky"] .lucky-card--profile, [data-tt-style="lucky"] .lucky-card--profile:hover { background: var(--profile-surface); border-radius: var(--profile-radius); }
+[data-tt-style="lucky"] .lucky-card--member, [data-tt-style="lucky"] .lucky-card--member:hover { background: var(--member-surface); color: var(--member-foreground); }
+[data-tt-style="lucky"] .lucky-card--member .lucky-card__title, [data-tt-style="lucky"] .lucky-card--member .lucky-card__content { color: inherit; }
+[data-tt-style="lucky"] .lucky-card--member .lucky-card__description { color: var(--member-foreground); }
+[data-tt-style="lucky"] .lucky-control { padding-inline: var(--spacer); background: var(--card); }
+[data-tt-style="lucky"] .lucky-control:focus, [data-tt-style="lucky"] .lucky-control:focus-visible, [data-tt-style="lucky"] .lucky-control.is-focused {
+  border-color: var(--ring); box-shadow: none; outline: var(--ring-width) solid var(--ring); outline-offset: var(--ring-offset);
+}
+[data-tt-style="lucky"] .lucky-control.is-invalid:focus, [data-tt-style="lucky"] .lucky-control[aria-invalid="true"]:focus { border-color: var(--destructive); outline-color: var(--destructive); box-shadow: none; }
+[data-tt-style="lucky"] .lucky-tabs__tab { min-height: var(--control-height); }
+[data-tt-style="lucky"] .lucky-price { display: inline-flex; align-items: baseline; gap: var(--spacer-xs); color: var(--price); font-family: var(--font-number); font-size: var(--price-size); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); }
+[data-tt-style="lucky"] .lucky-price__currency { font-family: var(--font-sans); font-size: var(--font-size); font-weight: var(--font-weight-medium); }
+[data-tt-style="lucky"] .lucky-option {
+  --btn-height: var(--option-height); --btn-radius: var(--option-radius); --btn-bg: var(--card); --btn-color: var(--foreground); --btn-border: var(--border);
+  --btn-hover-color: var(--primary); --btn-hover-bg: var(--accent); --btn-hover-border: var(--primary);
+  --btn-pressed-color: var(--primary); --btn-pressed-bg: var(--accent); --btn-pressed-border: var(--primary);
+}
+[data-tt-style="lucky"] .lucky-option.is-selected { --btn-color: var(--primary); --btn-bg: var(--accent); --btn-border: var(--primary); }

@@ -1,0 +1,20 @@
+/* Lucky · affix; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-affix {
+  position: relative;
+  z-index: 1;
+  transition: top var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-affix.is-fixed {
+  z-index: 10;
+  background-color: var(--surface-1);
+  box-shadow: var(--shadow-8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-affix {
+    transition: none;
+  }
+}

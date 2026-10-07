@@ -13,6 +13,7 @@
 | `@timeless/material` | Material 3 | 纯 CSS + `--md-sys-*` | 是 `[data-tt-style="material"]` |
 | `@timeless/fluent` | Fluent 2 | 纯 CSS + `--colorNeutral*` | 是 `[data-tt-style="fluent"]` |
 | `@timeless/animal` | animal-island-ui | 纯 CSS + `--animal-*` | 是 `[data-tt-style="animal"]` |
+| `@timeless/lucky` | Lucky 截图设计参考（仅浅色） | 纯 CSS + `--lucky-*` | 是 `[data-tt-style="lucky"]` |
 
 ---
 

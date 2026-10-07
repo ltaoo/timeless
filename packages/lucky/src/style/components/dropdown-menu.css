@@ -1,0 +1,192 @@
+/* Lucky · dropdown-menu; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-menu {
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  max-height: var(--tt-menu-max-height, 20rem);
+  overflow: hidden auto;
+  padding: 4px;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  color: var(--popover-foreground);
+  text-align: left;
+  list-style: none;
+  background-color: var(--popover);
+  background-clip: padding-box;
+  border: var(--border-width) solid var(--stroke1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-16);
+  outline: 0;
+}
+
+
+[data-tt-style="lucky"] .lucky-menu__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  width: 100%;
+  padding: 6px 10px 6px 12px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-faster) var(--easing-standard);
+}
+
+
+[data-tt-style="lucky"] .lucky-menu__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  transform: translateY(-50%);
+  background-color: var(--primary);
+  border-radius: var(--radius-pill);
+  transition: height var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-menu__item:hover,
+[data-tt-style="lucky"] .lucky-menu__item.is-focused {
+  color: var(--accent-foreground);
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-menu__item:hover::before,
+[data-tt-style="lucky"] .lucky-menu__item.is-focused::before {
+  height: 60%;
+}
+
+[data-tt-style="lucky"] .lucky-menu__item:active {
+  background-color: var(--surface-1-pressed);
+}
+
+[data-tt-style="lucky"] .lucky-menu__item.is-disabled,
+[data-tt-style="lucky"] .lucky-menu__item[data-disabled],
+[data-tt-style="lucky"] .lucky-menu__item:disabled {
+  color: var(--foreground-disabled);
+  pointer-events: none;
+  background-color: transparent;
+}
+
+[data-tt-style="lucky"] .lucky-menu__item.is-disabled::before,
+[data-tt-style="lucky"] .lucky-menu__item[data-disabled]::before {
+  height: 0;
+}
+
+[data-tt-style="lucky"] .lucky-menu__item:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -1px;
+}
+
+
+[data-tt-style="lucky"] .lucky-menu__check {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
+
+[data-tt-style="lucky"] .lucky-menu__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--foreground-3);
+}
+
+[data-tt-style="lucky"] .lucky-menu__shortcut {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.02em;
+  color: var(--foreground-3);
+}
+
+[data-tt-style="lucky"] .lucky-menu__arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+}
+
+[data-tt-style="lucky"] .lucky-menu__shortcut + .lucky-menu__arrow {
+  margin-left: 4px;
+}
+
+
+[data-tt-style="lucky"] .lucky-menu__label {
+  display: block;
+  padding: 6px 12px 2px;
+  margin-bottom: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground-3);
+  white-space: nowrap;
+}
+
+[data-tt-style="lucky"] .lucky-menu__separator {
+  height: 0;
+  margin: 4px 0;
+  overflow: hidden;
+  border-top: var(--border-width) solid var(--stroke2);
+}
+
+
+[data-tt-style="lucky"] .lucky-menu--submenu {
+  min-width: 9rem;
+}
+
+
+[data-tt-style="lucky"] .lucky-menu.is-enter {
+  animation: lucky-menu-in var(--duration-fast) var(--easing-decelerate) both;
+}
+
+[data-tt-style="lucky"] .lucky-menu.is-exit {
+  animation: lucky-menu-out var(--duration-faster) var(--easing-accelerate) both;
+}
+
+@keyframes lucky-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lucky-menu-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-menu__item,
+  [data-tt-style="lucky"] .lucky-menu__item::before {
+    transition: none;
+  }
+}

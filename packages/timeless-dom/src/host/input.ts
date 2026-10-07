@@ -56,27 +56,6 @@ export function DOMInput(props: {
       // $elm.style.width = "100%";
       // console.log("[dom]input render - before setupEvent", props.elm.events);
       common$.methods.setupEventListener(props.elm.events);
-      const events = props.elm.events;
-      $elm.addEventListener("input", function (event) {
-        event.preventDefault();
-        if (events && events.onInput) {
-          events.onInput(event);
-        }
-      });
-      if (events) {
-        if (events.onChange) {
-          $elm.addEventListener("change", events.onChange);
-        }
-        if (events.onFocus) {
-          $elm.addEventListener("focus", events.onFocus);
-        }
-        if (events.onBlur) {
-          $elm.addEventListener("blur", events.onBlur);
-        }
-        if (events.onKeyDown) {
-          $elm.addEventListener("keydown", events.onKeyDown);
-        }
-      }
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm: HTMLInputElement) {
@@ -84,28 +63,6 @@ export function DOMInput(props: {
       common$.methods.set$elm($elm);
       // $elm.style.width = "100%";
       common$.methods.setupEventListener(elm.events);
-      const events = elm.events;
-      $elm.addEventListener("input", function (event) {
-        console.log("handle input in hydrate");
-        event.preventDefault();
-        if (events && events.onInput) {
-          events.onInput(event);
-        }
-      });
-      if (events) {
-        if (events.onChange) {
-          $elm.addEventListener("change", events.onChange);
-        }
-        if (events.onFocus) {
-          $elm.addEventListener("focus", events.onFocus);
-        }
-        if (events.onBlur) {
-          $elm.addEventListener("blur", events.onBlur);
-        }
-        if (events.onKeyDown) {
-          $elm.addEventListener("keydown", events.onKeyDown);
-        }
-      }
     },
     setValue(value: string) {
       const $elm = common$.methods.get$elm();

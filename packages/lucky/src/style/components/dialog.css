@@ -1,0 +1,174 @@
+/* Lucky · dialog; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-dialog__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background-color: var(--surface-inverted);
+  opacity: 0.4;
+}
+
+[data-tt-style="lucky"] .lucky-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1051;
+  overflow: hidden auto;
+  outline: 0;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__positioner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  width: auto;
+  max-width: 40rem;
+  padding: 1.5rem;
+  margin: 0 auto;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--foreground);
+  background-color: var(--surface-2);
+  background-clip: padding-box;
+  border: 1.5px solid var(--stroke1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-64);
+  outline: 0;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  padding: 1.5rem 1.5rem 0.75rem;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height);
+  color: var(--foreground);
+}
+
+
+[data-tt-style="lucky"] .lucky-dialog__header .lucky-dialog__close {
+  margin-left: auto;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__close {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--foreground-3);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-dialog__close:hover {
+  color: var(--foreground);
+}
+
+[data-tt-style="lucky"] .lucky-dialog__close:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 0 1.5rem 1.25rem;
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground-2);
+}
+
+[data-tt-style="lucky"] .lucky-dialog__footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding: 0.75rem 1.5rem 1.5rem;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__footer .lucky-btn {
+  margin: 0;
+}
+
+
+[data-tt-style="lucky"] .lucky-dialog__scrim.is-enter {
+  animation: lucky-dialog-scrim-in var(--duration-normal) var(--easing-decelerate) both;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__scrim.is-exit {
+  animation: lucky-dialog-scrim-out var(--duration-fast) var(--easing-accelerate) both;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__positioner.is-enter {
+  animation: lucky-dialog-surface-in var(--duration-slow) var(--easing-decelerate) both;
+}
+
+[data-tt-style="lucky"] .lucky-dialog__positioner.is-exit {
+  animation: lucky-dialog-surface-out var(--duration-fast) var(--easing-accelerate) both;
+}
+
+@keyframes lucky-dialog-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.4;
+  }
+}
+
+@keyframes lucky-dialog-scrim-out {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes lucky-dialog-surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lucky-dialog-surface-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-dialog__close {
+    transition: none;
+  }
+}

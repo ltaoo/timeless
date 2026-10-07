@@ -1,0 +1,265 @@
+/* Lucky · date-range-picker; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-daterange {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 20px;
+  color: var(--foreground);
+  text-align: left;
+  background-color: var(--surface-1);
+  border: var(--border-width) solid var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-daterange:hover {
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-daterange.is-open,
+[data-tt-style="lucky"] .lucky-daterange:focus-within {
+  border-bottom-color: var(--primary);
+  box-shadow: inset 0 -2px 0 var(--primary);
+  outline: none;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__value.is-placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+}
+
+
+[data-tt-style="lucky"] .lucky-daterange__content {
+  position: relative;
+  display: inline-block;
+  width: max-content;
+  padding: var(--spacer);
+  color: var(--popover-foreground);
+  background-color: var(--surface-1);
+  border: var(--border-width) solid var(--stroke1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-16);
+  outline: none;
+  animation: lucky-daterange-in var(--duration-normal) var(--easing-decelerate)
+    both;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__calendars {
+  display: flex;
+  align-items: flex-start;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-sm);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__panel.is-left {
+  padding-right: 20px;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__panel.is-right {
+  padding-left: 20px;
+  border-left: var(--border-width) solid var(--stroke2);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__title {
+  flex: 1 1 auto;
+  font-size: var(--font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
+  text-align: center;
+  white-space: nowrap;
+}
+
+
+[data-tt-style="lucky"] .lucky-daterange__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--foreground-3);
+  background-color: transparent;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard),
+    color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__nav:hover {
+  color: var(--foreground);
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__nav:active {
+  background-color: var(--surface-1-pressed);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__nav:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__weekdays,
+[data-tt-style="lucky"] .lucky-daterange__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__weekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  font-size: var(--font-size-xs);
+  color: var(--foreground-3);
+  user-select: none;
+}
+
+
+[data-tt-style="lucky"] .lucky-daterange__cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard),
+    border-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__cell:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: 1;
+  color: var(--foreground);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  transition: background-color var(--duration-faster) var(--easing-standard),
+    color var(--duration-faster) var(--easing-standard),
+    border-color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__cell.is-outside .lucky-daterange__day {
+  color: var(--foreground-3);
+}
+
+
+[data-tt-style="lucky"] .lucky-daterange__cell.is-in-range {
+  background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__cell.is-in-range:hover {
+  background-color: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+
+[data-tt-style="lucky"] .lucky-daterange__day.is-active {
+  color: var(--primary-foreground);
+  font-weight: var(--font-weight-semibold);
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__cell.is-range-start {
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+[data-tt-style="lucky"] .lucky-daterange__cell.is-range-end {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+[data-tt-style="lucky"] .lucky-daterange__cell.is-single,
+[data-tt-style="lucky"] .lucky-daterange__cell.is-range-start.is-range-end {
+  background-color: transparent;
+  border-radius: var(--radius);
+}
+
+
+[data-tt-style="lucky"]
+  .lucky-daterange__cell.is-today
+  .lucky-daterange__day:not(.is-active) {
+  border-color: var(--primary);
+}
+
+@keyframes lucky-daterange-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-daterange,
+  [data-tt-style="lucky"] .lucky-daterange__content,
+  [data-tt-style="lucky"] .lucky-daterange__day {
+    transition: none;
+    animation: none;
+  }
+}

@@ -1,0 +1,19 @@
+/* Lucky · search-select; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-select.lucky-select--search {
+  cursor: text;
+}
+
+[data-tt-style="lucky"] .lucky-select.lucky-select--search .lucky-select__search {
+  min-width: 0;
+}
+
+
+
+[data-tt-style="lucky"] .lucky-select.lucky-select--search.is-disabled {
+  cursor: not-allowed;
+}
+
+[data-tt-style="lucky"] .lucky-select.lucky-select--search.is-disabled .lucky-select__search {
+  cursor: not-allowed;
+  pointer-events: none;
+}

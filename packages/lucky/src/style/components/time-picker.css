@@ -1,0 +1,287 @@
+/* Lucky · time-picker; shared primitive structure and semantic tokens. */
+[data-tt-style="lucky"] .lucky-timepicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacer-sm);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size);
+  line-height: 20px;
+  color: var(--foreground);
+  text-align: left;
+  background-color: var(--surface-1);
+  border: var(--border-width) solid var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker:hover {
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker.is-open,
+[data-tt-style="lucky"] .lucky-timepicker:focus-within {
+  border-bottom-color: var(--primary);
+  box-shadow: inset 0 -2px 0 var(--primary);
+  outline: none;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__value.is-placeholder {
+  color: var(--foreground-4);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--foreground-3);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__clear {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--foreground-3);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__clear:hover {
+  color: var(--foreground);
+}
+
+
+[data-tt-style="lucky"] .lucky-timepicker__content {
+  position: relative;
+  display: inline-block;
+  width: max-content;
+  color: var(--popover-foreground);
+  background-color: var(--surface-1);
+  border: var(--border-width) solid var(--stroke1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-16);
+  outline: none;
+  animation: lucky-timepicker-in var(--duration-normal) var(--easing-decelerate)
+    both;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__panel {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacer);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__preview {
+  padding: 4px 0 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fontSizeBase600, 24px);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+
+[data-tt-style="lucky"] .lucky-timepicker__columns {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+
+[data-tt-style="lucky"] .lucky-timepicker__column {
+  flex: 0 0 auto;
+  width: 72px;
+  min-width: 72px;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__column.is-bordered {
+  border-left: var(--border-width) solid var(--stroke2);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__scroll {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--stroke1) transparent;
+  scroll-snap-type: y proximity;
+  overscroll-behavior: contain;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__scroll::-webkit-scrollbar-thumb {
+  background-color: var(--stroke1);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-pill);
+}
+
+
+[data-tt-style="lucky"] .lucky-timepicker__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0;
+  scroll-snap-align: center;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--foreground);
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard),
+    color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__option:hover {
+  background-color: var(--surface-1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__option:active {
+  background-color: var(--surface-1-pressed);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__option:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: -1px;
+}
+
+
+[data-tt-style="lucky"] .lucky-timepicker__option::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  transform: translateY(-50%);
+  background-color: var(--primary);
+  border-radius: var(--radius-pill);
+  transition: height var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__option.is-active::before {
+  height: 60%;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__option.is-active,
+[data-tt-style="lucky"] .lucky-timepicker__option.is-active:hover {
+  color: var(--primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+
+[data-tt-style="lucky"] .lucky-timepicker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacer-sm);
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: var(--border-width) solid var(--stroke2);
+}
+
+
+[data-tt-style="lucky"] .lucky-timepicker__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  color: var(--foreground);
+  background-color: transparent;
+  border: var(--border-width) solid var(--stroke1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color var(--duration-faster) var(--easing-standard),
+    border-color var(--duration-faster) var(--easing-standard),
+    color var(--duration-faster) var(--easing-standard);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__action:hover {
+  background-color: var(--surface-1-hover);
+  border-color: var(--stroke1-hover);
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__action:focus-visible {
+  outline: var(--ring-width) solid var(--ring-color);
+  outline-offset: 1px;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__action.is-primary {
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+  border-color: transparent;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__action.is-primary:hover {
+  color: var(--primary-foreground);
+  background-color: var(--primary-hover);
+  border-color: transparent;
+}
+
+[data-tt-style="lucky"] .lucky-timepicker__action.is-primary:active {
+  background-color: var(--primary-pressed);
+}
+
+@keyframes lucky-timepicker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tt-style="lucky"] .lucky-timepicker,
+  [data-tt-style="lucky"] .lucky-timepicker__clear,
+  [data-tt-style="lucky"] .lucky-timepicker__option,
+  [data-tt-style="lucky"] .lucky-timepicker__option::before,
+  [data-tt-style="lucky"] .lucky-timepicker__content {
+    transition: none;
+    animation: none;
+  }
+}
