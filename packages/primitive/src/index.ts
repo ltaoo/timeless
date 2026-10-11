@@ -18,6 +18,7 @@ export type { Context } from "./context/context";
 
 // Content
 export * from "./content/view";
+export * from "./content/html";
 export * from "./content/text";
 export * from "./content/portal";
 export * as SVG from "./content/svg";

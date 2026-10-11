@@ -1,4 +1,4 @@
-import {
+import { Html,
   View,
   ViewProps,
   ViewChildren,
@@ -31,10 +31,9 @@ export function Video(
   children?: ViewChildren,
 ): TimelessElement {
   const { store, ...rest } = props;
-  return View(
+  return Html.Video(
     {
       ...rest,
-      as: "video",
       onMounted(event) {
         const $elm = (event as any).target;
         const $video = $elm as HTMLVideoElement;

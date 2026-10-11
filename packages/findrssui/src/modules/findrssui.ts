@@ -6,7 +6,7 @@
 // @ts-nocheck
 // FindRSS 的 Timeless UI：组件只渲染，交互状态由对应 ViewModel（Timeless vm core）维护。
 // 需要 Portal / 全局宿主的组件（Dialog / DropdownMenu / Toast）在 findrssui-layer.ts。
-import { Fragment, Img, Show, View, computed, ref, refobj, ui, vm } from "@timeless/timeless";
+import { Html, Fragment, Img, Show, View, computed, ref, refobj, ui, vm } from "@timeless/timeless";
 
 // 树走 `TreePrimitive`，不是顶层的具名导出。它有两种挂法，都要认：
 //   - 主运行时把重建出的 Tree 挂在 `ui.TreePrimitive` 上；
@@ -650,8 +650,7 @@ function ChoiceView(kind, props = {}, children = []) {
   ];
   const content = label === undefined ? children : as_children(label);
 
-  return View({
-    as: "label",
+  return Html.Label({
     class: ["frui-choice", `frui-${kind}`, rootClass].filter(Boolean).join(" "),
     attributes: {
       n: rootAttributes.n || `${semantic_name}-field`,
@@ -664,9 +663,8 @@ function ChoiceView(kind, props = {}, children = []) {
       onUnmounted?.();
     },
   }, [
-    View({
+    Html.Input({
       ...rest,
-      as: "input",
       class: ["frui-choice-input", `frui-${kind}-input`, custom_class].filter(Boolean).join(" "),
       attributes: {
         n: semantic_name,

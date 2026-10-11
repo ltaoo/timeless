@@ -1,6 +1,6 @@
 import { ui, vm } from "@timeless/timeless";
 import { computed, Icon, ListenerManager, refobj } from "@timeless/timeless";
-import { For, Show, View, ViewProps, classNames } from "@timeless/timeless";
+import { Html, For, Show, View, ViewProps, classNames } from "@timeless/timeless";
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 
@@ -91,7 +91,7 @@ function CalendarPanel(props: {
           View(
             { class: "datepicker__weekdays" },
             WEEKDAYS.map((day) =>
-              View({ as: "span", class: "datepicker__weekday" }, [day]),
+              Html.Span({ class: "datepicker__weekday" }, [day]),
             ),
           ),
           For({
@@ -139,9 +139,8 @@ function CalendarPanel(props: {
                         ]),
                       },
                       [
-                        View(
+                        Html.Span(
                           {
-                            as: "span",
                             class: classNames([
                               "datepicker__cell-inner",
                               computed(calendar_state_, () => {

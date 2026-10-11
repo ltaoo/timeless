@@ -1,5 +1,5 @@
 import { GalleryCore, GalleryItem } from "@timeless/inner-vm";
-import { View, ViewProps, ViewChildren, Button, Img, For, ref, computed } from "../core";
+import { Html, View, ViewProps, ViewChildren, Button, Img, For, ref, computed } from "../core";
 
 export type GalleryProps = ViewProps & { store: GalleryCore };
 export type GalleryClasses = Partial<Record<"grid" | "thumbnail" | "preview" | "toolbar" | "image" | "counter" | "control" | "status", string>>;
@@ -63,9 +63,8 @@ export function Preview(props: GalleryProps & { classes?: GalleryClasses }) {
   const { store, classes = {}, ...rest } = props;
   const state = ref(store.state);
   const selected = computed(state, value => value.open && value.current ? [value.current] : []);
-  return View({
+  return Html.Dialog({
     ...rest,
-    as: "dialog",
     attributes: { n: "gallery-preview", "aria-label": "图片画廊", ...rest.attributes },
     onKeyDown(event) {
       rest.onKeyDown?.(event);

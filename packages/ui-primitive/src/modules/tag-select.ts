@@ -1,5 +1,5 @@
 import { refobj, computed, isRef } from "../core";
-import {
+import { Html,
   View,
   ViewProps,
   ViewChildren,
@@ -142,10 +142,9 @@ export function Value(
     state.as(v);
   });
 
-  return View(
+  return Html.Span(
     {
       ...rest,
-      as: "span",
     },
     [
       computed(state, (d) => {
@@ -365,7 +364,7 @@ export function Item(
 }
 
 export function ItemText(props: ViewProps, children: ViewChildren) {
-  return View({ ...props, as: "span" }, children);
+  return Html.Span({ ...props }, children);
 }
 
 export function ItemIndicator(

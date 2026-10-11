@@ -1,6 +1,7 @@
 import { type TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { DOMView } from "@/host/view";
+import { DOMHtml } from "@/host/html";
 import { DOMForm } from "@/host/form";
 import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
@@ -94,6 +95,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const form = DOMForm({ build, elm });
     elm.$elm = form;
     return form;
+  }
+  if (elm.t.startsWith("html:")) {
+    const html = DOMHtml({build,elm});
+    elm.$elm = html;
+    return html;
   }
   if (elm.t === "view") {
     const view$ = DOMView({ build, elm });

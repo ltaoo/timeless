@@ -1,6 +1,6 @@
 import { ui, vm } from "@timeless/timeless";
 import { combine, computed, Icon, ref, refobj } from "@timeless/timeless";
-import { For, Show, View, ViewProps } from "@timeless/timeless";
+import { Html, For, Show, View, ViewProps } from "@timeless/timeless";
 
 export function DatePicker(
   props: ViewProps & {
@@ -134,9 +134,8 @@ export function DatePicker(
               // Weekday Headers
               View({ class: "grid grid-cols-7 mb-1" }, [
                 ...["一", "二", "三", "四", "五", "六", "日"].map((day) =>
-                  View(
+                  Html.Span(
                     {
-                      as: "span",
                       class:
                         "text-center text-xs text-muted-foreground size-8 flex items-center justify-center",
                     },

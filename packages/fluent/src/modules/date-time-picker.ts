@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import {
+import { Html,
   Icon,
   ListenerManager,
   View,
@@ -82,9 +82,8 @@ export function DateTimePicker(
           ]),
         },
         [
-          View(
+          Html.Span(
             {
-              as: "span",
               class: classNames([
                 "fl-datetimepicker__value",
                 combine(

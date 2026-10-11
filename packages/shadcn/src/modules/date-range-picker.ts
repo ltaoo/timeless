@@ -1,6 +1,6 @@
 import { ui, vm } from "@timeless/timeless";
 import { computed, Icon, refobj } from "@timeless/timeless";
-import { For, View, ViewProps, Show } from "@timeless/timeless";
+import { Html, For, View, ViewProps, Show } from "@timeless/timeless";
 
 import { Tooltip } from "./tooltip";
 
@@ -121,9 +121,8 @@ function CalendarPanel(props: {
       View(
         { class: "grid grid-cols-7 mb-1" },
         WEEKDAYS.map((day) =>
-          View(
+          Html.Span(
             {
-              as: "span",
               class:
                 "text-center text-xs text-muted-foreground w-full h-8 flex items-center justify-center",
             },
@@ -180,9 +179,8 @@ function CalendarPanel(props: {
                     }),
                   },
                   [
-                    View(
+                    Html.Span(
                       {
-                        as: "span",
                         class: computed(calendar_state_, (s) => {
                           const isInRange = store.$calendar.isInRange(
                             day.value,

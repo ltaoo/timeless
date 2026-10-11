@@ -9,7 +9,7 @@ import {
   ref,
   refobj,
 } from "@timeless/timeless";
-import { For, Show, View, ViewProps } from "@timeless/timeless";
+import { Html, For, Show, View, ViewProps } from "@timeless/timeless";
 
 /**
  * Cascader · Bootstrap 5.3
@@ -137,7 +137,7 @@ export function Cascader(
                       class: "cascader__item",
                     },
                     [
-                      View({ as: "span", class: "cascader__path" }, [
+                      Html.Span({ class: "cascader__path" }, [
                         result.path.map((o) => o.label).join(" / "),
                       ]),
                     ],

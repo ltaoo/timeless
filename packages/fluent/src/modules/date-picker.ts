@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import {
+import { Html,
   For,
   Icon,
   ListenerManager,
@@ -72,7 +72,7 @@ export function DateCalendarPanel(props: { store: vm.DatePickerCore; class?: any
           View(
             { class: "fl-datepicker__weekdays" },
             WEEKDAYS.map((day) =>
-              View({ as: "span", class: "fl-datepicker__weekday" }, [day]),
+              Html.Span({ class: "fl-datepicker__weekday" }, [day]),
             ),
           ),
           For({

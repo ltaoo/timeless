@@ -7,7 +7,7 @@ import {
   computed,
   refobj,
 } from "@timeless/timeless";
-import { For, View, ViewProps } from "@timeless/timeless";
+import { Html, For, View, ViewProps } from "@timeless/timeless";
 
 import { Button } from "./button";
 import { PICKER_ANIMATION, render_cell } from "./date-picker";
@@ -132,9 +132,8 @@ export function DateTimePicker(
           ]),
         },
         [
-          View(
+          Html.Span(
             {
-              as: "span",
               class: classNames([
                 "m3-datetimepicker__value",
                 combine(
@@ -196,8 +195,8 @@ export function DateTimePicker(
                     View(
                       { class: "m3-datepicker__weekdays" },
                       WEEKDAYS.map((day) =>
-                        View(
-                          { as: "span", class: "m3-datepicker__weekday" },
+                        Html.Span(
+                          { class: "m3-datepicker__weekday" },
                           [day],
                         ),
                       ),

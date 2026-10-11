@@ -32,13 +32,11 @@ import { Box, BoxProps } from "./box";
 const logger = Logger({ prefix: "primitive", scope: "content/view" });
 
 /** Props for View component */
-export type ViewProps = Omit<BoxProps, "onPointerDown" | "onPointerUp"> & {
+export type ViewProps = Omit<BoxProps, "as" | "onPointerDown" | "onPointerUp"> & {
   /** Element ID */
   id?: string;
   /** Unique key for list rendering */
   key?: string | number;
-  /** HTML tag to render as */
-  as?: string;
   /** Whether element is draggable */
   draggable?: boolean;
   /**
@@ -55,7 +53,7 @@ export type ViewProps = Omit<BoxProps, "onPointerDown" | "onPointerUp"> & {
 };
 
 /** Internal state for View */
-type ViewState = { as: string };
+type ViewState = {};
 
 /**
  * Creates a View component - the primary container.
@@ -72,7 +70,7 @@ export function View(
   const { onPointerDown, onPointerMove, onPointerUp, ...rest } = props;
 
   let $elm: any = null;
-  let box$ = Box(rest, { as: rest.as && /^[a-z][a-z0-9-]*$/i.test(rest.as) ? rest.as : "div" });
+  let box$ = Box(rest, {});
 
   const state = box$.state;
   const events = box$.events;

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { View, Input } from "@timeless/timeless";
+import { Html, View, Input } from "@timeless/timeless";
 import { DOMView } from "@/host/view";
 import { DOMInput } from "@/host/input";
 
@@ -19,7 +19,7 @@ describe("View native form events", () => {
     const element = new FakeElement();
     vi.stubGlobal("document", { createElement: () => element, createDocumentFragment: () => ({ appendChild() {} }) });
     const onInput = vi.fn(), onChange = vi.fn(), onKeyUp = vi.fn();
-    const view = View({ as: "input", attributes: { type: "range" }, onInput, onChange, onKeyUp });
+    const view = Html.Input({ attributes: { type: "range" }, onInput, onChange, onKeyUp });
     const host = DOMView({ build: vi.fn(), elm: view });
     if (mode === "render") host.render(); else host.hydrate(view, element as any);
     for (const type of ["input", "change", "keyup"]) element.dispatchEvent(new Event(type));

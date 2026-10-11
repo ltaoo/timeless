@@ -1,5 +1,5 @@
 import { refobj, computed } from "../core";
-import {
+import { Html,
   View,
   ViewProps,
   ViewChildren,
@@ -38,9 +38,8 @@ export function Trigger(
 
   const events: (() => void)[] = [];
 
-  const _input$ = View(
+  const _input$ = Html.Input(
     {
-      as: "input",
       attributes: {
         ...(rest.attributes || {}),
         id: props.id || rest.attributes?.id,
@@ -130,10 +129,9 @@ export function Value(
     state.as(v);
   });
 
-  return View(
+  return Html.Span(
     {
       ...rest,
-      as: "span",
     },
     [
       computed(state, (d) => {
@@ -268,7 +266,7 @@ export function CalendarHeader(
   return View(
     rest,
     children || [
-      View({ as: "span" }, [
+      Html.Span({  }, [
         computed(state, (d) => `${d.year.text}年${d.month.text}`),
       ]),
     ],
@@ -324,7 +322,7 @@ export function CalendarGridHeader(
 
   return View(
     props,
-    children || weekDays.map((day) => View({ as: "span" }, [day])),
+    children || weekDays.map((day) => Html.Span({  }, [day])),
   );
 }
 

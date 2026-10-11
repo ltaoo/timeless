@@ -8,7 +8,7 @@ import {
   ListenerManager,
   refobj,
 } from "@timeless/timeless";
-import { For, View, ViewProps, Show } from "@timeless/timeless";
+import { Html, For, View, ViewProps, Show } from "@timeless/timeless";
 
 export function DateTimePicker(
   props: ViewProps & {
@@ -172,9 +172,8 @@ export function DateTimePicker(
           ]),
         },
         [
-          View(
+          Html.Span(
             {
-              as: "span",
               class: combine(
                 { hasDate: has_date_, hasTime: has_time_ },
                 (t) => {
@@ -253,9 +252,8 @@ export function DateTimePicker(
                           For({
                             each: ["一", "二", "三", "四", "五", "六", "日"],
                             render(day) {
-                              return View(
+                              return Html.Span(
                                 {
-                                  as: "span",
                                   class:
                                     "text-center text-xs text-muted-foreground size-8 flex items-center justify-center",
                                 },

@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import {
+import { Html,
   For,
   Icon,
   ListenerManager,
@@ -111,7 +111,7 @@ function RangeCalendarPanel(props: {
           View(
             { class: "fl-daterange__weekdays" },
             WEEKDAYS.map((day) =>
-              View({ as: "span", class: "fl-daterange__weekday" }, [day]),
+              Html.Span({ class: "fl-daterange__weekday" }, [day]),
             ),
           ),
           For({
@@ -134,9 +134,8 @@ function RangeCalendarPanel(props: {
                         class: computed(calendar_state_, () => cellState(day)),
                       },
                       [
-                        View(
+                        Html.Span(
                           {
-                            as: "span",
                             class: computed(calendar_state_, () =>
                               daySpanClass(day),
                             ),

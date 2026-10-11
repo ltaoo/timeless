@@ -5,6 +5,7 @@ import pkg from "../package.json";
 console.log("timeless.ssr version " + pkg.version);
 
 import { SSRView } from "./host/view";
+import { SSRHtml } from "./host/html";
 import { SSRText } from "./host/text";
 import { SSRFragment } from "./host/fragment";
 import { SSRShow } from "./host/show";
@@ -36,6 +37,7 @@ function build(elm: TimelessElement): VNodeView<string> {
   if (elm.t === "for") return SSRFor({ build, elm });
   if (elm.t === "fragment") return SSRFragment({ build, elm });
   if (elm.t === "portal") return SSRPortal({ build, elm });
+  if (elm.t.startsWith("html:")) return SSRHtml({build,elm});
   if (elm.t === "view") return SSRView({ build, elm });
   if (elm.t === "text") return SSRText({ build, elm });
   if (elm.t === "row") return SSRRow({ build, elm });

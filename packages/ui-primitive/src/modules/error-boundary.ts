@@ -1,4 +1,4 @@
-import { View } from "../core";
+import { Html, View } from "../core";
 import { TimelessElement } from "../core";
 
 export type ErrorFallbackFn = (
@@ -23,9 +23,8 @@ export function defaultErrorView(
       },
     },
     [
-      View(
+      Html.Div(
         {
-          as: "div",
           style: {
             margin: "0 0 8px 0",
             "font-size": "14px",
@@ -34,9 +33,8 @@ export function defaultErrorView(
         },
         [`Error in "${viewName}"`],
       ),
-      View(
+      Html.Pre(
         {
-          as: "pre",
           style: {
             margin: "0",
             "font-size": "12px",

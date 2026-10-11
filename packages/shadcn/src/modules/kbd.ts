@@ -1,11 +1,10 @@
-import { View, ViewChildren, ViewProps, classNames } from "@timeless/timeless";
+import { Html, View, ViewChildren, ViewProps, classNames } from "@timeless/timeless";
 
 export function Kbd(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return View(
+  return Html.Kbd(
     {
       ...rest,
-      as: "kbd",
       dataset: {
         "data-slot": "kbd",
       },

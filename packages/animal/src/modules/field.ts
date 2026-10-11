@@ -1,6 +1,6 @@
 import { vm } from "@timeless/timeless";
 import { computed, ref, refobj, classNames, combine } from "@timeless/timeless";
-import {
+import { Html,
   View,
   Show,
   ViewProps,
@@ -27,10 +27,9 @@ export function FieldGroup(props: ViewProps, children: ViewChildren = []) {
 
 export function FieldSet(props: ViewProps, children: ViewChildren = []) {
   const { class: cls, ...rest } = props;
-  return View(
+  return Html.Fieldset(
     {
       ...rest,
-      as: "fieldset",
       class: classNames(["animal-field__set", cls]),
     },
     children,
@@ -39,10 +38,9 @@ export function FieldSet(props: ViewProps, children: ViewChildren = []) {
 
 export function FieldLegend(props: ViewProps, children: ViewChildren = []) {
   const { class: cls, ...rest } = props;
-  return View(
+  return Html.Legend(
     {
       ...rest,
-      as: "legend",
       class: classNames(["animal-field__legend", cls]),
     },
     children,

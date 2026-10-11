@@ -1,6 +1,6 @@
 import { ui, vm } from "@timeless/timeless";
 import { combine, computed, Icon, ListenerManager, ref, refobj } from "@timeless/timeless";
-import { For, Show, View, ViewProps, classNames } from "@timeless/timeless";
+import { Html, For, Show, View, ViewProps, classNames } from "@timeless/timeless";
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 
@@ -136,7 +136,7 @@ export function DatePicker(
               View(
                 { class: "datepicker__weekdays" },
                 WEEKDAYS.map((day) =>
-                  View({ as: "span", class: "datepicker__weekday" }, [day]),
+                  Html.Span({ class: "datepicker__weekday" }, [day]),
                 ),
               ),
               For({

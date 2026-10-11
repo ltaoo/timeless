@@ -22,7 +22,7 @@ export function SSRView(props: {
     render() {
       const attrs = box$.buildAttributes(props.elm.state);
       const children = box$.buildChildren(props.elm.children, props.build);
-      const tag = props.elm.state.as || "div";
+      const tag = "div";
       if (["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"].includes(tag.toLowerCase())) return `<${tag}${box$.stringifyAttrs(attrs)}>`;
       return `<${tag}${box$.stringifyAttrs(attrs)}>${children}</${tag}>`;
     },

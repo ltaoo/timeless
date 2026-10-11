@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import {
+import { Html,
   For,
   Icon,
   ListenerManager,
@@ -139,8 +139,8 @@ export function Cascader(
                   return ui.CascaderPrimitive.SearchResultItem(
                     { store, result, class: "animal-cascader__search-result" },
                     [
-                      View(
-                        { as: "span", class: "animal-cascader__path" },
+                      Html.Span(
+                        { class: "animal-cascader__path" },
                         [result.path.map((o) => o.label).join(" / ")],
                       ),
                     ],
