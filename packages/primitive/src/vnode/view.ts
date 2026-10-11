@@ -22,6 +22,7 @@ export type VNodeEvent<T = any> = {
 
 type VNodeViewType =
   | "view"
+  | "form"
   | "text"
   | "button"
   | "input"

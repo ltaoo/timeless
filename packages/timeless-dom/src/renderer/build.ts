@@ -1,6 +1,7 @@
 import { type TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { DOMView } from "@/host/view";
+import { DOMForm } from "@/host/form";
 import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
 import { DOMRichText } from "@/host/rich-text";
@@ -88,6 +89,11 @@ export function build(elm: TimelessElement): VNodeView<any> {
     const swiper_item$ = DOMSwiperItem({ build, elm });
     elm.$elm = swiper_item$;
     return swiper_item$;
+  }
+  if (elm.t === "form") {
+    const form = DOMForm({ build, elm });
+    elm.$elm = form;
+    return form;
   }
   if (elm.t === "view") {
     const view$ = DOMView({ build, elm });

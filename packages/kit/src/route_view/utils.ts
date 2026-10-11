@@ -312,7 +312,7 @@ export function buildRoutes<T extends RouteConfigure>(routes: T) {
   let defaultRouteName = "root.home_layout.index" as Exclude<K, "root">;
   let notfoundRouteName = "root.notfound" as Exclude<K, "root">;
 
-  function traverse(config: Record<string, any>, parentName: string) {
+  function traverse(config: Record<string, any>, parentName: string, parentRequire: string[] = []) {
     const children = {};
     for (const key in config) {
       const item = config[key];
@@ -334,16 +334,17 @@ export function buildRoutes<T extends RouteConfigure>(routes: T) {
         title: item.title,
         pathname: item.pathname,
         component: null,
-        is_default: item.is_default,
+        is_default: item.default || item.is_default,
         is_notfound_fallback: item.is_notfound_fallback,
       };
 
-      if (item.options) {
-        node.options = item.options;
+      const require = [...new Set([...parentRequire, ...(item.options?.require || [])])];
+      if (item.options || require.length) {
+        node.options = { ...item.options, ...(require.length ? { require } : {}) };
       }
 
       if (item.children) {
-        node.children = traverse(item.children, currentName);
+        node.children = traverse(item.children, currentName, require);
       }
 
       children[key] = node;
@@ -361,6 +362,10 @@ export function buildRoutes<T extends RouteConfigure>(routes: T) {
     },
   };
   const result = build<K>(configure as any);
+  defaultRouteName = result.routes.root.defaultName as Exclude<K, "root"> || defaultRouteName;
+  if (result.routes[notfoundRouteName]) {
+    result.routes.root.notfoundFallbackName ??= notfoundRouteName;
+  }
 
   return {
     routes: result.routes,

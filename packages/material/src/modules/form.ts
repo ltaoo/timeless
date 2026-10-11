@@ -1,5 +1,5 @@
 import { vm } from "@timeless/timeless";
-import { View, ViewProps, ViewChildren } from "@timeless/timeless";
+import { Form as NativeForm, FormProps, View, ViewProps, ViewChildren } from "@timeless/timeless";
 
 /**
  * Form · Material 3
@@ -9,10 +9,10 @@ import { View, ViewProps, ViewChildren } from "@timeless/timeless";
  * 时会得到一个纵向间距容器。字段级渲染请直接用 Field / FieldSet 系列组件。
  */
 export function Form(
-  props: ViewProps & {
-    store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+  props: FormProps & {
+    store?: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
   },
   children?: ViewChildren,
-) {
-  return View(props, children);
+): ReturnType<typeof NativeForm> {
+  return NativeForm(props, children);
 }

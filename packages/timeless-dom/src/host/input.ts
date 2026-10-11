@@ -50,8 +50,11 @@ export function DOMInput(props: {
       if (props.elm.state.tabindex !== undefined) {
         $elm.setAttribute("tabindex", props.elm.state.tabindex);
       }
-      if (props.elm.state.autoComplete !== undefined) {
-        $elm.setAttribute("autocomplete", props.elm.state.autoComplete);
+      // Explicit semantic tokens (username/current-password/new-password)
+      // must survive the first render, before onMounted callbacks run.
+      if (props.elm.state.attributes?.autocomplete === undefined && props.elm.state.autoComplete !== undefined) {
+        const autocomplete = props.elm.state.autoComplete;
+        $elm.setAttribute("autocomplete", typeof autocomplete === "boolean" ? (autocomplete ? "on" : "off") : autocomplete);
       }
       // $elm.style.width = "100%";
       // console.log("[dom]input render - before setupEvent", props.elm.events);

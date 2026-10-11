@@ -63,6 +63,8 @@ export class HistoryCore<
 
   /** 路由配置 */
   routes: Record<K, R>;
+  /** 按路径查找路由配置，保留声明顺序中的最后一个同路径路由。 */
+  routesWithPathname: Record<string, R>;
   /** 加载的所有视图 */
   views: Record<string, RouteViewCore>;
   /** 按顺序依次 push 的视图 */
@@ -101,8 +103,24 @@ export class HistoryCore<
     this.$view = view;
     this.$router = router;
     this.routes = routes;
+    this.routesWithPathname = Object.fromEntries(Object.values(routes).map(route => [route.pathname, route]));
     this.views = views;
     this.virtual = virtual;
+  }
+
+  /** Resolve layouts to their default page and unknown paths to the nearest
+   * layout fallback. Returns null when the route tree has no matching fallback.
+   */
+  matchPath(pathname: string): R | null {
+    const route = this.routesWithPathname[pathname];
+    if (route) {
+      return this.routes[this.resolveLayoutDefaultName(route.name)] || null;
+    }
+    const layout = Object.values(this.routes)
+      .filter(route => route.layout && route.notfoundFallbackName &&
+        (route.pathname === "/" || pathname.startsWith(route.pathname + "/")))
+      .sort((a, b) => b.pathname.length - a.pathname.length)[0];
+    return layout && this.routes[this.resolveLayoutDefaultName(layout.notfoundFallbackName)] || null;
   }
 
   resolveLayoutDefaultName(name: K) {

@@ -49,11 +49,13 @@ export function Input(
   const value_ = refobj(store.value || "");
   const placeholder_ = ref(store.placeholder || "");
   const disabled_ = ref(store.disabled || false);
+  const type_ = ref(store.state.tmpType || store.state.type || "text");
 
-  const listener$ = ListenerManager([value_, placeholder_, disabled_]);
+  const listener$ = ListenerManager([value_, placeholder_, disabled_, type_]);
 
   return NativeInput({
     ...props,
+    type: type_,
     placeholder: placeholder_,
     disabled: disabled_,
     value: value_,
@@ -63,6 +65,7 @@ export function Input(
           value_.as(state.value || "");
           placeholder_.as(state.placeholder || "");
           disabled_.as(state.disabled || false);
+          type_.as(state.tmpType || state.type || "text");
         }),
       );
       const $elm = event.target;

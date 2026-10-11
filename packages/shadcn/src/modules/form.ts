@@ -1,12 +1,12 @@
 import { vm } from "@timeless/timeless";
-import { View, ViewProps, ViewChildren } from "@timeless/timeless";
+import { Form as NativeForm, FormProps, View, ViewProps, ViewChildren } from "@timeless/timeless";
 
 export function Form(
-  props: ViewProps & {
-    store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+  props: FormProps & {
+    store?: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
   },
   children?: ViewChildren,
-) {
+): ReturnType<typeof NativeForm> {
   // if (props.store.symbol === "vm.ObjectFieldCore") {
   //   return ObjectFieldPrimitive.Fields({
   //     store: props.store as vm.ObjectFieldCore<any>,
@@ -19,7 +19,7 @@ export function Form(
 
   // if (props.store.symbol === "vm.ArrayFieldCore") {
   //   const arrayStore = props.store as vm.ArrayFieldCore<any>;
-  //   return View({ class: "space-y-4" }, [
+  //   return NativeForm({ class: "space-y-4" }, [
   //     ArrayFieldPrimitive.Items({
   //       store: arrayStore,
   //       render(item) {
@@ -76,7 +76,7 @@ export function Form(
   //   ]);
   // }
 
-  return View(props, children);
+  return NativeForm(props, children);
 }
 
 // const ObjectFieldPrimitive = FieldPrimitive.ObjectField;

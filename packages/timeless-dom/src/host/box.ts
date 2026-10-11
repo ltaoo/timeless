@@ -17,6 +17,8 @@ const native_events = {
   "onPointerUp": "pointerup",
   "onInput": "input",
   "onChange": "change",
+  "onSubmit": "submit",
+  "onReset": "reset",
   "onFocus": "focus",
   "onBlur": "blur",
   "onKeyDown": "keydown",

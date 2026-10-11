@@ -1,5 +1,5 @@
 import { vm } from "@timeless/timeless";
-import { View, ViewProps, ViewChildren, classNames } from "@timeless/timeless";
+import { Form as NativeForm, FormProps, View, ViewProps, ViewChildren, classNames } from "@timeless/timeless";
 
 /**
  * Form · Lucky
@@ -8,11 +8,11 @@ import { View, ViewProps, ViewChildren, classNames } from "@timeless/timeless";
  * 字段级渲染请直接用 Field / FieldSet 系列组件。
  */
 export function Form(
-  props: ViewProps & {
-    store: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
+  props: FormProps & {
+    store?: vm.ObjectFieldCore<any> | vm.ArrayFieldCore<any>;
   },
   children?: ViewChildren,
-) {
+): ReturnType<typeof NativeForm> {
   const { class: cls, ...rest } = props;
-  return View({ ...rest, class: classNames(["lucky-form", cls]) }, children);
+  return NativeForm({ ...rest, class: classNames(["lucky-form", cls]) }, children);
 }

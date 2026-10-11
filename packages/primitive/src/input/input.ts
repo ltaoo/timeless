@@ -9,6 +9,7 @@ import { bind_disabled } from "@/util/disabled";
 const logger = Logger({ prefix: "primitive", scope: "input/input" });
 
 export type InputProps = BoxProps & {
+  type?: string | DerivedRef<string> | Ref<string>;
   id?: string | null;
   name?: string | DerivedRef<string> | Ref<string>;
   value?: DerivedRef<string> | Ref<string>;
@@ -43,6 +44,7 @@ type InputState = {
 export function Input(props: InputProps = {}) {
   const {
     id,
+    type,
     name,
     value,
     placeholder,
@@ -63,13 +65,14 @@ export function Input(props: InputProps = {}) {
     ...rest
   } = props;
 
-  let input_attributes = attributes;
+  let input_attributes = type === undefined ? attributes : { ...attributes, type };
   if (disabled !== undefined) {
-    input_attributes = { ...attributes };
+    input_attributes = { ...input_attributes };
     delete input_attributes.disabled;
   }
 
   let $elm: any = null;
+  let mount_cleanup: void | (() => void);
 
   const box$ = Box<InputState>({ ...rest, attributes: input_attributes }, {
     value: "",
@@ -324,10 +327,11 @@ export function Input(props: InputProps = {}) {
       // console.log("[]input onMounted", $elm);
       state.rendered = true;
       if (rest.onMounted) {
-        rest.onMounted(event);
+        mount_cleanup = rest.onMounted(event);
       }
     },
     onUnmounted() {
+      mount_cleanup?.(); mount_cleanup = undefined;
       listener$.destroy();
       box$.methods.destroy();
       if (rest.onUnmounted) {

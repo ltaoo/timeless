@@ -114,7 +114,7 @@ export function hydrate_node(
     listview$.hydrate(vnode, $elm, opt);
     return listview$;
   }
-  if (vnode.t === "view") {
+  if (vnode.t === "view" || vnode.t === "form") {
     if ($elm.nodeType === 3) {
       return null;
     }
