@@ -26,6 +26,9 @@ const BUILD_ORDER = [
   "ui-primitive",
   "timeless",
   "timeless-dom",
+  "ui-renderer",
+  "ui-renderer-dom",
+  "a2ui",
   "provider-web",
   "shadcn",
   "weui",
@@ -39,10 +42,17 @@ const BUILD_ORDER = [
 
 // Browser distribution consumed by wx_channels_download and the web demos.
 const ARTIFACTS = [
+  ["a2ui", "timeless.a2ui.umd.min.js", "bundle-analysis.json"],
   ["timeless", "timeless.umd.min.js", "bundle-analysis.json"],
   ["lite", "timeless.lite.umd.min.js", "bundle-analysis.json"],
   ["utils", "timeless.utils.umd.min.js", "bundle-analysis.json"],
   ["timeless-dom", "timeless.dom.umd.min.js"],
+  ["ui-renderer", "timeless.ui-renderer.umd.min.js", "bundle-analysis.json"],
+  [
+    "ui-renderer-dom",
+    "timeless.ui-renderer-dom.umd.min.js",
+    "bundle-analysis.json",
+  ],
   ["provider-web", "timeless.web.umd.min.js"],
   ["shadcn", "timeless.shadcn.umd.min.js"],
   ["shadcn", "timeless.shadcn.css"],
@@ -74,11 +84,25 @@ const LOAD_PROFILES = {
   full: [
     "timeless.umd.min.js",
     "timeless.dom.umd.min.js",
+    "timeless.a2ui.umd.min.js",
+    "timeless.ui-renderer.umd.min.js",
+    "timeless.ui-renderer-dom.umd.min.js",
     "timeless.web.umd.min.js",
     "timeless.shadcn.umd.min.js",
     "timeless.weui.umd.min.js",
   ],
   lite: ["timeless.lite.umd.min.js", "timeless.dom.umd.min.js"],
+  lite_with_a2ui: [
+    "timeless.lite.umd.min.js",
+    "timeless.dom.umd.min.js",
+    "timeless.a2ui.umd.min.js",
+  ],
+  lite_with_ui_renderer: [
+    "timeless.lite.umd.min.js",
+    "timeless.dom.umd.min.js",
+    "timeless.ui-renderer.umd.min.js",
+    "timeless.ui-renderer-dom.umd.min.js",
+  ],
   lite_with_utils: ["timeless.lite.umd.min.js", "timeless.utils.umd.min.js"],
   // Scoped style libraries. They are mutually exclusive with the global
   // shadcn/weui bundles, so they stay out of `full` on purpose. The four of

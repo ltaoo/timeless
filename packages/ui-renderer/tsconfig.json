@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@timeless/ui-renderer": ["./src/index.ts"],
+      "@timeless/ui-renderer-dom": ["../ui-renderer-dom/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/__tests__", "dist", "node_modules"]
+}

@@ -559,20 +559,23 @@ DropdownMenu / Toast / …，约 25 个导出）。从 `findrss-reader/frontend/
 
 ---
 
-### `@timeless/a2ui` — JSON→UI 引擎
+### `@timeless/a2ui` — 官方 A2UI 协议渲染器
 
-**组合**：`timeless` + `inner-vm`
+**组合**：`timeless`（共用响应式、组件和 DOM 宿主）
 
-**职责**：从 JSON Schema 或 SSE 流动态生成 UI（A2UI = AI-to-UI）
+**职责**：消费官方 v0.9.1 协议，管理多 Surface、扁平组件引用、JSON Pointer 数据绑定和客户端 Action。直接使用官方 JSON Schema 校验消息。
 
 **关键导出**：
-- `renderSchema(schema)` — 渲染 JSON Schema
-- `renderStream(stream)` — 消费 SSE 流实时渲染
-- `registerComponents(map)` — 注册自定义组件解析器
+- `renderMessages(messages, options)` — 消费官方消息并返回渲染器
+- `renderStream(url, options)` — 消费 SSE 或 JSONL 流
+- `A2UIRenderer` / `A2UIModel` — 视图和状态分别管理
+- `createBasicCatalog(options)` — 18 个标准组件、14 个标准函数，可注入可信组件实现
 
 **使用场景**：服务端驱动 UI、AI 生成界面、低代码平台
 
-**依赖**：`timeless`、`inner-vm`
+**依赖**：`timeless`、`ajv`、`ajv-formats`
+
+**接入及迁移**：见 [`packages/a2ui/README.md`](./packages/a2ui/README.md)。旧 `renderSchema`、全局 `registerComponents` 和自定义 ops 协议已替换。
 
 ---
 

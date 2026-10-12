@@ -1,75 +1,127 @@
-import { RefArray } from "@timeless/timeless";
-import {
-  SingleFieldCore,
-  ObjectFieldCore,
-  InputCore,
-  SelectCore,
-  CheckboxCore,
-  ButtonCore,
-} from "@timeless/inner-vm";
-
-/** Component types mapping to Timeless components */
-export type UINodeType =
-  | "view"
-  | "field"
-  | "input"
-  | "select"
-  | "checkbox"
-  | "button"
-  | "textarea"
-  | "separator"
-  | "text"
-  | "row"
-  | "col";
-
-/** A single UI node in the schema tree */
-export interface UINode {
+import type {
+  DerivedRef,
+  TimelessElement,
+  ViewChildren,
+} from "@timeless/timeless";
+export type JsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+export type ProtocolVersion = "v0.9" | "v0.9.1";
+export interface DataBinding {
+  path: string;
+}
+export interface FunctionCall {
+  call: string;
+  args?: Record<string, unknown>;
+  returnType?:
+    | "string"
+    | "number"
+    | "boolean"
+    | "array"
+    | "object"
+    | "any"
+    | "void";
+}
+export type Dynamic<T> = T | DataBinding | FunctionCall;
+export type ChildList = string[] | { componentId: string; path: string };
+export type Action =
+  | { event: { name: string; context?: Record<string, unknown> } }
+  | { functionCall: FunctionCall };
+export interface CheckRule {
+  condition: Dynamic<boolean>;
+  message: string;
+}
+export interface ComponentDefinition {
   id: string;
-  type: UINodeType;
-  props?: Record<string, any>;
-  children?: UINode[];
+  component: string;
+  accessibility?: { label?: Dynamic<string>; description?: Dynamic<string> };
+  weight?: number;
+  checks?: CheckRule[];
+  [property: string]: unknown;
 }
-
-/** Field-specific props */
-export interface FieldProps {
-  label: string;
-  name: string;
-  required?: boolean;
-  help?: string;
-  rules?: Array<{ required?: boolean; message?: string }>;
-  input: {
-    type: "input" | "select" | "checkbox" | "textarea";
-    defaultValue?: any;
-    placeholder?: string;
-    options?: Array<{ label: string; value: string }>;
-  };
+export interface SurfaceDefinition {
+  surfaceId: string;
+  catalogId: string;
+  theme?: Record<string, JsonValue>;
+  sendDataModel?: boolean;
 }
-
-/** Stream operations for incremental rendering */
-export type StreamOp =
-  | { op: "root"; node: UINode }
-  | { op: "append"; parentId: string; node: UINode }
-  | { op: "insert"; parentId: string; index: number; node: UINode }
-  | { op: "update"; nodeId: string; props: Record<string, any> }
-  | { op: "delete"; nodeId: string }
-  | { op: "done" };
-
-/** Resolved node stored in the renderer's nodeMap */
-export interface ResolvedNode {
+export type ServerMessage = { version: ProtocolVersion } & (
+  | { createSurface: SurfaceDefinition }
+  | {
+      updateComponents: {
+        surfaceId: string;
+        components: ComponentDefinition[];
+      };
+    }
+  | { updateDataModel: { surfaceId: string; path?: string; value?: JsonValue } }
+  | { deleteSurface: { surfaceId: string } }
+);
+export type ClientMessage = { version: ProtocolVersion } & (
+  | {
+      action: {
+        name: string;
+        surfaceId: string;
+        sourceComponentId: string;
+        timestamp: string;
+        context: Record<string, JsonValue>;
+      };
+    }
+  | {
+      error: {
+        code: string;
+        surfaceId: string;
+        path?: string;
+        message: string;
+      };
+    }
+);
+export interface TransportMetadata {
+  a2uiClientCapabilities: { supportedCatalogIds: string[] };
+  a2uiClientDataModel?: { surfaces: Record<string, JsonValue> };
+}
+export interface ComponentContext {
+  definition: ComponentDefinition;
+  surface: SurfaceDefinition;
+  scope: string;
+  bind<T>(expression: unknown, convert: (value: unknown) => T): DerivedRef<T>;
+  watch<T>(read: () => T): DerivedRef<T>;
+  read(expression: unknown): unknown;
+  input(): unknown;
+  write(value: JsonValue): void;
+  errors(): string[];
+  act(action: Action): void;
+  child(id: string): TimelessElement;
+  children(children: ChildList): TimelessElement;
+  local(key: string, fallback: JsonValue): unknown;
+  setLocal(key: string, value: JsonValue): void;
+  onCleanup(cleanup: () => void): void;
+}
+export type ComponentFactory = (context: ComponentContext) => ViewChildren;
+export interface FunctionContext {
+  read(path: string): unknown;
+  call(name: string, args: Record<string, unknown>): unknown;
+  locale?: string;
+}
+export interface ClientFunction {
+  execute(args: Record<string, unknown>, context: FunctionContext): unknown;
+  actionOnly?: boolean;
+}
+export interface Catalog {
   id: string;
-  parentId: string | null;
-  element: any; // TimelessElement
-  children$?: RefArray<any>;
-  field$?: SingleFieldCore<any>;
-  core?: InputCore<any> | SelectCore<any> | CheckboxCore | ButtonCore;
-  schema: UINode;
+  schema: Record<string, unknown>;
+  components: Record<string, ComponentFactory>;
+  functions: Record<string, ClientFunction>;
 }
-
-/** Session object returned by renderStream/renderSchema */
-export interface A2UISession {
-  form$: ObjectFieldCore<any> | null;
-  nodeMap: Map<string, ResolvedNode>;
-  abort(): void;
-  destroy(): void;
-  onDone(cb: () => void): void;
+export interface A2UIOptions {
+  catalogs?: Catalog[];
+  locale?: string;
+  onClientMessage?: (
+    message: ClientMessage,
+    metadata: TransportMetadata,
+  ) => void;
+  onOpenUrl?: (url: string) => void;
 }

@@ -33983,6 +33983,429 @@ declare module "packages/findrssui/src/index" {
     export { Alert, Avatar, Badge, Button, ButtonViewModel, Card, Checkbox, ChoiceViewModel, Input, InputViewModel, Radio, Separator, Switch, Tabs, Tree, Textarea, Dialog, DropdownMenu, Toast, FRAlert, FRBadge, FRButton, FRCard, FRInput, FRSeparator, };
 }
 
+declare module "packages/ui-renderer/src/types" {
+    import type { DerivedRef, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    import type { SlotMap } from "packages/ui-renderer/src/index";
+    export type Cleanup = () => void;
+    export type SlotKind = "single" | "list" | "keyed" | "chain";
+    export interface SlotDefinition<K extends SlotKind = SlotKind, P = unknown> {
+        kind: K;
+        props: P;
+    }
+    export type SlotName = keyof SlotMap & string;
+    export type OwnerProps<K extends SlotName> = SlotMap[K] extends SlotDefinition<SlotKind, infer P> ? P : never;
+    export type KindOf<K extends SlotName> = SlotMap[K] extends SlotDefinition<infer Kind, unknown> ? Kind : never;
+    export type Children = {
+        [K in SlotName]?: KindOf<K>;
+    };
+    export interface Observable<T> {
+        getSnapshot(): T;
+        subscribe(listener: () => void): Cleanup;
+    }
+    export interface RenderOptions {
+        entryKey?: string | Observable<string>;
+    }
+    export interface ComponentProps<K extends SlotName> {
+        owner: OwnerProps<K>;
+        matched: unknown;
+        renderSlot<N extends SlotName>(name: N, owner: OwnerProps<N>, options?: RenderOptions): TimelessElement;
+        observe<T, R>(source: Observable<T>, selector: (snapshot: T) => R): DerivedRef<R>;
+        onCleanup(cleanup: Cleanup): void;
+    }
+    export type SlotComponent<K extends SlotName> = (props: ComponentProps<K>) => ViewChildren;
+    export type RegistrationOptions<K extends SlotName> = {
+        name: K;
+        priority?: number;
+        order?: number;
+        children?: Children;
+    } & (SlotMap[K] extends SlotDefinition<"list", unknown> ? {
+        id: string;
+    } : SlotMap[K] extends SlotDefinition<"keyed", unknown> ? {
+        key: string;
+    } : SlotMap[K] extends SlotDefinition<"chain", unknown> ? {
+        select(owner: OwnerProps<K>): unknown;
+    } : {});
+    export interface RendererHost<C> {
+        /** Attach the tree without invoking its lifecycle; return a detach operation. */
+        mount(element: TimelessElement, container: C): Cleanup;
+    }
+}
+declare module "packages/ui-renderer/src/registry" {
+    import type { Children, Cleanup, ComponentProps, Observable, OwnerProps, RegistrationOptions, SlotComponent, SlotName, KindOf } from "packages/ui-renderer/src/types";
+    import type { ViewChildren } from "packages/timeless/src/index";
+    export interface Entry {
+        readonly sequence: number;
+        readonly name: string;
+        readonly id?: string;
+        readonly key?: string;
+        readonly priority: number;
+        readonly order: number;
+        readonly children: Children;
+        readonly select?: (owner: unknown) => unknown;
+        readonly component: (props: ComponentProps<SlotName>) => ViewChildren;
+    }
+    export interface Selection {
+        entry: Entry;
+        matched: unknown;
+    }
+    /** Owns declarations and registrations; it has no dependency on a host renderer. */
+    export class SlotRegistry {
+        private slots;
+        private listeners;
+        private injections;
+        private sequence;
+        private disposed;
+        declare<K extends SlotName>(name: K, kind: KindOf<K>): Cleanup;
+        register<K extends SlotName>(options: RegistrationOptions<K>, component: SlotComponent<K>): Cleanup;
+        inject<K extends SlotName>(name: K, setup: () => void | Cleanup): Cleanup;
+        source<K extends SlotName>(name: K): Observable<readonly Entry[]>;
+        select<K extends SlotName>(name: K, owner: OwnerProps<K>, key?: string): Selection[];
+        dispose(): void;
+        private require_slot;
+        private assert_open;
+        private activate_injections;
+        private collapse;
+        private publish;
+    }
+}
+declare module "packages/ui-renderer/src/renderer" {
+    import { type TimelessElement } from "packages/timeless/src/index";
+    import { SlotRegistry } from "packages/ui-renderer/src/registry";
+    import type { Cleanup, OwnerProps, RenderOptions, RendererHost, SlotName } from "packages/ui-renderer/src/types";
+    export class UiRenderer<C> {
+        readonly slots: SlotRegistry;
+        private host;
+        private mounts;
+        private disposed;
+        constructor(host: RendererHost<C>, slots?: SlotRegistry);
+        renderSlot<K extends SlotName>(name: K, owner: OwnerProps<K>, options?: RenderOptions): TimelessElement;
+        mount(container: C): Cleanup;
+        dispose(): void;
+        private render_entry;
+    }
+    export function createUiRenderer<C>(host: RendererHost<C>, slots?: SlotRegistry): UiRenderer<C>;
+}
+declare module "packages/ui-renderer/src/index" {
+    export * from "packages/ui-renderer/src/types";
+    export { SlotRegistry } from "packages/ui-renderer/src/registry";
+    export { UiRenderer, createUiRenderer } from "packages/ui-renderer/src/renderer";
+    import type { SlotDefinition } from "packages/ui-renderer/src/types";
+    /** Extend this interface with your application's slot contracts. */
+    export interface SlotMap {
+        root: SlotDefinition<"single", Record<string, never>>;
+    }
+}
+declare module "packages/ui-renderer-dom/src/index" {
+    import { type SlotRegistry, type UiRenderer } from "packages/ui-renderer/src/index";
+    /** Bind the portable UI renderer to the existing DOM host. */
+    export function createDOMRenderer(slots?: SlotRegistry): UiRenderer<HTMLElement>;
+}
+
+declare module "packages/a2ui/src/types" {
+    import type { DerivedRef, TimelessElement, ViewChildren } from "packages/timeless/src/index";
+    export type JsonValue = null | boolean | number | string | JsonValue[] | {
+        [key: string]: JsonValue;
+    };
+    export type ProtocolVersion = "v0.9" | "v0.9.1";
+    export interface DataBinding {
+        path: string;
+    }
+    export interface FunctionCall {
+        call: string;
+        args?: Record<string, unknown>;
+        returnType?: "string" | "number" | "boolean" | "array" | "object" | "any" | "void";
+    }
+    export type Dynamic<T> = T | DataBinding | FunctionCall;
+    export type ChildList = string[] | {
+        componentId: string;
+        path: string;
+    };
+    export type Action = {
+        event: {
+            name: string;
+            context?: Record<string, unknown>;
+        };
+    } | {
+        functionCall: FunctionCall;
+    };
+    export interface CheckRule {
+        condition: Dynamic<boolean>;
+        message: string;
+    }
+    export interface ComponentDefinition {
+        id: string;
+        component: string;
+        accessibility?: {
+            label?: Dynamic<string>;
+            description?: Dynamic<string>;
+        };
+        weight?: number;
+        checks?: CheckRule[];
+        [property: string]: unknown;
+    }
+    export interface SurfaceDefinition {
+        surfaceId: string;
+        catalogId: string;
+        theme?: Record<string, JsonValue>;
+        sendDataModel?: boolean;
+    }
+    export type ServerMessage = {
+        version: ProtocolVersion;
+    } & ({
+        createSurface: SurfaceDefinition;
+    } | {
+        updateComponents: {
+            surfaceId: string;
+            components: ComponentDefinition[];
+        };
+    } | {
+        updateDataModel: {
+            surfaceId: string;
+            path?: string;
+            value?: JsonValue;
+        };
+    } | {
+        deleteSurface: {
+            surfaceId: string;
+        };
+    });
+    export type ClientMessage = {
+        version: ProtocolVersion;
+    } & ({
+        action: {
+            name: string;
+            surfaceId: string;
+            sourceComponentId: string;
+            timestamp: string;
+            context: Record<string, JsonValue>;
+        };
+    } | {
+        error: {
+            code: string;
+            surfaceId: string;
+            path?: string;
+            message: string;
+        };
+    });
+    export interface TransportMetadata {
+        a2uiClientCapabilities: {
+            supportedCatalogIds: string[];
+        };
+        a2uiClientDataModel?: {
+            surfaces: Record<string, JsonValue>;
+        };
+    }
+    export interface ComponentContext {
+        definition: ComponentDefinition;
+        surface: SurfaceDefinition;
+        scope: string;
+        bind<T>(expression: unknown, convert: (value: unknown) => T): DerivedRef<T>;
+        watch<T>(read: () => T): DerivedRef<T>;
+        read(expression: unknown): unknown;
+        input(): unknown;
+        write(value: JsonValue): void;
+        errors(): string[];
+        act(action: Action): void;
+        child(id: string): TimelessElement;
+        children(children: ChildList): TimelessElement;
+        local(key: string, fallback: JsonValue): unknown;
+        setLocal(key: string, value: JsonValue): void;
+        onCleanup(cleanup: () => void): void;
+    }
+    export type ComponentFactory = (context: ComponentContext) => ViewChildren;
+    export interface FunctionContext {
+        read(path: string): unknown;
+        call(name: string, args: Record<string, unknown>): unknown;
+        locale?: string;
+    }
+    export interface ClientFunction {
+        execute(args: Record<string, unknown>, context: FunctionContext): unknown;
+        actionOnly?: boolean;
+    }
+    export interface Catalog {
+        id: string;
+        schema: Record<string, unknown>;
+        components: Record<string, ComponentFactory>;
+        functions: Record<string, ClientFunction>;
+    }
+    export interface A2UIOptions {
+        catalogs?: Catalog[];
+        locale?: string;
+        onClientMessage?: (message: ClientMessage, metadata: TransportMetadata) => void;
+        onOpenUrl?: (url: string) => void;
+    }
+}
+
+declare module "packages/a2ui/src/validation" {
+    import type { Catalog, ClientMessage, ServerMessage } from "packages/a2ui/src/types";
+    export class ProtocolError extends Error {
+        readonly path: string;
+        readonly surfaceId: string;
+        constructor(message: string, surfaceId?: string, path?: string);
+    }
+    export class ProtocolValidator {
+        private server;
+        private client;
+        private functions;
+        constructor(catalog: Catalog);
+        validate(message: unknown, surfaceId?: string): asserts message is ServerMessage;
+        validateClient(message: unknown, surfaceId?: string): asserts message is ClientMessage;
+        validateFunction(call: unknown, surfaceId: string): void;
+        private fail;
+    }
+}
+
+declare module "packages/a2ui/src/data-model" {
+    import type { JsonValue } from "packages/a2ui/src/types";
+    export function pointer(path: string, scope?: string): string;
+    export function segments(path: string): string[];
+    export function readData(data: unknown, path: string): unknown;
+    export function writeData(data: JsonValue | undefined, path: string, value: JsonValue | undefined): JsonValue | undefined;
+    export function jsonSnapshot(value: unknown): JsonValue;
+    export function displayString(value: unknown): string;
+}
+
+declare module "packages/a2ui/src/functions" {
+    import type { ClientFunction, FunctionContext } from "packages/a2ui/src/types";
+    export function safeUrl(value: unknown): string;
+    /** Small data-expression parser; it never evaluates JavaScript. */
+    export function interpolate(template: string, context: FunctionContext): string;
+    export function basicFunctions(openUrl?: (url: string) => void): Record<string, ClientFunction>;
+}
+
+declare module "packages/a2ui/src/view" {
+    import { type TimelessElement } from "packages/timeless/src/index";
+    export function owned(view: TimelessElement, cleanups: (() => void)[]): TimelessElement;
+    /** Diff stable descriptors with the existing Timeless For/DOM host. */
+    export function outlet<T>(name: string, read: () => T[], subscribe: (update: () => void) => () => void, render: (item: T) => TimelessElement, same: (left: T, right: T) => boolean): TimelessElement;
+}
+
+declare module "packages/a2ui/src/catalog" {
+    import type { Catalog, ComponentFactory } from "packages/a2ui/src/types";
+    export const BASIC_CATALOG_ID = "https://a2ui.org/specification/v0_9_1/catalogs/basic/catalog.json";
+    export const LEGACY_CATALOG_ID = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
+    export function createBasicCatalog(options?: {
+        components?: Record<string, ComponentFactory>;
+        onOpenUrl?: (url: string) => void;
+    }): Catalog;
+}
+
+declare module "packages/a2ui/src/schema-resolver" {
+    import type { Catalog, ComponentDefinition } from "packages/a2ui/src/types";
+    /** Discover links from the catalog's ComponentId/ChildList schema references. */
+    export function componentReferences(definition: ComponentDefinition, catalog: Catalog): string[];
+}
+
+declare module "packages/a2ui/src/model" {
+    import { ProtocolValidator } from "packages/a2ui/src/validation";
+    import type { A2UIOptions, Action, Catalog, ClientMessage, ComponentDefinition, JsonValue, ProtocolVersion, SurfaceDefinition } from "packages/a2ui/src/types";
+    export class SurfaceModel {
+        readonly definition: SurfaceDefinition;
+        readonly catalog: Catalog;
+        readonly validator: ProtocolValidator;
+        readonly version: ProtocolVersion;
+        components: Map<string, ComponentDefinition>;
+        data: JsonValue | undefined;
+        private listeners;
+        private locals;
+        private disposed;
+        private options;
+        constructor(definition: SurfaceDefinition, catalog: Catalog, validator: ProtocolValidator, version: ProtocolVersion, options: A2UIOptions);
+        subscribe(listener: () => void): () => void;
+        get subscriberCount(): number;
+        notify(): void;
+        updateComponents(components: ComponentDefinition[]): void;
+        setData(path: string, value: JsonValue | undefined): void;
+        local(key: string, fallback: JsonValue): JsonValue;
+        setLocal(key: string, value: JsonValue): void;
+        resolve(expression: unknown, scope?: string, action?: boolean, depth?: number): unknown;
+        private call;
+        input(definition: ComponentDefinition, scope: string): unknown;
+        writeInput(definition: ComponentDefinition, scope: string, value: JsonValue): void;
+        errors(definition: ComponentDefinition, scope: string): string[];
+        act(definition: ComponentDefinition, scope: string, action: Action): void;
+        emit(message: ClientMessage): void;
+        dispose(): void;
+    }
+    export class A2UIModel {
+        readonly surfaces: Map<string, SurfaceModel>;
+        private options;
+        private catalogs;
+        private listeners;
+        private disposed;
+        constructor(options: A2UIOptions);
+        subscribe(listener: () => void): () => void;
+        apply(message: unknown): void;
+        dispose(): void;
+    }
+}
+
+declare module "packages/a2ui/src/renderer" {
+    import { type TimelessElement } from "packages/timeless/src/index";
+    import { A2UIModel } from "packages/a2ui/src/model";
+    import type { A2UIOptions } from "packages/a2ui/src/types";
+    export class A2UIRenderer {
+        readonly model: A2UIModel;
+        readonly element: TimelessElement;
+        private destroyed;
+        private abort_stream;
+        constructor(options?: A2UIOptions);
+        processMessage(message: unknown): void;
+        processMessages(messages: readonly unknown[]): void;
+        setStreamAbort(abort: () => void): void;
+        abort(): void;
+        destroy(): void;
+        private componentList;
+        private component;
+    }
+}
+
+declare module "packages/a2ui/src/stream-parser" {
+    import { A2UIRenderer } from "packages/a2ui/src/renderer";
+    export interface StreamParserOptions {
+        format?: "sse" | "jsonl";
+        onMessage?: (message: unknown) => void;
+        onError?: (error: Error) => void;
+        onDone?: () => void;
+    }
+    export class A2UIStreamParser {
+        private renderer;
+        private options;
+        private reader;
+        private event_source;
+        private aborted;
+        constructor(renderer: A2UIRenderer, options?: StreamParserOptions);
+        private dispatch;
+        connectEventSource(url: string): void;
+        connectStream(stream: ReadableStream<Uint8Array>): Promise<void>;
+        abort(): void;
+    }
+}
+
+declare module "packages/a2ui/src/a2ui" {
+    import { A2UIRenderer } from "packages/a2ui/src/renderer";
+    import { type StreamParserOptions } from "packages/a2ui/src/stream-parser";
+    import type { A2UIOptions } from "packages/a2ui/src/types";
+    export const A2UI_PROTOCOL_VERSION = "v0.9.1";
+    export const A2UI_MIME_TYPE = "application/a2ui+json";
+    export function renderMessages(messages: readonly unknown[], options?: A2UIOptions): A2UIRenderer;
+    export interface RenderStreamOptions extends A2UIOptions, StreamParserOptions {
+        useFetch?: boolean;
+        fetchOptions?: RequestInit;
+    }
+    export function renderStream(url: string, options?: RenderStreamOptions): A2UIRenderer;
+}
+
+declare module "packages/a2ui/src/index" {
+    export * from "packages/a2ui/src/types";
+    export { A2UIRenderer } from "packages/a2ui/src/renderer";
+    export { A2UIModel, SurfaceModel } from "packages/a2ui/src/model";
+    export { A2UIStreamParser, type StreamParserOptions } from "packages/a2ui/src/stream-parser";
+    export { ProtocolValidator, ProtocolError } from "packages/a2ui/src/validation";
+    export { createBasicCatalog, BASIC_CATALOG_ID } from "packages/a2ui/src/catalog";
+    export { renderMessages, renderStream, A2UI_PROTOCOL_VERSION, A2UI_MIME_TYPE, type RenderStreamOptions } from "packages/a2ui/src/a2ui";
+}
+
 // === Package module aliases ===
 declare module "@timeless/types" { export * from "packages/types/src/index"; }
 declare module "@timeless/inner-reactive" { export * from "packages/reactive/src/index"; }
@@ -34001,8 +34424,17 @@ declare module "@timeless/lucky" { export * from "packages/lucky/src/index"; }
 declare module "@timeless/animal" { export * from "packages/animal/src/index"; }
 declare module "@timeless/findrssui" { export * from "packages/findrssui/src/index"; }
 
+declare module "@timeless/ui-renderer" { export * from "packages/ui-renderer/src/index"; }
+
+declare module "@timeless/ui-renderer-dom" { export * from "packages/ui-renderer-dom/src/index"; }
+
+declare module "@timeless/a2ui" { export * from "packages/a2ui/src/index"; }
+
 // === Timeless namespace ===
 declare const Timeless: {
+  a2ui: typeof import("@timeless/a2ui");
+  UiRenderer: typeof import("@timeless/ui-renderer");
+  UiRendererDOM: typeof import("@timeless/ui-renderer-dom");
   reactive: typeof import("@timeless/inner-reactive");
   timeless: typeof import("@timeless/timeless");
   kit: typeof import("@timeless/inner-kit");

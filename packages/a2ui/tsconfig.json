@@ -1,24 +1,18 @@
 {
   "compilerOptions": {
-    "noImplicitAny": false,
-    "target": "ESNext",
-    "useDefineForClassFields": true,
+    "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ES2022", "DOM"],
     "moduleResolution": "bundler",
-    "strict": false,
-    "sourceMap": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "noEmit": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
+    "strict": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "declaration": true,
-    "declarationDir": "dist",
-    "outDir": "dist"
+    "outDir": "dist",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/__tests__", "dist", "node_modules"]
 }

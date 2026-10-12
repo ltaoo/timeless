@@ -20,6 +20,12 @@ const PACKAGES: {
   globals?: boolean;
 }[] = [
   {
+    name: "@timeless/a2ui",
+    entry: "packages/a2ui/src/index.ts",
+    namespace: "a2ui",
+    globals: false,
+  },
+  {
     name: "@timeless/inner-reactive",
     entry: "packages/reactive/src/index.ts",
     namespace: "reactive",
@@ -52,6 +58,18 @@ const PACKAGES: {
     name: "@timeless/ui-primitive",
     entry: "packages/ui-primitive/src/index.ts",
     namespace: "ui",
+  },
+  {
+    name: "@timeless/ui-renderer",
+    entry: "packages/ui-renderer/src/index.ts",
+    namespace: "UiRenderer",
+    globals: false,
+  },
+  {
+    name: "@timeless/ui-renderer-dom",
+    entry: "packages/ui-renderer-dom/src/index.ts",
+    namespace: "UiRendererDOM",
+    globals: false,
   },
   {
     name: "@timeless/inner-vm",
@@ -112,6 +130,7 @@ const BASE_COMPILER_OPTIONS: ts.CompilerOptions = {
   skipLibCheck: true,
   baseUrl: ROOT,
   paths: {
+    "@timeless/a2ui": ["packages/a2ui/src/index.ts"],
     "@timeless/inner-base": ["packages/base/src/index.ts"],
     "@timeless/inner-icons": ["packages/icons/src/index.ts"],
     "@timeless/inner-kit": ["packages/kit/src/index.ts"],
@@ -131,6 +150,8 @@ const BASE_COMPILER_OPTIONS: ts.CompilerOptions = {
     "@timeless/findrssui": ["packages/findrssui/src/index.ts"],
     "@timeless/timeless": ["packages/timeless/src/index.ts"],
     "@timeless/ui-primitive": ["packages/ui-primitive/src/index.ts"],
+    "@timeless/ui-renderer": ["packages/ui-renderer/src/index.ts"],
+    "@timeless/ui-renderer-dom": ["packages/ui-renderer-dom/src/index.ts"],
   },
 };
 

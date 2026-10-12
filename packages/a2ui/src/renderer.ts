@@ -1,265 +1,233 @@
-import { ObjectFieldCore, SingleFieldCore } from "@timeless/inner-vm";
+import {
+  View,
+  ref,
+  release,
+  destroyElement,
+  type TimelessElement,
+  type DerivedRef,
+} from "@timeless/timeless";
+import { createBasicCatalog, LEGACY_CATALOG_ID } from "./catalog";
+import { outlet, owned } from "./view";
+import { A2UIModel, SurfaceModel } from "./model";
+import { pointer, readData } from "./data-model";
+import { ProtocolError } from "./validation";
+import type {
+  A2UIOptions,
+  ChildList,
+  ComponentContext,
+  ComponentDefinition,
+  JsonValue,
+} from "./types";
 
-import { UINode, StreamOp, ResolvedNode } from "./types";
-import { resolveNode } from "./schema-resolver";
-
-/**
- * A2UIRenderer — incremental rendering engine.
- *
- * Each container node maintains a `refArray` for its children.
- * When a new node is appended, `push()` on the parent's refArray
- * triggers the `For` component to incrementally insert DOM.
- */
+interface Occurrence {
+  id: string;
+  scope: string;
+  definition: ComponentDefinition;
+}
 export class A2UIRenderer {
-  nodeMap = new Map<string, ResolvedNode>();
-  private _rootElement: any = null;
-  private _fields: SingleFieldCore<any>[] = [];
-  private _form$: ObjectFieldCore<any> | null = null;
-  private _doneCallbacks: Array<() => void> = [];
-
-  get rootElement() {
-    return this._rootElement;
+  readonly model: A2UIModel;
+  readonly element: TimelessElement;
+  private destroyed = false;
+  private abort_stream: (() => void) | undefined;
+  constructor(options: A2UIOptions = {}) {
+    const basic = createBasicCatalog({ onOpenUrl: options.onOpenUrl });
+    const catalogs = options.catalogs ?? [
+      basic,
+      { ...basic, id: LEGACY_CATALOG_ID },
+    ];
+    this.model = new A2UIModel({ ...options, catalogs });
+    this.element = outlet(
+      "a2ui-surfaces",
+      () => [...this.model.surfaces.values()],
+      (update) => this.model.subscribe(update),
+      (surface) =>
+        View(
+          {
+            attributes: { n: `a2ui-surface:${surface.definition.surfaceId}` },
+            style: {
+              "--a2ui-primary": String(
+                surface.definition.theme?.primaryColor ?? "#2563eb",
+              ),
+            },
+          },
+          [this.componentList(surface, ["root"], "/", [])],
+        ),
+      (left, right) => left === right,
+    );
   }
-
-  get form$() {
-    return this._form$;
+  processMessage(message: unknown): void {
+    this.model.apply(message);
   }
-
-  /**
-   * Create the root node from a UINode.
-   */
-  createRoot(node: UINode): any {
-    const resolved = resolveNode(node);
-    this.nodeMap.set(node.id, resolved);
-
-    // Collect field if present
-    if (resolved.field$) {
-      this._fields.push(resolved.field$);
-    }
-
-    // Recursively resolve children
-    if (node.children && resolved.children$) {
-      for (const child of node.children) {
-        this._resolveAndAppend(resolved, child);
-      }
-    }
-
-    this._rootElement = resolved.element;
-    return resolved.element;
+  processMessages(messages: readonly unknown[]): void {
+    for (const message of messages) this.processMessage(message);
   }
-
-  /**
-   * Append a node to a parent container.
-   */
-  append(parentId: string, node: UINode) {
-    const parent = this.nodeMap.get(parentId);
-    if (!parent || !parent.children$) {
-      console.warn(`[a2ui] Cannot append to "${parentId}": not a container or not found.`);
-      return;
-    }
-    this._resolveAndAppend(parent, node);
+  setStreamAbort(abort: () => void): void {
+    this.abort_stream = abort;
   }
-
-  /**
-   * Insert a node at a specific index in a parent container.
-   */
-  insert(parentId: string, index: number, node: UINode) {
-    const parent = this.nodeMap.get(parentId);
-    if (!parent || !parent.children$) {
-      console.warn(`[a2ui] Cannot insert into "${parentId}": not a container or not found.`);
-      return;
-    }
-    const resolved = resolveNode(node);
-    resolved.parentId = parentId;
-    this.nodeMap.set(node.id, resolved);
-
-    if (resolved.field$) {
-      this._fields.push(resolved.field$);
-    }
-
-    parent.children$.insert(index, resolved.element);
-
-    // Recursively resolve children
-    if (node.children && resolved.children$) {
-      for (const child of node.children) {
-        this._resolveAndAppend(resolved, child);
-      }
+  abort(): void {
+    this.abort_stream?.();
+    this.abort_stream = undefined;
+  }
+  destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    this.abort();
+    try {
+      destroyElement(this.element);
+    } finally {
+      this.model.dispose();
     }
   }
-
-  /**
-   * Update an existing node's props/state.
-   */
-  update(nodeId: string, props: Record<string, any>) {
-    const resolved = this.nodeMap.get(nodeId);
-    if (!resolved) {
-      console.warn(`[a2ui] Cannot update "${nodeId}": not found.`);
-      return;
-    }
-
-    // Update field-level props
-    if (resolved.field$) {
-      if (props.label !== undefined) {
-        // SingleFieldCore doesn't have setLabel, but we can update internal state
-        (resolved.field$ as any)._label = props.label;
-      }
-      if (props.hidden !== undefined) {
-        props.hidden ? resolved.field$.hide() : resolved.field$.show();
-      }
-    }
-
-    // Update input core value
-    if (resolved.core && props.value !== undefined && "setValue" in resolved.core) {
-      (resolved.core as any).setValue(props.value);
-    }
-
-    // Merge new props into schema
-    resolved.schema.props = { ...resolved.schema.props, ...props };
+  private componentList(
+    surface: SurfaceModel,
+    children: ChildList,
+    scope: string,
+    ancestors: string[],
+  ): TimelessElement {
+    const read = (): Occurrence[] => {
+      const references = Array.isArray(children)
+        ? children.map((id) => ({ id, scope }))
+        : (() => {
+            const path = pointer(children.path, scope);
+            const values = readData(surface.data, path);
+            if (values === undefined || values === null) return [];
+            if (!Array.isArray(values))
+              throw new ProtocolError(
+                "Template data must be an array",
+                surface.definition.surfaceId,
+                path,
+              );
+            return Array.from({ length: values.length }, (_, index) => ({
+              id: children.componentId,
+              scope: `${path === "/" ? "" : path}/${index}`,
+            }));
+          })();
+      return references.flatMap((reference) => {
+        const definition = surface.components.get(reference.id);
+        return definition ? [{ ...reference, definition }] : [];
+      });
+    };
+    return outlet(
+      `a2ui-children:${surface.definition.surfaceId}:${scope}`,
+      read,
+      (update) => surface.subscribe(update),
+      (item) => {
+        if (ancestors.includes(item.id))
+          throw new ProtocolError(
+            "Cyclic component reference",
+            surface.definition.surfaceId,
+          );
+        return this.component(surface, item, [...ancestors, item.id]);
+      },
+      (left, right) =>
+        left.id === right.id &&
+        left.scope === right.scope &&
+        left.definition === right.definition,
+    );
   }
-
-  /**
-   * Remove a node from its parent.
-   */
-  remove(nodeId: string) {
-    const resolved = this.nodeMap.get(nodeId);
-    if (!resolved) {
-      console.warn(`[a2ui] Cannot remove "${nodeId}": not found.`);
-      return;
-    }
-
-    // Remove from parent's children$
-    if (resolved.parentId) {
-      const parent = this.nodeMap.get(resolved.parentId);
-      if (parent?.children$) {
-        parent.children$.remove(resolved.element);
-      }
-    }
-
-    // Remove field from collection
-    if (resolved.field$) {
-      const idx = this._fields.indexOf(resolved.field$);
-      if (idx !== -1) {
-        this._fields.splice(idx, 1);
-      }
-    }
-
-    // Clean up children recursively
-    this._removeChildren(nodeId);
-    this.nodeMap.delete(nodeId);
-  }
-
-  /**
-   * Finalize: collect all fields and assemble an ObjectFieldCore form.
-   */
-  finalize(): ObjectFieldCore<any> | null {
-    if (this._fields.length === 0) {
-      return null;
-    }
-
-    const fields: Record<string, SingleFieldCore<any>> = {};
-    for (const field of this._fields) {
-      const key = field.name || field.id;
-      if (key) {
-        fields[key] = field;
-      }
-    }
-
-    this._form$ = new ObjectFieldCore({ fields });
-    return this._form$;
-  }
-
-  /**
-   * Apply a batch of stream operations.
-   */
-  applyOps(ops: StreamOp[]) {
-    for (const op of ops) {
-      this.applyOp(op);
-    }
-  }
-
-  /**
-   * Apply a single stream operation.
-   */
-  applyOp(op: StreamOp) {
-    switch (op.op) {
-      case "root":
-        this.createRoot(op.node);
-        break;
-      case "append":
-        this.append(op.parentId, op.node);
-        break;
-      case "insert":
-        this.insert(op.parentId, op.index, op.node);
-        break;
-      case "update":
-        this.update(op.nodeId, op.props);
-        break;
-      case "delete":
-        this.remove(op.nodeId);
-        break;
-      case "done":
-        this.finalize();
-        this._fireDone();
-        break;
-    }
-  }
-
-  /**
-   * Register a done callback.
-   */
-  onDone(cb: () => void) {
-    this._doneCallbacks.push(cb);
-  }
-
-  /**
-   * Destroy the renderer and clean up.
-   */
-  destroy() {
-    this.nodeMap.clear();
-    this._fields = [];
-    this._form$ = null;
-    this._doneCallbacks = [];
-  }
-
-  // --- Private helpers ---
-
-  private _resolveAndAppend(parent: ResolvedNode, childNode: UINode) {
-    const resolved = resolveNode(childNode);
-    resolved.parentId = parent.id;
-    this.nodeMap.set(childNode.id, resolved);
-
-    if (resolved.field$) {
-      this._fields.push(resolved.field$);
-    }
-
-    parent.children$.push(resolved.element);
-
-    // Recursively resolve children
-    if (childNode.children && resolved.children$) {
-      for (const child of childNode.children) {
-        this._resolveAndAppend(resolved, child);
-      }
-    }
-  }
-
-  private _removeChildren(nodeId: string) {
-    for (const [id, resolved] of this.nodeMap) {
-      if (resolved.parentId === nodeId) {
-        if (resolved.field$) {
-          const idx = this._fields.indexOf(resolved.field$);
-          if (idx !== -1) {
-            this._fields.splice(idx, 1);
-          }
+  private component(
+    surface: SurfaceModel,
+    item: Occurrence,
+    ancestors: string[],
+  ): TimelessElement {
+    const cleanups: (() => void)[] = [];
+    let closed = false;
+    const watch = <T>(read: () => T): DerivedRef<T> => {
+      const value = ref(read());
+      const unsubscribe = surface.subscribe(() => {
+        if (!closed) {
+          const next = read();
+          if (!Object.is(value.value, next)) value.as(next);
         }
-        this._removeChildren(id);
-        this.nodeMap.delete(id);
+      });
+      cleanups.push(() => {
+        try {
+          unsubscribe();
+        } finally {
+          value.destroy();
+          release(value);
+        }
+      });
+      return value;
+    };
+    const context: ComponentContext = {
+      definition: item.definition,
+      surface: surface.definition,
+      scope: item.scope,
+      read: (expression) => surface.resolve(expression, item.scope),
+      watch,
+      bind: (expression, convert) =>
+        watch(() => convert(surface.resolve(expression, item.scope))),
+      input: () => surface.input(item.definition, item.scope),
+      write: (value) => surface.writeInput(item.definition, item.scope, value),
+      errors: () => surface.errors(item.definition, item.scope),
+      act: (action) => surface.act(item.definition, item.scope, action),
+      child: (id) => context.children([id]),
+      children: (children) => {
+        const view = this.componentList(
+          surface,
+          children,
+          item.scope,
+          ancestors,
+        );
+        cleanups.push(() => destroyElement(view));
+        return view;
+      },
+      local: (key, fallback) =>
+        surface.local(JSON.stringify([item.id, item.scope, key]), fallback),
+      setLocal: (key, value: JsonValue) =>
+        surface.setLocal(JSON.stringify([item.id, item.scope, key]), value),
+      onCleanup: (cleanup) => cleanups.push(cleanup),
+    };
+    try {
+      const factory = Object.hasOwn(
+        surface.catalog.components,
+        item.definition.component,
+      )
+        ? surface.catalog.components[item.definition.component]
+        : undefined;
+      if (!factory)
+        throw new ProtocolError(
+          `Unsupported component: ${item.definition.component}`,
+          surface.definition.surfaceId,
+        );
+      const content = factory(context);
+      const view = View(
+        {
+          attributes: {
+            n: `a2ui-component:${surface.definition.surfaceId}:${item.id}:${item.scope}`,
+            "aria-label": context.bind(
+              item.definition.accessibility?.label,
+              (value) => (value === undefined ? undefined : String(value)),
+            ),
+            "aria-description": context.bind(
+              item.definition.accessibility?.description,
+              (value) => (value === undefined ? undefined : String(value)),
+            ),
+          },
+          style: { flexGrow: item.definition.weight ?? 0 },
+        },
+        content,
+      );
+      return owned(view, [
+        ...cleanups,
+        () => {
+          closed = true;
+        },
+      ]);
+    } catch (error) {
+      closed = true;
+      const errors: unknown[] = [error];
+      for (const cleanup of cleanups.reverse()) {
+        try {
+          cleanup();
+        } catch (failure) {
+          errors.push(failure);
+        }
       }
-    }
-  }
-
-  private _fireDone() {
-    for (const cb of this._doneCallbacks) {
-      cb();
+      if (errors.length > 1)
+        throw new AggregateError(errors, "A2UI component construction failed");
+      throw error;
     }
   }
 }

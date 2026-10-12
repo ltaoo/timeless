@@ -110,6 +110,66 @@ class UmdSmokeTestModel {
       "full Timeless is missing Window",
     );
 
+    for (const browser_context of [context, full_context]) {
+      const core = browser_context.Timeless;
+      const ref_before_renderer = core.ref;
+      this.load_script(browser_context, "timeless.ui-renderer.umd.min.js");
+      this.load_script(browser_context, "timeless.ui-renderer-dom.umd.min.js");
+      this.assert(
+        core.ref === ref_before_renderer,
+        "UI renderer replaced core ref",
+      );
+      this.assert(
+        typeof core.UiRendererDOM.createDOMRenderer === "function",
+        "DOM UI renderer did not attach its factory",
+      );
+      const renderer = core.UiRendererDOM.createDOMRenderer();
+      this.assert(
+        renderer.slots instanceof core.UiRenderer.SlotRegistry,
+        "DOM adapter did not reuse the portable slot registry",
+      );
+      const remove = renderer.slots.register({ name: "root" }, () => "root");
+      this.assert(
+        renderer.slots.select("root", {}).length === 1,
+        "UMD registration failed",
+      );
+      remove();
+      renderer.dispose();
+      this.load_script(browser_context, "timeless.a2ui.umd.min.js");
+      this.assert(core.ref === ref_before_renderer, "A2UI replaced core ref");
+      const a2ui = new core.a2ui.A2UIRenderer();
+      a2ui.processMessages([
+        {
+          version: "v0.9.1",
+          createSurface: {
+            surfaceId: "smoke",
+            catalogId: core.a2ui.BASIC_CATALOG_ID,
+          },
+        },
+        {
+          version: "v0.9.1",
+          updateComponents: {
+            surfaceId: "smoke",
+            components: [
+              { id: "root", component: "Text", text: { path: "/title" } },
+            ],
+          },
+        },
+        {
+          version: "v0.9.1",
+          updateDataModel: {
+            surfaceId: "smoke",
+            value: { title: "Official A2UI" },
+          },
+        },
+      ]);
+      this.assert(
+        a2ui.model.surfaces.get("smoke").data.title === "Official A2UI",
+        "A2UI UMD protocol update failed",
+      );
+      a2ui.destroy();
+    }
+
     return {
       lite_exports: Object.keys(timeless).filter((key) => key !== "utils")
         .length,
@@ -121,7 +181,7 @@ class UmdSmokeTestModel {
 class UmdSmokeTestView {
   render(result) {
     console.log(
-      `UMD smoke test passed: lite (${result.lite_exports} exports) -> optional utils (${result.utils_exports} exports).`,
+      `UMD smoke test passed: lite (${result.lite_exports} exports), optional utils (${result.utils_exports} exports), UI renderer and A2UI with lite/full core.`,
     );
   }
 }

@@ -1,38 +1,13 @@
-// Types
-export type {
-  UINode,
-  UINodeType,
-  FieldProps,
-  StreamOp,
-  ResolvedNode,
-  A2UISession,
-} from "./types";
-
-// Schema Resolver
-export {
-  resolveNode,
-  resolveField,
-  resolveContainer,
-  resolveButton,
-  resolveSeparator,
-  resolveText,
-  setComponents,
-  getComponent,
-} from "./schema-resolver";
-
-// Renderer
+export * from "./types";
 export { A2UIRenderer } from "./renderer";
-
-// Stream Parser
-export { A2UIStreamParser } from "./stream-parser";
-export type { StreamParserOptions } from "./stream-parser";
-
-// Main API
+export { A2UIModel, SurfaceModel } from "./model";
+export { A2UIStreamParser, type StreamParserOptions } from "./stream-parser";
+export { ProtocolValidator, ProtocolError } from "./validation";
+export { createBasicCatalog, BASIC_CATALOG_ID } from "./catalog";
 export {
+  renderMessages,
   renderStream,
-  renderSchema,
-  applyOps,
-  registerComponents,
-  A2UIVersion,
+  A2UI_PROTOCOL_VERSION,
+  A2UI_MIME_TYPE,
+  type RenderStreamOptions,
 } from "./a2ui";
-export type { RenderStreamOptions } from "./a2ui";

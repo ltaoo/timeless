@@ -1,0 +1,29 @@
+{
+  "name": "@timeless/ui-renderer",
+  "version": "0.34.2",
+  "description": "Typed plugin UI slots and observable bindings for Timeless hosts",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/timeless.ui-renderer.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/timeless.ui-renderer.esm.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@timeless/timeless": "workspace:*"
+  }
+}

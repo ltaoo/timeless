@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@microsoft/api-extractor': 7.58.1
+
 importers:
 
   .:
@@ -545,12 +548,19 @@ importers:
 
   packages/a2ui:
     dependencies:
-      '@timeless/inner-vm':
-        specifier: workspace:*
-        version: link:../ui-vm
       '@timeless/timeless':
         specifier: workspace:*
         version: link:../timeless
+      ajv:
+        specifier: 8.18.0
+        version: 8.18.0
+      ajv-formats:
+        specifier: 3.0.1
+        version: 3.0.1(ajv@8.18.0)
+    devDependencies:
+      '@timeless/timeless-dom':
+        specifier: workspace:*
+        version: link:../timeless-dom
 
   packages/analytics: {}
 
@@ -951,6 +961,21 @@ importers:
       tailwindcss:
         specifier: ^3.0.0 || ^4.0.0
         version: 4.2.2
+
+  packages/ui-renderer:
+    dependencies:
+      '@timeless/timeless':
+        specifier: workspace:*
+        version: link:../timeless
+
+  packages/ui-renderer-dom:
+    dependencies:
+      '@timeless/timeless-dom':
+        specifier: workspace:*
+        version: link:../timeless-dom
+      '@timeless/ui-renderer':
+        specifier: workspace:*
+        version: link:../ui-renderer
 
   packages/ui-vm:
     dependencies:

@@ -1,0 +1,29 @@
+{
+  "name": "@timeless/ui-renderer-dom",
+  "version": "0.34.2",
+  "description": "Timeless DOM host adapter for plugin UI slots",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/timeless.ui-renderer-dom.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/timeless.ui-renderer-dom.esm.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@timeless/ui-renderer": "workspace:*",
+    "@timeless/timeless-dom": "workspace:*"
+  }
+}
