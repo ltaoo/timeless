@@ -1,9 +1,34 @@
-import { Result } from "@timeless/timeless";
+import { getPlatform, Result } from "@timeless/timeless";
+import type { ParsedHTML, TextRange, TextHighlight } from "@timeless/inner-kit";
+import { connect as provide_audio } from "./audio";
+import { download } from "./download";
+import { random_uuid } from "./uuid";
+
 import { StorageCore, ApplicationModel, ThemeTypes } from "@timeless/inner-kit";
 
 export function connect<T extends { storage: StorageCore<any>; user: any }>(
   app: ApplicationModel<T>,
 ) {
+  app.randomUUID = () => random_uuid();
+  app.download = (input) => download(input);
+  app.parseHTML = (html) => {
+    const parse = getPlatform().parseHTML;
+    if (!parse) throw new Error("Renderer does not implement HTML parsing");
+    return parse(html) as ParsedHTML;
+  };
+  app.createTextRange = (target, start, end, options) => {
+    const create = getPlatform().createTextRange;
+    if (!create) throw new Error("Renderer does not implement text ranges");
+    return create(target, start, end, options) as TextRange;
+  };
+  app.highlightText = (ranges, options) => {
+    const highlight = getPlatform().highlightText;
+    if (!highlight)
+      throw new Error("Renderer does not implement text highlights");
+    return highlight(ranges, options) as TextHighlight;
+  };
+  provide_audio(app.audio);
+
   const ownerDocument = globalThis.document;
   app.getComputedStyle = (el: HTMLElement) => {
     return window.getComputedStyle(el);

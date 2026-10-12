@@ -103,35 +103,42 @@ export class HistoryCore<
     this.$view = view;
     this.$router = router;
     this.routes = routes;
-    this.routesWithPathname = Object.fromEntries(Object.values(routes).map(route => [route.pathname, route]));
+    this.routesWithPathname = Object.fromEntries(
+      Object.values(routes).map((route) => [route.pathname, route]),
+    );
     this.views = views;
     this.virtual = virtual;
   }
 
-  /** Resolve layouts to their default page and unknown paths to the nearest
-   * layout fallback. Returns null when the route tree has no matching fallback.
-   */
-  matchPath(pathname: string): R | null {
-    const route = this.routesWithPathname[pathname];
-    if (route) {
-      return this.routes[this.resolveLayoutDefaultName(route.name)] || null;
-    }
-    const layout = Object.values(this.routes)
-      .filter(route => route.layout && route.notfoundFallbackName &&
-        (route.pathname === "/" || pathname.startsWith(route.pathname + "/")))
-      .sort((a, b) => b.pathname.length - a.pathname.length)[0];
-    return layout && this.routes[this.resolveLayoutDefaultName(layout.notfoundFallbackName)] || null;
-  }
-
   resolveLayoutDefaultName(name: K) {
-    const route = this.routes[name];
-    if (!route) {
-      return name;
-    }
-    if (route.layout && route.defaultName && route.defaultName !== name) {
-      return route.defaultName as K;
+    const visited = new Set<K>();
+    while (!visited.has(name)) {
+      visited.add(name);
+      const route = this.routes[name];
+      if (!route?.layout || !route.defaultName) break;
+      name = route.defaultName as K;
     }
     return name;
+  }
+
+  /** 按 pathname 匹配；未知路径使用最近布局的回退页，未配置则返回 null。 */
+  matchPath(pathname: string): R | null {
+    const route = this.routesWithPathname[pathname];
+    if (route)
+      return this.routes[this.resolveLayoutDefaultName(route.name)] || null;
+    const layout = Object.values(this.routes)
+      .filter(
+        (item) =>
+          item.layout &&
+          item.notfoundFallbackName &&
+          (item.pathname === "/" || pathname.startsWith(item.pathname + "/")),
+      )
+      .sort((a, b) => b.pathname.length - a.pathname.length)[0];
+    return layout
+      ? this.routes[
+          this.resolveLayoutDefaultName(layout.notfoundFallbackName)
+        ] || null
+      : null;
   }
 
   push(

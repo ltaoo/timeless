@@ -89,7 +89,9 @@ describe("provider-web HttpClientCore", () => {
     const { store, calls } = make_client();
     const controller = new AbortController();
     controller.abort("stop");
-    await store.fetch({ url: "/api/a", method: "GET", signal: controller.signal });
-    expect((calls[0].init.signal as AbortSignal).aborted).toBe(true);
+    await expect(
+      store.fetch({ url: "/api/a", method: "GET", signal: controller.signal }),
+    ).rejects.toBe("stop");
+    expect(calls).toHaveLength(0);
   });
 });

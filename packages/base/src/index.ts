@@ -9,3 +9,5 @@ export * from "./type";
 export * from "./utils";
 export * from "./throttle";
 export * from "./debounce";
+
+export * from "./host";

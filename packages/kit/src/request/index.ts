@@ -252,6 +252,7 @@ export class RequestCore<
         cache,
         signal,
         keepalive,
+        timeout,
         process,
       } = this.service(...(args as unknown as any[]));
       // console.log('[DOMAIN]request/index - after = this.service()', headers);
@@ -264,6 +265,7 @@ export class RequestCore<
         cache,
         signal,
         keepalive,
+        timeout,
       };
       if (method === "GET") {
         // const [query, extra = {}] = args;

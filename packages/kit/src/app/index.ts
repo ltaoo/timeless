@@ -5,6 +5,17 @@
 import { BaseDomain, Handler, Result } from "@timeless/inner-base";
 import { JSONObject } from "@timeless/inner-types";
 
+import { AudioCore } from "../audio";
+import {
+  DownloadInput,
+  ParsedHTML,
+  TextRange,
+  TextRangeOptions,
+  TextHighlight,
+  TextHighlightOptions,
+  unsupported_host_capability,
+} from "./platform";
+
 import { StorageCore } from "@/storage";
 import { ClipboardModel } from "@/clipboard";
 
@@ -120,6 +131,34 @@ export class ApplicationModel<
   height = 0;
   theme: ThemeTypes = "system";
 
+  audio = new AudioCore();
+
+  randomUUID(): string {
+    return unsupported_host_capability("randomUUID");
+  }
+  parseHTML(html: string): ParsedHTML {
+    return unsupported_host_capability("parseHTML");
+  }
+  createTextRange(
+    target: unknown,
+    start: number,
+    end: number,
+    options?: TextRangeOptions,
+  ): TextRange {
+    return unsupported_host_capability("createTextRange");
+  }
+  highlightText(
+    ranges: TextRange[],
+    options: TextHighlightOptions,
+  ): TextHighlight {
+    return unsupported_host_capability("highlightText");
+  }
+  download(input: DownloadInput): Promise<void> {
+    return Promise.reject(
+      new Error("Host provider does not implement download"),
+    );
+  }
+
   safeArea = false;
   Events = Events;
 
@@ -148,6 +187,11 @@ export class ApplicationModel<
       onReady,
     };
   }
+  destroy() {
+    this.audio.destroy();
+    super.destroy();
+  }
+
   /** 启动应用 */
   async start(size: { width: number; height: number }) {
     const { width, height } = size;

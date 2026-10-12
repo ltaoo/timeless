@@ -92,16 +92,17 @@ export type RouteConfig<T> = {
   parent: {
     name: string;
   };
-  options?: Partial<{
-    require?: string[];
-    keep_alive?: boolean;
-    animation?: {
-      in: string;
-      out: string;
-      show: string;
-      hide: string;
-    };
-  }>;
+  options?: Record<string, unknown> &
+    Partial<{
+      require?: string[];
+      keep_alive?: boolean;
+      animation?: {
+        in: string;
+        out: string;
+        show: string;
+        hide: string;
+      };
+    }>;
   // component: unknown;
 };
 
@@ -274,17 +275,10 @@ type RouteInner = {
   pathname: string;
   component?: any;
   is_default?: boolean;
+  default?: boolean;
+  notfound?: boolean;
   is_notfound_fallback?: boolean;
-  options?: Partial<{
-    // keep_alive?: boolean;
-    // animation?: Partial<{
-    //   in: string;
-    //   out: string;
-    //   show: string;
-    //   hide: string;
-    // }>;
-    require?: string[];
-  }>;
+  options?: RouteConfig<string>["options"];
   children?: RouteConfigure;
 };
 export type RouteConfigure = Record<PathnameKey, RouteInner>;
@@ -312,7 +306,11 @@ export function buildRoutes<T extends RouteConfigure>(routes: T) {
   let defaultRouteName = "root.home_layout.index" as Exclude<K, "root">;
   let notfoundRouteName = "root.notfound" as Exclude<K, "root">;
 
-  function traverse(config: Record<string, any>, parentName: string, parentRequire: string[] = []) {
+  function traverse(
+    config: Record<string, any>,
+    parentName: string,
+    parentRequire: string[] = [],
+  ) {
     const children = {};
     for (const key in config) {
       const item = config[key];
@@ -338,9 +336,14 @@ export function buildRoutes<T extends RouteConfigure>(routes: T) {
         is_notfound_fallback: item.is_notfound_fallback,
       };
 
-      const require = [...new Set([...parentRequire, ...(item.options?.require || [])])];
+      const require = [
+        ...new Set([...parentRequire, ...(item.options?.require || [])]),
+      ];
       if (item.options || require.length) {
-        node.options = { ...item.options, ...(require.length ? { require } : {}) };
+        node.options = {
+          ...item.options,
+          ...(require.length ? { require } : {}),
+        };
       }
 
       if (item.children) {
@@ -362,7 +365,8 @@ export function buildRoutes<T extends RouteConfigure>(routes: T) {
     },
   };
   const result = build<K>(configure as any);
-  defaultRouteName = result.routes.root.defaultName as Exclude<K, "root"> || defaultRouteName;
+  defaultRouteName = (result.routes.root.defaultName ||
+    defaultRouteName) as Exclude<K, "root">;
   if (result.routes[notfoundRouteName]) {
     result.routes.root.notfoundFallbackName ??= notfoundRouteName;
   }

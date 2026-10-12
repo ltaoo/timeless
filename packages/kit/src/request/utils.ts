@@ -17,6 +17,7 @@ export type RequestPayload<T> = {
   cache?: RequestCache;
   signal?: AbortSignal;
   keepalive?: boolean;
+  timeout?: number;
   // defaultResponse?: T;
   process?: (v: any) => T;
 };
@@ -27,6 +28,7 @@ type RequestExtra = Partial<{
   cache: RequestCache;
   signal: AbortSignal;
   keepalive: boolean;
+  timeout: number;
 }>;
 /**
  * GetRespTypeFromRequestPayload
@@ -64,7 +66,7 @@ export const request = {
     extra: RequestExtra = {},
   ) {
     // console.log("GET", endpoint);
-    const { headers, cache, signal, keepalive } = extra;
+    const { headers, cache, signal, keepalive, timeout } = extra;
     const url = [endpoint, query ? "?" + qs_stringify(query) : ""].join("");
     const resp = {
       url,
@@ -74,6 +76,7 @@ export const request = {
       cache,
       signal,
       keepalive,
+      timeout,
     } as RequestPayload<T>;
     if (getHandler) {
       getHandler(resp);
@@ -83,7 +86,7 @@ export const request = {
   /** 构建请求参数 */
   post<T>(url: unknown, body?: any, extra: RequestExtra = {}) {
     // console.log("POST", url);
-    const { headers, cache, signal, keepalive } = extra;
+    const { headers, cache, signal, keepalive, timeout } = extra;
     const resp = {
       url,
       method: "POST",
@@ -93,6 +96,7 @@ export const request = {
       cache,
       signal,
       keepalive,
+      timeout,
     } as RequestPayload<T>;
     if (posterHandler) {
       posterHandler(resp);
@@ -101,7 +105,7 @@ export const request = {
   },
   /** 与 post 同构，只是方法为 PUT。 */
   put<T>(url: unknown, body?: any, extra: RequestExtra = {}) {
-    const { headers, cache, signal, keepalive } = extra;
+    const { headers, cache, signal, keepalive, timeout } = extra;
     return {
       url,
       method: "PUT",
@@ -110,14 +114,18 @@ export const request = {
       cache,
       signal,
       keepalive,
+      timeout,
     } as RequestPayload<T>;
   },
   patch<T>(url: unknown, body?: any, extra: RequestExtra = {}) {
-    return { ...request.put<T>(url, body, extra), method: "PATCH" } as RequestPayload<T>;
+    return {
+      ...request.put<T>(url, body, extra),
+      method: "PATCH",
+    } as RequestPayload<T>;
   },
   /** DELETE **不带 body**（与 findrss 的 `request.del(url, extra)` 对应）。 */
   del<T>(url: unknown, extra: RequestExtra = {}) {
-    const { headers, cache, signal, keepalive } = extra;
+    const { headers, cache, signal, keepalive, timeout } = extra;
     return {
       url,
       method: "DELETE",
@@ -125,6 +133,7 @@ export const request = {
       cache,
       signal,
       keepalive,
+      timeout,
     } as RequestPayload<T>;
   },
 };
@@ -199,7 +208,18 @@ export function request_factory(
     },
     get<T>(...args: Parameters<typeof request.get>) {
       const payload = request.get<T>(...args);
-      const { url, method, query, params, body, headers, cache, signal, keepalive } = payload;
+      const {
+        url,
+        method,
+        query,
+        params,
+        body,
+        headers,
+        cache,
+        signal,
+        keepalive,
+        timeout,
+      } = payload;
       if (_debug) {
         console.log("create GET payload");
         console.log(payload);
@@ -217,6 +237,7 @@ export function request_factory(
         cache,
         signal,
         keepalive,
+        timeout,
         headers: {
           ...payload.headers,
           ..._headers,
@@ -227,7 +248,17 @@ export function request_factory(
     },
     post<T>(...args: Parameters<typeof request.post>) {
       const payload = request.post<T>(...args);
-      const { url, method, query, params, body = {}, cache, signal, keepalive } = payload;
+      const {
+        url,
+        method,
+        query,
+        params,
+        body = {},
+        cache,
+        signal,
+        keepalive,
+        timeout,
+      } = payload;
       if (_debug) {
         console.log("create POST payload");
         console.log(payload);
@@ -244,6 +275,7 @@ export function request_factory(
         cache,
         signal,
         keepalive,
+        timeout,
         headers: {
           ...payload.headers,
           ..._headers,
@@ -254,7 +286,17 @@ export function request_factory(
     },
     put<T>(...args: Parameters<typeof request.put>) {
       const payload = request.put<T>(...args);
-      const { url, method, query, params, body = {}, cache, signal, keepalive } = payload;
+      const {
+        url,
+        method,
+        query,
+        params,
+        body = {},
+        cache,
+        signal,
+        keepalive,
+        timeout,
+      } = payload;
       if (_debug) {
         console.log("create PUT payload");
         console.log(payload);
@@ -269,6 +311,7 @@ export function request_factory(
         cache,
         signal,
         keepalive,
+        timeout,
         headers: {
           ...payload.headers,
           ..._headers,
@@ -288,7 +331,17 @@ export function request_factory(
     },
     del<T>(...args: Parameters<typeof request.del>) {
       const payload = request.del<T>(...args);
-      const { url, method, query, params, body, cache, signal, keepalive } = payload;
+      const {
+        url,
+        method,
+        query,
+        params,
+        body,
+        cache,
+        signal,
+        keepalive,
+        timeout,
+      } = payload;
       if (_debug) {
         console.log("create DELETE payload");
         console.log(payload);
@@ -303,6 +356,7 @@ export function request_factory(
         cache,
         signal,
         keepalive,
+        timeout,
         headers: {
           ...payload.headers,
           ..._headers,

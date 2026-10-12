@@ -20,3 +20,11 @@ export {
   connectScroll as provide_ui_scroll_view_scroll,
 } from "./ui/scroll_view";
 export { connect as provide_ui_video_player } from "./ui/video_player";
+
+export {
+  connect as provide_audio,
+  create_audio_provider,
+  type WebAudioProviderOptions,
+} from "./audio";
+export { download } from "./download";
+export { random_uuid } from "./uuid";

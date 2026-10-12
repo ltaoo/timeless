@@ -13,6 +13,8 @@ export type WebHttpClientProviderOptions = {
    * 宿主若需要统一鉴权 / 收口（如 findrss 的 401 跳登录），注入自己的 fetch。
    */
   transport?: WebHttpTransport;
+  /** Default deadline; overridden by the client and each request. */
+  timeout?: number;
 };
 
 export function connect(
@@ -21,27 +23,37 @@ export function connect(
 ) {
   const transport: WebHttpTransport =
     options.transport || ((input, init) => globalThis.fetch(input, init));
+  const provider_timeout = options.timeout;
   let requests: { id: string; controller: AbortController }[] = [];
 
   store.fetch = async (options) => {
     const { url, method, id, data, headers, cache, signal, keepalive } =
       options;
+    const timeout = options.timeout ?? store.timeout ?? provider_timeout;
+    if (timeout !== undefined && (!Number.isFinite(timeout) || timeout < 0))
+      throw new RangeError("Request timeout must be non-negative");
     const controller = new AbortController();
-    if (id) {
-      requests.push({ id, controller });
-    }
+    const request = { id: id || "", controller };
+    if (id) requests.push(request);
+    const abort = () => controller.abort(signal?.reason);
+    let timer: ReturnType<typeof setTimeout> | undefined;
     if (signal) {
       if (signal.aborted) {
         controller.abort(signal.reason);
       } else {
-        signal.addEventListener(
-          "abort",
-          () => controller.abort(signal.reason),
-          { once: true },
-        );
+        signal.addEventListener("abort", abort, { once: true });
       }
     }
+    if (timeout)
+      timer = setTimeout(
+        () =>
+          controller.abort(
+            new DOMException("Request timed out", "TimeoutError"),
+          ),
+        timeout,
+      );
     try {
+      if (controller.signal.aborted) throw controller.signal.reason;
       const init: RequestInit = {
         method,
         cache,
@@ -62,7 +74,11 @@ export function connect(
         init.headers = headers as Record<string, string>;
       }
       const response = await transport(url as string, init);
-      const parsed = await response.json().catch(() => null);
+      const parsed = await response.json().catch((error) => {
+        if (controller.signal.aborted) throw controller.signal.reason;
+        return null;
+      });
+      if (controller.signal.aborted) throw controller.signal.reason;
       return {
         ok: response.ok,
         status: response.status,
@@ -70,16 +86,21 @@ export function connect(
         json: async () => parsed,
       };
     } finally {
-      requests = requests.filter((r) => r.id !== id);
+      if (timer !== undefined) clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      requests = requests.filter((r) => r !== request);
     }
   };
   store.cancel = (id: string) => {
-    const matched = requests.find((r) => r.id === id);
-    if (!matched) {
+    const matched = requests.filter((r) => r.id === id);
+    if (!matched.length) {
       return Result.Err("没有找到对应请求");
     }
     requests = requests.filter((r) => r.id !== id);
-    matched.controller.abort("主动取消");
+    for (const request of matched)
+      request.controller.abort(
+        new DOMException("Request cancelled", "AbortError"),
+      );
     return Result.Ok(null);
   };
 }

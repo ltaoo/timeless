@@ -1,3 +1,6 @@
+import { parse_html } from "./html";
+import { create_text_range, highlight_text } from "./text-range";
+
 import { setPlatform, type Platform } from "@timeless/timeless";
 
 interface Rect {
@@ -48,9 +51,7 @@ const zeroRect: Rect = {
 };
 
 function numberOr(value: unknown, fallback: number): number {
-  return typeof value === "number" && Number.isFinite(value)
-    ? value
-    : fallback;
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
 function normalizeRect(rect: Partial<Rect> | null | undefined): Rect {
@@ -215,6 +216,9 @@ function getDocumentElement(element?: unknown): unknown {
 }
 
 export const platform = setPlatform<Platform>({
+  parseHTML: parse_html,
+  createTextRange: create_text_range,
+  highlightText: highlight_text,
   addEventListener(
     type: string,
     handler: EventListener,
@@ -265,3 +269,6 @@ export const platform = setPlatform<Platform>({
 
   getDocumentElement,
 });
+
+export { parse_html } from "./html";
+export { create_text_range, highlight_text } from "./text-range";

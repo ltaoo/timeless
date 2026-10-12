@@ -1,3 +1,11 @@
+import type {
+  ParsedHTML,
+  TextRange,
+  TextRangeOptions,
+  TextHighlight,
+  TextHighlightOptions,
+} from "./host";
+
 export interface Rect {
   x: number;
   y: number;
@@ -18,6 +26,19 @@ export interface ElementRects {
 export type Strategy = "absolute" | "fixed";
 
 export interface Platform {
+  /** Optional host extensions. Consumers must check availability on other renderers. */
+  parseHTML?(html: string): ParsedHTML;
+  createTextRange?(
+    target: unknown,
+    start: number,
+    end: number,
+    options?: TextRangeOptions,
+  ): TextRange;
+  highlightText?(
+    ranges: TextRange[],
+    options: TextHighlightOptions,
+  ): TextHighlight;
+
   addEventListener(
     type: string,
     handler: EventListener,

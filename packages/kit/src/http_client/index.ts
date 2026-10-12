@@ -13,6 +13,8 @@ type HttpClientCoreProps = {
   hostname?: string;
   headers?: Record<string, string>;
   debug?: boolean;
+  /** Request deadline in milliseconds; zero disables it. */
+  timeout?: number;
 };
 type HttpClientCoreState = {};
 
@@ -28,6 +30,7 @@ export type HttpClientFetchOptions = {
   cache?: RequestCache;
   signal?: AbortSignal;
   keepalive?: boolean;
+  timeout?: number;
 };
 
 /**
@@ -48,21 +51,24 @@ type HttpClientSendExtra = Partial<{
   cache: RequestCache;
   signal: AbortSignal;
   keepalive: boolean;
+  timeout: number;
 }>;
 
 export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
   hostname: string = "";
   headers: Record<string, string> = {};
   debug = false;
+  timeout?: number;
 
   constructor(props: HttpClientCoreProps = {}) {
     super(props);
 
-    const { hostname = "", headers = {}, debug = false } = props;
+    const { hostname = "", headers = {}, debug = false, timeout } = props;
 
     this.hostname = hostname;
     this.headers = headers;
     this.debug = debug;
+    this.timeout = timeout;
   }
 
   /**
@@ -94,6 +100,7 @@ export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
         cache: extra.cache,
         signal: extra.signal,
         keepalive: extra.keepalive,
+        timeout: extra.timeout,
         headers: {
           ...this.headers,
           ...(extra.headers || {}),
