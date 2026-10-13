@@ -4,6 +4,12 @@ import { MountedEvent } from "@/event";
 
 import { Box, BoxProps } from "./box";
 import { Fragment } from "./fragment";
+import {
+  create_owner,
+  get_owner,
+  run_with_owner,
+  dispose_owner,
+} from "@/context/context";
 import { isElement, TimelessElement, ViewChildren } from "./type";
 
 export type ListViewV2Reactive<T> = T | Ref<T> | DerivedRef<T>;
@@ -281,6 +287,7 @@ export function ListViewV2<T extends Record<string, unknown>>(
     itemHeight: initial_item_height,
     gutter: isRef(gutter) ? gutter.value : gutter,
   });
+  const parent_owner = get_owner();
   let host: any = null;
   let mounted_cleanup: (() => void) | undefined;
   let destroyed = false;
@@ -328,9 +335,38 @@ export function ListViewV2<T extends Record<string, unknown>>(
     },
     model,
     renderItem(item, index) {
-      const child = render(item, index);
-      if (child === null || child === undefined) return null;
-      return isElement(child) ? child : Fragment({}, child);
+      const owner = create_owner(parent_owner);
+      let child: TimelessElement | null;
+      try {
+        child = run_with_owner(owner, () => {
+          const content = render(item, index);
+          if (content === null || content === undefined) return null;
+          return isElement(content) ? content : Fragment({}, content);
+        });
+      } catch (error) {
+        dispose_owner(owner);
+        throw error;
+      }
+      if (!child) {
+        dispose_owner(owner);
+        return null;
+      }
+      const row = Fragment({}, [child]);
+      const destroy = row.destroy;
+      let disposed = false;
+      // Virtual rows are discarded, so both host teardown paths permanently dispose them.
+      const dispose = () => {
+        if (disposed) return;
+        disposed = true;
+        try {
+          destroy();
+        } finally {
+          dispose_owner(owner);
+        }
+      };
+      row.destroy = dispose;
+      row.onUnmounted = dispose;
+      return row;
     },
     onMounted(event: MountedEvent) {
       box$.state.rendered = true;

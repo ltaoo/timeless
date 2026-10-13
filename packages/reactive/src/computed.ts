@@ -151,9 +151,9 @@ export function computed<T = any>(
   };
 
   // Register with owner's disposal tracking if active
-  // if (_current_disposables) {
-  //   _current_disposables.push(res.destroy);
-  // }
+  if (_current_disposables) {
+    _current_disposables.push(res.destroy);
+  }
 
   return res as DerivedRef<T>;
 }

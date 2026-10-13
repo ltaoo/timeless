@@ -1,4 +1,5 @@
 import {
+  destroyElement,
   isRef,
   Ref,
   ref,
@@ -181,7 +182,7 @@ export function DOMListViewV2(props: {
     resize_observer?.unobserve(entry.row);
     row_entries.delete(entry.row);
     entry.child?.beforeUnmounted?.();
-    entry.child?.onUnmounted?.();
+    destroyElement(entry.child);
     entry.item_ref.destroy();
     entry.index_ref.destroy();
     entry.row.remove();

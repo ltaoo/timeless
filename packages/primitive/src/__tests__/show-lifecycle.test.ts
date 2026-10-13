@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { ref, computed } from "@timeless/inner-reactive";
+
 import { View } from "@/content/view";
 import { Show } from "@/reactive/show";
 
@@ -47,4 +49,25 @@ describe("Show lifecycle", () => {
     expect(host.insertChildren).toHaveBeenCalledOnce();
     expect(child_mounted).toHaveBeenCalledOnce();
   });
+});
+
+it("permanent destruction releases the condition, owner and nested child exactly once", () => {
+  const source = ref(0);
+  const condition = ref(true);
+  const onUnmounted = vi.fn();
+  const childUnmounted = vi.fn();
+  const show = Show({
+    when: condition,
+    onUnmounted,
+    ok: () =>
+      View({ onUnmounted: childUnmounted }, [
+        computed(source, (value) => value),
+      ]),
+  });
+  show.destroy();
+  show.destroy();
+  expect(condition.getDeps()).toHaveLength(0);
+  expect(source.getDeps()).toHaveLength(0);
+  expect(onUnmounted).toHaveBeenCalledTimes(1);
+  expect(childUnmounted).toHaveBeenCalledTimes(1);
 });

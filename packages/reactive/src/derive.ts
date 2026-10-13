@@ -99,7 +99,8 @@ export function derive<T>(
     subscribe(ctx: Subscriber<T>) {
       _derive_deps.push(ctx);
       return function () {
-        _derive_deps.splice(_derive_deps.indexOf(ctx), 1);
+        const index = _derive_deps.indexOf(ctx);
+        if (index >= 0) _derive_deps.splice(index, 1);
       };
     },
     destroy() {
@@ -120,9 +121,9 @@ export function derive<T>(
   };
 
   // Register with owner's disposal tracking if active
-  // if (_current_disposables) {
-  //   _current_disposables.push(res.destroy);
-  // }
+  if (_current_disposables) {
+    _current_disposables.push(res.destroy);
+  }
 
   return res;
 }

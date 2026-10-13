@@ -71,6 +71,8 @@ export function For<T>(
   // Track subscription unsubscribers separately for HMR
   const _hmr_subs: (() => void)[] = [];
   let _id = 0;
+  let destroyed = false;
+  let unmounted = false;
   const listener$ = ListenerManager();
 
   const _key = props.key;
@@ -614,6 +616,7 @@ export function For<T>(
       return [...state.children];
     },
     onMounted(event: MountedEvent) {
+      unmounted = false;
       // logger.log("onMounted", state.children);
       methods.subscribe_props();
       state.rendered = true;
@@ -646,6 +649,7 @@ export function For<T>(
       }
     },
     onUnmounted() {
+      unmounted = true;
       if (props.onUnmounted) {
         props.onUnmounted();
       }
@@ -670,6 +674,22 @@ export function For<T>(
       // state.idx_arr = [];
       // state.item_owners = [];
       // state.children = [];
+    },
+    destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      if (!unmounted) props.onUnmounted?.();
+      listener$.destroy();
+      _hmr_subs.splice(0).forEach((unsubscribe) => unsubscribe());
+      for (const child of state.children) destroyElement(child);
+      for (const index of state.idx_arr) index?.destroy();
+      for (const owner of state.item_owners) if (owner) dispose_owner(owner);
+      state.children = [];
+      state.idx_arr = [];
+      state.item_owners = [];
+      state.items = [];
+      state.wrapped_items = [];
+      _existing_map.clear();
     },
     _hmr_dispose() {
       _hmr_subs.forEach((fn) => fn());

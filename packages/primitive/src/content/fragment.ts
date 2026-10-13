@@ -23,7 +23,12 @@
 import { MountedEvent } from "@/event";
 import { VNodeView } from "@/vnode/view";
 
-import { TimelessElement, ViewChildren, isElement } from "./type";
+import {
+  TimelessElement,
+  ViewChildren,
+  isElement,
+  destroyElement,
+} from "./type";
 import { Box } from "./box";
 
 /** Props for Fragment component */
@@ -50,6 +55,7 @@ export function Fragment(props: FragmentProps, children?: ViewChildren) {
   const { onMounted, beforeUnmounted, onUnmounted } = props || {};
 
   let $elm: any = null;
+  let destroyed = false;
   const box$ = Box<FragmentState>({}, {} as FragmentState);
 
   const state = box$.state;
@@ -66,6 +72,16 @@ export function Fragment(props: FragmentProps, children?: ViewChildren) {
     },
     state,
     children: state.children,
+    destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      box$.methods.destroy();
+      onUnmounted?.();
+      for (const child of state.children) destroyElement(child);
+      state.children = [];
+      state.rendered = false;
+      $elm = null;
+    },
     append(node: any) {
       state.children.push(node);
     },

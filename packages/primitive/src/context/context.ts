@@ -18,10 +18,7 @@ import {
   ViewChildren,
   resolve_children,
 } from "@/content/type";
-import {
-  start_tracking,
-  stop_tracking,
-} from "@timeless/inner-reactive";
+import { start_tracking, stop_tracking } from "@timeless/inner-reactive";
 
 // === Owner ===
 
@@ -44,8 +41,9 @@ export function run_with_owner<T>(owner: Owner, fn: () => T): T {
   try {
     return fn();
   } finally {
-    stop_tracking();
     current_owner = prev;
+    if (prev) start_tracking(prev.disposables);
+    else stop_tracking();
   }
 }
 
@@ -122,6 +120,14 @@ export function Scope(
   fragment.onUnmounted = () => {
     originalUnmounted();
     dispose_owner(owner);
+  };
+  const original_destroy = fragment.destroy!;
+  fragment.destroy = () => {
+    try {
+      original_destroy();
+    } finally {
+      dispose_owner(owner);
+    }
   };
   return fragment;
 }
