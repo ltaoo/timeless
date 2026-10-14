@@ -356,3 +356,25 @@ it("PATCH 从 factory 经 RequestCore 到 fetch，并触发状态回调", async 
     loading: false, response: { saved: true },
   }));
 });
+
+
+it("DELETE JSON body survives factory, RequestCore and HttpClientCore", async () => {
+  const client = new HttpClientCore();
+  client.fetch = vi.fn().mockResolvedValue({ ok: true, data: { removed: true } });
+  const controller = new AbortController();
+  const api = request_factory({ headers: { "X-Tenant": "one" } });
+  const req = new RequestCore(
+    (body: { id: string }) => api.del("/api/mail-account?scope=own", {
+      body, signal: controller.signal, cache: "no-store", keepalive: true,
+    }),
+    { client },
+  );
+  const body = { id: "mail-1" };
+  expect((await req.run(body)).data).toEqual({ removed: true });
+  expect(client.fetch).toHaveBeenCalledWith(expect.objectContaining({
+    method: "DELETE", url: "/api/mail-account?scope=own", data: body,
+    headers: { "X-Tenant": "one" }, signal: controller.signal,
+    cache: "no-store", keepalive: true,
+  }));
+  expect(req.state).toEqual({ initial: false, loading: false, error: null, response: { removed: true } });
+});

@@ -288,7 +288,7 @@ export class RequestCore<
         return Result.Ok(r) as Result<Promise<Result<P>>>;
       }
       if (method === "DELETE") {
-        const r = this.client.del<P>(url, extra);
+        const r = this.client.del<P>(url, { ...extra, body });
         return Result.Ok(r) as Result<Promise<Result<P>>>;
       }
       return Result.Err(`未知的 method '${method}'`);

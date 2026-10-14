@@ -123,12 +123,13 @@ export const request = {
       method: "PATCH",
     } as RequestPayload<T>;
   },
-  /** DELETE **不带 body**（与 findrss 的 `request.del(url, extra)` 对应）。 */
-  del<T>(url: unknown, extra: RequestExtra = {}) {
-    const { headers, cache, signal, keepalive, timeout } = extra;
+  /** DELETE 可在 options 中声明 body，省略时仍为无请求体的删除。 */
+  del<T>(url: unknown, extra: RequestExtra & { body?: any } = {}) {
+    const { body, headers, cache, signal, keepalive, timeout } = extra;
     return {
       url,
       method: "DELETE",
+      body,
       headers,
       cache,
       signal,

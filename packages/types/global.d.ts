@@ -21593,6 +21593,8 @@ declare module "packages/kit/src/http_client/index" {
         hostname?: string;
         headers?: Record<string, string>;
         debug?: boolean;
+        /** Request deadline in milliseconds; zero disables it. */
+        timeout?: number;
     };
     type HttpClientMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     /** `fetch` 的入参：URL 已由调用方拼好（`get` 会补 hostname + query）。 */
@@ -21605,6 +21607,7 @@ declare module "packages/kit/src/http_client/index" {
         cache?: RequestCache;
         signal?: AbortSignal;
         keepalive?: boolean;
+        timeout?: number;
     };
     /**
      * `fetch` 的返回信封：原生 `Response` 的关键字段 + 已解析的 JSON 数据。
@@ -21623,11 +21626,13 @@ declare module "packages/kit/src/http_client/index" {
         cache: RequestCache;
         signal: AbortSignal;
         keepalive: boolean;
+        timeout: number;
     }>;
     export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
         hostname: string;
         headers: Record<string, string>;
         debug: boolean;
+        timeout?: number;
         constructor(props?: HttpClientCoreProps);
         /**
          * 把「方法 + 端点 + body」跑成 `Result<T>`。状态与错误体的判定都收敛在这里：
@@ -21640,8 +21645,10 @@ declare module "packages/kit/src/http_client/index" {
         post<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: HttpClientSendExtra): Promise<Result<T>>;
         put<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: HttpClientSendExtra): Promise<Result<T>>;
         patch<T>(endpoint: unknown, body?: JSONObject | FormData, extra?: HttpClientSendExtra): Promise<Result<T>>;
-        /** DELETE 不带 body（与 findrss 的 `request.del(path, options)` 对应）。 */
-        del<T>(endpoint: unknown, extra?: HttpClientSendExtra): Promise<Result<T>>;
+        /** DELETE 的可选 body 放在 options 中，保留原有二参数调用。 */
+        del<T>(endpoint: unknown, extra?: HttpClientSendExtra & {
+            body?: JSONObject | FormData;
+        }): Promise<Result<T>>;
         fetch<T>(options: HttpClientFetchOptions): Promise<HttpClientFetchResult<T>>;
         cancel(id: string): import("@timeless/inner-base").Resp<null>;
         setHeaders(headers: Record<string, string>): void;
@@ -22635,6 +22642,7 @@ declare module "packages/kit/src/request/utils" {
         cache?: RequestCache;
         signal?: AbortSignal;
         keepalive?: boolean;
+        timeout?: number;
         process?: (v: any) => T;
     };
     /** get/post/put/del 的可选参数：headers 与三个 fetch 透传字段。 */
@@ -22643,6 +22651,7 @@ declare module "packages/kit/src/request/utils" {
         cache: RequestCache;
         signal: AbortSignal;
         keepalive: boolean;
+        timeout: number;
     }>;
     /**
      * GetRespTypeFromRequestPayload
@@ -22667,8 +22676,10 @@ declare module "packages/kit/src/request/utils" {
         /** 与 post 同构，只是方法为 PUT。 */
         put<T>(url: unknown, body?: any, extra?: RequestExtra): RequestPayload<T>;
         patch<T>(url: unknown, body?: any, extra?: RequestExtra): RequestPayload<T>;
-        /** DELETE **不带 body**（与 findrss 的 `request.del(url, extra)` 对应）。 */
-        del<T>(url: unknown, extra?: RequestExtra): RequestPayload<T>;
+        /** DELETE 可在 options 中声明 body，省略时仍为无请求体的删除。 */
+        del<T>(url: unknown, extra?: RequestExtra & {
+            body?: any;
+        }): RequestPayload<T>;
     };
     export function request_factory(opt?: Partial<{
         hostnames: Partial<{
@@ -22693,24 +22704,28 @@ declare module "packages/kit/src/request/utils" {
             cache: RequestCache;
             signal: AbortSignal;
             keepalive: boolean;
+            timeout: number;
         }>): RequestPayload<T>;
         post<T>(url: unknown, body?: any, extra?: Partial<{
             headers: Record<string, string | number>;
             cache: RequestCache;
             signal: AbortSignal;
             keepalive: boolean;
+            timeout: number;
         }>): RequestPayload<T>;
         put<T>(url: unknown, body?: any, extra?: Partial<{
             headers: Record<string, string | number>;
             cache: RequestCache;
             signal: AbortSignal;
             keepalive: boolean;
+            timeout: number;
         }>): RequestPayload<T>;
         patch<T>(url: unknown, body?: any, extra?: Partial<{
             headers: Record<string, string | number>;
             cache: RequestCache;
             signal: AbortSignal;
             keepalive: boolean;
+            timeout: number;
         }>): {
             hostname: string;
             headers: {
@@ -22726,13 +22741,17 @@ declare module "packages/kit/src/request/utils" {
             cache?: RequestCache;
             signal?: AbortSignal;
             keepalive?: boolean;
+            timeout?: number;
         };
         del<T>(url: unknown, extra?: Partial<{
             headers: Record<string, string | number>;
             cache: RequestCache;
             signal: AbortSignal;
             keepalive: boolean;
-        }>): RequestPayload<T>;
+            timeout: number;
+        }> & {
+            body?: any;
+        }): RequestPayload<T>;
     };
 }
 declare module "packages/kit/src/request/index" {

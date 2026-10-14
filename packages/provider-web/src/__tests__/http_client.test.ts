@@ -95,3 +95,12 @@ describe("provider-web HttpClientCore", () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+
+it("DELETE with a body uses the same JSON transport as POST", async () => {
+  const { store, calls } = make_client();
+  await store.del("/api/mail-account", { body: { id: "mail-1" } });
+  expect(calls[0].init.method).toBe("DELETE");
+  expect(calls[0].init.body).toBe('{"id":"mail-1"}');
+  expect(calls[0].init.headers).toEqual({ "Content-Type": "application/json" });
+});

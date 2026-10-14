@@ -162,12 +162,12 @@ export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
   ): Promise<Result<T>> {
     return this.send<T>("PATCH", endpoint, body, extra);
   }
-  /** DELETE 不带 body（与 findrss 的 `request.del(path, options)` 对应）。 */
+  /** DELETE 的可选 body 放在 options 中，保留原有二参数调用。 */
   async del<T>(
     endpoint: unknown,
-    extra: HttpClientSendExtra = {},
+    extra: HttpClientSendExtra & { body?: JSONObject | FormData } = {},
   ): Promise<Result<T>> {
-    return this.send<T>("DELETE", endpoint, undefined, extra);
+    return this.send<T>("DELETE", endpoint, extra.body, extra);
   }
   async fetch<T>(
     options: HttpClientFetchOptions,

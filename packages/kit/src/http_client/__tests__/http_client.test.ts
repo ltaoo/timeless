@@ -170,3 +170,15 @@ describe("HttpClientCore", () => {
     });
   });
 });
+
+
+it("del accepts an optional body without changing existing option arguments", async () => {
+  const client = new HttpClientCore();
+  client.fetch = vi.fn().mockResolvedValue({ ok: false, status: 409, data: { error: "conflict" } });
+  const result = await client.del("/api/account", { body: { id: "one" }, headers: { "X-Test": "1" } });
+  expect(client.fetch).toHaveBeenCalledWith(expect.objectContaining({
+    method: "DELETE", data: { id: "one" }, headers: { "X-Test": "1" },
+  }));
+  expect(result.error?.code).toBe(409);
+  expect(result.error?.message).toBe("conflict");
+});
