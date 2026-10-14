@@ -1,16 +1,19 @@
-import { Html, View, ViewChildren, ViewProps, classNames } from "@timeless/timeless";
+import { View, ViewChildren, ViewProps, classNames } from "@timeless/timeless";
 
 export function Kbd(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return Html.Kbd(
+  return View(
     {
       ...rest,
       dataset: {
         "data-slot": "kbd",
       },
       class: classNames([
-        "pointer-events-none inline-flex h-5 w-fit min-w-5 items-center justify-center gap-1 rounded-sm bg-muted px-1 font-sans text-xs font-medium text-muted-foreground select-none in-data-[slot=tooltip-content]:bg-background/20 in-data-[slot=tooltip-content]:text-background dark:in-data-[slot=tooltip-content]:bg-background/10 [&_svg:not([class*='size-'])]:size-3",
-        cls,
+        "tt-content-inline tt-content-code",
+        classNames([
+          "pointer-events-none inline-flex h-5 w-fit min-w-5 items-center justify-center gap-1 rounded-sm bg-muted px-1 font-sans text-xs font-medium text-muted-foreground select-none in-data-[slot=tooltip-content]:bg-background/20 in-data-[slot=tooltip-content]:text-background dark:in-data-[slot=tooltip-content]:bg-background/10 [&_svg:not([class*='size-'])]:size-3",
+          cls,
+        ]),
       ]),
     },
     children,

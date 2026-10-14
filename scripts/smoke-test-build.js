@@ -112,6 +112,25 @@ class UmdSmokeTestModel {
 
     for (const browser_context of [context, full_context]) {
       const core = browser_context.Timeless;
+      this.assert(!("Html" in core), "core still exposes the host tag factory");
+      for (const name of [
+        "View",
+        "Label",
+        "Disclosure",
+        "Canvas",
+        "Modal",
+        "Form",
+        "Input",
+        "Button",
+        "Link",
+        "Img",
+        "Video",
+      ]) {
+        this.assert(
+          typeof core[name] === "function",
+          `core is missing portable ${name}`,
+        );
+      }
       const ref_before_renderer = core.ref;
       this.load_script(browser_context, "timeless.ui-renderer.umd.min.js");
       this.load_script(browser_context, "timeless.ui-renderer-dom.umd.min.js");

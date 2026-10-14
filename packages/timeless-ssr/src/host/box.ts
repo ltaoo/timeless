@@ -127,6 +127,20 @@ export function SSRBox() {
       return function () {};
     },
     removeEventListener() {},
+    // Server rendering has neither native listeners nor a mounted child tree.
+    // These methods keep the SSR host aligned with the shared VNode contract.
+    setupEventListener(_events: unknown) {},
+    teardownEventListener(_events: unknown) {},
+    get$children(): string[] {
+      return [];
+    },
+    trackChild(
+      _dom: unknown,
+      _element: TimelessElement,
+      _vnode: VNodeView,
+      _index: number,
+    ) {},
+    untrackChild(_index: number) {},
     getChildren() {
       return [];
     },

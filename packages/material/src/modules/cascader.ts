@@ -8,7 +8,7 @@ import {
   ref,
   refobj,
 } from "@timeless/timeless";
-import { Html, For, Show, View, ViewProps } from "@timeless/timeless";
+import { For, Show, View, ViewProps } from "@timeless/timeless";
 
 import { PICKER_ANIMATION } from "./date-picker";
 
@@ -144,7 +144,7 @@ export function Cascader(
                       class: "m3-cascader__result",
                     },
                     [
-                      Html.Span({ class: "m3-cascader__path" }, [
+                      View({ class: "tt-content-inline m3-cascader__path" }, [
                         result.path.map((o) => o.label).join(" / "),
                       ]),
                     ],
@@ -214,8 +214,7 @@ export function Cascader(
                               {
                                 store,
                                 hasChildren: Boolean(
-                                  option.children &&
-                                    option.children.length > 0,
+                                  option.children && option.children.length > 0,
                                 ),
                                 class: "m3-cascader__item-arrow",
                               },

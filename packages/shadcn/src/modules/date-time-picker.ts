@@ -8,7 +8,7 @@ import {
   ListenerManager,
   refobj,
 } from "@timeless/timeless";
-import { Html, For, View, ViewProps, Show } from "@timeless/timeless";
+import { For, View, ViewProps, Show } from "@timeless/timeless";
 
 export function DateTimePicker(
   props: ViewProps & {
@@ -172,16 +172,16 @@ export function DateTimePicker(
           ]),
         },
         [
-          Html.Span(
+          View(
             {
-              class: combine(
-                { hasDate: has_date_, hasTime: has_time_ },
-                (t) => {
+              class: classNames([
+                "tt-content-inline",
+                combine({ hasDate: has_date_, hasTime: has_time_ }, (t) => {
                   return t.hasDate && t.hasTime
                     ? "text-foreground"
                     : "text-muted-foreground";
-                },
-              ),
+                }),
+              ]),
             },
             [
               combine({ date: date_state_, time: time_state_ }, (t) => {
@@ -252,10 +252,10 @@ export function DateTimePicker(
                           For({
                             each: ["一", "二", "三", "四", "五", "六", "日"],
                             render(day) {
-                              return Html.Span(
+                              return View(
                                 {
                                   class:
-                                    "text-center text-xs text-muted-foreground size-8 flex items-center justify-center",
+                                    "tt-content-inline text-center text-xs text-muted-foreground size-8 flex items-center justify-center",
                                 },
                                 [day],
                               );

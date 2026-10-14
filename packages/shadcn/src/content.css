@@ -1,0 +1,53 @@
+/* Visual content uses View; these defaults replace element-specific presentation. */
+:where(.tt-content-inline) {
+  display: inline;
+}
+:where(.tt-content-strong, .tt-content-heading-cell) {
+  font-weight: bolder;
+}
+:where(.tt-content-emphasis) {
+  font-style: italic;
+}
+:where(.tt-content-small) {
+  font-size: smaller;
+}
+:where(.tt-content-code) {
+  font-family: monospace;
+}
+:where(.tt-content-pre) {
+  white-space: pre;
+  font-family: monospace;
+  margin-block: 1em;
+}
+:where(.tt-content-table) {
+  display: table;
+}
+:where(.tt-content-rowgroup) {
+  display: table-row-group;
+}
+:where(.tt-content-row) {
+  display: table-row;
+}
+:where(.tt-content-cell) {
+  display: table-cell;
+}
+:where(.tt-content-list, .tt-content-ordered-list) {
+  margin-block: 1em;
+  padding-inline-start: 40px;
+}
+:where(.tt-content-list) {
+  list-style-type: disc;
+}
+:where(.tt-content-ordered-list) {
+  list-style-type: decimal;
+}
+:where(.tt-content-listitem) {
+  display: list-item;
+}
+:where(.tt-content-quote) {
+  margin-block: 1em;
+  margin-inline: 40px;
+}
+:where(.tt-content-paragraph) {
+  margin-block: 1em;
+}

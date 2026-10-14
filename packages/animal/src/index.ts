@@ -1,3 +1,4 @@
+import "./content.css";
 import { Gallery } from "./modules/gallery";
 import { Button } from "./modules/button";
 import { Input } from "./modules/input";

@@ -1,13 +1,26 @@
 import { describe, it, expect } from "vitest";
-import { Html, Button, ref, Show, View } from "@timeless/timeless";
+import { Modal, Canvas, Button, ref, Show, View } from "@timeless/timeless";
 
 import { renderToString } from "../index";
 
 describe("renderToString", () => {
-  it("renders the declared tag and rejects malformed tag names", () => {
-    expect(renderToString(Html.Dialog({  }, ["Gallery"]))).toBe("<dialog>Gallery</dialog>");
-    expect(renderToString(View({ as: 'div><script' } as any))).toBe("<div></div>");
-    expect(renderToString(Html.Input({  }))).toBe("<input>");
+  it("renders dedicated surfaces and ignores arbitrary View tags", () => {
+    expect(renderToString(Modal({ open: true }, ["Gallery"]))).toBe(
+      '<dialog role="dialog" aria-modal="true" open>Gallery</dialog>',
+    );
+    expect(renderToString(View({ as: "div><script" } as any))).toBe(
+      "<div></div>",
+    );
+    expect(renderToString(Canvas({ attributes: { width: 512 } }))).toBe(
+      '<canvas width="512"></canvas>',
+    );
+  });
+  it("renders current reactive modal visibility before mounting", () => {
+    const open = ref(false);
+    const modal = Modal({ open }, ["Content"]);
+    expect(renderToString(modal)).not.toContain(" open");
+    open.set(true);
+    expect(renderToString(modal)).toContain(" open>Content</dialog>");
   });
   it("should render a simple View with text", () => {
     const element = View({}, ["Hello World"]);

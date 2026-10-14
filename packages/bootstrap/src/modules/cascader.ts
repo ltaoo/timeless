@@ -9,7 +9,7 @@ import {
   ref,
   refobj,
 } from "@timeless/timeless";
-import { Html, For, Show, View, ViewProps } from "@timeless/timeless";
+import { For, Show, View, ViewProps } from "@timeless/timeless";
 
 /**
  * Cascader · Bootstrap 5.3
@@ -137,7 +137,7 @@ export function Cascader(
                       class: "cascader__item",
                     },
                     [
-                      Html.Span({ class: "cascader__path" }, [
+                      View({ class: "tt-content-inline cascader__path" }, [
                         result.path.map((o) => o.label).join(" / "),
                       ]),
                     ],
@@ -163,74 +163,70 @@ export function Cascader(
                   const cur_panel = combine({ state: state_, idx }, (t) => {
                     return t.state.panels[t.idx] ?? null;
                   });
-                  const options = computed(cur_panel, (t) => (t ? t.options : []));
-                  return View(
-                    { class: "cascader__panel" },
-                    [
-                      For({
-                        key: "value",
-                        each: options as any,
-                        render(
-                          option: CascaderOption<any> & {
-                            selected: boolean;
-                            focused: boolean;
-                          },
-                        ) {
-                          return ui.CascaderPrimitive.Item(
-                            {
-                              store,
-                              panelIndex: idx.value,
-                              option,
-                              class: classNames([
-                                "cascader__item",
-                                computed(cur_panel, (t: any) => {
-                                  const opt = t
-                                    ? t.options.find(
-                                        (o: any) => o.value === option.value,
-                                      )
-                                    : null;
-                                  const is_selected = opt
-                                    ? Boolean(opt.selected)
-                                    : false;
-                                  const is_focused = opt
-                                    ? Boolean(opt.focused)
-                                    : false;
-                                  const disabled = opt
-                                    ? Boolean(opt.disabled)
-                                    : false;
-                                  return [
-                                    disabled ? "is-disabled" : "",
-                                    is_selected || is_focused
-                                      ? "is-active"
-                                      : "",
-                                  ]
-                                    .filter(Boolean)
-                                    .join(" ");
-                                }),
-                              ]),
-                            },
-                            [
-                              ui.CascaderPrimitive.ItemText(
-                                { class: "cascader__item-text" },
-                                [option.label],
-                              ),
-                              ui.CascaderPrimitive.ItemIndicator(
-                                {
-                                  store,
-                                  hasChildren: Boolean(
-                                    option.children &&
-                                      option.children.length > 0,
-                                  ),
-                                  class: "cascader__item-indicator",
-                                },
-                                [Icon({ name: "chevron-right", size: 16 })],
-                              ),
-                            ],
-                          );
-                        },
-                      }),
-                    ],
+                  const options = computed(cur_panel, (t) =>
+                    t ? t.options : [],
                   );
+                  return View({ class: "cascader__panel" }, [
+                    For({
+                      key: "value",
+                      each: options as any,
+                      render(
+                        option: CascaderOption<any> & {
+                          selected: boolean;
+                          focused: boolean;
+                        },
+                      ) {
+                        return ui.CascaderPrimitive.Item(
+                          {
+                            store,
+                            panelIndex: idx.value,
+                            option,
+                            class: classNames([
+                              "cascader__item",
+                              computed(cur_panel, (t: any) => {
+                                const opt = t
+                                  ? t.options.find(
+                                      (o: any) => o.value === option.value,
+                                    )
+                                  : null;
+                                const is_selected = opt
+                                  ? Boolean(opt.selected)
+                                  : false;
+                                const is_focused = opt
+                                  ? Boolean(opt.focused)
+                                  : false;
+                                const disabled = opt
+                                  ? Boolean(opt.disabled)
+                                  : false;
+                                return [
+                                  disabled ? "is-disabled" : "",
+                                  is_selected || is_focused ? "is-active" : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ");
+                              }),
+                            ]),
+                          },
+                          [
+                            ui.CascaderPrimitive.ItemText(
+                              { class: "cascader__item-text" },
+                              [option.label],
+                            ),
+                            ui.CascaderPrimitive.ItemIndicator(
+                              {
+                                store,
+                                hasChildren: Boolean(
+                                  option.children && option.children.length > 0,
+                                ),
+                                class: "cascader__item-indicator",
+                              },
+                              [Icon({ name: "chevron-right", size: 16 })],
+                            ),
+                          ],
+                        );
+                      },
+                    }),
+                  ]);
                 },
               }),
             ],

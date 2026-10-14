@@ -1,5 +1,5 @@
 import { refobj, computed, isRef } from "../core";
-import { Html,
+import {
   View,
   ViewProps,
   ViewChildren,
@@ -142,19 +142,14 @@ export function Value(
     state.as(v);
   });
 
-  return Html.Span(
-    {
-      ...rest,
-    },
-    [
-      computed(state, (d) => {
-        if (d.selectedOptions.length === 0) {
-          return d.placeholder || "Select tags...";
-        }
-        return d.selectedOptions.map((o) => o.label).join(", ");
-      }),
-    ],
-  );
+  return View({ class: "tt-content-inline", ...rest }, [
+    computed(state, (d) => {
+      if (d.selectedOptions.length === 0) {
+        return d.placeholder || "Select tags...";
+      }
+      return d.selectedOptions.map((o) => o.label).join(", ");
+    }),
+  ]);
 }
 
 export function TagList(
@@ -364,7 +359,7 @@ export function Item(
 }
 
 export function ItemText(props: ViewProps, children: ViewChildren) {
-  return Html.Span({ ...props }, children);
+  return View({ class: "tt-content-inline", ...props }, children);
 }
 
 export function ItemIndicator(

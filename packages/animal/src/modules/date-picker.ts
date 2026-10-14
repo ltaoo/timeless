@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import { Html,
+import {
   For,
   Icon,
   ListenerManager,
@@ -28,7 +28,10 @@ import { Html,
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 
-export function DateCalendarPanel(props: { store: vm.DatePickerCore; class?: any }) {
+export function DateCalendarPanel(props: {
+  store: vm.DatePickerCore;
+  class?: any;
+}) {
   const { store, class: cls } = props;
 
   const calendar_state_ = refobj(store.$calendar.state);
@@ -71,7 +74,9 @@ export function DateCalendarPanel(props: { store: vm.DatePickerCore; class?: any
           View(
             { class: "animal-datepicker__weekdays" },
             WEEKDAYS.map((day) =>
-              Html.Span({ class: "animal-datepicker__weekday" }, [day]),
+              View({ class: "tt-content-inline animal-datepicker__weekday" }, [
+                day,
+              ]),
             ),
           ),
           For({
@@ -182,7 +187,9 @@ export function DatePicker(
             placeholder,
             class: classNames([
               "animal-datepicker__value",
-              computed(state_, (d: any) => (d.value != null ? "" : "is-placeholder")),
+              computed(state_, (d: any) =>
+                d.value != null ? "" : "is-placeholder",
+              ),
             ]),
           }),
           Show({

@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import { Html,
+import {
   Icon,
   ListenerManager,
   View,
@@ -31,7 +31,14 @@ export function DateTimePicker(
     placeholder?: string;
   },
 ) {
-  const { date: date$, time: time$, id, placeholder = "选择日期时间", class: cls, ...rest } = props;
+  const {
+    date: date$,
+    time: time$,
+    id,
+    placeholder = "选择日期时间",
+    class: cls,
+    ...rest
+  } = props;
 
   const date_state_ = refobj(date$.state);
   const time_state_ = refobj(time$.state);
@@ -82,15 +89,16 @@ export function DateTimePicker(
           ]),
         },
         [
-          Html.Span(
+          View(
             {
               class: classNames([
-                "animal-datetimepicker__value",
-                combine(
-                  { hasDate: has_date_, hasTime: has_time_ },
-                  (t) =>
+                "tt-content-inline",
+                classNames([
+                  "animal-datetimepicker__value",
+                  combine({ hasDate: has_date_, hasTime: has_time_ }, (t) =>
                     t.hasDate && t.hasTime ? "is-filled" : "is-placeholder",
-                ),
+                  ),
+                ]),
               ]),
             },
             [

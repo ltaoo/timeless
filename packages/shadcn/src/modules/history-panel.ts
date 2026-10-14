@@ -7,7 +7,7 @@ import {
   ref,
   Icon,
 } from "@timeless/timeless";
-import { Html, View, ViewProps, For, Show } from "@timeless/timeless";
+import { View, ViewProps, For, Show } from "@timeless/timeless";
 
 export function HistoryPanel(
   props: ViewProps & { store: kit.HistoryCore<string, any> },
@@ -127,10 +127,10 @@ export function HistoryPanel(
                                     style: { "font-size": "11px" },
                                   },
                                   [
-                                    Html.Pre(
+                                    View(
                                       {
                                         class:
-                                          "text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap break-all",
+                                          "tt-content-pre text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap break-all",
                                       },
                                       [query],
                                     ),

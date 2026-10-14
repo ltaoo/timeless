@@ -8,7 +8,7 @@ import {
   ListenerManager,
   refobj,
 } from "@timeless/timeless";
-import { Html, For, Show, View, ViewProps } from "@timeless/timeless";
+import { For, Show, View, ViewProps } from "@timeless/timeless";
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 const ITEM_HEIGHT = 32;
@@ -141,7 +141,8 @@ export function DateTimePicker(
         class: classNames(["timepicker__column", extra_class]),
         onMounted() {
           ensure_default_temp_time();
-          const index = typeof target === "number" ? values.indexOf(target) : -1;
+          const index =
+            typeof target === "number" ? values.indexOf(target) : -1;
           setTimeout(() => {
             if (index !== -1) scroll_to_index(view$, index);
           }, 0);
@@ -199,14 +200,16 @@ export function DateTimePicker(
           ]),
         },
         [
-          Html.Span(
+          View(
             {
               class: classNames([
-                "datetimepicker__value",
-                combine(
-                  { hasBoth: has_both_ },
-                  (t) => (t.hasBoth ? "" : "is-placeholder"),
-                ),
+                "tt-content-inline",
+                classNames([
+                  "datetimepicker__value",
+                  combine({ hasBoth: has_both_ }, (t) =>
+                    t.hasBoth ? "" : "is-placeholder",
+                  ),
+                ]),
               ]),
             },
             [
@@ -220,10 +223,9 @@ export function DateTimePicker(
               }),
             ],
           ),
-          ui.DatePickerPrimitive.Icon(
-            { class: "datetimepicker__icon" },
-            [Icon({ name: "calendar", size: 16 })],
-          ),
+          ui.DatePickerPrimitive.Icon({ class: "datetimepicker__icon" }, [
+            Icon({ name: "calendar", size: 16 }),
+          ]),
         ],
       ),
       ui.DatePickerPrimitive.Content(
@@ -262,7 +264,10 @@ export function DateTimePicker(
                     View(
                       { class: "datepicker__weekdays" },
                       WEEKDAYS.map((day) =>
-                        Html.Span({ class: "datepicker__weekday" }, [day]),
+                        View(
+                          { class: "tt-content-inline datepicker__weekday" },
+                          [day],
+                        ),
                       ),
                     ),
                     For({
@@ -308,18 +313,15 @@ export function DateTimePicker(
               ],
             ),
             View({ class: "datetimepicker__time" }, [
-              View(
-                { class: "timepicker__header" },
-                [
-                  computed(time_state_, (t) =>
-                    format_temp_time({
-                      t_hour: t.tempHour,
-                      t_minute: t.tempMinute,
-                      t_second: t.tempSecond,
-                    }),
-                  ),
-                ],
-              ),
+              View({ class: "timepicker__header" }, [
+                computed(time_state_, (t) =>
+                  format_temp_time({
+                    t_hour: t.tempHour,
+                    t_minute: t.tempMinute,
+                    t_second: t.tempSecond,
+                  }),
+                ),
+              ]),
               View(
                 {
                   class: classNames([

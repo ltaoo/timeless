@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import { Html,
+import {
   View,
   ViewProps,
   ViewChildren,
@@ -66,7 +66,9 @@ export function Button(
     "btn",
     computed(
       state_,
-      (s) => VARIANT_CLASSES[(s.variant as string) || "primary"] || VARIANT_CLASSES.primary,
+      (s) =>
+        VARIANT_CLASSES[(s.variant as string) || "primary"] ||
+        VARIANT_CLASSES.primary,
     ),
     computed(state_, (s) => SIZE_CLASSES[(s.size as string) || "md"] ?? ""),
     computed(state_, (s) => (s.loading ? "is-loading" : "")),
@@ -93,7 +95,7 @@ export function Button(
     },
     [
       ui.ButtonPrimitive.Loading({ store }, [
-        Html.Span({ class: "btn__spinner" }, []),
+        View({ class: "tt-content-inline btn__spinner" }, []),
       ]),
       ui.ButtonPrimitive.Prefix({}, prefix || []),
       ui.ButtonPrimitive.Content({}, children),

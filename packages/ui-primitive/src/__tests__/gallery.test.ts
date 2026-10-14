@@ -15,11 +15,18 @@ describe("GalleryPrimitive", () => {
     expect(store.state.open).toBe(false);
   });
   it("constructs without browser globals and navigates by keyboard", () => {
-    const store = new GalleryCore({ items: [{ src: "a.jpg" }, { src: "b.jpg" }] });
+    const store = new GalleryCore({
+      items: [{ src: "a.jpg" }, { src: "b.jpg" }],
+    });
     const preview = Preview({ store });
-    expect(preview.state.as).toBe("dialog");
+    expect(preview.t).toBe("modal");
+    expect(preview.state).not.toHaveProperty("as");
     const preventDefault = vi.fn();
-    preview.events.onKeyDown?.({ key: "ArrowRight", preventDefault, defaultPrevented: false } as unknown as KeyboardEvent);
+    preview.events.onKeyDown?.({
+      key: "ArrowRight",
+      preventDefault,
+      defaultPrevented: false,
+    } as unknown as KeyboardEvent);
     expect(store.state.index).toBe(1);
     expect(preventDefault).toHaveBeenCalledOnce();
   });

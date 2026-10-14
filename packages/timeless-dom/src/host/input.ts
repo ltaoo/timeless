@@ -29,7 +29,9 @@ export function DOMInput(props: {
     render() {
       const $elm = document.createElement("input");
       $elm.type = "text";
-      $elm.value = props.elm.state.value;
+      // Attribute-only inputs retain their native initial value (radio, hidden, range).
+      if (props.elm.state.attributes?.value === undefined)
+        $elm.value = props.elm.state.value;
       if (props.elm.state.id) {
         $elm.id = props.elm.state.id;
       }
@@ -52,9 +54,19 @@ export function DOMInput(props: {
       }
       // Explicit semantic tokens (username/current-password/new-password)
       // must survive the first render, before onMounted callbacks run.
-      if (props.elm.state.attributes?.autocomplete === undefined && props.elm.state.autoComplete !== undefined) {
+      if (
+        props.elm.state.attributes?.autocomplete === undefined &&
+        props.elm.state.autoComplete !== undefined
+      ) {
         const autocomplete = props.elm.state.autoComplete;
-        $elm.setAttribute("autocomplete", typeof autocomplete === "boolean" ? (autocomplete ? "on" : "off") : autocomplete);
+        $elm.setAttribute(
+          "autocomplete",
+          typeof autocomplete === "boolean"
+            ? autocomplete
+              ? "on"
+              : "off"
+            : autocomplete,
+        );
       }
       // $elm.style.width = "100%";
       // console.log("[dom]input render - before setupEvent", props.elm.events);

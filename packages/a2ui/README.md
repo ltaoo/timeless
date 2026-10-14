@@ -92,12 +92,12 @@ const renderer = renderStream("/ui", {
 `createBasicCatalog({ components, onOpenUrl })` 可覆盖标准组件的可信本地实现；使用 `new A2UIRenderer({ catalogs: [catalog] })` 注入 Catalog。覆盖示例：
 
 ```ts
-import { Html, Text } from "@timeless/timeless";
+import { View, Text } from "@timeless/timeless";
 import { A2UIRenderer, createBasicCatalog } from "@timeless/a2ui";
 const catalog = createBasicCatalog({
   components: {
     Text: (context) =>
-      Html.Span(
+      View(
         {
           attributes: { n: `custom-text:${context.definition.id}` },
         },

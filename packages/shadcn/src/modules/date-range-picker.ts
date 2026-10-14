@@ -1,6 +1,6 @@
 import { ui, vm } from "@timeless/timeless";
 import { computed, Icon, refobj } from "@timeless/timeless";
-import { Html, For, View, ViewProps, Show } from "@timeless/timeless";
+import { For, View, ViewProps, Show, classNames } from "@timeless/timeless";
 
 import { Tooltip } from "./tooltip";
 
@@ -121,10 +121,10 @@ function CalendarPanel(props: {
       View(
         { class: "grid grid-cols-7 mb-1" },
         WEEKDAYS.map((day) =>
-          Html.Span(
+          View(
             {
               class:
-                "text-center text-xs text-muted-foreground w-full h-8 flex items-center justify-center",
+                "tt-content-inline text-center text-xs text-muted-foreground w-full h-8 flex items-center justify-center",
             },
             [day],
           ),
@@ -179,52 +179,55 @@ function CalendarPanel(props: {
                     }),
                   },
                   [
-                    Html.Span(
+                    View(
                       {
-                        class: computed(calendar_state_, (s) => {
-                          const isInRange = store.$calendar.isInRange(
-                            day.value,
-                          );
-                          const isRangeStart = store.$calendar.isRangeStart(
-                            day.value,
-                          );
-                          const isRangeEnd = store.$calendar.isRangeEnd(
-                            day.value,
-                          );
-                          const hasEnd = Boolean(s.endDate || s.hoverDate);
-                          const isSingle = isRangeStart && !hasEnd;
-
-                          const baseClass =
-                            "relative z-10 inline-flex size-8 items-center justify-center rounded-md";
-                          const clas: string[] = [];
-
-                          if (isSingle || isRangeStart || isRangeEnd) {
-                            clas.push("bg-primary text-primary-foreground");
-                          } else if (isInRange) {
-                            clas.push("text-accent-foreground");
-                          } else if (day.is_prev_month || day.is_next_month) {
-                            clas.push(
-                              "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground",
+                        class: classNames([
+                          "tt-content-inline",
+                          computed(calendar_state_, (s) => {
+                            const isInRange = store.$calendar.isInRange(
+                              day.value,
                             );
-                          } else if (day.is_today) {
-                            clas.push(
-                              "bg-accent text-accent-foreground font-medium",
+                            const isRangeStart = store.$calendar.isRangeStart(
+                              day.value,
                             );
-                          } else {
-                            clas.push(
-                              "hover:bg-accent hover:text-accent-foreground",
+                            const isRangeEnd = store.$calendar.isRangeEnd(
+                              day.value,
                             );
-                          }
+                            const hasEnd = Boolean(s.endDate || s.hoverDate);
+                            const isSingle = isRangeStart && !hasEnd;
 
-                          if (
-                            day.is_today &&
-                            !(isSingle || isRangeStart || isRangeEnd)
-                          ) {
-                            clas.push("ring-1 ring-ring/50");
-                          }
+                            const baseClass =
+                              "relative z-10 inline-flex size-8 items-center justify-center rounded-md";
+                            const clas: string[] = [];
 
-                          return [baseClass, ...clas].join(" ");
-                        }),
+                            if (isSingle || isRangeStart || isRangeEnd) {
+                              clas.push("bg-primary text-primary-foreground");
+                            } else if (isInRange) {
+                              clas.push("text-accent-foreground");
+                            } else if (day.is_prev_month || day.is_next_month) {
+                              clas.push(
+                                "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground",
+                              );
+                            } else if (day.is_today) {
+                              clas.push(
+                                "bg-accent text-accent-foreground font-medium",
+                              );
+                            } else {
+                              clas.push(
+                                "hover:bg-accent hover:text-accent-foreground",
+                              );
+                            }
+
+                            if (
+                              day.is_today &&
+                              !(isSingle || isRangeStart || isRangeEnd)
+                            ) {
+                              clas.push("ring-1 ring-ring/50");
+                            }
+
+                            return [baseClass, ...clas].join(" ");
+                          }),
+                        ]),
                       },
                       [day.text],
                     ),

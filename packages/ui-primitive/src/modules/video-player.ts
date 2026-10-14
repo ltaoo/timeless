@@ -1,8 +1,9 @@
-import { Html,
+import {
   View,
   ViewProps,
   ViewChildren,
   TimelessElement,
+  Video as PrimitiveVideo,
 } from "../core";
 import { VideoPlayerCore } from "@timeless/inner-vm";
 
@@ -31,18 +32,15 @@ export function Video(
   children?: ViewChildren,
 ): TimelessElement {
   const { store, ...rest } = props;
-  return Html.Video(
-    {
-      ...rest,
-      onMounted(event) {
-        const $elm = (event as any).target;
-        const $video = $elm as HTMLVideoElement;
-        store.setMounted();
-        const provide = global_provider?.provide_ui_video_player;
-        if (typeof provide === "function") provide($video, store);
-        if (props.onMounted) props.onMounted(event);
-      },
+  return PrimitiveVideo({
+    ...rest,
+    onMounted(event) {
+      const $elm = (event as any).target;
+      const $video = $elm as HTMLVideoElement;
+      store.setMounted();
+      const provide = global_provider?.provide_ui_video_player;
+      if (typeof provide === "function") provide($video, store);
+      if (props.onMounted) props.onMounted(event);
     },
-    children,
-  );
+  });
 }

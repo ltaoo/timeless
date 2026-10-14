@@ -106,6 +106,7 @@ export function Img(props: ImgProps) {
   } = props as ImgProps & Record<string, any>;
 
   let $elm: any = null;
+  let mount_cleanup: void | (() => void);
   const box$ = Box<ImgState>(rest, {} as ImgState);
 
   const state = box$.state;
@@ -184,13 +185,15 @@ export function Img(props: ImgProps) {
       return $elm;
     },
     set $elm(v: any) {
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state,
     events,
     onMounted(event: MountedEvent) {
+      state.rendered = true;
       if (rest.onMounted) {
-        rest.onMounted(event);
+        mount_cleanup = rest.onMounted(event);
       }
     },
     beforeUnmounted() {
@@ -199,12 +202,21 @@ export function Img(props: ImgProps) {
       }
     },
     onUnmounted() {
+      mount_cleanup?.();
+      mount_cleanup = undefined;
+      box$.methods.set$elm(null);
+      $elm = null;
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
       // Reset state for potential re-render
       // listener$.destroy();
       state.rendered = false;
+    },
+    destroy() {
+      this.onUnmounted();
+      listener$.destroy();
+      box$.methods.destroy();
     },
   };
 }

@@ -1,3 +1,4 @@
+import "./content.css";
 // FindRSS UI：从 findrss-reader 的 `frontend/src/components/` 迁出的组件库
 // （原地址：`frontend/src/components/findrssui.js` + `findrssui_layer.js` + `frontend/src/findrssui.css`）。
 //

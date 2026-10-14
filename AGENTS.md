@@ -160,3 +160,7 @@ hydrate）和 `Platform` 实现，但组件形状本身不在这里定义。
    shape 的实现间接渲染，不需要每个平台单独实现。`primitive` 与宿主包之间保持"一份
    shape、多份实现"：跨平台共有逻辑留在 primitive，需要宿主能力差异的部分才落到
    `host/`。
+
+## 内容节点与平台边界
+
+不导出 `Html` 标签工厂。内容统一由 `View` 配合样式或 `Label` 表达；输入、表单、链接、媒体、绘图与模态能力使用专用 Primitive。展开收起由 `Disclosure` 组合 `View` / `Button` 实现。DOM 标签与模态焦点、取消和背景点击行为只在宿主层实现，不允许用任意标签接口把宿主细节带回 Primitive。

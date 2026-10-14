@@ -1,0 +1,55 @@
+/* Visual content uses View; these defaults replace element-specific presentation. */
+:where([data-tt-style="fluent"]) :where(.tt-content-inline) {
+  display: inline;
+}
+:where([data-tt-style="fluent"])
+  :where(.tt-content-strong, .tt-content-heading-cell) {
+  font-weight: bolder;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-emphasis) {
+  font-style: italic;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-small) {
+  font-size: smaller;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-code) {
+  font-family: monospace;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-pre) {
+  white-space: pre;
+  font-family: monospace;
+  margin-block: 1em;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-table) {
+  display: table;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-rowgroup) {
+  display: table-row-group;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-row) {
+  display: table-row;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-cell) {
+  display: table-cell;
+}
+:where([data-tt-style="fluent"])
+  :where(.tt-content-list, .tt-content-ordered-list) {
+  margin-block: 1em;
+  padding-inline-start: 40px;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-list) {
+  list-style-type: disc;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-ordered-list) {
+  list-style-type: decimal;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-listitem) {
+  display: list-item;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-quote) {
+  margin-block: 1em;
+  margin-inline: 40px;
+}
+:where([data-tt-style="fluent"]) :where(.tt-content-paragraph) {
+  margin-block: 1em;
+}

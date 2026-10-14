@@ -11,19 +11,19 @@ import {
   isFragment,
 } from "./box";
 
-const logger = Logger({ prefix: "dom", scope: "view" });
+const logger = Logger({ prefix: "dom", scope: "canvas" });
 
-export type DOMHtml = VNodeView<HTMLElement> & {
-  t: "html";
+export type DOMCanvas = VNodeView<HTMLElement> & {
+  t: "canvas";
   render(): HTMLElement;
   hydrate(elm: TimelessElement, $e: HTMLElement): void;
 };
 
-export function DOMHtml(props: {
+export function DOMCanvas(props: {
   build: (elm: TimelessElement) => VNodeView<HTMLElement>;
   elm: TimelessElement;
-}): DOMHtml {
-  const t = "html";
+}): DOMCanvas {
+  const t = "canvas";
   const box$ = HostElement({ $elm: null, t, build: props.build });
 
   return {
@@ -36,7 +36,7 @@ export function DOMHtml(props: {
       return true;
     },
     render() {
-      const $elm = document.createElement(props.elm.state.tag) as HTMLElement;
+      const $elm = document.createElement("canvas");
       box$.methods.set$elm($elm);
       box$.methods.applyState(props.elm.state, { initial: true });
       const $fragment = box$.methods.render(props.elm.children);
@@ -93,8 +93,8 @@ export function DOMHtml(props: {
   };
 }
 
-export function isDOMHtml(
+export function isDOMCanvas(
   value: { t?: string } & VNodeView<any>,
-): value is DOMHtml {
-  return value.t === "html";
+): value is DOMCanvas {
+  return value.t === "canvas";
 }

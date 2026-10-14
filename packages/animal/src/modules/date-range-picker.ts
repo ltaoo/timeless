@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import { Html,
+import {
   For,
   Icon,
   ListenerManager,
@@ -111,13 +111,14 @@ function RangeCalendarPanel(props: {
           View(
             { class: "animal-daterange__weekdays" },
             WEEKDAYS.map((day) =>
-              Html.Span({ class: "animal-daterange__weekday" }, [day]),
+              View({ class: "tt-content-inline animal-daterange__weekday" }, [
+                day,
+              ]),
             ),
           ),
           For({
-            each: computed(
-              calendar_state_,
-              (s: any) => (side === "left" ? s.left.weeks : s.right.weeks),
+            each: computed(calendar_state_, (s: any) =>
+              side === "left" ? s.left.weeks : s.right.weeks,
             ),
             render(week: any) {
               return View({ class: "animal-daterange__week" }, [
@@ -134,11 +135,14 @@ function RangeCalendarPanel(props: {
                         class: computed(calendar_state_, () => cellState(day)),
                       },
                       [
-                        Html.Span(
+                        View(
                           {
-                            class: computed(calendar_state_, () =>
-                              daySpanClass(day),
-                            ),
+                            class: classNames([
+                              "tt-content-inline",
+                              computed(calendar_state_, () =>
+                                daySpanClass(day),
+                              ),
+                            ]),
                           },
                           [day.text],
                         ),
@@ -162,7 +166,13 @@ export function DateRangePicker(
     placeholder?: string;
   },
 ) {
-  const { store, id, placeholder = "选择日期范围", class: cls, ...rest } = props;
+  const {
+    store,
+    id,
+    placeholder = "选择日期范围",
+    class: cls,
+    ...rest
+  } = props;
 
   const state_ = refobj(store.state);
   const presence_ = refobj(store.$presence.state);
@@ -201,7 +211,9 @@ export function DateRangePicker(
             placeholder,
             class: classNames([
               "animal-daterange__value",
-              computed(state_, (d: any) => (d.value != null ? "" : "is-placeholder")),
+              computed(state_, (d: any) =>
+                d.value != null ? "" : "is-placeholder",
+              ),
             ]),
           }),
           ui.DateRangePickerPrimitive.Icon(

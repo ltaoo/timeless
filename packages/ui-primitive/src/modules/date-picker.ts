@@ -1,5 +1,5 @@
 import { refobj, computed } from "../core";
-import { Html,
+import {
   View,
   ViewProps,
   ViewChildren,
@@ -10,6 +10,7 @@ import { Html,
   ButtonProps,
   classNames,
   TimelessElement,
+  Input as PrimitiveInput,
 } from "../core";
 import { DatePickerCore } from "@timeless/inner-vm";
 
@@ -38,33 +39,30 @@ export function Trigger(
 
   const events: (() => void)[] = [];
 
-  const _input$ = Html.Input(
-    {
-      attributes: {
-        ...(rest.attributes || {}),
-        id: props.id || rest.attributes?.id,
-      },
-      style: {
-        position: "absolute",
-        width: "1px",
-        height: "1px",
-        padding: 0,
-        margin: "-1px",
-        overflow: "hidden",
-        clip: "rect(0, 0, 0, 0)",
-        "white-space": "nowrap",
-        "border-width": 0,
-      },
-      onFocus() {
-        if (store.$presence.state.visible) {
-          return;
-        }
-        store.$presence.show();
-        store.$popper.place();
-      },
+  const _input$ = PrimitiveInput({
+    attributes: {
+      ...(rest.attributes || {}),
+      id: props.id || rest.attributes?.id,
     },
-    [],
-  );
+    style: {
+      position: "absolute",
+      width: "1px",
+      height: "1px",
+      padding: 0,
+      margin: "-1px",
+      overflow: "hidden",
+      clip: "rect(0, 0, 0, 0)",
+      "white-space": "nowrap",
+      "border-width": 0,
+    },
+    onFocus() {
+      if (store.$presence.state.visible) {
+        return;
+      }
+      store.$presence.show();
+      store.$popper.place();
+    },
+  });
 
   return View(
     {
@@ -129,16 +127,11 @@ export function Value(
     state.as(v);
   });
 
-  return Html.Span(
-    {
-      ...rest,
-    },
-    [
-      computed(state, (d) => {
-        return d.date || placeholder;
-      }),
-    ],
-  );
+  return View({ class: "tt-content-inline", ...rest }, [
+    computed(state, (d) => {
+      return d.date || placeholder;
+    }),
+  ]);
 }
 
 export function Icon(props: ViewProps, children: ViewChildren) {
@@ -266,7 +259,7 @@ export function CalendarHeader(
   return View(
     rest,
     children || [
-      Html.Span({  }, [
+      View({ class: "tt-content-inline" }, [
         computed(state, (d) => `${d.year.text}年${d.month.text}`),
       ]),
     ],
@@ -322,7 +315,8 @@ export function CalendarGridHeader(
 
   return View(
     props,
-    children || weekDays.map((day) => Html.Span({  }, [day])),
+    children ||
+      weekDays.map((day) => View({ class: "tt-content-inline" }, [day])),
   );
 }
 

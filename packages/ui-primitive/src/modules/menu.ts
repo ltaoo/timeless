@@ -1,4 +1,9 @@
-import { Html, refobj, computed, classNames } from "../core";
+import {
+  refobj,
+  computed,
+  classNames,
+  Button as PrimitiveButton,
+} from "../core";
 import { Logger } from "../core";
 import {
   View,
@@ -202,7 +207,7 @@ export function ItemImpl(
   const { store, ...rest } = props;
   const state_ = refobj(props.store.state);
 
-  return Html.Button(
+  return PrimitiveButton(
     {
       ...rest,
       attributes: {

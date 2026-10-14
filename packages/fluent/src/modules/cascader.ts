@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import { Html,
+import {
   For,
   Icon,
   ListenerManager,
@@ -139,10 +139,9 @@ export function Cascader(
                   return ui.CascaderPrimitive.SearchResultItem(
                     { store, result, class: "fl-cascader__search-result" },
                     [
-                      Html.Span(
-                        { class: "fl-cascader__path" },
-                        [result.path.map((o) => o.label).join(" / ")],
-                      ),
+                      View({ class: "tt-content-inline fl-cascader__path" }, [
+                        result.path.map((o) => o.label).join(" / "),
+                      ]),
                     ],
                   );
                 },
@@ -175,14 +174,12 @@ export function Cascader(
                       key: "value",
                       each: options,
                       render(option: any) {
-                        const matched_opt = computed(
-                          cur_panel,
-                          (t: any) =>
-                            t
-                              ? t.options.find(
-                                  (o: any) => o.value === option.value,
-                                )
-                              : null,
+                        const matched_opt = computed(cur_panel, (t: any) =>
+                          t
+                            ? t.options.find(
+                                (o: any) => o.value === option.value,
+                              )
+                            : null,
                         );
                         return ui.CascaderPrimitive.Item(
                           {
@@ -212,8 +209,7 @@ export function Cascader(
                               {
                                 store,
                                 hasChildren: Boolean(
-                                  option.children &&
-                                    option.children.length > 0,
+                                  option.children && option.children.length > 0,
                                 ),
                                 class: "fl-cascader__item-indicator",
                               },

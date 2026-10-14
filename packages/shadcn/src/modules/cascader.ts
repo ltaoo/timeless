@@ -8,7 +8,7 @@ import {
   ref,
   refobj,
 } from "@timeless/timeless";
-import { Html, For, Show, View, ViewProps } from "@timeless/timeless";
+import { For, Show, View, ViewProps } from "@timeless/timeless";
 
 import { CascaderOption } from "@timeless/timeless";
 
@@ -152,7 +152,7 @@ export function Cascader(
                         "relative flex w-full cursor-default select-none items-center rounded-md py-1 px-1.5 text-sm outline-hidden transition-colors hover:bg-accent hover:text-accent-foreground",
                     },
                     [
-                      Html.Span({  }, [
+                      View({ class: "tt-content-inline" }, [
                         result.path.map((o) => o.label).join(" / "),
                       ]),
                     ],

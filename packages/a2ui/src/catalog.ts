@@ -1,7 +1,6 @@
 import {
   Audio,
   Checkbox,
-  Html,
   Input,
   Textarea,
   Text,
@@ -11,6 +10,11 @@ import {
   getIconRegistry,
   type TimelessElement,
   type ViewChildren,
+  Label,
+  Button as PrimitiveButton,
+  Modal as PrimitiveModal,
+  Img as PrimitiveImg,
+  Video as PrimitiveVideo,
 } from "@timeless/timeless";
 import basic_schema from "./schemas/catalog.json";
 import { basicFunctions, safeUrl } from "./functions";
@@ -42,12 +46,21 @@ function markdown(text: string, name: string): ViewChildren {
   return pieces.map((piece, index) => {
     const attributes = { n: `${name}:fragment:${index}` };
     if (piece.startsWith("**"))
-      return Html.Strong({ attributes }, [piece.slice(2, -2)]);
+      return View(
+        { style: { display: "inline", fontWeight: 700 }, attributes },
+        [piece.slice(2, -2)],
+      );
     if (piece.startsWith("*"))
-      return Html.Em({ attributes }, [piece.slice(1, -1)]);
+      return View(
+        { style: { display: "inline", fontStyle: "italic" }, attributes },
+        [piece.slice(1, -1)],
+      );
     if (piece.startsWith("`"))
-      return Html.Code({ attributes }, [piece.slice(1, -1)]);
-    return Html.Span({ attributes }, [piece]);
+      return View(
+        { style: { display: "inline", fontFamily: "monospace" }, attributes },
+        [piece.slice(1, -1)],
+      );
+    return View({ style: { display: "inline" }, attributes }, [piece]);
   });
 }
 
@@ -59,10 +72,11 @@ function textComponent(context: ComponentContext): TimelessElement {
     () => [value.value],
     (update) => value.subscribe({ onChange: update }),
     (text) =>
-      Html.Span(
+      View(
         {
+          class: "tt-content-inline",
           attributes: semantic(context, "markdown"),
-          style: { whiteSpace: "pre-wrap" },
+          style: { display: "inline", whiteSpace: "pre-wrap" },
         },
         markdown(
           text.replace(/^#{1,6}\s+/, ""),
@@ -72,18 +86,26 @@ function textComponent(context: ComponentContext): TimelessElement {
     (left, right) => left === right,
   );
   context.onCleanup(() => content.destroy?.());
-  const headings: Record<string, typeof Html.P> = {
-    h1: Html.H1,
-    h2: Html.H2,
-    h3: Html.H3,
-    h4: Html.H4,
-    h5: Html.H5,
-    caption: Html.Small,
-    body: Html.P,
-  };
-  const factory =
-    headings[String(context.definition.variant ?? "body")] ?? Html.P;
-  return factory({ attributes: semantic(context) }, [content]);
+  const variant = String(context.definition.variant ?? "body");
+  const level = /^h[1-5]$/.test(variant) ? Number(variant.slice(1)) : 0;
+  return View(
+    {
+      attributes: {
+        ...semantic(context),
+        role: level ? "heading" : undefined,
+        "aria-level": level || undefined,
+      },
+      style: {
+        fontSize: level
+          ? `${2 - (level - 1) * 0.2}em`
+          : variant === "caption"
+            ? "0.875em"
+            : "1em",
+        fontWeight: level ? 700 : 400,
+      },
+    },
+    [content],
+  );
 }
 
 function inputComponent(context: ComponentContext): TimelessElement {
@@ -146,11 +168,14 @@ function inputComponent(context: ComponentContext): TimelessElement {
       );
     },
   });
-  return Html.Label({ attributes: semantic(context, "label") }, [
+  return Label({ attributes: semantic(context, "label") }, [
     Text(label),
     input,
-    Html.Small(
-      { attributes: { ...semantic(context, "errors"), role: "status" } },
+    View(
+      {
+        class: "tt-content-inline tt-content-small",
+        attributes: { ...semantic(context, "errors"), role: "status" },
+      },
       [Text(errors)],
     ),
   ]);
@@ -174,7 +199,7 @@ function checkbox(context: ComponentContext): TimelessElement {
       )?.setChecked?.(next),
   });
   context.onCleanup(unsubscribe);
-  return Html.Label({ attributes: semantic(context) }, [
+  return Label({ attributes: semantic(context) }, [
     input,
     Text(context.bind(context.definition.label, displayString)),
     Text(context.watch(() => context.errors().join("; "))),
@@ -187,96 +212,106 @@ function choicePicker(context: ComponentContext): TimelessElement {
     value: string;
   }[];
   const multiple = context.definition.variant === "multipleSelection";
-  return Html.Fieldset({ attributes: semantic(context) }, [
-    Html.Legend({ attributes: semantic(context, "legend") }, [
-      Text(context.bind(context.definition.label, displayString)),
-    ]),
-    ...(context.definition.filterable
-      ? [
-          Input({
-            attributes: {
-              ...semantic(context, "filter"),
-              "aria-label": "Filter options",
-            },
-            value: context.watch(() =>
-              displayString(context.local("filter", "")),
-            ),
-            onInput: (event) =>
-              context.setLocal(
-                "filter",
-                (event.target as HTMLInputElement).value,
+  const label_id = `a2ui-choice-label:${context.definition.id}`;
+  return View(
+    {
+      attributes: {
+        ...semantic(context),
+        role: "group",
+        "aria-labelledby": label_id,
+      },
+    },
+    [
+      View({ attributes: { ...semantic(context, "legend"), id: label_id } }, [
+        Text(context.bind(context.definition.label, displayString)),
+      ]),
+      ...(context.definition.filterable
+        ? [
+            Input({
+              attributes: {
+                ...semantic(context, "filter"),
+                "aria-label": "Filter options",
+              },
+              value: context.watch(() =>
+                displayString(context.local("filter", "")),
               ),
-          }),
-        ]
-      : []),
-    ...options.map((option) => {
-      const selected = context.watch(
-        () =>
-          Array.isArray(context.input()) &&
-          (context.input() as unknown[]).includes(option.value),
-      );
-      const input = Checkbox({
-        attributes: {
-          ...semantic(context, `option:${option.value}`),
-          role: multiple ? "checkbox" : "radio",
-          "aria-checked": selected,
-        },
-        checked: selected,
-        onChange: (event) => {
-          const checked = (event.target as HTMLInputElement).checked;
-          const previous = Array.isArray(context.input())
-            ? (context.input() as string[])
-            : [];
-          context.write(
-            multiple
-              ? checked
-                ? [...new Set([...previous, option.value])]
-                : previous.filter((value) => value !== option.value)
-              : checked
-                ? [option.value]
-                : [],
-          );
-        },
-      });
-      context.onCleanup(
-        selected.subscribe({
-          onChange: (next) =>
-            (
-              input.$elm as unknown as {
-                setChecked?: (checked: boolean) => void;
-              } | null
-            )?.setChecked?.(next),
-        }),
-      );
-      return Html.Label(
-        {
+              onInput: (event) =>
+                context.setLocal(
+                  "filter",
+                  (event.target as HTMLInputElement).value,
+                ),
+            }),
+          ]
+        : []),
+      ...options.map((option) => {
+        const selected = context.watch(
+          () =>
+            Array.isArray(context.input()) &&
+            (context.input() as unknown[]).includes(option.value),
+        );
+        const input = Checkbox({
           attributes: {
-            ...semantic(context, `choice:${option.value}`),
-            hidden: context.watch(
-              () =>
-                !displayString(context.read(option.label))
-                  .toLocaleLowerCase()
-                  .includes(
-                    displayString(
-                      context.local("filter", ""),
-                    ).toLocaleLowerCase(),
-                  ),
-            ),
+            ...semantic(context, `option:${option.value}`),
+            role: multiple ? "checkbox" : "radio",
+            "aria-checked": selected,
           },
-          style:
-            context.definition.displayStyle === "chips"
-              ? {
-                  display: "inline-flex",
-                  padding: "4px 8px",
-                  borderRadius: "16px",
-                  border: "1px solid #d4d4d4",
-                }
-              : {},
-        },
-        [input, Text(context.bind(option.label, displayString))],
-      );
-    }),
-  ]);
+          checked: selected,
+          onChange: (event) => {
+            const checked = (event.target as HTMLInputElement).checked;
+            const previous = Array.isArray(context.input())
+              ? (context.input() as string[])
+              : [];
+            context.write(
+              multiple
+                ? checked
+                  ? [...new Set([...previous, option.value])]
+                  : previous.filter((value) => value !== option.value)
+                : checked
+                  ? [option.value]
+                  : [],
+            );
+          },
+        });
+        context.onCleanup(
+          selected.subscribe({
+            onChange: (next) =>
+              (
+                input.$elm as unknown as {
+                  setChecked?: (checked: boolean) => void;
+                } | null
+              )?.setChecked?.(next),
+          }),
+        );
+        return Label(
+          {
+            attributes: {
+              ...semantic(context, `choice:${option.value}`),
+              hidden: context.watch(
+                () =>
+                  !displayString(context.read(option.label))
+                    .toLocaleLowerCase()
+                    .includes(
+                      displayString(
+                        context.local("filter", ""),
+                      ).toLocaleLowerCase(),
+                    ),
+              ),
+            },
+            style:
+              context.definition.displayStyle === "chips"
+                ? {
+                    display: "inline-flex",
+                    padding: "4px 8px",
+                    borderRadius: "16px",
+                    border: "1px solid #d4d4d4",
+                  }
+                : {},
+          },
+          [input, Text(context.bind(option.label, displayString))],
+        );
+      }),
+    ],
+  );
 }
 
 function tabs(context: ComponentContext): TimelessElement {
@@ -288,7 +323,7 @@ function tabs(context: ComponentContext): TimelessElement {
     View(
       { attributes: { ...semantic(context, "tab-list"), role: "tablist" } },
       entries.map((tab, index) =>
-        Html.Button(
+        PrimitiveButton(
           {
             attributes: {
               ...semantic(context, `tab:${index}`),
@@ -327,17 +362,19 @@ function modal(context: ComponentContext): TimelessElement {
       },
       [context.child(String(context.definition.trigger))],
     ),
-    Html.Dialog(
+    PrimitiveModal(
       {
+        open: context.watch(() => Boolean(context.local("open", false))),
+        onClose: () => context.setLocal("open", false),
         attributes: {
           ...semantic(context, "dialog"),
-          open: context.watch(() => Boolean(context.local("open", false))),
+
           "aria-modal": "true",
         },
       },
       [
         context.child(String(context.definition.content)),
-        Html.Button(
+        PrimitiveButton(
           {
             attributes: semantic(context, "close"),
             onClick: () => context.setLocal("open", false),
@@ -400,7 +437,7 @@ export function createBasicCatalog(
         largeFeature: { width: "100%", maxHeight: "400px" },
         header: { width: "100%", height: "200px" },
       };
-      return Html.Img({
+      return PrimitiveImg({
         attributes: {
           ...semantic(context),
           src: context.bind(context.definition.url, safeUrl),
@@ -421,7 +458,7 @@ export function createBasicCatalog(
       });
     },
     Video: (context) =>
-      Html.Video({
+      PrimitiveVideo({
         attributes: {
           ...semantic(context),
           controls: true,
@@ -536,7 +573,7 @@ export function createBasicCatalog(
             : { borderTop: "1px solid #d4d4d4" },
       }),
     Button: (context) =>
-      Html.Button(
+      PrimitiveButton(
         {
           attributes: {
             ...semantic(context),

@@ -1,6 +1,13 @@
 import { ui, vm } from "@timeless/timeless";
-import { combine, computed, Icon, ListenerManager, ref, refobj } from "@timeless/timeless";
-import { Html, For, Show, View, ViewProps, classNames } from "@timeless/timeless";
+import {
+  combine,
+  computed,
+  Icon,
+  ListenerManager,
+  ref,
+  refobj,
+} from "@timeless/timeless";
+import { For, Show, View, ViewProps, classNames } from "@timeless/timeless";
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 
@@ -76,7 +83,9 @@ export function DatePicker(
             placeholder,
             class: classNames([
               "datepicker__value",
-              computed(state_, (d) => (d.value != null ? "" : "is-placeholder")),
+              computed(state_, (d) =>
+                d.value != null ? "" : "is-placeholder",
+              ),
             ]),
           }),
           Show({
@@ -117,67 +126,76 @@ export function DatePicker(
           ),
         },
         () => [
-          ui.DatePickerPrimitive.Calendar({ store, class: "datepicker__calendar" }, [
-            View({ class: "datepicker__header" }, [
-              ui.DatePickerPrimitive.CalendarPrevButton(
-                { store, class: "datepicker__nav" },
-                [Icon({ name: "chevron-left", size: 16 })],
-              ),
-              ui.DatePickerPrimitive.CalendarHeader({
-                store,
-                class: "datepicker__title",
-              }),
-              ui.DatePickerPrimitive.CalendarNextButton(
-                { store, class: "datepicker__nav" },
-                [Icon({ name: "chevron-right", size: 16 })],
-              ),
-            ]),
-            ui.DatePickerPrimitive.CalendarGrid({ store, class: "datepicker__grid" }, [
-              View(
-                { class: "datepicker__weekdays" },
-                WEEKDAYS.map((day) =>
-                  Html.Span({ class: "datepicker__weekday" }, [day]),
+          ui.DatePickerPrimitive.Calendar(
+            { store, class: "datepicker__calendar" },
+            [
+              View({ class: "datepicker__header" }, [
+                ui.DatePickerPrimitive.CalendarPrevButton(
+                  { store, class: "datepicker__nav" },
+                  [Icon({ name: "chevron-left", size: 16 })],
                 ),
-              ),
-              For({
-                each: computed(calendar_state_, (s) => s.weeks) as any,
-                render(week: any) {
-                  return View({ class: "datepicker__week" }, [
-                    For({
-                      each: computed(week, (t: any) => t.dates) as any,
-                      render(day: any) {
-                        return ui.DatePickerPrimitive.CalendarCell(
-                          {
-                            store,
-                            value: day.value,
-                            isToday: day.is_today,
-                            isPrevMonth: day.is_prev_month,
-                            isNextMonth: day.is_next_month,
-                            class: classNames([
-                              "datepicker__cell",
-                              computed(calendar_state_, (s) => {
-                                const is_selected = s.selectedDay?.time === day.time;
-                                return [
-                                  is_selected ? "is-active" : "",
-                                  day.is_today ? "is-today" : "",
-                                  day.is_prev_month || day.is_next_month
-                                    ? "is-outside"
-                                    : "",
-                                ]
-                                  .filter(Boolean)
-                                  .join(" ");
-                              }),
-                            ]),
+                ui.DatePickerPrimitive.CalendarHeader({
+                  store,
+                  class: "datepicker__title",
+                }),
+                ui.DatePickerPrimitive.CalendarNextButton(
+                  { store, class: "datepicker__nav" },
+                  [Icon({ name: "chevron-right", size: 16 })],
+                ),
+              ]),
+              ui.DatePickerPrimitive.CalendarGrid(
+                { store, class: "datepicker__grid" },
+                [
+                  View(
+                    { class: "datepicker__weekdays" },
+                    WEEKDAYS.map((day) =>
+                      View({ class: "tt-content-inline datepicker__weekday" }, [
+                        day,
+                      ]),
+                    ),
+                  ),
+                  For({
+                    each: computed(calendar_state_, (s) => s.weeks) as any,
+                    render(week: any) {
+                      return View({ class: "datepicker__week" }, [
+                        For({
+                          each: computed(week, (t: any) => t.dates) as any,
+                          render(day: any) {
+                            return ui.DatePickerPrimitive.CalendarCell(
+                              {
+                                store,
+                                value: day.value,
+                                isToday: day.is_today,
+                                isPrevMonth: day.is_prev_month,
+                                isNextMonth: day.is_next_month,
+                                class: classNames([
+                                  "datepicker__cell",
+                                  computed(calendar_state_, (s) => {
+                                    const is_selected =
+                                      s.selectedDay?.time === day.time;
+                                    return [
+                                      is_selected ? "is-active" : "",
+                                      day.is_today ? "is-today" : "",
+                                      day.is_prev_month || day.is_next_month
+                                        ? "is-outside"
+                                        : "",
+                                    ]
+                                      .filter(Boolean)
+                                      .join(" ");
+                                  }),
+                                ]),
+                              },
+                              [day.text],
+                            );
                           },
-                          [day.text],
-                        );
-                      },
-                    }),
-                  ]);
-                },
-              }),
-            ]),
-          ]),
+                        }),
+                      ]);
+                    },
+                  }),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     ],

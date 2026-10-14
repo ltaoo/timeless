@@ -6,7 +6,19 @@
 // @ts-nocheck
 // FindRSS 的 Timeless UI：组件只渲染，交互状态由对应 ViewModel（Timeless vm core）维护。
 // 需要 Portal / 全局宿主的组件（Dialog / DropdownMenu / Toast）在 findrssui-layer.ts。
-import { Html, Fragment, Img, Show, View, computed, ref, refobj, ui, vm } from "@timeless/timeless";
+import {
+  Fragment,
+  Img,
+  Show,
+  View,
+  computed,
+  ref,
+  refobj,
+  ui,
+  vm,
+  Label,
+  Input as PrimitiveInput,
+} from "@timeless/timeless";
 
 // 树走 `TreePrimitive`，不是顶层的具名导出。它有两种挂法，都要认：
 //   - 主运行时把重建出的 Tree 挂在 `ui.TreePrimitive` 上；
@@ -16,12 +28,15 @@ import { Html, Fragment, Img, Show, View, computed, ref, refobj, ui, vm } from "
 // `Timeless.FindRSSTree?.TreePrimitive || Timeless.ui?.TreePrimitive` 保持同一条链。
 const host_Timeless =
   typeof globalThis === "undefined" ? undefined : globalThis.Timeless;
-const TreePrimitive = host_Timeless?.FindRSSTree?.TreePrimitive || ui.TreePrimitive;
+const TreePrimitive =
+  host_Timeless?.FindRSSTree?.TreePrimitive || ui.TreePrimitive;
 
 function source_value(value, fallback) {
   return value && typeof value === "object" && "value" in value
     ? value.value
-    : value === undefined ? fallback : value;
+    : value === undefined
+      ? fallback
+      : value;
 }
 
 function subscribe_source(source, handler) {
@@ -31,7 +46,8 @@ function subscribe_source(source, handler) {
 }
 
 function dispose_all(unlistens) {
-  for (const unlisten of unlistens) if (typeof unlisten === "function") unlisten();
+  for (const unlisten of unlistens)
+    if (typeof unlisten === "function") unlisten();
 }
 
 /** 数组 / 单节点统一成 children 数组（Timeless 不展开嵌套数组）。 */
@@ -63,12 +79,14 @@ function normalize_autocomplete(value) {
 }
 
 function ButtonViewModel(props = {}) {
-  const store = props.store || new vm.ButtonCore({
-    disabled: Boolean(source_value(props.disabled, false)),
-    loading: Boolean(source_value(props.loading, false)),
-    variant: props.variant || "default",
-    size: props.size || "default",
-  });
+  const store =
+    props.store ||
+    new vm.ButtonCore({
+      disabled: Boolean(source_value(props.disabled, false)),
+      loading: Boolean(source_value(props.loading, false)),
+      variant: props.variant || "default",
+      size: props.size || "default",
+    });
   if (props.store && props.disabled !== undefined) {
     source_value(props.disabled, false) ? store.disable() : store.enable();
   }
@@ -76,8 +94,12 @@ function ButtonViewModel(props = {}) {
     store.setLoading(Boolean(source_value(props.loading, false)));
   }
   const unlistens = [
-    subscribe_source(props.disabled, (value) => value ? store.disable() : store.enable()),
-    subscribe_source(props.loading, (value) => store.setLoading(Boolean(value))),
+    subscribe_source(props.disabled, (value) =>
+      value ? store.disable() : store.enable(),
+    ),
+    subscribe_source(props.loading, (value) =>
+      store.setLoading(Boolean(value)),
+    ),
   ];
   return { store, destroy: () => dispose_all(unlistens) };
 }
@@ -98,25 +120,47 @@ function Button(props = {}, children = []) {
     onUnmounted,
     ...rest
   } = props;
-  const model = ButtonViewModel({ store: provided_store, disabled, loading, variant, size });
+  const model = ButtonViewModel({
+    store: provided_store,
+    disabled,
+    loading,
+    variant,
+    size,
+  });
   const state_ = refobj(model.store.state);
   const unlisten = model.store.onStateChange((state) => state_.as(state));
   const loading_node = ui.ButtonPrimitive.Loading({ store: model.store }, [
-    View({ class: "frui-button-loading", attributes: { n: "button-loading", "aria-hidden": "true" } }, [
-      View({ class: "frui-spinner" }),
-    ]),
+    View(
+      {
+        class: "frui-button-loading",
+        attributes: { n: "button-loading", "aria-hidden": "true" },
+      },
+      [View({ class: "frui-spinner" })],
+    ),
   ]);
-  const icon_node = icon === undefined
-    ? null
-    : View({ class: "frui-button-icon", attributes: { n: "button-icon", "aria-hidden": "true" } }, as_children(icon));
+  const icon_node =
+    icon === undefined
+      ? null
+      : View(
+          {
+            class: "frui-button-icon",
+            attributes: { n: "button-icon", "aria-hidden": "true" },
+          },
+          as_children(icon),
+        );
   const content_node = ui.ButtonPrimitive.Content({}, children);
-  const slots = (icon_position === "end"
-    ? [loading_node, content_node, icon_node]
-    : [loading_node, icon_node, content_node]).filter(Boolean);
+  const slots = (
+    icon_position === "end"
+      ? [loading_node, content_node, icon_node]
+      : [loading_node, icon_node, content_node]
+  ).filter(Boolean);
   const base_class = `frui-button frui-button-${variant} frui-button-${size}`;
-  const class_name = custom_class && typeof custom_class.subscribe === "function"
-    ? computed(custom_class, (value) => [base_class, value].filter(Boolean).join(" "))
-    : [base_class, custom_class].filter(Boolean).join(" ");
+  const class_name =
+    custom_class && typeof custom_class.subscribe === "function"
+      ? computed(custom_class, (value) =>
+          [base_class, value].filter(Boolean).join(" "),
+        )
+      : [base_class, custom_class].filter(Boolean).join(" ");
   const clean_up = () => {
     unlisten?.();
     model.destroy();
@@ -129,52 +173,74 @@ function Button(props = {}, children = []) {
     // Timeless 没有 Slot / asChild 机制，`href` 是「长得像按钮的链接」的等价能力。
     // <a> 没有 disabled：只能 aria-disabled + CSS pointer-events。
     const { disabled: _drop, type: _type, ...anchor_attributes } = attributes;
-    return View({
+    return View(
+      {
+        ...rest,
+        class: class_name,
+        attributes: {
+          n: attributes.n || "button",
+          href: computed(href, (value) => String(source_value(value) ?? "")),
+          ...anchor_attributes,
+          "aria-disabled": computed(state_, (state) =>
+            state.disabled || state.loading ? "true" : undefined,
+          ),
+          "aria-busy": computed(state_, (state) =>
+            state.loading ? "true" : undefined,
+          ),
+        },
+        onClick: provided_store ? undefined : onClick,
+        onUnmounted: clean_up,
+      },
+      slots,
+    );
+  }
+
+  return ui.ButtonPrimitive.Root(
+    {
       ...rest,
+      onClick: provided_store ? undefined : onClick,
+      store: model.store,
       class: class_name,
       attributes: {
         n: attributes.n || "button",
-        href: computed(href, (value) => String(source_value(value) ?? "")),
-        ...anchor_attributes,
-        "aria-disabled": computed(state_, (state) => state.disabled || state.loading ? "true" : undefined),
-        "aria-busy": computed(state_, (state) => state.loading ? "true" : undefined),
+        type: attributes.type || "button",
+        ...attributes,
+        disabled: computed(
+          state_,
+          (state) => state.disabled || state.loading || undefined,
+        ),
+        "aria-busy": computed(state_, (state) =>
+          state.loading ? "true" : undefined,
+        ),
       },
-      onClick: provided_store ? undefined : onClick,
       onUnmounted: clean_up,
-    }, slots);
-  }
-
-  return ui.ButtonPrimitive.Root({
-    ...rest,
-    onClick: provided_store ? undefined : onClick,
-    store: model.store,
-    class: class_name,
-    attributes: {
-      n: attributes.n || "button",
-      type: attributes.type || "button",
-      ...attributes,
-      disabled: computed(state_, (state) => state.disabled || state.loading || undefined),
-      "aria-busy": computed(state_, (state) => state.loading ? "true" : undefined),
     },
-    onUnmounted: clean_up,
-  }, slots);
+    slots,
+  );
 }
 
 function InputViewModel(props = {}) {
   const attributes = props.attributes || {};
   const value_source = props.value;
-  const store = props.store || new vm.InputCore({
-    defaultValue: source_value(value_source, props.defaultValue ?? ""),
-    placeholder: source_value(props.placeholder, attributes.placeholder || ""),
-    type: props.type || attributes.type || "text",
-    disabled: Boolean(source_value(props.disabled, false)),
-    allowClear: props.allowClear === true,
-    ignoreEnterEvent: Boolean(props.onKeyDown) && !props.onEnter,
-  });
+  const store =
+    props.store ||
+    new vm.InputCore({
+      defaultValue: source_value(value_source, props.defaultValue ?? ""),
+      placeholder: source_value(
+        props.placeholder,
+        attributes.placeholder || "",
+      ),
+      type: props.type || attributes.type || "text",
+      disabled: Boolean(source_value(props.disabled, false)),
+      allowClear: props.allowClear === true,
+      ignoreEnterEvent: Boolean(props.onKeyDown) && !props.onEnter,
+    });
   const unlistens = [
     store.onChange((value) => {
-      if (value_source && typeof value_source.as === "function") value_source.as(value);
-      else if (value_source && typeof value_source.set === "function") value_source.set(value);
+      if (value_source && typeof value_source.as === "function")
+        value_source.as(value);
+      else if (value_source && typeof value_source.set === "function")
+        value_source.set(value);
       props.onChange?.(value);
       props.onInput?.({ target: { value } });
     }),
@@ -184,7 +250,9 @@ function InputViewModel(props = {}) {
     subscribe_source(value_source, (value) => {
       if (store.value !== value) store.setValue(value, { silence: true });
     }),
-    subscribe_source(props.placeholder, (value) => store.setPlaceholder(String(value || ""))),
+    subscribe_source(props.placeholder, (value) =>
+      store.setPlaceholder(String(value || "")),
+    ),
     subscribe_source(props.disabled, (value) => {
       store.disabled = Boolean(value);
       store.setValue(store.value, { silence: true });
@@ -208,15 +276,21 @@ function field_attributes(attributes, extra, fields = {}) {
   const merged = { n: attributes.n || "input", ...attributes, ...extra };
   delete merged.autocomplete;
   const { maxLength, minLength, type } = fields;
-  if (maxLength !== undefined && Number(maxLength) > 0) merged.maxlength = Number(maxLength);
-  if (minLength !== undefined && Number(minLength) > 0) merged.minlength = Number(minLength);
+  if (maxLength !== undefined && Number(maxLength) > 0)
+    merged.maxlength = Number(maxLength);
+  if (minLength !== undefined && Number(minLength) > 0)
+    merged.minlength = Number(minLength);
   if (type !== undefined) merged.type = type;
   return merged;
 }
 
 /** `autocomplete` 的取值：attributes 优先于 props，`undefined` = 不写属性。 */
 function field_autocomplete(autoComplete, attributes) {
-  return normalize_autocomplete(attributes.autocomplete !== undefined ? attributes.autocomplete : autoComplete);
+  return normalize_autocomplete(
+    attributes.autocomplete !== undefined
+      ? attributes.autocomplete
+      : autoComplete,
+  );
 }
 
 /**
@@ -263,68 +337,172 @@ function Input(props = {}) {
     onUnmounted,
     ...rest
   } = props;
-  const model = InputViewModel({ ...props, value, onChange, onInput, onKeyDown, attributes });
+  const model = InputViewModel({
+    ...props,
+    value,
+    onChange,
+    onInput,
+    onKeyDown,
+    attributes,
+  });
   const state_ = refobj(model.store.state);
   const unlisten = model.store.onStateChange((state) => state_.as(state));
   const input_id = attributes.id || next_uid("frui-input");
   const label_id = `${input_id}-label`;
   const help_id = `${input_id}-help`;
-  const affixed = prefix !== undefined || suffix !== undefined || addonBefore !== undefined || addonAfter !== undefined;
-  const input_attributes = field_attributes(attributes, { id: input_id }, { maxLength, minLength, type });
+  const affixed =
+    prefix !== undefined ||
+    suffix !== undefined ||
+    addonBefore !== undefined ||
+    addonAfter !== undefined;
+  const input_attributes = field_attributes(
+    attributes,
+    { id: input_id },
+    { maxLength, minLength, type },
+  );
   const autocomplete = field_autocomplete(autoComplete, attributes);
   if (label !== undefined) input_attributes["aria-labelledby"] = label_id;
-  if (help !== undefined || error !== undefined) input_attributes["aria-describedby"] = help_id;
+  if (help !== undefined || error !== undefined)
+    input_attributes["aria-describedby"] = help_id;
   if (status === "error") input_attributes["aria-invalid"] = "true";
   const max_length = input_attributes.maxlength;
 
-  const root_node = ui.InputPrimitive.Root({
-    store: model.store,
-    class: [
-      "frui-input-root",
-      affixed ? "frui-input-root-affixed" : null,
-      status !== "default" ? `frui-input-root-${status}` : null,
-      size !== "default" ? `frui-input-root-${size}` : null,
-      rootClass,
-    ].filter(Boolean).join(" "),
-    attributes: { n: rootAttributes.n || `${attributes.n || "input"}-root`, ...rootAttributes },
-    onUnmounted() {
-      unlisten?.();
-      model.destroy();
-      state_.destroy?.();
-      onUnmounted?.();
-    },
-  }, [
-    addonBefore === undefined ? null : View({ class: "frui-input-addon", attributes: { n: "input-addon-before" } }, as_children(addonBefore)),
-    prefix === undefined ? null : View({ class: "frui-input-affix", attributes: { n: "input-prefix" } }, as_children(prefix)),
-    ui.InputPrimitive.Input({
-      ...rest,
+  const root_node = ui.InputPrimitive.Root(
+    {
       store: model.store,
-      class: ["frui-input", affixed ? "frui-input-bare" : null, size !== "default" ? `frui-input-${size}` : null, custom_class]
-        .filter(Boolean).join(" "),
-      attributes: input_attributes,
-      onKeyDown(event) { model.store.handleKeyDown(event); },
-      onMounted(event) {
-        apply_autocomplete(event?.target?.get$elm ? event.target.get$elm() : event?.target ?? null, autocomplete);
-        onMounted?.(event);
+      class: [
+        "frui-input-root",
+        affixed ? "frui-input-root-affixed" : null,
+        status !== "default" ? `frui-input-root-${status}` : null,
+        size !== "default" ? `frui-input-root-${size}` : null,
+        rootClass,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      attributes: {
+        n: rootAttributes.n || `${attributes.n || "input"}-root`,
+        ...rootAttributes,
       },
-    }),
-    suffix === undefined ? null : View({ class: "frui-input-affix", attributes: { n: "input-suffix" } }, as_children(suffix)),
-    addonAfter === undefined ? null : View({ class: "frui-input-addon", attributes: { n: "input-addon-after" } }, as_children(addonAfter)),
-  ].filter(Boolean));
+      onUnmounted() {
+        unlisten?.();
+        model.destroy();
+        state_.destroy?.();
+        onUnmounted?.();
+      },
+    },
+    [
+      addonBefore === undefined
+        ? null
+        : View(
+            {
+              class: "frui-input-addon",
+              attributes: { n: "input-addon-before" },
+            },
+            as_children(addonBefore),
+          ),
+      prefix === undefined
+        ? null
+        : View(
+            { class: "frui-input-affix", attributes: { n: "input-prefix" } },
+            as_children(prefix),
+          ),
+      ui.InputPrimitive.Input({
+        ...rest,
+        store: model.store,
+        class: [
+          "frui-input",
+          affixed ? "frui-input-bare" : null,
+          size !== "default" ? `frui-input-${size}` : null,
+          custom_class,
+        ]
+          .filter(Boolean)
+          .join(" "),
+        attributes: input_attributes,
+        onKeyDown(event) {
+          model.store.handleKeyDown(event);
+        },
+        onMounted(event) {
+          apply_autocomplete(
+            event?.target?.get$elm
+              ? event.target.get$elm()
+              : (event?.target ?? null),
+            autocomplete,
+          );
+          onMounted?.(event);
+        },
+      }),
+      suffix === undefined
+        ? null
+        : View(
+            { class: "frui-input-affix", attributes: { n: "input-suffix" } },
+            as_children(suffix),
+          ),
+      addonAfter === undefined
+        ? null
+        : View(
+            {
+              class: "frui-input-addon",
+              attributes: { n: "input-addon-after" },
+            },
+            as_children(addonAfter),
+          ),
+    ].filter(Boolean),
+  );
 
-  if (label === undefined && help === undefined && error === undefined && !showCount) return root_node;
-  return View({ class: "frui-field", attributes: { n: `${rootAttributes.n || attributes.n || "input"}-field` } }, [
-    label === undefined ? null : View({ class: "frui-field-label", attributes: { n: "input-label", id: label_id } }, as_children(label)),
-    root_node,
-    error !== undefined
-      ? View({ class: "frui-field-help frui-field-help-error", attributes: { n: "input-error", id: help_id } }, as_children(error))
-      : (help === undefined ? null : View({ class: "frui-field-help", attributes: { n: "input-help", id: help_id } }, as_children(help))),
-    showCount
-      ? View({ class: "frui-field-count", attributes: { n: "input-count" } }, [
-          computed(state_, (state) => `${String(state.value ?? "").length}/${max_length ?? "∞"}`),
-        ])
-      : null,
-  ].filter(Boolean));
+  if (
+    label === undefined &&
+    help === undefined &&
+    error === undefined &&
+    !showCount
+  )
+    return root_node;
+  return View(
+    {
+      class: "frui-field",
+      attributes: { n: `${rootAttributes.n || attributes.n || "input"}-field` },
+    },
+    [
+      label === undefined
+        ? null
+        : View(
+            {
+              class: "frui-field-label",
+              attributes: { n: "input-label", id: label_id },
+            },
+            as_children(label),
+          ),
+      root_node,
+      error !== undefined
+        ? View(
+            {
+              class: "frui-field-help frui-field-help-error",
+              attributes: { n: "input-error", id: help_id },
+            },
+            as_children(error),
+          )
+        : help === undefined
+          ? null
+          : View(
+              {
+                class: "frui-field-help",
+                attributes: { n: "input-help", id: help_id },
+              },
+              as_children(help),
+            ),
+      showCount
+        ? View(
+            { class: "frui-field-count", attributes: { n: "input-count" } },
+            [
+              computed(
+                state_,
+                (state) =>
+                  `${String(state.value ?? "").length}/${max_length ?? "∞"}`,
+              ),
+            ],
+          )
+        : null,
+    ].filter(Boolean),
+  );
 }
 
 function Textarea(props = {}) {
@@ -350,7 +528,14 @@ function Textarea(props = {}) {
     onUnmounted,
     ...rest
   } = props;
-  const model = InputViewModel({ ...props, value, onChange, onInput, onKeyDown, attributes });
+  const model = InputViewModel({
+    ...props,
+    value,
+    onChange,
+    onInput,
+    onKeyDown,
+    attributes,
+  });
   const state_ = refobj(model.store.state);
   const unlisten = model.store.onStateChange((state) => state_.as(state));
   const textarea_id = attributes.id || next_uid("frui-textarea");
@@ -358,7 +543,11 @@ function Textarea(props = {}) {
   const help_id = `${textarea_id}-help`;
   const auto = autoSize === true || (autoSize && typeof autoSize === "object");
   const config = autoSize && typeof autoSize === "object" ? autoSize : {};
-  const textarea_attributes = field_attributes(attributes, { id: textarea_id }, { maxLength, minLength });
+  const textarea_attributes = field_attributes(
+    attributes,
+    { id: textarea_id },
+    { maxLength, minLength },
+  );
   const autocomplete = field_autocomplete(autoComplete, attributes);
   if (label !== undefined) textarea_attributes["aria-labelledby"] = label_id;
   if (help !== undefined) textarea_attributes["aria-describedby"] = help_id;
@@ -369,56 +558,116 @@ function Textarea(props = {}) {
   function resize() {
     if (!auto || !element) return;
     const style = getComputedStyle(element);
-    const line = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.5 || 20;
+    const line =
+      parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.5 || 20;
     const chrome = Math.max(0, element.offsetHeight - element.clientHeight);
     const min_rows = Number(config.minRows) > 0 ? Number(config.minRows) : 0;
     const max_rows = Number(config.maxRows) > 0 ? Number(config.maxRows) : 0;
-    element.style.minHeight = min_rows > 0 ? `${min_rows * line + chrome}px` : "0";
+    element.style.minHeight =
+      min_rows > 0 ? `${min_rows * line + chrome}px` : "0";
     element.style.height = "auto";
     const content = element.scrollHeight;
     const max_height = max_rows > 0 ? max_rows * line + chrome : Infinity;
-    const next = Math.min(Math.max(content, min_rows > 0 ? min_rows * line + chrome : 0), max_height);
+    const next = Math.min(
+      Math.max(content, min_rows > 0 ? min_rows * line + chrome : 0),
+      max_height,
+    );
     element.style.height = `${next}px`;
     element.style.overflowY = content > max_height ? "auto" : "hidden";
   }
 
   if (auto) model.store.onChange(() => requestAnimationFrame(resize));
 
-  const root_node = ui.TextareaPrimitive.Root({
-    store: model.store,
-    class: ["frui-textarea-root", size_class_of(rootClass)].filter(Boolean).join(" "),
-    attributes: { n: rootAttributes.n || `${attributes.n || "textarea"}-root`, ...rootAttributes },
-    onUnmounted() {
-      unlisten?.();
-      model.destroy();
-      state_.destroy?.();
-      onUnmounted?.();
+  const root_node = ui.TextareaPrimitive.Root(
+    {
+      store: model.store,
+      class: ["frui-textarea-root", size_class_of(rootClass)]
+        .filter(Boolean)
+        .join(" "),
+      attributes: {
+        n: rootAttributes.n || `${attributes.n || "textarea"}-root`,
+        ...rootAttributes,
+      },
+      onUnmounted() {
+        unlisten?.();
+        model.destroy();
+        state_.destroy?.();
+        onUnmounted?.();
+      },
     },
-  }, [ui.TextareaPrimitive.Textarea({
-    ...rest,
-    store: model.store,
-    class: ["frui-input", "frui-textarea", auto ? "frui-textarea-auto" : null, custom_class].filter(Boolean).join(" "),
-    attributes: textarea_attributes,
-    onKeyDown(event) { model.store.handleKeyDown(event); },
-    onMounted(event) {
-      element = event?.target?.get$elm ? event.target.get$elm() : event?.target ?? null;
-      apply_autocomplete(element, autocomplete);
-      onMounted?.(event);
-      requestAnimationFrame(resize);
-    },
-  })]);
+    [
+      ui.TextareaPrimitive.Textarea({
+        ...rest,
+        store: model.store,
+        class: [
+          "frui-input",
+          "frui-textarea",
+          auto ? "frui-textarea-auto" : null,
+          custom_class,
+        ]
+          .filter(Boolean)
+          .join(" "),
+        attributes: textarea_attributes,
+        onKeyDown(event) {
+          model.store.handleKeyDown(event);
+        },
+        onMounted(event) {
+          element = event?.target?.get$elm
+            ? event.target.get$elm()
+            : (event?.target ?? null);
+          apply_autocomplete(element, autocomplete);
+          onMounted?.(event);
+          requestAnimationFrame(resize);
+        },
+      }),
+    ],
+  );
 
   if (label === undefined && help === undefined && !showCount) return root_node;
-  return View({ class: "frui-field", attributes: { n: `${rootAttributes.n || attributes.n || "textarea"}-field` } }, [
-    label === undefined ? null : View({ class: "frui-field-label", attributes: { n: "textarea-label", id: label_id } }, as_children(label)),
-    root_node,
-    help === undefined ? null : View({ class: "frui-field-help", attributes: { n: "textarea-help", id: help_id } }, as_children(help)),
-    showCount
-      ? View({ class: "frui-textarea-count", attributes: { n: "textarea-count" } }, [
-          computed(state_, (state) => `${String(state.value ?? "").length}/${textarea_attributes.maxlength ?? "∞"}`),
-        ])
-      : null,
-  ].filter(Boolean));
+  return View(
+    {
+      class: "frui-field",
+      attributes: {
+        n: `${rootAttributes.n || attributes.n || "textarea"}-field`,
+      },
+    },
+    [
+      label === undefined
+        ? null
+        : View(
+            {
+              class: "frui-field-label",
+              attributes: { n: "textarea-label", id: label_id },
+            },
+            as_children(label),
+          ),
+      root_node,
+      help === undefined
+        ? null
+        : View(
+            {
+              class: "frui-field-help",
+              attributes: { n: "textarea-help", id: help_id },
+            },
+            as_children(help),
+          ),
+      showCount
+        ? View(
+            {
+              class: "frui-textarea-count",
+              attributes: { n: "textarea-count" },
+            },
+            [
+              computed(
+                state_,
+                (state) =>
+                  `${String(state.value ?? "").length}/${textarea_attributes.maxlength ?? "∞"}`,
+              ),
+            ],
+          )
+        : null,
+    ].filter(Boolean),
+  );
 }
 
 /** Textarea 没有 size prop，但保留 rootClass 透传（历史行为）。 */
@@ -428,11 +677,17 @@ function size_class_of(root_class) {
 
 function component_view(class_name, props = {}, children = []) {
   const { class: custom_class, attributes = {}, ...rest } = props;
-  return View({
-    ...rest,
-    class: [class_name, custom_class].filter(Boolean).join(" "),
-    attributes: { n: attributes.n || class_name.split(" ")[0].replace("frui-", ""), ...attributes },
-  }, children);
+  return View(
+    {
+      ...rest,
+      class: [class_name, custom_class].filter(Boolean).join(" "),
+      attributes: {
+        n: attributes.n || class_name.split(" ")[0].replace("frui-", ""),
+        ...attributes,
+      },
+    },
+    children,
+  );
 }
 
 function Card(props = {}, children = []) {
@@ -446,25 +701,69 @@ function Card(props = {}, children = []) {
     attributes = {},
     ...rest
   } = props;
-  const header = title === undefined && description === undefined && extra === undefined
-    ? null
-    : View({ class: "frui-card-header", attributes: { n: "card-header" } }, [
-        View({ class: "frui-card-titles", attributes: { n: "card-titles" } }, [
-          title === undefined ? null : View({ class: "frui-card-title", attributes: { n: "card-title" } }, as_children(title)),
-          description === undefined ? null : View({ class: "frui-card-description", attributes: { n: "card-description" } }, as_children(description)),
-        ].filter(Boolean)),
-        extra === undefined ? null : View({ class: "frui-card-extra", attributes: { n: "card-extra" } }, as_children(extra)),
-      ].filter(Boolean));
-  return View({
-    ...rest,
-    class: ["frui-card", custom_class].filter(Boolean).join(" "),
-    attributes: { n: attributes.n || "card", ...attributes },
-  }, [
-    media === undefined ? null : View({ class: "frui-card-media", attributes: { n: "card-media" } }, as_children(media)),
-    header,
-    View({ class: "frui-card-body", attributes: { n: "card-body" } }, children),
-    footer === undefined ? null : View({ class: "frui-card-footer", attributes: { n: "card-footer" } }, as_children(footer)),
-  ].filter(Boolean));
+  const header =
+    title === undefined && description === undefined && extra === undefined
+      ? null
+      : View(
+          { class: "frui-card-header", attributes: { n: "card-header" } },
+          [
+            View(
+              { class: "frui-card-titles", attributes: { n: "card-titles" } },
+              [
+                title === undefined
+                  ? null
+                  : View(
+                      {
+                        class: "frui-card-title",
+                        attributes: { n: "card-title" },
+                      },
+                      as_children(title),
+                    ),
+                description === undefined
+                  ? null
+                  : View(
+                      {
+                        class: "frui-card-description",
+                        attributes: { n: "card-description" },
+                      },
+                      as_children(description),
+                    ),
+              ].filter(Boolean),
+            ),
+            extra === undefined
+              ? null
+              : View(
+                  { class: "frui-card-extra", attributes: { n: "card-extra" } },
+                  as_children(extra),
+                ),
+          ].filter(Boolean),
+        );
+  return View(
+    {
+      ...rest,
+      class: ["frui-card", custom_class].filter(Boolean).join(" "),
+      attributes: { n: attributes.n || "card", ...attributes },
+    },
+    [
+      media === undefined
+        ? null
+        : View(
+            { class: "frui-card-media", attributes: { n: "card-media" } },
+            as_children(media),
+          ),
+      header,
+      View(
+        { class: "frui-card-body", attributes: { n: "card-body" } },
+        children,
+      ),
+      footer === undefined
+        ? null
+        : View(
+            { class: "frui-card-footer", attributes: { n: "card-footer" } },
+            as_children(footer),
+          ),
+    ].filter(Boolean),
+  );
 }
 
 function Badge(props = {}, children = []) {
@@ -489,11 +788,14 @@ function Badge(props = {}, children = []) {
     : numeric
       ? [Number(count) > Number(max) ? `${max}+` : String(count)]
       : children;
-  return View({
-    ...rest,
-    class: classes.filter(Boolean).join(" "),
-    attributes: { n: attributes.n || "badge", ...attributes },
-  }, shown);
+  return View(
+    {
+      ...rest,
+      class: classes.filter(Boolean).join(" "),
+      attributes: { n: attributes.n || "badge", ...attributes },
+    },
+    shown,
+  );
 }
 
 function Alert(props = {}, children = []) {
@@ -516,37 +818,65 @@ function Alert(props = {}, children = []) {
     onClose?.();
   };
   const content = [
-    title === undefined ? null : View({ class: "frui-alert-title", attributes: { n: "alert-title" } }, as_children(title)),
+    title === undefined
+      ? null
+      : View(
+          { class: "frui-alert-title", attributes: { n: "alert-title" } },
+          as_children(title),
+        ),
     as_children(body).length === 0
       ? null
-      : View({ class: "frui-alert-description", attributes: { n: "alert-description" } }, as_children(body)),
-    closable
-      ? View({
-          class: "frui-alert-close",
-          attributes: { n: "alert-close", role: "button", tabindex: "0", "aria-label": "关闭" },
-          onClick: close,
-          onKeyDown(event) {
-            if (event.key !== "Enter" && event.key !== " ") return;
-            event.preventDefault();
-            close();
+      : View(
+          {
+            class: "frui-alert-description",
+            attributes: { n: "alert-description" },
           },
-        }, ["×"])
+          as_children(body),
+        ),
+    closable
+      ? View(
+          {
+            class: "frui-alert-close",
+            attributes: {
+              n: "alert-close",
+              role: "button",
+              tabindex: "0",
+              "aria-label": "关闭",
+            },
+            onClick: close,
+            onKeyDown(event) {
+              if (event.key !== "Enter" && event.key !== " ") return;
+              event.preventDefault();
+              close();
+            },
+          },
+          ["×"],
+        )
       : null,
   ].filter(Boolean);
   return Show({
     when: computed(hidden_, (value) => !value),
     ok() {
-      return View({
-        ...rest,
-        class: ["frui-alert", `frui-alert-${tone}`, closable ? "frui-alert-closable" : null, custom_class]
-          .filter(Boolean).join(" "),
-        attributes: {
-          n: attributes.n || "alert",
-          role: role || (tone === "danger" ? "alert" : "status"),
-          "aria-live": tone === "danger" ? "assertive" : "polite",
-          ...attributes,
+      return View(
+        {
+          ...rest,
+          class: [
+            "frui-alert",
+            `frui-alert-${tone}`,
+            closable ? "frui-alert-closable" : null,
+            custom_class,
+          ]
+            .filter(Boolean)
+            .join(" "),
+          attributes: {
+            n: attributes.n || "alert",
+            role: role || (tone === "danger" ? "alert" : "status"),
+            "aria-live": tone === "danger" ? "assertive" : "polite",
+            ...attributes,
+          },
         },
-      }, content);
+        content,
+      );
     },
   });
 }
@@ -565,20 +895,42 @@ function Separator(props = {}, children = []) {
     ...attributes,
   };
   if (as_children(children).length > 0) {
-    return View({
-      ...rest,
-      class: ["frui-separator-labeled", custom_class].filter(Boolean).join(" "),
-      attributes: base_attributes,
-    }, [
-      View({ class: "frui-separator-line", attributes: { n: "separator-line-start", "aria-hidden": "true" } }),
-      View({ class: "frui-separator-label", attributes: { n: "separator-label" } }, as_children(children)),
-      View({ class: "frui-separator-line", attributes: { n: "separator-line-end", "aria-hidden": "true" } }),
-    ]);
+    return View(
+      {
+        ...rest,
+        class: ["frui-separator-labeled", custom_class]
+          .filter(Boolean)
+          .join(" "),
+        attributes: base_attributes,
+      },
+      [
+        View({
+          class: "frui-separator-line",
+          attributes: { n: "separator-line-start", "aria-hidden": "true" },
+        }),
+        View(
+          {
+            class: "frui-separator-label",
+            attributes: { n: "separator-label" },
+          },
+          as_children(children),
+        ),
+        View({
+          class: "frui-separator-line",
+          attributes: { n: "separator-line-end", "aria-hidden": "true" },
+        }),
+      ],
+    );
   }
   return View({
     ...rest,
-    class: ["frui-separator", orientation === "vertical" ? "frui-separator-vertical" : null, custom_class]
-      .filter(Boolean).join(" "),
+    class: [
+      "frui-separator",
+      orientation === "vertical" ? "frui-separator-vertical" : null,
+      custom_class,
+    ]
+      .filter(Boolean)
+      .join(" "),
     attributes: base_attributes,
   });
 }
@@ -588,7 +940,9 @@ function Separator(props = {}, children = []) {
 /** Checkbox / Radio 共用的布尔状态；View 只负责把状态同步到原生 input。 */
 function ChoiceViewModel(props = {}) {
   const checked_source = props.checked;
-  const checked_ = ref(Boolean(source_value(checked_source, props.defaultChecked ?? false)));
+  const checked_ = ref(
+    Boolean(source_value(checked_source, props.defaultChecked ?? false)),
+  );
   const disabled_ = ref(Boolean(source_value(props.disabled, false)));
   const unlistens = [
     subscribe_source(checked_source, (value) => checked_.as(Boolean(value))),
@@ -600,8 +954,10 @@ function ChoiceViewModel(props = {}) {
     const next = Boolean(value);
     if (next === checked_.value) return false;
     checked_.as(next);
-    if (checked_source && typeof checked_source.as === "function") checked_source.as(next);
-    else if (checked_source && typeof checked_source.set === "function") checked_source.set(next);
+    if (checked_source && typeof checked_source.as === "function")
+      checked_source.as(next);
+    else if (checked_source && typeof checked_source.set === "function")
+      checked_source.set(next);
     props.onChange?.(next, props.value);
     return true;
   }
@@ -634,7 +990,13 @@ function ChoiceView(kind, props = {}, children = []) {
     onUnmounted,
     ...rest
   } = props;
-  const model = ChoiceViewModel({ checked, defaultChecked, disabled, value, onChange });
+  const model = ChoiceViewModel({
+    checked,
+    defaultChecked,
+    disabled,
+    value,
+    onChange,
+  });
   const semantic_name = attributes.n || kind;
   let element = null;
 
@@ -650,42 +1012,59 @@ function ChoiceView(kind, props = {}, children = []) {
   ];
   const content = label === undefined ? children : as_children(label);
 
-  return Html.Label({
-    class: ["frui-choice", `frui-${kind}`, rootClass].filter(Boolean).join(" "),
-    attributes: {
-      n: rootAttributes.n || `${semantic_name}-field`,
-      "aria-disabled": computed(model.state.disabled, (state) => state ? "true" : "false"),
-      ...rootAttributes,
-    },
-    onUnmounted() {
-      dispose_all(unlistens);
-      model.destroy();
-      onUnmounted?.();
-    },
-  }, [
-    Html.Input({
-      ...rest,
-      class: ["frui-choice-input", `frui-${kind}-input`, custom_class].filter(Boolean).join(" "),
+  return Label(
+    {
+      class: ["frui-choice", `frui-${kind}`, rootClass]
+        .filter(Boolean)
+        .join(" "),
       attributes: {
-        n: semantic_name,
-        ...attributes,
-        type: kind,
-        name,
-        value,
+        n: rootAttributes.n || `${semantic_name}-field`,
+        "aria-disabled": computed(model.state.disabled, (state) =>
+          state ? "true" : "false",
+        ),
+        ...rootAttributes,
       },
-      onChange(event) {
-        model.methods.set_checked(Boolean(event.target?.checked));
+      onUnmounted() {
+        dispose_all(unlistens);
+        model.destroy();
+        onUnmounted?.();
       },
-      onMounted(event) {
-        element = event?.target?.get$elm ? event.target.get$elm() : event?.target ?? null;
-        sync_element();
-        onMounted?.(event);
-      },
-    }),
-    content.length === 0
-      ? null
-      : View({ class: "frui-choice-label", attributes: { n: `${semantic_name}-label` } }, content),
-  ].filter(Boolean));
+    },
+    [
+      PrimitiveInput({
+        ...rest,
+        class: ["frui-choice-input", `frui-${kind}-input`, custom_class]
+          .filter(Boolean)
+          .join(" "),
+        attributes: {
+          n: semantic_name,
+          ...attributes,
+          type: kind,
+          name,
+          value,
+        },
+        onChange(event) {
+          model.methods.set_checked(Boolean(event.target?.checked));
+        },
+        onMounted(event) {
+          element = event?.target?.get$elm
+            ? event.target.get$elm()
+            : (event?.target ?? null);
+          sync_element();
+          onMounted?.(event);
+        },
+      }),
+      content.length === 0
+        ? null
+        : View(
+            {
+              class: "frui-choice-label",
+              attributes: { n: `${semantic_name}-label` },
+            },
+            content,
+          ),
+    ].filter(Boolean),
+  );
 }
 
 function Checkbox(props = {}, children = []) {
@@ -733,9 +1112,12 @@ function Switch(props = {}) {
     store.onStateChange((state) => state_.as(state)),
     store.onChange((value) => onChange?.(value)),
     subscribe_source(checked, (value) => {
-      if (Boolean(value) !== Boolean(store.state.checked)) store.setValue(Boolean(value));
+      if (Boolean(value) !== Boolean(store.state.checked))
+        store.setValue(Boolean(value));
     }),
-    subscribe_source(disabled, (value) => value ? store.disable() : store.enable()),
+    subscribe_source(disabled, (value) =>
+      value ? store.disable() : store.enable(),
+    ),
   ];
   const is_on_ = computed(state_, (state) => Boolean(state.checked));
   const is_disabled_ = computed(state_, (state) => Boolean(state.disabled));
@@ -745,36 +1127,66 @@ function Switch(props = {}) {
     store.setValue(!store.state.checked);
   }
 
-  const root_node = View({
-    ...rest,
-    class: ["frui-switch", size !== "default" ? `frui-switch-${size}` : null, custom_class].filter(Boolean).join(" "),
-    attributes: {
-      role: "switch",
-      tabindex: "0",
-      "aria-checked": computed(is_on_, (on) => (on ? "true" : "false")),
-      "aria-disabled": computed(is_disabled_, (value) => (value ? "true" : "false")),
+  const root_node = View(
+    {
+      ...rest,
+      class: [
+        "frui-switch",
+        size !== "default" ? `frui-switch-${size}` : null,
+        custom_class,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      attributes: {
+        role: "switch",
+        tabindex: "0",
+        "aria-checked": computed(is_on_, (on) => (on ? "true" : "false")),
+        "aria-disabled": computed(is_disabled_, (value) =>
+          value ? "true" : "false",
+        ),
+      },
+      onClick() {
+        toggle();
+      },
+      onKeyDown(event) {
+        if (event.key !== " " && event.key !== "Enter") return;
+        event.preventDefault();
+        toggle();
+      },
+      onUnmounted() {
+        dispose_all(unlistens);
+        state_.destroy?.();
+        is_on_.destroy?.();
+        is_disabled_.destroy?.();
+        onUnmounted?.();
+      },
     },
-    onClick() { toggle(); },
-    onKeyDown(event) {
-      if (event.key !== " " && event.key !== "Enter") return;
-      event.preventDefault();
-      toggle();
-    },
-    onUnmounted() {
-      dispose_all(unlistens);
-      state_.destroy?.();
-      is_on_.destroy?.();
-      is_disabled_.destroy?.();
-      onUnmounted?.();
-    },
-  }, [View({ class: "frui-switch-thumb", attributes: { n: "switch-thumb", "aria-hidden": "true" } })]);
+    [
+      View({
+        class: "frui-switch-thumb",
+        attributes: { n: "switch-thumb", "aria-hidden": "true" },
+      }),
+    ],
+  );
   if (label === undefined) {
-    return View({ class: "frui-switch-field", attributes: { n: attributes.n || "switch" } }, [root_node]);
+    return View(
+      {
+        class: "frui-switch-field",
+        attributes: { n: attributes.n || "switch" },
+      },
+      [root_node],
+    );
   }
-  return View({ class: "frui-switch-field", attributes: { n: attributes.n || "switch" } }, [
-    root_node,
-    View({ class: "frui-switch-label", attributes: { n: "switch-label" } }, as_children(label)),
-  ]);
+  return View(
+    { class: "frui-switch-field", attributes: { n: attributes.n || "switch" } },
+    [
+      root_node,
+      View(
+        { class: "frui-switch-label", attributes: { n: "switch-label" } },
+        as_children(label),
+      ),
+    ],
+  );
 }
 
 // ---- Avatar ----
@@ -786,7 +1198,8 @@ function avatar_hue(name) {
   const text = String(name || "");
   if (text === "") return avatar_hues[0];
   let hash = 0;
-  for (let index = 0; index < text.length; index += 1) hash = (hash * 31 + text.charCodeAt(index)) >>> 0;
+  for (let index = 0; index < text.length; index += 1)
+    hash = (hash * 31 + text.charCodeAt(index)) >>> 0;
   return avatar_hues[hash % avatar_hues.length];
 }
 
@@ -805,45 +1218,72 @@ function Avatar(props = {}) {
   const text = String(source_value(name) ?? "").trim();
   const label = text || "用户";
   const unlistens = [];
-  if (src && typeof src === "object" && src.__is_ref && typeof src.subscribe === "function") {
+  if (
+    src &&
+    typeof src === "object" &&
+    src.__is_ref &&
+    typeof src.subscribe === "function"
+  ) {
     unlistens.push(src.subscribe({ onChange: () => failed_.as(false) }));
   }
-  const has_image_ = computed(failed_, (failed) => Boolean(String(source_value(src) ?? "").trim()) && !failed);
-  const style = { "--frui-avatar-hue": String(avatar_hue(text)), ...(rest.style || {}) };
-  return View({
-    ...rest,
-    class: [
-      "frui-avatar",
-      shape === "square" ? "frui-avatar-square" : null,
-      size !== "default" ? `frui-avatar-${size}` : null,
-      custom_class,
-    ].filter(Boolean).join(" "),
-    style,
-    attributes: { n: attributes.n || "avatar", role: "img", "aria-label": label, ...attributes },
-    onUnmounted() {
-      dispose_all(unlistens);
-      failed_.destroy?.();
-      has_image_.destroy?.();
-      onUnmounted?.();
+  const has_image_ = computed(
+    failed_,
+    (failed) => Boolean(String(source_value(src) ?? "").trim()) && !failed,
+  );
+  const style = {
+    "--frui-avatar-hue": String(avatar_hue(text)),
+    ...(rest.style || {}),
+  };
+  return View(
+    {
+      ...rest,
+      class: [
+        "frui-avatar",
+        shape === "square" ? "frui-avatar-square" : null,
+        size !== "default" ? `frui-avatar-${size}` : null,
+        custom_class,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      style,
+      attributes: {
+        n: attributes.n || "avatar",
+        role: "img",
+        "aria-label": label,
+        ...attributes,
+      },
+      onUnmounted() {
+        dispose_all(unlistens);
+        failed_.destroy?.();
+        has_image_.destroy?.();
+        onUnmounted?.();
+      },
     },
-  }, [
-    Show({
-      when: has_image_,
-      ok() {
-        return Img({
-          class: "frui-avatar-image",
-          src,
-          attributes: { n: "avatar-image", alt: "" },
-          onError() { failed_.as(true); },
-        });
-      },
-      else() {
-        return View({ class: "frui-avatar-initial", attributes: { n: "avatar-initial", "aria-hidden": "true" } }, [
-          label.slice(0, 1).toUpperCase(),
-        ]);
-      },
-    }),
-  ]);
+    [
+      Show({
+        when: has_image_,
+        ok() {
+          return Img({
+            class: "frui-avatar-image",
+            src,
+            attributes: { n: "avatar-image", alt: "" },
+            onError() {
+              failed_.as(true);
+            },
+          });
+        },
+        else() {
+          return View(
+            {
+              class: "frui-avatar-initial",
+              attributes: { n: "avatar-initial", "aria-hidden": "true" },
+            },
+            [label.slice(0, 1).toUpperCase()],
+          );
+        },
+      }),
+    ],
+  );
 }
 
 // ---- Tabs ----
@@ -863,7 +1303,9 @@ function Tabs(props = {}) {
   const fallback = items.length > 0 ? items[0].id : "";
   const current_ = ref(source_value(value, fallback) ?? fallback);
   const unlistens = [
-    subscribe_source(value, (next) => { if (next !== current_.value) current_.as(next); }),
+    subscribe_source(value, (next) => {
+      if (next !== current_.value) current_.as(next);
+    }),
   ];
 
   function select(id) {
@@ -876,44 +1318,70 @@ function Tabs(props = {}) {
 
   const tabs = items.map((item) => {
     const active_ = computed(current_, (id) => id === item.id);
-    return View({
-      class: computed(active_, (active) => active ? "frui-tabs-tab frui-tabs-tab-active" : "frui-tabs-tab"),
-      attributes: {
-        n: `tab-${item.id}`,
-        role: "tab",
-        tabindex: "0",
-        "aria-selected": computed(active_, (active) => active ? "true" : "false"),
+    return View(
+      {
+        class: computed(active_, (active) =>
+          active ? "frui-tabs-tab frui-tabs-tab-active" : "frui-tabs-tab",
+        ),
+        attributes: {
+          n: `tab-${item.id}`,
+          role: "tab",
+          tabindex: "0",
+          "aria-selected": computed(active_, (active) =>
+            active ? "true" : "false",
+          ),
+        },
+        onClick() {
+          select(item.id);
+        },
+        onKeyDown(event) {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          select(item.id);
+        },
       },
-      onClick() { select(item.id); },
-      onKeyDown(event) {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        select(item.id);
-      },
-    }, as_children(item.label));
+      as_children(item.label),
+    );
   });
 
   // 每个面板各自 Show：Show 只在「真值变假值」时重建，用整块切换会拿不到内容更新。
-  const panels = items.map((item) => Show({
-    when: computed(current_, (id) => id === item.id),
-    ok() {
-      return View({ class: "frui-tabs-panel", attributes: { n: `tabs-panel-${item.id}`, role: "tabpanel" } }, as_children(item.content));
-    },
-  }));
+  const panels = items.map((item) =>
+    Show({
+      when: computed(current_, (id) => id === item.id),
+      ok() {
+        return View(
+          {
+            class: "frui-tabs-panel",
+            attributes: { n: `tabs-panel-${item.id}`, role: "tabpanel" },
+          },
+          as_children(item.content),
+        );
+      },
+    }),
+  );
 
-  return View({
-    ...rest,
-    class: ["frui-tabs", custom_class].filter(Boolean).join(" "),
-    attributes: { n: attributes.n || "tabs", ...attributes },
-    onUnmounted() {
-      dispose_all(unlistens);
-      current_.destroy?.();
-      onUnmounted?.();
+  return View(
+    {
+      ...rest,
+      class: ["frui-tabs", custom_class].filter(Boolean).join(" "),
+      attributes: { n: attributes.n || "tabs", ...attributes },
+      onUnmounted() {
+        dispose_all(unlistens);
+        current_.destroy?.();
+        onUnmounted?.();
+      },
     },
-  }, [
-    View({ class: "frui-tabs-list", attributes: { n: "tabs-list", role: "tablist" } }, tabs),
-    ...panels,
-  ]);
+    [
+      View(
+        {
+          class: "frui-tabs-list",
+          attributes: { n: "tabs-list", role: "tablist" },
+        },
+        tabs,
+      ),
+      ...panels,
+    ],
+  );
 }
 
 // ---- Tree ----
@@ -965,7 +1433,9 @@ function Tree(props = {}) {
     classes: {
       ...tree_classes,
       ...classes,
-      root: [tree_classes.root, custom_class, classes?.root].filter(Boolean).join(" "),
+      root: [tree_classes.root, custom_class, classes?.root]
+        .filter(Boolean)
+        .join(" "),
     },
   });
 }
@@ -980,11 +1450,33 @@ function TreeRow(props = {}) {
 Tree.Row = TreeRow;
 
 export {
-  Alert, Avatar, Badge, Button, ButtonViewModel, Card, Checkbox, ChoiceViewModel, Input, InputViewModel,
-  Radio, Separator, Switch, Tabs, Tree,
+  Alert,
+  Avatar,
+  Badge,
+  Button,
+  ButtonViewModel,
+  Card,
+  Checkbox,
+  ChoiceViewModel,
+  Input,
+  InputViewModel,
+  Radio,
+  Separator,
+  Switch,
+  Tabs,
+  Tree,
   Textarea,
-  Alert as FRAlert, Badge as FRBadge, Button as FRButton, Card as FRCard,
-  Input as FRInput, Separator as FRSeparator,
+  Alert as FRAlert,
+  Badge as FRBadge,
+  Button as FRButton,
+  Card as FRCard,
+  Input as FRInput,
+  Separator as FRSeparator,
   // 供 findrssui-layer.ts 复用的内部工具（不经 src/index.ts 暴露）。
-  Fragment, as_children, dispose_all, normalize_autocomplete, source_value, subscribe_source,
+  Fragment,
+  as_children,
+  dispose_all,
+  normalize_autocomplete,
+  source_value,
+  subscribe_source,
 };

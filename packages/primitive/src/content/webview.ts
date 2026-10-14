@@ -62,6 +62,7 @@ export function Webview(props: WebviewProps): TimelessElement<WebviewState> {
           const unsub = href.subscribe({
             onChange(v) {
               state.href = v;
+              $elm?.setAttribute?.("src", v);
             },
           });
           listener$.push(unsub);
@@ -73,6 +74,7 @@ export function Webview(props: WebviewProps): TimelessElement<WebviewState> {
   };
 
   methods.subscribe_props();
+  box$.methods.add_event();
 
   return {
     t: "webview",

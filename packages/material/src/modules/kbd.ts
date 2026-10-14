@@ -1,11 +1,14 @@
-import { Html, View, ViewChildren, ViewProps, classNames } from "@timeless/timeless";
+import { View, ViewChildren, ViewProps, classNames } from "@timeless/timeless";
 
 export function Kbd(props: ViewProps, children?: ViewChildren) {
   const { class: cls, ...rest } = props;
-  return Html.Kbd(
+  return View(
     {
       ...rest,
-      class: classNames(["m3-kbd", cls]),
+      class: classNames([
+        "tt-content-inline tt-content-code",
+        classNames(["m3-kbd", cls]),
+      ]),
     },
     children,
   );

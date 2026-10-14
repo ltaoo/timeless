@@ -6,7 +6,7 @@ import {
   computed,
   refobj,
 } from "@timeless/timeless";
-import { Html, For, View, ViewProps } from "@timeless/timeless";
+import { For, View, ViewProps } from "@timeless/timeless";
 
 import { PICKER_ANIMATION } from "./date-picker";
 
@@ -30,7 +30,13 @@ export function DateRangePicker(
     placeholder?: string;
   },
 ) {
-  const { store, id, placeholder = "选择日期范围", class: cls, ...rest } = props;
+  const {
+    store,
+    id,
+    placeholder = "选择日期范围",
+    class: cls,
+    ...rest
+  } = props;
 
   const state_ = refobj(store.state);
   const calendar_state_ = refobj(store.$calendar.state);
@@ -45,7 +51,9 @@ export function DateRangePicker(
     has_value_,
   ]);
 
-  function nav_button(type: "leftPrev" | "leftNext" | "rightPrev" | "rightNext") {
+  function nav_button(
+    type: "leftPrev" | "leftNext" | "rightPrev" | "rightNext",
+  ) {
     const ButtonComponent = {
       leftPrev: ui.DateRangePickerPrimitive.LeftPrevButton,
       leftNext: ui.DateRangePickerPrimitive.LeftNextButton,
@@ -67,8 +75,7 @@ export function DateRangePicker(
         class: classNames([
           "m3-daterangepicker__nav",
           computed(calendar_state_, (s) =>
-            guard &&
-            !(type === "leftNext" ? s.canLeftNext : s.canRightPrev)
+            guard && !(type === "leftNext" ? s.canLeftNext : s.canRightPrev)
               ? "is-disabled"
               : "",
           ),
@@ -99,10 +106,9 @@ export function DateRangePicker(
           View(
             { class: "m3-daterangepicker__weekdays" },
             WEEKDAYS.map((day) =>
-              Html.Span(
-                { class: "m3-daterangepicker__weekday" },
-                [day],
-              ),
+              View({ class: "tt-content-inline m3-daterangepicker__weekday" }, [
+                day,
+              ]),
             ),
           ),
           For({
@@ -143,8 +149,11 @@ export function DateRangePicker(
                         ]),
                       },
                       [
-                        Html.Span(
-                          { class: "m3-daterangepicker__cell-label" },
+                        View(
+                          {
+                            class:
+                              "tt-content-inline m3-daterangepicker__cell-label",
+                          },
                           [day.text],
                         ),
                       ],

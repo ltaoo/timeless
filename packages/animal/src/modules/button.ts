@@ -1,5 +1,5 @@
 import { ui, vm } from "@timeless/timeless";
-import { Html,
+import {
   View,
   ViewProps,
   ViewChildren,
@@ -100,7 +100,7 @@ export function Button(
     },
     [
       ui.ButtonPrimitive.Loading({ store }, [
-        Html.Span({ class: "animal-btn__spinner" }, []),
+        View({ class: "tt-content-inline animal-btn__spinner" }, []),
       ]),
       ui.ButtonPrimitive.Prefix({}, prefix || []),
       ui.ButtonPrimitive.Content({}, children),

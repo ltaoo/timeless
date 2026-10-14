@@ -1,3 +1,4 @@
+import "./content.css";
 import { Price, formatPrice } from "./modules/price";
 import { OptionChip } from "./modules/option-chip";
 import { Gallery } from "./modules/gallery";

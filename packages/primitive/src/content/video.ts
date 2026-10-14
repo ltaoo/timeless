@@ -47,7 +47,13 @@ export type VideoProps = BoxProps & {
   /** Plays inline on mobile browsers */
   playsInline?: boolean | DerivedRef<boolean> | Ref<boolean>;
   /** Preload hint */
-  preload?: "none" | "metadata" | "auto" | "" | DerivedRef<string> | Ref<string>;
+  preload?:
+    | "none"
+    | "metadata"
+    | "auto"
+    | ""
+    | DerivedRef<string>
+    | Ref<string>;
   /** Cross-origin attribute */
   crossOrigin?:
     | "anonymous"
@@ -114,6 +120,7 @@ export function Video(props: VideoProps) {
   } = props as VideoProps & Record<string, any>;
 
   let $elm: any = null;
+  let mount_cleanup: void | (() => void);
   const box$ = Box<VideoState>(rest, {} as VideoState);
 
   const state = box$.state;
@@ -234,6 +241,7 @@ export function Video(props: VideoProps) {
   };
 
   methods.subscribe_props();
+  box$.methods.add_event();
 
   return {
     t: "video",
@@ -241,13 +249,15 @@ export function Video(props: VideoProps) {
       return $elm;
     },
     set $elm(v: any) {
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state,
     events,
     onMounted(event: MountedEvent) {
+      state.rendered = true;
       if (rest.onMounted) {
-        rest.onMounted(event);
+        mount_cleanup = rest.onMounted(event);
       }
     },
     beforeUnmounted() {
@@ -256,10 +266,19 @@ export function Video(props: VideoProps) {
       }
     },
     onUnmounted() {
+      mount_cleanup?.();
+      mount_cleanup = undefined;
+      box$.methods.set$elm(null);
+      $elm = null;
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
       state.rendered = false;
+    },
+    destroy() {
+      this.onUnmounted();
+      listener$.destroy();
+      box$.methods.destroy();
     },
   };
 }

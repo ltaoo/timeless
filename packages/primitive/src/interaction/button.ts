@@ -1,7 +1,12 @@
 import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import { Text } from "@/content/text";
-import { isElement, ViewChildren, resolve_children } from "@/content/type";
+import {
+  destroyElement,
+  isElement,
+  ViewChildren,
+  resolve_children,
+} from "@/content/type";
 import { MountedEvent } from "@/event/index";
 import { Box, BoxProps } from "@/content/box";
 
@@ -21,6 +26,7 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
   }
 
   let $elm: any = null;
+  let mount_cleanup: void | (() => void);
   const box$ = Box<ButtonState>(
     { ...rest, attributes: button_attributes },
     { disabled: false },
@@ -130,8 +136,9 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
     children: state.children,
     events,
     onMounted(event: MountedEvent) {
+      state.rendered = true;
       if (props.onMounted) {
-        props.onMounted(event);
+        mount_cleanup = props.onMounted(event);
       }
       for (let i = 0; i < state.children.length; i += 1) {
         const child = state.children[i];
@@ -152,31 +159,17 @@ export function Button(props: ButtonProps = {}, children?: ViewChildren) {
       }
     },
     onUnmounted() {
-      if (props.onUnmounted) {
-        props.onUnmounted();
-      }
-      // for (let i = 0; i < state.children.length; i += 1) {
-      //   const node = state.children[i];
-      //   if (isElement(node)) {
-      //     // 如果是 Portal 组件，调用其 cleanup 方法
-      //     if (node.t === "portal" && typeof node.cleanup === "function") {
-      //       // console.log("[View] calling cleanup on Portal child");
-      //       node.cleanup();
-      //     } else if (node.onUnmounted) {
-      //       // 否则调用标准的 onUnmounted
-      //       // console.log("[View] calling onUnmounted on child:", node.t);
-      //       node.onUnmounted();
-      //     }
-      //   }
-      // }
-      // console.log("[View] clearing DOM, firstChild:", !!$elm.firstChild);
-      // host.clearChildren($elm);
-      // $elm.removeChildren();
-      // console.log("[View] onUnmounted completed");
-
-      // Reset state for potential re-render (e.g., when Show toggles when back to true)
+      mount_cleanup?.();
+      mount_cleanup = undefined;
+      props.onUnmounted?.();
+      box$.methods.set$elm(null);
       state.rendered = false;
       $elm = null;
+    },
+    destroy() {
+      this.onUnmounted();
+      box$.methods.destroy();
+      for (const child of state.children) destroyElement(child);
     },
   };
 }

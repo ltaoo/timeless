@@ -1,6 +1,6 @@
 import { ui, vm } from "@timeless/timeless";
 import { computed, Icon, ListenerManager, refobj } from "@timeless/timeless";
-import { Html, For, Show, View, ViewProps, classNames } from "@timeless/timeless";
+import { For, Show, View, ViewProps, classNames } from "@timeless/timeless";
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 
@@ -91,7 +91,7 @@ function CalendarPanel(props: {
           View(
             { class: "datepicker__weekdays" },
             WEEKDAYS.map((day) =>
-              Html.Span({ class: "datepicker__weekday" }, [day]),
+              View({ class: "tt-content-inline datepicker__weekday" }, [day]),
             ),
           ),
           For({
@@ -139,28 +139,31 @@ function CalendarPanel(props: {
                         ]),
                       },
                       [
-                        Html.Span(
+                        View(
                           {
                             class: classNames([
-                              "datepicker__cell-inner",
-                              computed(calendar_state_, () => {
-                                const is_start = store.$calendar.isRangeStart(
-                                  day.value,
-                                );
-                                const is_end = store.$calendar.isRangeEnd(
-                                  day.value,
-                                );
-                                return [
-                                  is_start || is_end ? "is-edge" : "",
-                                  store.$calendar.isInRange(day.value) &&
-                                  !is_start &&
-                                  !is_end
-                                    ? "is-in"
-                                    : "",
-                                ]
-                                  .filter(Boolean)
-                                  .join(" ");
-                              }),
+                              "tt-content-inline",
+                              classNames([
+                                "datepicker__cell-inner",
+                                computed(calendar_state_, () => {
+                                  const is_start = store.$calendar.isRangeStart(
+                                    day.value,
+                                  );
+                                  const is_end = store.$calendar.isRangeEnd(
+                                    day.value,
+                                  );
+                                  return [
+                                    is_start || is_end ? "is-edge" : "",
+                                    store.$calendar.isInRange(day.value) &&
+                                    !is_start &&
+                                    !is_end
+                                      ? "is-in"
+                                      : "",
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" ");
+                                }),
+                              ]),
                             ]),
                           },
                           [day.text],
@@ -185,7 +188,13 @@ export function DateRangePicker(
     placeholder?: string;
   },
 ) {
-  const { store, id, placeholder = "选择日期范围", class: cls, ...rest } = props;
+  const {
+    store,
+    id,
+    placeholder = "选择日期范围",
+    class: cls,
+    ...rest
+  } = props;
 
   const state_ = refobj(store.state);
   const presence_ = refobj(store.$presence.state);
@@ -225,10 +234,9 @@ export function DateRangePicker(
               ),
             ]),
           }),
-          ui.DateRangePickerPrimitive.Icon(
-            { class: "datepicker__icon" },
-            [Icon({ name: "calendar", size: 16 })],
-          ),
+          ui.DateRangePickerPrimitive.Icon({ class: "datepicker__icon" }, [
+            Icon({ name: "calendar", size: 16 }),
+          ]),
         ],
       ),
       ui.DateRangePickerPrimitive.Content(

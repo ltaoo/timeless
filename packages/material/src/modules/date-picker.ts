@@ -8,7 +8,7 @@ import {
   ref,
   refobj,
 } from "@timeless/timeless";
-import { Html, For, Show, View, ViewProps } from "@timeless/timeless";
+import { For, Show, View, ViewProps } from "@timeless/timeless";
 
 const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 
@@ -168,8 +168,8 @@ export function DatePicker(
                   View(
                     { class: "m3-datepicker__weekdays" },
                     WEEKDAYS.map((day) =>
-                      Html.Span(
-                        { class: "m3-datepicker__weekday" },
+                      View(
+                        { class: "tt-content-inline m3-datepicker__weekday" },
                         [day],
                       ),
                     ),

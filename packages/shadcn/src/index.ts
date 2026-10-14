@@ -1,3 +1,4 @@
+import "./content.css";
 import { Gallery } from "./modules/gallery";
 import { Input } from "./modules/input";
 import { FileDropZone, FileInput } from "./modules/file-picker";
