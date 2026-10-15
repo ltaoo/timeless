@@ -47,6 +47,7 @@ export default defineConfig({
     include: [
       "packages/provider-web/src/__tests__/*.test.ts",
       "packages/timeless-dom/src/__tests__/html.test.ts",
+      "packages/timeless-dom/src/__tests__/hydration.test.ts",
       "packages/timeless-dom/src/__tests__/text-range.test.ts",
       "packages/kit/src/audio/__tests__/*.test.ts",
       "packages/kit/src/http_client/__tests__/*.test.ts",

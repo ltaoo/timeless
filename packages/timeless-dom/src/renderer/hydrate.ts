@@ -2,9 +2,42 @@ import { VNodeView, type TimelessElement } from "@timeless/timeless";
 
 import { resetPortalCounter } from "@/host/portal";
 import { isDOMTableElementType } from "@/host/table";
+import { HostElement, isEmptyNode } from "@/host/box";
 
 import { render } from "./index";
 import { build } from "./build";
+
+/** Hydrate against the live DOM: transparent children insert their own end anchors. */
+export function hydrate_children(
+  elm: TimelessElement,
+  parent: HTMLElement,
+  host: ReturnType<typeof HostElement>["methods"],
+  offset = 0,
+): number {
+  const start = offset;
+  const children = elm.children || [];
+  const views: (VNodeView<any> | null)[] = [];
+  for (let idx = 0; idx < children.length; idx += 1) {
+    const child = children[idx];
+    if (!child) {
+      views.push(null);
+      continue;
+    }
+    const view = hydrate_node(child, parent.childNodes[offset] as HTMLElement | Text, {
+      $parent: parent, offset, idx,
+    });
+    views.push(view);
+    if (!view || isEmptyNode(child)) continue;
+    const last = view.get$elm();
+    if (last?.parentNode === parent) {
+      offset = Array.prototype.indexOf.call(parent.childNodes, last) + 1;
+    }
+  }
+  host.set$childrne(Array.from(parent.childNodes).slice(start, offset));
+  host.setchildrenelement([...children]);
+  host.setchildnode(views);
+  return offset;
+}
 
 /**
  * Hydrate a virtual node tree onto existing server-rendered DOM.
@@ -124,8 +157,13 @@ export function hydrate_node(
     return view$;
   }
   if (vnode.t === "text") {
-    if (!($elm.nodeType === 3)) {
-      return null;
+    const value = String(vnode.state.value ?? "");
+    // HTML drops empty text nodes and merges adjacent text nodes.
+    if (!$elm || $elm.nodeType !== 3 || value === "") {
+      $elm = document.createTextNode(value);
+      opt.$parent.insertBefore($elm, opt.$parent.childNodes[opt.offset] || null);
+    } else if ($elm.textContent?.startsWith(value) && $elm.textContent.length > value.length) {
+      ($elm as Text).splitText(value.length);
     }
     const text$ = build(vnode);
     vnode.$elm = text$;

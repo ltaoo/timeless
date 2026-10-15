@@ -1,6 +1,6 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { hydrate_node } from "@/renderer/hydrate";
+import { hydrate_children } from "@/renderer/hydrate";
 
 import { HostElement } from "./box";
 
@@ -35,35 +35,10 @@ export function DOMButton(props: {
       $elm.appendChild($fragment);
       return $elm;
     },
-    hydrate(elm: TimelessElement, $elm: HTMLButtonElement) {
-      // console.log("hydrate button element", $elm, elm.events);
-      if ($elm.nodeType === 3) {
-        return;
-      }
+    hydrate(elm: TimelessElement, $elm: HTMLElement) {
       common$.methods.set$elm($elm);
       common$.methods.setupEventListener(elm.events);
-      if (elm.children) {
-        const child_nodes: VNodeView[] = [];
-        const $children = Array.from($elm.childNodes);
-        for (let i = 0; i < elm.children.length; i += 1) {
-          const child = elm.children[i];
-          if (child) {
-            const child$ = hydrate_node(
-              child,
-              $children[i] as HTMLElement | Text,
-              {
-                $parent: $elm as HTMLElement,
-                offset: 0,
-                idx: i,
-              },
-            );
-            if (child$) {
-              child_nodes.push(child$);
-            }
-          }
-        }
-        common$.methods.setchildnode(child_nodes);
-      }
+      hydrate_children(elm, $elm, common$.methods);
     },
   };
 }
