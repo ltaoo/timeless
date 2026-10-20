@@ -50,17 +50,16 @@ export function NativeFor(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
     },
     addEventListener(
       type: string,

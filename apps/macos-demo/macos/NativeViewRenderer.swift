@@ -2,12 +2,6 @@ import Cocoa
 import JavaScriptCore
 import yoga
 
-/// An NSView subclass whose coordinate system origin is top-left,
-/// matching Yoga's layout output.
-class FlippedView: NSView {
-    override var isFlipped: Bool { true }
-}
-
 /// Converts a `NativeNode` tree into an AppKit (NSView) hierarchy
 /// using Yoga for layout calculation. Registers HMR change callbacks
 /// on JSValue $elm objects so that property and structural changes
@@ -48,7 +42,9 @@ class NativeViewRenderer {
 
     /// Re-layout existing NSView tree using updated $elm data.
     /// Called after JS patch() modifies the $elm tree.
-    func relayout() {
+    func relayout(containerWidth: CGFloat? = nil, containerHeight: CGFloat? = nil) {
+        if let width = containerWidth { lastContainerWidth = width }
+        if let height = containerHeight { lastContainerHeight = height }
         guard let bridge = bridge,
               let rootJSValue = bridge.rootElmJSValue,
               let rootNode = bridge.parseNode(rootJSValue),
@@ -67,7 +63,7 @@ class NativeViewRenderer {
 
         // Update the document view height if inside a scroll view
         if let docView = rootView.superview {
-            docView.frame.size.height = rootView.frame.height
+            docView.frame.size = rootView.frame.size
         }
     }
 
@@ -157,48 +153,24 @@ class NativeViewRenderer {
             return imageView
 
         case .button(let style, let children, let jsValue):
-            let button = NSButton(title: "", target: nil, action: nil)
-            button.bezelStyle = .rounded
-            button.frame = frame
+            let button = FlippedView(frame: frame)
             NativeViewRenderer.applyStyle(style, to: button)
-            for child in children {
-                if case .text(let value, _, _) = child {
-                    button.title = value
-                    break
-                }
-            }
-            if let fontSize = style["font-size"] {
-                let size = NativeViewRenderer.parsePx(fontSize)
-                if size > 0 {
-                    button.font = .systemFont(ofSize: size)
-                }
-            }
-            if let jsValue = jsValue {
-                // Live event reading: read from $elm.listeners on each click
-                let helper = LiveButtonClickHelper(jsValue: jsValue)
-                button.target = helper
-                button.action = #selector(LiveButtonClickHelper.handleClick)
-                objc_setAssociatedObject(button, "clickHelper", helper, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-
-                let onStyleChange: @convention(block) (JSValue) -> Void = { [weak button] styleJS in
-                    guard let btn = button else { return }
-                    let s = styleJS.toDictionary() as? [String: String] ?? [:]
-                    NativeViewRenderer.applyStyle(s, to: btn)
-                }
-                jsValue.setValue(onStyleChange, forProperty: "_onStyleChange")
-            }
+            addChildren(children, to: button, yogaParent: yogaNode)
+            registerContainerCallbacks(jsValue: jsValue, view: button)
+            button.bind(jsValue, button: true)
             return button
 
         case .input(let value, let placeholder, let style, let jsValue):
-            let textField = NSTextField(frame: frame)
+            let textField = StyledTextField(frame: frame)
             textField.stringValue = value
             textField.placeholderString = placeholder
             textField.isEditable = true
-            textField.isBezeled = true
-            textField.bezelStyle = .roundedBezel
+            textField.isBezeled = false
+            textField.drawsBackground = false
             NativeViewRenderer.applyStyle(style, to: textField)
             NativeViewRenderer.applyTextStyle(style, to: textField)
             if let jsValue = jsValue {
+                textField.bind(jsValue)
                 let delegate = LiveTextFieldInputDelegate(jsValue: jsValue)
                 textField.delegate = delegate
                 objc_setAssociatedObject(textField, "inputDelegate", delegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -256,8 +228,8 @@ class NativeViewRenderer {
             textField.stringValue = value
             textField.placeholderString = placeholder
             textField.isEditable = !disabled
-            textField.isBezeled = true
-            textField.bezelStyle = .roundedBezel
+            textField.isBezeled = false
+            textField.drawsBackground = false
             let formatter = NumberFormatter()
             formatter.numberStyle = .decimal
             textField.formatter = formatter
@@ -489,6 +461,7 @@ class NativeViewRenderer {
     /// on container JSValues (view, row, column, aspectRatio).
     private func registerContainerCallbacks(jsValue: JSValue?, view: NSView) {
         guard let jsValue = jsValue else { return }
+        (view as? FlippedView)?.bind(jsValue)
 
         let onStyleChange: @convention(block) (JSValue) -> Void = { [weak view] styleJS in
             guard let view = view else { return }
@@ -553,33 +526,17 @@ class NativeViewRenderer {
 
     static func applyStyle(_ style: [String: String], to view: NSView) {
         view.wantsLayer = true
-
-        if let bg = style["background-color"] {
-            view.layer?.backgroundColor = parseColor(bg)?.cgColor
-        }
+        view.layer?.backgroundColor = parseColor(style["background-color"] ?? style["background"] ?? "transparent")?.cgColor
+        view.layer?.borderColor = parseColor(style["border-color"] ?? "black")?.cgColor
+        view.layer?.borderWidth = parsePx(style["border-width"])
+        view.layer?.cornerRadius = parsePx(style["border-radius"])
+        view.alphaValue = CGFloat(Double(style["opacity"] ?? "1") ?? 1)
+        view.isHidden = style["display"] == "none"
     }
 
     static func applyTextStyle(_ style: [String: String], to label: NSTextField) {
-        var fontSize: CGFloat = 14
-        if let fs = style["font-size"] {
-            fontSize = parsePx(fs)
-            if fontSize <= 0 { fontSize = 14 }
-        }
-
-        var fontWeight: NSFont.Weight = .regular
-        if let fw = style["font-weight"] {
-            if fw == "bold" || fw == "700" {
-                fontWeight = .bold
-            } else if fw == "600" {
-                fontWeight = .semibold
-            } else if fw == "500" {
-                fontWeight = .medium
-            } else if fw == "300" {
-                fontWeight = .light
-            }
-        }
-
-        label.font = NSFont.systemFont(ofSize: fontSize, weight: fontWeight)
+        label.font = YogaLayoutEngine.resolveFont(style)
+        label.alignment = style["text-align"] == "center" ? .center : style["text-align"] == "right" ? .right : .left
 
         if let color = style["color"] {
             if let c = parseColor(color) {
@@ -600,37 +557,29 @@ class NativeViewRenderer {
     }
 
     static func parseColor(_ value: String) -> NSColor? {
-        guard value.hasPrefix("#"), value.count == 7 else { return nil }
-        let hex = String(value.dropFirst())
-        guard let rgb = UInt64(hex, radix: 16) else { return nil }
+        switch value.lowercased() {
+        case "transparent": return .clear
+        case "black": return .black
+        case "white": return .white
+        default: break
+        }
+        guard value.hasPrefix("#") else { return nil }
+        var hex = String(value.dropFirst())
+        if hex.count == 3 || hex.count == 4 { hex = hex.map { "\($0)\($0)" }.joined() }
+        if hex.count == 6 { hex += "ff" }
+        guard hex.count == 8, let rgba = UInt64(hex, radix: 16) else { return nil }
         return NSColor(
-            red: CGFloat((rgb >> 16) & 0xFF) / 255.0,
-            green: CGFloat((rgb >> 8) & 0xFF) / 255.0,
-            blue: CGFloat(rgb & 0xFF) / 255.0,
-            alpha: 1.0
+            red: CGFloat((rgba >> 24) & 0xFF) / 255.0,
+            green: CGFloat((rgba >> 16) & 0xFF) / 255.0,
+            blue: CGFloat((rgba >> 8) & 0xFF) / 255.0,
+            alpha: CGFloat(rgba & 0xFF) / 255.0
         )
     }
 }
 
 // MARK: - Live event helpers (read from $elm.listeners on each invocation)
 
-/// Reads `$elm.listeners.click` on each click instead of caching the closure.
-class LiveButtonClickHelper: NSObject {
-    let jsValue: JSValue  // the $elm JSValue
-
-    init(jsValue: JSValue) {
-        self.jsValue = jsValue
-    }
-
-    @objc func handleClick() {
-        guard let listeners = jsValue.forProperty("listeners"),
-              let clickHandler = listeners.forProperty("click"),
-              !clickHandler.isUndefined else { return }
-        clickHandler.call(withArguments: [])
-    }
-}
-
-/// Reads `$elm.listeners.click` live for checkbox/radio.
+/// Checkbox/radio dispatch the shared click and change events.
 class LiveCheckboxClickHelper: NSObject {
     weak var button: NSButton?
     let jsValue: JSValue
@@ -642,11 +591,9 @@ class LiveCheckboxClickHelper: NSObject {
 
     @objc func handleClick() {
         let isChecked = button?.state == .on
-        let event: [String: Any] = ["target": ["checked": isChecked]]
-        guard let listeners = jsValue.forProperty("listeners"),
-              let clickHandler = listeners.forProperty("click"),
-              !clickHandler.isUndefined else { return }
-        clickHandler.call(withArguments: [event])
+        jsValue.setObject(isChecked, forKeyedSubscript: "checked" as NSString)
+        jsValue.forProperty("_dispatchNativeEvent")?.call(withArguments: ["click", [:]])
+        jsValue.forProperty("_dispatchNativeEvent")?.call(withArguments: ["change", [:]])
     }
 }
 
@@ -656,6 +603,16 @@ class LiveTextFieldInputDelegate: NSObject, NSTextFieldDelegate {
 
     init(jsValue: JSValue) {
         self.jsValue = jsValue
+    }
+
+    func controlTextDidBeginEditing(_ obj: Notification) {
+        jsValue.forProperty("_setStyleState")?.call(withArguments: ["focus", true])
+        jsValue.forProperty("_dispatchNativeEvent")?.call(withArguments: ["focus", [:]])
+    }
+
+    func controlTextDidEndEditing(_ obj: Notification) {
+        jsValue.forProperty("_setStyleState")?.call(withArguments: ["focus", false])
+        jsValue.forProperty("_dispatchNativeEvent")?.call(withArguments: ["blur", [:]])
     }
 
     func controlTextDidChange(_ obj: Notification) {

@@ -40,17 +40,16 @@ export function NativeButton(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
     },
     addEventListener(
       type: string,
@@ -81,6 +80,14 @@ export function NativeButton(props: {
     render() {
       methods.set$elm($elm);
       methods.applyState(props.elm.state, { initial: true });
+      methods.setDefaultStyle({
+        "background-color": "#eeeeee",
+        "border-radius": "6px",
+        "padding-top": "6px",
+        "padding-bottom": "6px",
+        "padding-left": "12px",
+        "padding-right": "12px",
+      });
       methods.setupEventListener(props.elm.events);
       if (props.elm.children) {
         methods.render(props.elm.children);

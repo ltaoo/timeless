@@ -206,6 +206,25 @@ importers:
         specifier: ^8.0.0-beta.16
         version: 8.0.0-beta.16(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(less@4.6.7)(terser@5.46.0)(yaml@2.8.3)
 
+  apps/windows-demo:
+    dependencies:
+      '@timeless/timeless':
+        specifier: workspace:^
+        version: link:../../packages/timeless
+      '@timeless/timeless-native':
+        specifier: workspace:^
+        version: link:../../packages/timeless-native
+      '@timeless/timeless-windows':
+        specifier: workspace:^
+        version: link:../../packages/timeless-windows
+    devDependencies:
+      '@timeless/inner-vite-plugin':
+        specifier: workspace:^
+        version: link:../../packages/vite-plugin
+      vite:
+        specifier: ^8.0.0-beta.16
+        version: 8.0.0-beta.16(@types/node@25.0.9)(esbuild@0.27.4)(jiti@2.6.1)(less@4.6.7)(terser@5.46.0)(yaml@2.8.3)
+
   apps/playground:
     devDependencies:
       '@timeless/cli':
@@ -938,6 +957,12 @@ importers:
         specifier: workspace:*
         version: link:../timeless
 
+  packages/timeless-windows:
+    dependencies:
+      '@timeless/timeless-native':
+        specifier: workspace:*
+        version: link:../timeless-native
+
   packages/types:
     devDependencies:
       typescript:
@@ -1052,6 +1077,9 @@ importers:
 
   packages/vite-plugin:
     dependencies:
+      postcss:
+        specifier: ^8.5.6
+        version: 8.5.6
       vite:
         specifier: '>=5.0.0'
         version: 5.4.21(@types/node@25.0.9)(less@4.6.7)(lightningcss@1.32.0)(terser@5.46.0)

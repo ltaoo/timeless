@@ -5,5 +5,5 @@ export default createLibConfig({
   entry: resolve(__dirname, "src/index.ts"),
   name: "timeless.vite-plugin",
   formats: ["es", "cjs"],
-  external: ["vite"],
+  external: ["vite", "postcss", "node:fs/promises"],
 });

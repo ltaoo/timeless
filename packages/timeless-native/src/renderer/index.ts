@@ -1,4 +1,5 @@
 import { type TimelessElement, isElement, patch } from "@timeless/timeless";
+import { bindNativeStyleRoot, refreshNativeStyles } from "../stylesheet";
 
 declare const __nativeBridge_render: (tree: any) => void;
 declare const __nativeBridge_relayout: (() => void) | undefined;
@@ -24,7 +25,7 @@ import { NativeLabel } from "@/host/label";
 import { NativeIcon } from "@/host/icon";
 import { NativeFilePicker } from "@/host/file-picker";
 import { NativeNumberInput } from "@/host/number-input";
-import { NativeSelect } from "@/host/select";
+import { NativeSelect, NativeSelectOption } from "@/host/select";
 import { NativeAspectRatio } from "@/host/aspect-ratio";
 import { NativeSplitView, NativeSplitPane } from "@/host/split-view";
 import { NativeScrollView } from "@/host/scroll-view";
@@ -149,6 +150,11 @@ function build(elm: TimelessElement): any {
     elm.$elm = numberInput$;
     return numberInput$;
   }
+  if (elm.t === "select-option" || elm.t === "select-option-group") {
+    const option = NativeSelectOption({ build, elm });
+    elm.$elm = option;
+    return option;
+  }
   if (elm.t === "select") {
     const select$ = NativeSelect({ build, elm });
     elm.$elm = select$;
@@ -187,6 +193,7 @@ function build(elm: TimelessElement): any {
 export function buildAndRender(elm: TimelessElement) {
   const vnode = build(elm);
   const dom = vnode.render();
+  refreshNativeStyles(dom);
   return { vnode, dom };
 }
 
@@ -204,6 +211,7 @@ export function nativePlatform() {
       if (idx !== -1) {
         parent.children[idx] = newDom;
         newDom.parentNode = parent;
+        refreshNativeStyles(newDom);
         oldDom.parentNode = null;
         if (typeof parent._onChildReplaced === "function") {
           parent._onChildReplaced(idx, newDom);
@@ -225,6 +233,7 @@ export function nativePlatform() {
     insertChild(parentDom: any, childDom: any, index: number) {
       parentDom.children.splice(index, 0, childDom);
       childDom.parentNode = parentDom;
+      refreshNativeStyles(childDom);
       if (typeof parentDom._onChildInserted === "function") {
         parentDom._onChildInserted(index, childDom);
       }
@@ -233,6 +242,7 @@ export function nativePlatform() {
       // Native: children go INSIDE the anchor-based element, not as siblings
       anchorDom.children.push(childDom);
       childDom.parentNode = anchorDom;
+      refreshNativeStyles(childDom);
       if (typeof anchorDom._onChildInserted === "function") {
         anchorDom._onChildInserted(anchorDom.children.length - 1, childDom);
       }
@@ -265,6 +275,7 @@ export function render(elm: TimelessElement) {
         platform: nativePlatform(),
       });
       hmr.data.__root = elm;
+      bindNativeStyleRoot(elm.$elm.get$elm());
       if (typeof __nativeBridge_relayout !== "undefined") {
         __nativeBridge_relayout();
       }
@@ -295,6 +306,7 @@ export function render(elm: TimelessElement) {
     const isViewLike = isNativeView(host$) || host$.getType() === "view";
     console.log("[Native Render] isViewLike:", isViewLike);
     const $root = host$.render();
+    bindNativeStyleRoot($root);
     __nativeBridge_render($root);
     console.log("[Native Render] pushing view to root children, $elm:");
 

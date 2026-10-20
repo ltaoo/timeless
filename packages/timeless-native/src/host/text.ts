@@ -1,4 +1,9 @@
 import { TimelessElement } from "@timeless/timeless";
+import {
+  refreshNativeStyles,
+  requestNativeLayout,
+  setNativeInlineStyle,
+} from "../stylesheet";
 
 export interface NativeTextElm {
   type: "text";
@@ -48,17 +53,20 @@ export function NativeText(props: { elm: TimelessElement }): NativeText {
         }
       } else {
         $text.value = "";
+        $text._onContentChange?.("");
       }
+      requestNativeLayout();
     },
     setStyle(style: Record<string, string>) {
-      Object.assign($text.style, style);
-      if (typeof $text._onStyleChange === "function") {
-        $text._onStyleChange($text.style);
-      }
+      setNativeInlineStyle($text, style);
     },
     render() {
+      refreshNativeStyles($text);
       $text.value = (() => {
-        if (props.elm.state.value !== null && props.elm.state.value !== undefined) {
+        if (
+          props.elm.state.value !== null &&
+          props.elm.state.value !== undefined
+        ) {
           return String(props.elm.state.value);
         }
         return "";

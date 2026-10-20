@@ -5,6 +5,7 @@ import { HostElement, BoxMethods } from "./box";
 export type NativeInput = VNodeView<any> & {
   t: "input";
   render(): any;
+  setValue(value: string): void;
 };
 
 export function NativeInput(props: {
@@ -41,14 +42,13 @@ export function NativeInput(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
       if (key === "value") {
         $elm.value = value;
       }
@@ -57,7 +57,11 @@ export function NativeInput(props: {
       }
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
+    },
+    setValue(value: string) {
+      $elm.value = value;
+      ($elm as any)._onValueChange?.(value);
     },
     addEventListener(
       type: string,
@@ -96,7 +100,7 @@ export function NativeInput(props: {
         $elm.placeholder = String(props.elm.state.placeholder);
       }
       if (!$elm.style["height"]) {
-        $elm.style["height"] = "28px";
+        methods.setDefaultStyle({ height: "28px" });
       }
       return $elm;
     },

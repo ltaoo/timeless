@@ -4,6 +4,13 @@ import {
   ViewStyleProperties,
   isElement,
 } from "@timeless/timeless";
+import {
+  refreshNativeStyles,
+  requestNativeLayout,
+  setNativeDefaultStyle,
+  setNativeInlineStyle,
+  setNativeStyleValue,
+} from "../stylesheet";
 
 export interface BoxMethods {
   set$elm(elm: any): void;
@@ -16,6 +23,7 @@ export interface BoxMethods {
     opt?: Partial<{ initial?: boolean }>,
   ): void;
   setStyleSet(styleSet: string[], opt?: Partial<{ initial?: boolean }>): void;
+  setDefaultStyle(style: Record<string, string>): void;
   setStyleValue(key: any, value: string): void;
   setAttribute(key: string, value: string): void;
   removeAttribute(key: string): void;
@@ -41,6 +49,15 @@ export interface BoxMethods {
   handleElementsMounted(): void;
   handleElementUnmounted(): void;
   getChildren(): any[];
+  get$children(): any[];
+  teardownEventListener(events: any): void;
+  trackChild(
+    dom: any,
+    element: TimelessElement,
+    vnode: any,
+    index: number,
+  ): void;
+  untrackChild(index: number): void;
   buildChildren(children?: (TimelessElement | null)[]): {
     $fragment: any;
     child_elements: (TimelessElement | null)[];
@@ -75,6 +92,7 @@ export function HostElement(props: {
   const methods: BoxMethods = {
     set$elm(elm: any) {
       $elm = elm;
+      if ($elm) refreshNativeStyles($elm);
     },
     get$elm() {
       return $elm;
@@ -115,10 +133,7 @@ export function HostElement(props: {
           styleObj[k] = String(v);
         }
       });
-      $elm.style = styleObj;
-      if (typeof $elm._onStyleChange === "function") {
-        $elm._onStyleChange($elm.style);
-      }
+      setNativeInlineStyle($elm, styleObj);
     },
     setStyleSet(styleSet: string[], opt: Partial<{ initial?: boolean }> = {}) {
       if (!$elm) {
@@ -129,6 +144,10 @@ export function HostElement(props: {
       } else {
         $elm.attrs.class = styleSet.join(" ");
       }
+      refreshNativeStyles($elm);
+    },
+    setDefaultStyle(style) {
+      if ($elm) setNativeDefaultStyle($elm, style);
     },
     setStyleValue(key: any, value: string) {
       if (!$elm) {
@@ -137,16 +156,14 @@ export function HostElement(props: {
       const k = String(key)
         .replace(/([A-Z])/g, "-$1")
         .toLowerCase();
-      $elm.style[k] = value;
-      if (typeof $elm._onStyleChange === "function") {
-        $elm._onStyleChange($elm.style);
-      }
+      setNativeStyleValue($elm, k, value);
     },
     setAttribute(key: string, value: string) {
       if (!$elm) {
         return;
       }
       $elm.attrs[key] = value;
+      if (key === "class" || key === "disabled") refreshNativeStyles($elm);
       if (typeof $elm._onAttributeChange === "function") {
         $elm._onAttributeChange(key, value);
       }
@@ -156,12 +173,17 @@ export function HostElement(props: {
         return;
       }
       delete $elm.attrs[key];
+      if (key === "class" || key === "disabled") refreshNativeStyles($elm);
       if (typeof $elm._onAttributeChange === "function") {
         $elm._onAttributeChange(key, null);
       }
     },
-    blur() {},
-    focus() {},
+    blur() {
+      $elm?._blur?.();
+    },
+    focus() {
+      $elm?._focus?.();
+    },
     addEventListener(
       type: string,
       handler: (event: any) => void,
@@ -240,6 +262,7 @@ export function HostElement(props: {
       if (events.onAnimationEnd) {
         $elm.listeners.animationend = events.onAnimationEnd;
       }
+      if (events.onScroll) $elm.listeners.scroll = events.onScroll;
       if (events.onInput) {
         $elm.listeners.input = events.onInput;
       }
@@ -249,6 +272,27 @@ export function HostElement(props: {
       if (typeof $elm._onEventChange === "function") {
         $elm._onEventChange($elm.listeners);
       }
+    },
+    teardownEventListener(events: any) {
+      if (!$elm || !events) return;
+      for (const key of Object.keys(events)) {
+        const type =
+          key === "onDoubleClick" ? "dblclick" : key.slice(2).toLowerCase();
+        if ($elm.listeners[type] === events[key]) delete $elm.listeners[type];
+      }
+    },
+    get$children() {
+      return child_host_nodes;
+    },
+    trackChild(dom, element, vnode, index) {
+      child_host_nodes.splice(index, 0, dom);
+      child_elements.splice(index, 0, element);
+      child_nodes.splice(index, 0, vnode);
+    },
+    untrackChild(index) {
+      child_host_nodes.splice(index, 1);
+      child_elements.splice(index, 1);
+      child_nodes.splice(index, 1);
     },
     applyState(
       state: TimelessElement["state"],
@@ -279,8 +323,8 @@ export function HostElement(props: {
         return null;
       }
       child_elements = [];
-      const child_host_nodes: any[] = [];
-      const child_nodes: any[] = [];
+      child_host_nodes = [];
+      child_nodes = [];
 
       for (const child of children) {
         if (isElement(child)) {
@@ -298,6 +342,7 @@ export function HostElement(props: {
         }
       }
 
+      refreshNativeStyles($elm);
       return $elm;
     },
     handleElementsMounted() {
@@ -365,6 +410,7 @@ export function HostElement(props: {
           $child.parentNode = $elm;
           $elm.children.push($child);
         }
+        refreshNativeStyles($elm);
       }
       child_elements = r.child_elements as TimelessElement[];
       child_host_nodes = r.child_host_nodes;
@@ -399,6 +445,7 @@ export function HostElement(props: {
     insert(idx: number, children: (TimelessElement | null)[]) {
       const inserted_elements: TimelessElement[] = [];
       const inserted_child: any[] = [];
+      let host_index = idx;
 
       for (const child of children) {
         if (child) {
@@ -406,12 +453,14 @@ export function HostElement(props: {
           inserted_child.push(child$);
           const $child = child$.render();
           if ($child) {
-            child_host_nodes.splice(idx, 0, $child);
+            child_host_nodes.splice(host_index, 0, $child);
             inserted_elements.push(child);
             if ($elm && $elm.children) {
               $child.parentNode = $elm;
-              $elm.children.splice(idx, 0, $child);
+              $elm.children.splice(host_index, 0, $child);
+              refreshNativeStyles($child);
             }
+            host_index += 1;
           }
         }
       }
@@ -428,35 +477,17 @@ export function HostElement(props: {
       }
     },
     remove(idx: number, count: number) {
-      const removed_elements: TimelessElement[] = [];
-
-      for (let i = 0; i < count; i++) {
-        const $child = child_host_nodes[idx + i];
-        if ($child) {
-          child_host_nodes.splice(idx + i, 1);
-          const child_elm = child_elements[idx + i];
-          if (child_elm) {
-            removed_elements.push(child_elm);
-          }
-          if ($elm && $elm.children) {
-            const childIdx = $elm.children.indexOf($child);
-            if (childIdx !== -1) {
-              $child.parentNode = null;
-              $elm.children.splice(childIdx, 1);
-            }
-          }
-        }
-      }
-
-      child_elements.splice(idx, count);
+      const removed = child_host_nodes.splice(idx, count);
+      const removed_elements = child_elements.splice(idx, count);
       child_nodes.splice(idx, count);
-
+      for (const child of removed) {
+        const index = $elm?.children?.indexOf(child) ?? -1;
+        if (index !== -1) $elm.children.splice(index, 1);
+        if (child) child.parentNode = null;
+      }
+      requestNativeLayout();
       setTimeout(() => {
-        for (const child of removed_elements) {
-          if (child && child.onUnmounted) {
-            child.onUnmounted();
-          }
-        }
+        for (const element of removed_elements) element?.onUnmounted?.();
       }, 0);
     },
     move(from: number, to: number) {
@@ -467,6 +498,9 @@ export function HostElement(props: {
 
       child_host_nodes.splice(from, 1);
       child_host_nodes.splice(to, 0, $from);
+      child_elements.splice(to, 0, ...child_elements.splice(from, 1));
+      child_nodes.splice(to, 0, ...child_nodes.splice(from, 1));
+      requestNativeLayout();
 
       if ($elm && $elm.children) {
         const $to = child_host_nodes[to + 1] || null;
@@ -484,73 +518,40 @@ export function HostElement(props: {
         }
       }
     },
-    refresh(data: {
-      children: (TimelessElement | null)[];
-      added: { idx: number; element: TimelessElement | null }[];
-      removed: { idx: number }[];
-      moved: { from: number; to: number }[];
-    }) {
-      const { added, removed, moved } = data;
-
-      const sorted_removed = [...removed].sort((a, b) => b.idx - a.idx);
-      for (const { idx } of sorted_removed) {
-        const $child = child_host_nodes[idx];
-        if ($child) {
-          child_host_nodes.splice(idx, 1);
-          if ($elm && $elm.children) {
-            const childIdx = $elm.children.indexOf($child);
-            if (childIdx !== -1) {
-              $elm.children.splice(childIdx, 1);
-            }
-          }
-        }
+    refresh(data: { children: (TimelessElement | null)[] }) {
+      const previous = new Map(
+        child_elements.map((element, index) => [
+          element,
+          { vnode: child_nodes[index], dom: child_host_nodes[index] },
+        ]),
+      );
+      const next_elements: TimelessElement[] = [];
+      const next_nodes: any[] = [];
+      const next_hosts: any[] = [];
+      const mounted: TimelessElement[] = [];
+      for (const element of data.children) {
+        if (!isElement(element)) continue;
+        const cached = previous.get(element);
+        const vnode = cached?.vnode ?? props.build(element);
+        const dom = cached?.dom ?? vnode.render();
+        next_elements.push(element);
+        next_nodes.push(vnode);
+        next_hosts.push(dom);
+        if (!cached) mounted.push(element);
       }
-
-      if (moved.length > 0) {
-        const removedIdxs = removed.map((r) => r.idx).sort((a, b) => a - b);
-        const entries = moved
-          .map(({ from, to }) => {
-            let shift = 0;
-            for (const ri of removedIdxs) {
-              if (ri < from) shift++;
-              else break;
-            }
-            return { $node: child_host_nodes[from - shift], to };
-          })
-          .sort((a, b) => a.to - b.to);
-
-        for (const { $node, to } of entries) {
-          if (!$node) continue;
-          const currentFrom = child_host_nodes.indexOf($node);
-          if (currentFrom !== -1 && currentFrom !== to) {
-            methods.move(currentFrom, to);
-          }
-        }
+      for (const dom of child_host_nodes) {
+        if (dom && !next_hosts.includes(dom)) dom.parentNode = null;
       }
-
-      for (const { idx, element } of added) {
-        if (element) {
-          const child$ = props.build(element);
-          const $child = child$.render();
-          if ($child) {
-            const $reference = child_host_nodes[idx];
-            if ($reference) {
-              child_host_nodes.splice(idx, 0, $child);
-              if ($elm && $elm.children) {
-                const refIdx = $elm.children.indexOf($reference);
-                if (refIdx !== -1) {
-                  $elm.children.splice(refIdx, 0, $child);
-                }
-              }
-            } else {
-              child_host_nodes.push($child);
-              if ($elm && $elm.children) {
-                $elm.children.push($child);
-              }
-            }
-          }
-        }
+      child_elements = next_elements;
+      child_nodes = next_nodes;
+      child_host_nodes = next_hosts;
+      if ($elm?.children) {
+        $elm.children.splice(0, $elm.children.length, ...next_hosts);
+        refreshNativeStyles($elm);
       }
+      requestNativeLayout();
+      for (const element of mounted)
+        element.onMounted?.({ target: element.$elm });
     },
     getParent() {
       return null;

@@ -1,0 +1,22 @@
+{
+  "name": "@timeless/windows-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch --mode development",
+    "build:host": "cmake -S ../../packages/timeless-windows/native -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --target timeless-windows timeless_windows_test --parallel",
+    "test:host": "ctest --test-dir build -C Release --output-on-failure",
+    "start": "powershell -NoProfile -Command \"& (Get-ChildItem build -Recurse -Filter timeless-windows.exe | Select-Object -First 1).FullName --dev dist/app.js\""
+  },
+  "dependencies": {
+    "@timeless/timeless": "workspace:^",
+    "@timeless/timeless-native": "workspace:^",
+    "@timeless/timeless-windows": "workspace:^"
+  },
+  "devDependencies": {
+    "@timeless/inner-vite-plugin": "workspace:^",
+    "vite": "^8.0.0-beta.16"
+  }
+}

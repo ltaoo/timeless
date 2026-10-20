@@ -1,7 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { NativeView } from "./view";
-import { HostElement, BoxMethods } from "./box";
+import { setNativeDefaultStyle } from "../stylesheet";
 
 export type NativeGrid = VNodeView<any> & {
   t: "grid";
@@ -13,17 +13,6 @@ export function NativeGrid(props: {
   elm: TimelessElement;
 }): NativeGrid {
   const view$ = NativeView(props);
-  const box$ = HostElement({ t: "grid", $elm: null, build: props.build });
-
-  const $elm = {
-    type: "grid",
-    children: [] as any[],
-    style: {} as Record<string, string>,
-    attrs: {} as Record<string, string>,
-    listeners: {} as Record<string, any>,
-  };
-
-  const methods: BoxMethods = box$.methods;
 
   return {
     ...view$,
@@ -34,7 +23,6 @@ export function NativeGrid(props: {
     isDocumentFragment() {
       return false;
     },
-    get$elm: () => $elm,
     setStyle: view$.setStyle,
     setStyleValue: view$.setStyleValue,
     setStyleSet: view$.setStyleSet,
@@ -44,20 +32,22 @@ export function NativeGrid(props: {
     removeEventListener: view$.removeEventListener,
     getBoundingClientRect: view$.getBoundingClientRect,
     render() {
-      view$.render();
+      const $elm = view$.render();
 
       if (props.elm.state) {
         const cols = props.elm.state.columns ?? 4;
         const gap = props.elm.state.gap ?? 16;
-        $elm.style["display"] = "grid";
-        $elm.style["grid-template-columns"] = `repeat(${cols}, 1fr)`;
-        $elm.style["gap"] = `${gap}px`;
+        setNativeDefaultStyle($elm, {
+          display: "grid",
+          "grid-template-columns": `repeat(${cols}, 1fr)`,
+          gap: `${gap}px`,
+        });
       }
 
       return $elm;
     },
-    hydrate(elm: TimelessElement, $dom: any) {
-      view$.hydrate(elm, $dom);
+    hydrate(elm: TimelessElement, $dom: any, opt: any) {
+      view$.hydrate(elm, $dom, opt);
     },
     getChildren: view$.getChildren,
     buildChildren: view$.buildChildren,

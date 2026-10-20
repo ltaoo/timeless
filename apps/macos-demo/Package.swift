@@ -18,6 +18,7 @@ let package = Package(
                 .unsafeFlags(["-cxx-interoperability-mode=default"])
             ]
         ),
+        .testTarget(name: "TimelessMacDemoTests", dependencies: ["TimelessMacDemo"], path: "Tests"),
     ],
     cxxLanguageStandard: .cxx20
 )

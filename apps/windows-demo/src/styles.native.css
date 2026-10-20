@@ -1,0 +1,117 @@
+.page {
+  min-height: 100%;
+  padding: 32px;
+  gap: 16px;
+  background-color: #f3f5f9;
+  color: #202938;
+  font-size: 14px;
+}
+.title {
+  font-size: 30px;
+  font-weight: 700;
+}
+.subtitle {
+  color: #596579;
+}
+.card {
+  padding: 24px;
+  gap: 16px;
+  background-color: #fff;
+  border-width: 1px;
+  border-color: #dce2eb;
+  border-radius: 16px;
+}
+.card.compact {
+  padding: 12px;
+  gap: 8px;
+}
+.counter {
+  font-size: 48px;
+  font-weight: 700;
+  color: #304ffe;
+}
+.button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.primary {
+  background-color: #304ffe;
+  color: #fff;
+}
+.primary:hover {
+  background-color: #2440dc;
+}
+.primary:active {
+  background-color: #192fae;
+}
+.danger {
+  background-color: #cf304a;
+  color: #fff;
+}
+.danger:hover {
+  background-color: #ac2238;
+}
+.danger:active {
+  background-color: #871b2c;
+}
+.secondary {
+  background-color: #e3e8f1;
+  color: #202938;
+}
+.secondary:hover {
+  background-color: #d0d9e8;
+}
+.secondary:active {
+  background-color: #bdc9dd;
+}
+.button:focus {
+  border-width: 2px;
+  border-color: #768bff;
+}
+.button:disabled {
+  opacity: 0.4;
+}
+.field {
+  height: 36px;
+  background-color: #f7f8fb;
+  border-width: 1px;
+  border-color: #c5cede;
+  border-radius: 6px;
+}
+.field:focus {
+  border-color: #304ffe;
+}
+.controls {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.window-scroll {
+  width: 100%;
+  height: 100%;
+  background-color: #f3f5f9;
+}
+.scroll-list {
+  height: 160px;
+  flex-shrink: 0;
+  gap: 8px;
+  background-color: #f7f8fb;
+}
+.scroll-item {
+  width: 900px;
+  height: 40px;
+  flex-shrink: 0;
+}
+.check {
+  width: 24px;
+  height: 24px;
+  color: #304ffe;
+}
+.check:focus {
+  background-color: #e3e8f1;
+}
+.check:disabled {
+  opacity: 0.4;
+}

@@ -1,10 +1,16 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
+import { requestNativeLayout } from "../stylesheet";
+
 import { HostElement, BoxMethods } from "./box";
 
 export type NativeScrollView = VNodeView<any> & {
   t: "scroll-view";
   render(): any;
+  scrollTop: number;
+  scrollLeft: number;
+  readonly scrollHeight: number;
+  readonly scrollWidth: number;
 };
 
 export function NativeScrollView(props: {
@@ -22,6 +28,12 @@ export function NativeScrollView(props: {
     listeners: {} as Record<string, any>,
     horizontal: "auto",
     vertical: "auto",
+    scrollTop: 0,
+    scrollLeft: 0,
+    scrollHeight: 0,
+    scrollWidth: 0,
+    contentWidth: props.elm.state.contentWidth,
+    contentHeight: props.elm.state.contentHeight,
   };
 
   const methods: BoxMethods = box$.methods;
@@ -31,6 +43,26 @@ export function NativeScrollView(props: {
     t,
     get $elm() {
       return $elm;
+    },
+    get scrollTop() {
+      return $elm.scrollTop;
+    },
+    set scrollTop(value: number) {
+      $elm.scrollTop = value;
+      requestNativeLayout();
+    },
+    get scrollLeft() {
+      return $elm.scrollLeft;
+    },
+    set scrollLeft(value: number) {
+      $elm.scrollLeft = value;
+      requestNativeLayout();
+    },
+    get scrollHeight() {
+      return $elm.scrollHeight;
+    },
+    get scrollWidth() {
+      return $elm.scrollWidth;
     },
     getType() {
       return "view";
@@ -42,17 +74,16 @@ export function NativeScrollView(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
     },
     addEventListener(
       type: string,
@@ -84,24 +115,24 @@ export function NativeScrollView(props: {
       methods.set$elm($elm);
       methods.applyState(props.elm.state, { initial: true });
 
-      $elm.style["display"] = "flex";
-      $elm.style["flex-direction"] = "column";
-      $elm.style["overflow"] = "auto";
+      methods.setDefaultStyle({ display: "flex" });
+      methods.setDefaultStyle({ "flex-direction": "column" });
+      methods.setDefaultStyle({ overflow: "auto" });
 
       if (props.elm.state.horizontal) {
         $elm.horizontal = props.elm.state.horizontal;
         if (props.elm.state.horizontal === "hidden") {
-          $elm.style["overflow-x"] = "hidden";
+          methods.setDefaultStyle({ "overflow-x": "hidden" });
         } else if (props.elm.state.horizontal === "visible") {
-          $elm.style["overflow-x"] = "visible";
+          methods.setDefaultStyle({ "overflow-x": "visible" });
         }
       }
       if (props.elm.state.vertical) {
         $elm.vertical = props.elm.state.vertical;
         if (props.elm.state.vertical === "hidden") {
-          $elm.style["overflow-y"] = "hidden";
+          methods.setDefaultStyle({ "overflow-y": "hidden" });
         } else if (props.elm.state.vertical === "visible") {
-          $elm.style["overflow-y"] = "visible";
+          methods.setDefaultStyle({ "overflow-y": "visible" });
         }
       }
 

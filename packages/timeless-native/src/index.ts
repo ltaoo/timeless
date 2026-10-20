@@ -4,6 +4,7 @@ import { buildAndRender, nativePlatform } from "./renderer";
 console.log("native.version" + __Version);
 
 export { render, buildAndRender, nativePlatform };
+export { registerNativeStyleSheet, type NativeStyleRule } from "./stylesheet";
 
 export const TimelessNativeVersion = __Version;
 

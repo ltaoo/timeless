@@ -42,17 +42,16 @@ export function NativeTabView(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
     },
     addEventListener(
       type: string,
@@ -84,8 +83,8 @@ export function NativeTabView(props: {
       methods.set$elm($elm);
       methods.applyState(props.elm.state, { initial: true });
 
-      $elm.style["display"] = "flex";
-      $elm.style["flex-direction"] = "column";
+      methods.setDefaultStyle({ display: "flex" });
+      methods.setDefaultStyle({ "flex-direction": "column" });
 
       if (props.elm.state.activeIndex !== undefined) {
         $elm.activeIndex = props.elm.state.activeIndex;
@@ -166,17 +165,16 @@ export function NativeTabPane(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
     },
     addEventListener(
       type: string,
@@ -208,7 +206,7 @@ export function NativeTabPane(props: {
       methods.set$elm($elm);
       methods.applyState(props.elm.state, { initial: true });
 
-      $elm.style["flex"] = "1";
+      methods.setDefaultStyle({ flex: "1" });
 
       if (props.elm.state.label !== undefined) {
         $elm.label = props.elm.state.label;

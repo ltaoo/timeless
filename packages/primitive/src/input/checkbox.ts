@@ -118,17 +118,28 @@ export function Checkbox(props: CheckboxProps) {
           const unsub = checked.subscribe({
             onChange(v) {
               state.checked = v;
-              // if ($elm && typeof $elm.setChecked === "function") {
-              //   setTimeout(() => {
-              //     $elm.setChecked(v);
-              //   }, 0);
-              // }
+              $elm?.setChecked?.(v);
             },
           });
           box$.methods.unsubscribe(unsub);
         } else {
           state.checked = checked;
         }
+      }
+
+      if (indeterminate !== undefined) {
+        state.indeterminate = isRef(indeterminate)
+          ? indeterminate.value
+          : indeterminate;
+        if (isRef(indeterminate))
+          box$.methods.unsubscribe(
+            indeterminate.subscribe({
+              onChange(value) {
+                state.indeterminate = value;
+                $elm?.setIndeterminate?.(value);
+              },
+            }),
+          );
       }
 
       bind_disabled({
@@ -148,7 +159,7 @@ export function Checkbox(props: CheckboxProps) {
           const unsub = readonly.subscribe({
             onChange(v) {
               state.readonly = v;
-              // methods.setProp("readOnly", v);
+              box$.methods.apply_attr("readonly", v);
             },
           });
           box$.methods.unsubscribe(unsub);

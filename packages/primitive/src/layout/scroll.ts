@@ -1,5 +1,3 @@
-import { DerivedRef, Ref, isRef } from "@timeless/inner-reactive";
-
 import { ViewProps } from "@/content/view";
 import { ViewChildren } from "@/content/type";
 import { Box } from "@/content/box";
@@ -9,6 +7,7 @@ export type ScrollBarVisibility = "auto" | "hidden" | "visible" | "scroll";
 export type ScrollViewProps = ViewProps & {
   horizontal?: ScrollBarVisibility;
   vertical?: ScrollBarVisibility;
+  onScroll?: (event: { scrollTop: number; scrollLeft: number }) => void;
   contentWidth?: number | string;
   contentHeight?: number | string;
 };
@@ -16,6 +15,8 @@ export type ScrollViewProps = ViewProps & {
 type ScrollViewState = {
   horizontal: ScrollBarVisibility;
   vertical: ScrollBarVisibility;
+  contentWidth?: number | string;
+  contentHeight?: number | string;
 };
 
 export function ScrollView(props: ScrollViewProps, children?: ViewChildren) {
@@ -24,6 +25,7 @@ export function ScrollView(props: ScrollViewProps, children?: ViewChildren) {
     vertical = "auto",
     contentWidth,
     contentHeight,
+    onScroll,
     ...rest
   } = props;
 
@@ -31,6 +33,8 @@ export function ScrollView(props: ScrollViewProps, children?: ViewChildren) {
   const box$ = Box<ScrollViewState>(rest, {
     horizontal,
     vertical,
+    contentWidth,
+    contentHeight,
   } as ScrollViewState);
   const state = box$.state;
 
@@ -55,6 +59,7 @@ export function ScrollView(props: ScrollViewProps, children?: ViewChildren) {
   };
 
   methods.subscribe_props();
+  box$.methods.add_event();
   box$.methods.build_children(children);
 
   return {
@@ -68,6 +73,18 @@ export function ScrollView(props: ScrollViewProps, children?: ViewChildren) {
     },
     state,
     children: state.children,
+    events: { ...box$.events, onScroll },
+    onMounted(event: any) {
+      state.rendered = true;
+      for (const child of state.children)
+        child?.onMounted?.({ target: child.$elm });
+      box$.methods.unsubscribe(rest.onMounted?.(event));
+    },
+    onUnmounted() {
+      for (const child of state.children) child?.onUnmounted?.();
+      rest.onUnmounted?.();
+      box$.methods.destroy();
+    },
     methods,
   };
 }

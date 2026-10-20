@@ -1,11 +1,14 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
+import { requestNativeLayout } from "../stylesheet";
+
 import { HostElement, BoxMethods } from "./box";
 
 export type NativeCheckbox = VNodeView<any> & {
   t: "checkbox";
   render(): any;
   setChecked(checked: boolean): void;
+  setIndeterminate(value: boolean): void;
 };
 
 export function NativeCheckbox(props: {
@@ -18,6 +21,7 @@ export function NativeCheckbox(props: {
   const $elm = {
     type: "checkbox",
     checked: false,
+    indeterminate: false,
     value: "" as string,
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
@@ -42,17 +46,23 @@ export function NativeCheckbox(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
+      if (key === "checked") $elm.checked = String(value) !== "false";
+      if (key === "indeterminate")
+        $elm.indeterminate = String(value) !== "false";
+      requestNativeLayout();
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
+      if (key === "checked") $elm.checked = false;
+      if (key === "indeterminate") $elm.indeterminate = false;
+      requestNativeLayout();
     },
     addEventListener(
       type: string,
@@ -85,7 +95,9 @@ export function NativeCheckbox(props: {
       methods.applyState(props.elm.state, { initial: true });
       methods.setupEventListener(props.elm.events);
 
-      $elm.checked = !!props.elm.state.value;
+      $elm.checked = !!props.elm.state.checked;
+      $elm.indeterminate = !!props.elm.state.indeterminate;
+      if (props.elm.state.readonly) methods.setAttribute("readonly", "");
       if (props.elm.state.id) {
         $elm.attrs.id = props.elm.state.id;
       }
@@ -94,9 +106,6 @@ export function NativeCheckbox(props: {
       }
 
       const events = props.elm.events;
-      if (events && events.onChange) {
-        $elm.listeners.click = events.onChange;
-      }
       if (events && events.onFocus) {
         $elm.listeners.focus = events.onFocus;
       }
@@ -110,8 +119,13 @@ export function NativeCheckbox(props: {
       methods.set$elm($dom);
       methods.setupEventListener(elm.events);
     },
+    setIndeterminate(value: boolean) {
+      $elm.indeterminate = value;
+      requestNativeLayout();
+    },
     setChecked(checked: boolean) {
       $elm.checked = checked;
+      requestNativeLayout();
     },
     buildChildren(children: (TimelessElement | null)[]) {
       return methods.buildChildren(children);

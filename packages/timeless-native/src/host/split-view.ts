@@ -44,17 +44,16 @@ export function NativeSplitView(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
     },
     addEventListener(
       type: string,
@@ -90,9 +89,11 @@ export function NativeSplitView(props: {
         (child) => child?.t === "split-pane",
       );
 
-      $elm.style["display"] = "flex";
-      $elm.style["flex-direction"] =
-        props.elm.state.direction === "horizontal" ? "row" : "column";
+      methods.setDefaultStyle({ display: "flex" });
+      methods.setDefaultStyle({
+        "flex-direction":
+          props.elm.state.direction === "horizontal" ? "row" : "column",
+      });
 
       if (props.elm.state.direction) {
         $elm.direction = props.elm.state.direction;
@@ -178,17 +179,16 @@ export function NativeSplitPane(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
+      methods.setStyleValue(key, value);
     },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
+    setStyleSet(names: string[]) {
+      methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
+      methods.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
+      methods.removeAttribute(key);
     },
     addEventListener(
       type: string,
@@ -222,7 +222,7 @@ export function NativeSplitPane(props: {
 
       const size =
         typeof props.elm.state.size === "number" ? props.elm.state.size : 0;
-      $elm.style["flex"] = size > 0 ? `0 0 ${size}px` : "1";
+      methods.setDefaultStyle({ flex: size > 0 ? `0 0 ${size}px` : "1" });
 
       $elm.size = size;
       if (props.elm.state.minSize !== undefined) {

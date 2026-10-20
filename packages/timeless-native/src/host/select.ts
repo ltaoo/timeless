@@ -1,129 +1,128 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
-
-import { HostElement, BoxMethods } from "./box";
-
-export type NativeSelect = VNodeView<any> & {
-  t: "select";
-  render(): any;
-};
+import { HostElement } from "./box";
+import { requestNativeLayout } from "../stylesheet";
 
 export function NativeSelect(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
   elm: TimelessElement;
-}): NativeSelect {
-  const t = "select";
-  const box$ = HostElement({ t, $elm: null, build: props.build });
-
-  const $elm = {
+}) {
+  const node = {
     type: "select",
     children: [] as any[],
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
+    value: "",
+    placeholder: "",
   };
-
-  const methods: BoxMethods = box$.methods;
-
+  const { methods } = HostElement({
+    t: "select",
+    $elm: node,
+    build: props.build,
+  });
+  function setValue(value: any) {
+    node.value = String((Array.isArray(value) ? value[0] : value) ?? "");
+    requestNativeLayout();
+  }
+  function setPlaceholder(value: string) {
+    node.placeholder = value;
+    requestNativeLayout();
+  }
   return {
     ...methods,
-    t,
+    t: "select",
     get $elm() {
-      return $elm;
+      return node;
     },
     getType() {
-      return "input";
+      return "input" as const;
     },
     isDocumentFragment() {
       return false;
     },
-    setStyle(style: any) {
-      methods.setStyle(style);
-    },
-    setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
-    },
-    setStyleSet(set: string[]) {
-      $elm.attrs.class = set.join(" ");
-    },
-    setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
-    },
-    removeAttribute(key: string) {
-      delete $elm.attrs[key];
-    },
-    addEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $elm.listeners[type] = handler;
-    },
-    removeEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      delete $elm.listeners[type];
-    },
-    getBoundingClientRect() {
-      return {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      };
+    setValue,
+    setPlaceholder,
+    hydrate(element: TimelessElement, dom: any) {
+      methods.set$elm(dom);
+      methods.applyState(element.state, { initial: true });
+      methods.setupEventListener(element.events);
     },
     render() {
-      methods.set$elm($elm);
       methods.applyState(props.elm.state, { initial: true });
-
-      $elm.attrs.class = "t-select";
-      $elm.style["display"] = "inline-block";
-
-      if (props.elm.children) {
-        const r = methods.buildChildren(props.elm.children);
-        for (const $child of r.child_host_nodes) {
-          if ($elm.children) {
-            $elm.children.push($child);
-          }
-        }
-      }
-
+      methods.setDefaultStyle({ height: "32px" });
+      setValue(props.elm.state.value);
+      setPlaceholder(props.elm.state.placeholder);
+      methods.render(props.elm.children);
       methods.setupEventListener(props.elm.events);
-
-      return $elm;
-    },
-    hydrate(elm: TimelessElement, $dom: any) {
-      methods.set$elm($dom);
-      methods.applyState(elm.state, { initial: true });
-      methods.setupEventListener(elm.events);
-    },
-    buildChildren(children: (TimelessElement | null)[]) {
-      return methods.buildChildren(children);
-    },
-    insertChildren(children: (TimelessElement | null)[]) {
-      methods.insertChildren(children);
-    },
-    removeChildren() {
-      methods.removeChildren();
-    },
-    getParent() {
-      return null;
-    },
-    get$elm() {
-      return $elm;
-    },
-    getChildren() {
-      return methods.getChildren();
+      return node;
     },
   };
 }
 
-export function isNativeSelect(value: any): value is NativeSelect {
-  return value.t === "select";
+export function NativeSelectOption(props: {
+  build: (elm: TimelessElement) => VNodeView<any>;
+  elm: TimelessElement;
+}) {
+  const group = props.elm.t === "select-option-group";
+  const node = {
+    type: props.elm.t,
+    children: [] as any[],
+    style: {} as Record<string, string>,
+    attrs: {} as Record<string, string>,
+    listeners: {} as Record<string, any>,
+    get value() {
+      return String(props.elm.state.value ?? "");
+    },
+    get label() {
+      return String(props.elm.state.label ?? "");
+    },
+    selected: !!props.elm.state.selected,
+  };
+  Object.defineProperty(node.attrs, "disabled", {
+    enumerable: true,
+    configurable: true,
+    get: () => (props.elm.state.disabled ? "" : undefined),
+  });
+  const { methods } = HostElement({
+    t: node.type,
+    $elm: node,
+    build: props.build,
+  });
+  return {
+    ...methods,
+    t: node.type,
+    get $elm() {
+      return node;
+    },
+    getType() {
+      return "view" as const;
+    },
+    isDocumentFragment() {
+      return false;
+    },
+    select() {
+      node.selected = true;
+      requestNativeLayout();
+    },
+    unselect() {
+      node.selected = false;
+      requestNativeLayout();
+    },
+    hydrate(element: TimelessElement, dom: any) {
+      methods.set$elm(dom);
+      methods.applyState(element.state, { initial: true });
+      methods.setupEventListener(element.events);
+    },
+    render() {
+      methods.applyState(props.elm.state, { initial: true });
+      if (group) methods.render(props.elm.children);
+      return node;
+    },
+  };
 }
+
+export function isNativeSelect(value: any) {
+  return value?.t === "select";
+}
+
+export type NativeSelect = ReturnType<typeof NativeSelect>;

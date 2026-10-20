@@ -124,6 +124,9 @@ enum YogaLayoutEngine {
 
         case .button(let style, _, _):
             YGNodeStyleSetMinHeight(yogaNode, 32)
+            YGNodeStyleSetFlexDirection(yogaNode, .row)
+            YGNodeStyleSetAlignItems(yogaNode, .center)
+            YGNodeStyleSetJustifyContent(yogaNode, .center)
             applyStyleDict(yogaNode, style: style)
 
         case .input(_, _, let style, _):
@@ -213,7 +216,8 @@ enum YogaLayoutEngine {
                 YGNodeStyleSetWidthPercent(node, pct)
             } else {
                 let v = Float(parsePx(w))
-                if v > 0 { YGNodeStyleSetWidth(node, v) }
+                if w == "auto" { YGNodeStyleSetWidthAuto(node) }
+                else if v >= 0 { YGNodeStyleSetWidth(node, v) }
             }
         }
         if let h = style["height"] {
@@ -221,21 +225,33 @@ enum YogaLayoutEngine {
                 YGNodeStyleSetHeightPercent(node, pct)
             } else {
                 let v = Float(parsePx(h))
-                if v > 0 { YGNodeStyleSetHeight(node, v) }
+                if h == "auto" { YGNodeStyleSetHeightAuto(node) }
+                else if v >= 0 { YGNodeStyleSetHeight(node, v) }
             }
         }
 
         // Min/Max dimensions
-        if let v = style["min-width"] { let f = Float(parsePx(v)); if f > 0 { YGNodeStyleSetMinWidth(node, f) } }
-        if let v = style["min-height"] { let f = Float(parsePx(v)); if f > 0 { YGNodeStyleSetMinHeight(node, f) } }
-        if let v = style["max-width"] { let f = Float(parsePx(v)); if f > 0 { YGNodeStyleSetMaxWidth(node, f) } }
-        if let v = style["max-height"] { let f = Float(parsePx(v)); if f > 0 { YGNodeStyleSetMaxHeight(node, f) } }
+        for (key, setter, percentSetter) in [
+            ("min-width", YGNodeStyleSetMinWidth, YGNodeStyleSetMinWidthPercent),
+            ("min-height", YGNodeStyleSetMinHeight, YGNodeStyleSetMinHeightPercent),
+            ("max-width", YGNodeStyleSetMaxWidth, YGNodeStyleSetMaxWidthPercent),
+            ("max-height", YGNodeStyleSetMaxHeight, YGNodeStyleSetMaxHeightPercent),
+        ] {
+            if let value = style[key] {
+                if value.hasSuffix("%"), let percent = Float(value.dropLast()) { percentSetter(node, percent) }
+                else { setter(node, Float(parsePx(value))) }
+            }
+        }
 
         // Padding
         applyEdgeValues(node, style: style, property: "padding", setter: YGNodeStyleSetPadding)
 
         // Margin
         applyEdgeValues(node, style: style, property: "margin", setter: YGNodeStyleSetMargin)
+        if let width = style["border-width"] { YGNodeStyleSetBorder(node, .all, Float(parsePx(width))) }
+        for (edge, key) in [(YGEdge.top, "top"), (.right, "right"), (.bottom, "bottom"), (.left, "left")] {
+            if let value = style[key] { YGNodeStyleSetPosition(node, edge, Float(parsePx(value))) }
+        }
 
         // Flex direction (can be overridden by node type)
         if let fd = style["flex-direction"] {
@@ -314,7 +330,7 @@ enum YogaLayoutEngine {
                 YGNodeStyleSetFlexBasisPercent(node, pct)
             } else {
                 let v = Float(parsePx(fb))
-                if v > 0 { YGNodeStyleSetFlexBasis(node, v) }
+                if v >= 0 { YGNodeStyleSetFlexBasis(node, v) }
             }
         }
 
@@ -409,20 +425,20 @@ enum YogaLayoutEngine {
         // Shorthand (all edges)
         if let all = style[property] {
             let v = Float(parsePx(all))
-            if v > 0 { setter(node, .all, v) }
+            if v >= 0 || property == "margin" { setter(node, .all, v) }
         }
         // Individual edges
         if let v = style["\(property)-top"] {
-            let f = Float(parsePx(v)); if f > 0 { setter(node, .top, f) }
+            let f = Float(parsePx(v)); if f >= 0 || property == "margin" { setter(node, .top, f) }
         }
         if let v = style["\(property)-right"] {
-            let f = Float(parsePx(v)); if f > 0 { setter(node, .right, f) }
+            let f = Float(parsePx(v)); if f >= 0 || property == "margin" { setter(node, .right, f) }
         }
         if let v = style["\(property)-bottom"] {
-            let f = Float(parsePx(v)); if f > 0 { setter(node, .bottom, f) }
+            let f = Float(parsePx(v)); if f >= 0 || property == "margin" { setter(node, .bottom, f) }
         }
         if let v = style["\(property)-left"] {
-            let f = Float(parsePx(v)); if f > 0 { setter(node, .left, f) }
+            let f = Float(parsePx(v)); if f >= 0 || property == "margin" { setter(node, .left, f) }
         }
     }
 
@@ -459,7 +475,7 @@ enum YogaLayoutEngine {
 
     // MARK: - Font Resolution
 
-    private static func resolveFont(_ style: [String: String]) -> NSFont {
+    static func resolveFont(_ style: [String: String]) -> NSFont {
         var fontSize: CGFloat = 14
         if let fs = style["font-size"] {
             let v = parsePx(fs)
@@ -469,7 +485,11 @@ enum YogaLayoutEngine {
         var weight: NSFont.Weight = .regular
         if let fw = style["font-weight"] {
             switch fw {
+            case "100": weight = .ultraLight
+            case "200": weight = .thin
             case "bold", "700": weight = .bold
+            case "800": weight = .heavy
+            case "900": weight = .black
             case "600": weight = .semibold
             case "500": weight = .medium
             case "300": weight = .light
@@ -485,7 +505,9 @@ enum YogaLayoutEngine {
     private static func nodeChildren(_ node: NativeNode) -> [NativeNode] {
         switch node {
         case .view(_, let c, _), .row(_, let c, _), .column(_, let c, _),
-             .button(_, let c, _), .aspectRatio(_, _, let c, _):
+             .button(_, let c, _), .aspectRatio(_, _, let c, _),
+             .splitView(_, _, _, _, _, let c, _), .splitPane(_, _, _, _, _, let c, _),
+             .scrollView(_, _, let c, _), .tabView(_, _, let c, _), .tabPane(_, _, let c, _):
             return c
         default:
             return []

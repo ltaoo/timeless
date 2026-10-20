@@ -1,5 +1,7 @@
 import type { Plugin } from "vite";
 
+export { timelessNativeStyles } from "./native-styles";
+
 /**
  * Timeless HMR Plugin — HMR-Aware Reactive Primitives
  *

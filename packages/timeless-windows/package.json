@@ -1,0 +1,25 @@
+{
+  "name": "@timeless/timeless-windows",
+  "version": "0.34.2",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/timeless.windows.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/timeless.windows.esm.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "native"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@timeless/timeless-native": "workspace:*"
+  }
+}

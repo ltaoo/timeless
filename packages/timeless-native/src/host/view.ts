@@ -1,10 +1,10 @@
 import {
-  isElement,
   TimelessElement,
   ViewStyleProperties,
   VNodeView,
 } from "@timeless/timeless";
 import { HostElement } from "./box";
+import { refreshNativeStyles } from "../stylesheet";
 
 export type NativeView = VNodeView & {
   t: "view";
@@ -22,7 +22,9 @@ export function NativeView(props: {
     listeners: {} as Record<string, any>,
     parentNode: null as any,
     _onStyleChange: null as ((style: Record<string, string>) => void) | null,
-    _onAttributeChange: null as ((key: string, value: string | null) => void) | null,
+    _onAttributeChange: null as
+      | ((key: string, value: string | null) => void)
+      | null,
     _onEventChange: null as ((listeners: Record<string, any>) => void) | null,
     _onChildInserted: null as ((index: number, child: any) => void) | null,
     _onChildRemoved: null as ((index: number) => void) | null,
@@ -30,51 +32,7 @@ export function NativeView(props: {
   };
   const box$ = HostElement({ t: "view", $elm, build: props.build });
 
-  const methods = {
-    setStyle(style: ViewStyleProperties) {
-      const styleObj: Record<string, string> = {};
-      Object.keys(style).forEach((key) => {
-        const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-        const v = style[key as keyof ViewStyleProperties];
-        if (v !== undefined && v !== null) {
-          styleObj[k] = String(v);
-        }
-      });
-      $elm.style = styleObj;
-      if (typeof $elm._onStyleChange === "function") {
-        $elm._onStyleChange($elm.style);
-      }
-    },
-    setupEventListener(events: any) {
-      if (events.onClick) {
-        $elm.listeners.click = events.onClick;
-      }
-      if (events.onPointerDown) {
-        $elm.listeners.pointerdown = events.onPointerDown;
-      }
-      if (events.onFocus) {
-        $elm.listeners.focus = events.onFocus;
-      }
-      if (events.onBlur) {
-        $elm.listeners.blur = events.onBlur;
-      }
-      if (events.onKeyDown) {
-        $elm.listeners.keydown = events.onKeyDown;
-      }
-      if (events.onContextMenu) {
-        $elm.listeners.contextmenu = events.onContextMenu;
-      }
-      if (events.onMouseEnter) {
-        $elm.listeners.mouseenter = events.onMouseEnter;
-      }
-      if (events.onMouseLeave) {
-        $elm.listeners.mouseleave = events.onMouseLeave;
-      }
-      if (typeof $elm._onEventChange === "function") {
-        $elm._onEventChange($elm.listeners);
-      }
-    },
-  };
+  const methods = box$.methods;
 
   return {
     ...box$.methods,
@@ -89,26 +47,16 @@ export function NativeView(props: {
       methods.setStyle(style);
     },
     setStyleValue(key: string, value: string) {
-      const k = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      $elm.style[k] = value;
-      if (typeof $elm._onStyleChange === "function") {
-        $elm._onStyleChange($elm.style);
-      }
+      box$.methods.setStyleValue(key, value);
     },
-    setStyleSet(name: string[]) {
-      $elm.attrs.class = name.join(" ");
+    setStyleSet(names: string[]) {
+      box$.methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
-      $elm.attrs[key] = value;
-      if (typeof $elm._onAttributeChange === "function") {
-        $elm._onAttributeChange(key, value);
-      }
+      box$.methods.setAttribute(key, value);
     },
     removeAttribute(key: string) {
-      delete $elm.attrs[key];
-      if (typeof $elm._onAttributeChange === "function") {
-        $elm._onAttributeChange(key, null);
-      }
+      box$.methods.removeAttribute(key);
     },
     addEventListener(
       type: string,
@@ -133,42 +81,9 @@ export function NativeView(props: {
         methods.setupEventListener(props.elm.events);
       }
       if (props.elm.children) {
-        // Extract inheritable text styles from parent view
-        const inheritableKeys = [
-          "font-size",
-          "font-weight",
-          "font-style",
-          "font-family",
-          "color",
-          "text-align",
-          "text-decoration",
-          "line-height",
-          "letter-spacing",
-        ];
-        const inherited_style: Record<string, string> = {};
-        for (const key of inheritableKeys) {
-          if ($elm.style[key]) {
-            inherited_style[key] = $elm.style[key];
-          }
-        }
-        for (const child of props.elm.children) {
-          if (isElement(child)) {
-            const child$ = props.build(child);
-            const $child = child$.render();
-            if (child$ && $child) {
-              // Propagate inherited text styles to text children
-              if (
-                $child.type === "text" &&
-                Object.keys(inherited_style).length > 0
-              ) {
-                $child.style = { ...inherited_style, ...$child.style };
-              }
-              $child.parentNode = $elm;
-              $elm.children.push($child);
-            }
-          }
-        }
+        box$.methods.render(props.elm.children);
       }
+      refreshNativeStyles($elm);
       return $elm;
     },
     hydrate(elm: TimelessElement, $elm) {},

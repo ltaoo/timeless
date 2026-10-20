@@ -1,0 +1,66 @@
+name: Windows native host
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "packages/timeless-windows/**"
+      - "packages/timeless-native/**"
+      - "packages/vite-plugin/**"
+      - "packages/primitive/**"
+      - "packages/reactive/**"
+      - "packages/timeless/**"
+      - "apps/windows-demo/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/windows-native.yml"
+  pull_request:
+    paths:
+      - "packages/timeless-windows/**"
+      - "packages/timeless-native/**"
+      - "packages/vite-plugin/**"
+      - "packages/primitive/**"
+      - "packages/reactive/**"
+      - "packages/timeless/**"
+      - "apps/windows-demo/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/windows-native.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Build shared core and check browser artifacts
+        run: pnpm build
+      - name: Build native libraries and Windows demo
+        run: pnpm --filter @timeless/inner-vite-plugin --filter @timeless/timeless-native --filter @timeless/timeless-windows --filter @timeless/windows-demo -r build
+      - name: Test shared native styles
+        run: pnpm exec vitest run --config vitest.platform.config.ts
+      - name: Build development HMR fixture
+        run: pnpm --filter @timeless/windows-demo exec vite build --mode development --outDir dist-dev
+      - name: Compile Windows host
+        run: pnpm --filter @timeless/windows-demo build:host
+      - name: Test QuickJS, Yoga, HWND controls and Direct2D
+        run: pnpm --filter @timeless/windows-demo test:host
+      - name: Verify development HMR preserves model state
+        run: ./apps/windows-demo/build/Release/timeless_windows_test.exe apps/windows-demo/dist-dev/app.js --hmr
+      - uses: actions/upload-artifact@v4
+        with:
+          name: timeless-windows-x64
+          path: |
+            apps/windows-demo/build/Release/timeless-windows.exe
+            apps/windows-demo/build/Release/app.js
+            apps/windows-demo/build/Release/*LICENSE.txt
+          if-no-files-found: error

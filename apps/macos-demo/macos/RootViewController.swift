@@ -135,6 +135,11 @@ class RootViewController: NSViewController {
         let containerHeight = scroll.contentSize.height
         guard containerWidth > 0, containerHeight > 0 else { return }
 
+        if renderer.rootView != nil {
+            renderer.relayout(containerWidth: containerWidth, containerHeight: containerHeight)
+            return
+        }
+
         guard let rendered = renderer.render(
             rootNode,
             containerWidth: containerWidth,

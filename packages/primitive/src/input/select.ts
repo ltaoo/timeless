@@ -39,9 +39,7 @@ function defaultSelectRender<
   T extends {
     value: any;
     label: string;
-  } & {
-    label: string;
-    options: {
+    options?: {
       value: any;
       label: string;
     }[];
@@ -49,13 +47,13 @@ function defaultSelectRender<
 >(opt: T, idx: DerivedRef<number>) {
   console.log("invoke defualt select render", opt);
   if (!!opt["options"]) {
-    return SelectOptionGroup(opt);
+    return SelectOptionGroup({ ...opt, options: opt.options });
   }
   return SelectOption(opt);
   // return Show({
   //   when: !!opt["options"],
   //   ok() {
-  //     return SelectOptionGroup(opt);
+  //     return SelectOptionGroup({ ...opt, options: opt.options });
   //   },
   //   else() {
   //     return SelectOption(opt);
@@ -126,7 +124,7 @@ export function Select<T extends { value: any; label: string }>(
             value.subscribe({
               onChange(v) {
                 state.value = v;
-                $elm.setValue(v);
+                $elm?.setValue?.(v);
               },
             }),
           );
@@ -141,7 +139,7 @@ export function Select<T extends { value: any; label: string }>(
             placeholder.subscribe({
               onChange(v) {
                 state.placeholder = v;
-                $elm.setPlaceholder(v);
+                $elm?.setPlaceholder?.(v);
               },
             }),
           );
@@ -159,14 +157,16 @@ export function Select<T extends { value: any; label: string }>(
         add_cleanup: box$.methods.unsubscribe,
       });
       if (readonly !== undefined) {
-        if (isRef(readonly)) {
+        const set_readonly = (value: boolean) => {
+          state.readonly = value;
+          state.attributes.readonly = value ? "" : undefined;
+          box$.methods.apply_attr("readonly", value);
+        };
+        set_readonly(isRef(readonly) ? readonly.value : readonly);
+        if (isRef(readonly))
           box$.methods.unsubscribe(
-            readonly.subscribe({
-              onChange(v) {},
-            }),
+            readonly.subscribe({ onChange: set_readonly }),
           );
-        } else {
-        }
       }
       if (required !== undefined) {
         if (isRef(required)) {
@@ -190,62 +190,30 @@ export function Select<T extends { value: any; label: string }>(
       }
     },
     select(value: any) {
-      if (state.selected) {
-        if (state.selected.state.value === value) {
-          return;
-        } else {
-          state.selected.unselect();
-        }
-      }
-      for (let i = 0; i < state.children.length; i += 1) {
-        const child = state.children[i] as any;
-        if (child) {
-          if (child.t === "select-option-group") {
-            const selected = child.select(value);
-            if (selected) {
-              state.selected = selected;
-            }
-          } else {
-            if (child.state.value === value) {
-              state.selected = child;
+      const selected_value = Array.isArray(value) ? value[0] : value;
+      const visit = (children: any[]) => {
+        for (const child of children) {
+          if (!child) continue;
+          if (child.t === "select-option") {
+            if (String(child.state.value) === String(selected_value)) {
               child.select();
-            }
-          }
+              state.selected = child;
+            } else child.unselect();
+          } else visit(child.children ?? []);
         }
-      }
-      // const matched = state.children.find((c) => {
-      //   if (!c) {
-      //     return false;
-      //   }
-      //   if (c.t === "select-option-group") {
-      //     return c.children.find((cc) => {
-      //       return cc.state.value === value;
-      //     });
-      //   }
-      //   return c.state.value === value;
-      // });
-      // if (matched) {
-      //   if (matched.t === "select-option-group") {
-      //     const sub = matched.children?.find((cc) => {
-      //       return cc?.state.value === value;
-      //     });
-      //     if (sub) {
-      //       sub.select();
-      //       // sub.state.selected = true;
-      //     }
-      //   } else {
-      //     matched.select();
-      //     // matched.state.selected = true;
-      //   }
-      // }
+      };
+      state.selected = null;
+      visit(state.children);
     },
     // build_option_elements(children?: ViewChildren) {},
   };
 
   methods.subscribe_props();
   box$.methods.add_event();
-  state.children = for$.children;
+  state.children = [for$];
   const events = box$.events;
+  events.onFocus = onFocus;
+  events.onBlur = onBlur;
   events.onChange = function (event) {
     if (state.disabled) {
       return;
@@ -276,6 +244,7 @@ export function Select<T extends { value: any; label: string }>(
     onMounted(event: MountedEvent) {
       console.log("[primitive]select onMounted", $elm);
       state.rendered = true;
+      for$.onMounted(event);
       if (rest.onMounted) {
         box$.methods.unsubscribe(rest.onMounted(event));
       }
@@ -289,6 +258,7 @@ export function Select<T extends { value: any; label: string }>(
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }
+      for$.onUnmounted();
       box$.methods.destroy();
       state.rendered = false;
       state.children.length = 0;
@@ -305,9 +275,15 @@ export function SelectOption(props: SelectOptionProps) {
   let $elm: any = null;
 
   const state = {
-    value: props.value,
-    label: props.label,
-    disabled: props.disabled,
+    get value() {
+      return props.value;
+    },
+    get label() {
+      return props.label;
+    },
+    get disabled() {
+      return props.disabled;
+    },
     selected: false,
   };
 
@@ -373,7 +349,7 @@ export function SelectOptionGroup<T extends { label: string; value: any }>(
     subscribe_props() {},
   };
 
-  const children = for$.children;
+  const children = [for$];
 
   return {
     t: "select-option-group",
@@ -386,7 +362,7 @@ export function SelectOptionGroup<T extends { label: string; value: any }>(
     state,
     children,
     select(v: any) {
-      const matched = children.find((child) => {
+      const matched = for$.children.find((child) => {
         return child?.state.value === v;
       }) as any;
       if (!matched) {
@@ -405,11 +381,13 @@ export function SelectOptionGroup<T extends { label: string; value: any }>(
       }
     },
     onMounted(event: MountedEvent) {
+      for$.onMounted(event);
       if (props.onMounted) {
         props.onMounted(event);
       }
     },
     onUnmounted() {
+      for$.onUnmounted();
       if (props.onUnmounted) {
         props.onUnmounted();
       }

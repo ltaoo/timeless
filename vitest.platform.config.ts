@@ -45,6 +45,8 @@ export default defineConfig({
   test: {
     globals: true,
     include: [
+      "packages/timeless-native/src/__tests__/*.test.ts",
+      "packages/vite-plugin/src/__tests__/*.test.ts",
       "packages/provider-web/src/__tests__/*.test.ts",
       "packages/timeless-dom/src/__tests__/html.test.ts",
       "packages/timeless-dom/src/__tests__/hydration.test.ts",

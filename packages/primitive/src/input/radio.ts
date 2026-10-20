@@ -168,6 +168,8 @@ export function Radio(props: RadioProps) {
   };
 
   methods.subscribe_props();
+  box$.methods.add_event();
+  events.onChange = onChange;
 
   return {
     t: "radio",

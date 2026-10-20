@@ -3,6 +3,7 @@ dist
 docs
 /apps/*/public/timeless
 /apps/*/build
+/apps/*/dist-dev
 /apps/*/.build
 .virtual-build
 

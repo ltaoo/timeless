@@ -1,12 +1,15 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import { createLibConfig } from "../../vite.config.base";
-import { timelessNativeHMR } from "@timeless/inner-vite-plugin";
+import {
+  timelessNativeHMR,
+  timelessNativeStyles,
+} from "@timeless/inner-vite-plugin";
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === "development";
   const base = createLibConfig({
-    entry: resolve(__dirname, "src/index.js"),
+    entry: resolve(__dirname, "src/style-demo.js"),
     name: "app",
     globalName: "App",
     formats: ["umd"],
@@ -17,6 +20,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     ...base,
-    plugins: [...(Array.isArray(base.plugins) ? base.plugins : []), ...(isDev ? [timelessNativeHMR()] : [])],
+    plugins: [
+      ...(Array.isArray(base.plugins) ? base.plugins : []),
+      timelessNativeStyles(),
+      ...(isDev ? [timelessNativeHMR()] : []),
+    ],
   };
 });
