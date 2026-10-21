@@ -8,6 +8,7 @@
 #include <dwrite.h>
 #include <filesystem>
 #include <iostream>
+#include <initguid.h> // Instantiate the accessibility GUIDs declared by oleacc.h.
 #include <oleacc.h>
 #include <shellapi.h>
 #include <stdexcept>
