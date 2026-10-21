@@ -102,6 +102,11 @@ export function Select(
         {
           select$: store,
           item$: option,
+          attributes: {
+            role: "option",
+            "data-value": String(option.value),
+            "aria-selected": computed(item_, (state) => !!state.selected),
+          },
           class: classNames([
             "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
             "focus:bg-accent focus:text-accent-foreground",
@@ -173,6 +178,7 @@ export function Select(
     [
       ui.SelectPrimitive.Trigger(
         {
+          ...rest,
           id,
           store,
           class: classNames([
@@ -328,60 +334,59 @@ export function Select(
             "pointer-events": "auto",
           },
         },
-        [View({}, ["Som"])],
-        // () => [
-        //   ui.SelectPrimitive.Viewport(
-        //     {
-        //       store,
-        //       class: classNames([
-        //         "scroll-my-1 p-1",
-        //         SelectGroupClassName,
-        //         "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
-        //       ]),
-        //     },
-        //     [
-        //       Show({
-        //         when: computed(state_, (t) => t.loading),
-        //         ok() {
-        //           return View(
-        //             {
-        //               class:
-        //                 "py-6 text-center text-sm text-muted-foreground select-none",
-        //             },
-        //             ["加载中..."],
-        //           );
-        //         },
-        //         else() {
-        //           return Show({
-        //             when: computed(
-        //               filtered_entries_,
-        //               (list) => list.length > 0,
-        //             ),
-        //             ok() {
-        //               return [
-        //                 For({
-        //                   each: filtered_entries_,
-        //                   render: methods.render_entry,
-        //                 }),
-        //               ];
-        //             },
-        //             else() {
-        //               return [
-        //                 View(
-        //                   {
-        //                     class:
-        //                       "py-6 text-center text-sm text-muted-foreground select-none",
-        //                   },
-        //                   ["暂无数据"],
-        //                 ),
-        //               ];
-        //             },
-        //           });
-        //         },
-        //       }),
-        //     ],
-        //   ),
-        // ],
+        [
+          ui.SelectPrimitive.Viewport(
+            {
+              store,
+              class: classNames([
+                "scroll-my-1 p-1",
+                SelectGroupClassName,
+                "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
+              ]),
+            },
+            [
+              Show({
+                when: computed(state_, (t) => t.loading),
+                ok() {
+                  return View(
+                    {
+                      class:
+                        "py-6 text-center text-sm text-muted-foreground select-none",
+                    },
+                    ["加载中..."],
+                  );
+                },
+                else() {
+                  return Show({
+                    when: computed(
+                      filtered_entries_,
+                      (list) => list.length > 0,
+                    ),
+                    ok() {
+                      return [
+                        For({
+                          each: filtered_entries_,
+                          render: methods.render_entry,
+                        }),
+                      ];
+                    },
+                    else() {
+                      return [
+                        View(
+                          {
+                            class:
+                              "py-6 text-center text-sm text-muted-foreground select-none",
+                          },
+                          ["暂无数据"],
+                        ),
+                      ];
+                    },
+                  });
+                },
+              }),
+            ],
+          ),
+        ],
       ),
     ],
   );

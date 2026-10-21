@@ -1,10 +1,18 @@
-import { TimelessElement, VNodeView } from "@timeless/timeless";
+import {
+  getIconRegistry,
+  type ASNNode,
+  type IconState,
+  type TimelessElement,
+  type VNodeView,
+} from "@timeless/timeless";
+import { requestNativeLayout } from "../stylesheet";
 
 import { HostElement, BoxMethods } from "./box";
 
 export type NativeIcon = VNodeView<any> & {
   t: "icon";
   render(): any;
+  setIcon(value: IconState): void;
 };
 
 export function NativeIcon(props: {
@@ -19,6 +27,8 @@ export function NativeIcon(props: {
     name: "" as string,
     color: "" as string,
     size: 24,
+    svg: null as string | null,
+    _onIconChange: undefined as undefined | (() => void),
     style: {} as Record<string, string>,
     attrs: {} as Record<string, string>,
     listeners: {} as Record<string, any>,
@@ -37,6 +47,29 @@ export function NativeIcon(props: {
     },
     isDocumentFragment() {
       return false;
+    },
+    setIcon(value) {
+      const registry = getIconRegistry();
+      const icon = Object.prototype.hasOwnProperty.call(registry, value.name)
+        ? registry[value.name]
+        : undefined;
+      const svg = icon ? serialize_icon(icon) : null;
+      const size =
+        Number.isFinite(value.size) && value.size > 0 ? value.size : 24;
+      if (
+        $elm.name === value.name &&
+        $elm.color === value.color &&
+        $elm.size === size &&
+        $elm.svg === svg
+      )
+        return;
+      const resized = $elm.size !== size;
+      $elm.name = value.name;
+      $elm.color = value.color;
+      $elm.size = size;
+      $elm.svg = svg;
+      $elm._onIconChange?.();
+      if (resized) requestNativeLayout();
     },
     setStyle(style: any) {
       methods.setStyle(style);
@@ -84,16 +117,7 @@ export function NativeIcon(props: {
       methods.applyState(props.elm.state, { initial: true });
       methods.setupEventListener(props.elm.events);
 
-      if (props.elm.state.name) {
-        $elm.name = props.elm.state.name as string;
-      }
-      if (props.elm.state.color) {
-        $elm.color = props.elm.state.color as string;
-      }
-      if (props.elm.state.size !== undefined) {
-        $elm.size = props.elm.state.size as number;
-      }
-
+      this.setIcon(props.elm.state);
       return $elm;
     },
     hydrate(elm: TimelessElement, $dom: any) {
@@ -123,4 +147,27 @@ export function NativeIcon(props: {
 
 export function isNativeIcon(value: any): value is NativeIcon {
   return value.t === "icon";
+}
+
+function serialize_icon(node: ASNNode): string {
+  const xml_name = /^[A-Za-z_][\w:.-]*$/;
+  if (!xml_name.test(node.tag))
+    throw new Error(`Invalid icon tag: ${node.tag}`);
+  const attrs =
+    node.tag === "svg"
+      ? { xmlns: "http://www.w3.org/2000/svg", ...node.attrs }
+      : (node.attrs ?? {});
+  const attributes = Object.entries(attrs)
+    .map(([key, value]) => {
+      if (!xml_name.test(key))
+        throw new Error(`Invalid icon attribute: ${key}`);
+      const escaped = value
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      return ` ${key}="${escaped}"`;
+    })
+    .join("");
+  return `<${node.tag}${attributes}>${(node.children ?? []).map(serialize_icon).join("")}</${node.tag}>`;
 }

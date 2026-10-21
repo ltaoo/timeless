@@ -9,12 +9,10 @@
  * <Icon name="home" size={24} color="blue" />
  * ```
  */
-import { isRef } from "@timeless/inner-reactive";
+import { isRef, type Ref, type DerivedRef } from "@timeless/inner-reactive";
 
 import { MountedEvent } from "@/event";
-import { ListenerManager } from "@/util/listener";
-
-import { Box, BoxProps, BoxState } from "./box";
+import { Box, BoxProps } from "./box";
 import { Logger } from "@/util/logger";
 
 const logger = Logger({ prefix: "primitive", scope: "icon" });
@@ -22,15 +20,15 @@ const logger = Logger({ prefix: "primitive", scope: "icon" });
 /** Props for Icon component */
 type IconProps = BoxProps & {
   /** Icon name from the icon library */
-  name: string;
+  name: string | Ref<string> | DerivedRef<string>;
   /** Icon color - defaults to "currentColor" */
-  color?: string;
+  color?: string | Ref<string> | DerivedRef<string>;
   /** Icon size in pixels - defaults to 24 */
-  size?: number;
+  size?: number | Ref<number> | DerivedRef<number>;
 };
 
 /** Internal state for Icon */
-type IconState = {
+export type IconState = {
   name: string;
   size: number;
   color: string;
@@ -68,7 +66,6 @@ export function getIconRegistry(): IconRegistry {
  */
 export function Icon(props: IconProps) {
   let $elm: any = null;
-  const listener$ = ListenerManager();
   const box$ = Box<IconState>(props, {
     name: "",
     size: 24,
@@ -82,9 +79,12 @@ export function Icon(props: IconProps) {
       if (props.name !== undefined) {
         if (isRef(props.name)) {
           const unsub_name = props.name.subscribe({
-            onChange(v) {},
+            onChange(v) {
+              state.name = v;
+              $elm?.setIcon?.(state);
+            },
           });
-          listener$.push(unsub_name);
+          box$.methods.unsubscribe(unsub_name);
           state.name = props.name.value;
         } else {
           state.name = props.name;
@@ -93,9 +93,12 @@ export function Icon(props: IconProps) {
       if (props.size !== undefined) {
         if (isRef(props.size)) {
           const unsub_size = props.size.subscribe({
-            onChange(v) {},
+            onChange(v) {
+              state.size = v;
+              $elm?.setIcon?.(state);
+            },
           });
-          listener$.push(unsub_size);
+          box$.methods.unsubscribe(unsub_size);
           state.size = props.size.value;
         } else {
           state.size = props.size;
@@ -104,9 +107,12 @@ export function Icon(props: IconProps) {
       if (props.color !== undefined) {
         if (isRef(props.color)) {
           const unsub_color = props.color.subscribe({
-            onChange(v) {},
+            onChange(v) {
+              state.color = v;
+              $elm?.setIcon?.(state);
+            },
           });
-          listener$.push(unsub_color);
+          box$.methods.unsubscribe(unsub_color);
           state.color = props.color.value;
         } else {
           state.color = props.color;
@@ -125,15 +131,18 @@ export function Icon(props: IconProps) {
     set $elm(v: any) {
       box$.methods.set$elm(v);
       $elm = v;
+      $elm?.setIcon?.(state);
     },
     state,
+    _hmr_dispose: box$.methods.destroy,
     onMounted(event: MountedEvent) {
       if (props.onMounted) {
-        props.onMounted(event);
+        box$.methods.unsubscribe(props.onMounted(event));
       }
     },
     onUnmounted() {
-      // listener$.destroy();
+      box$.methods.destroy();
+      $elm = null;
       if (props.onUnmounted) {
         props.onUnmounted();
       }

@@ -37,6 +37,12 @@ struct Node {
   YGNodeRef layout;
   int id = 0;
   std::string type, name, text, placeholder;
+  struct TextSpan {
+    uint32_t start, end;
+    std::unordered_map<std::string, std::string> style;
+    std::string href;
+  };
+  std::vector<TextSpan> text_spans;
   std::unordered_map<std::string, std::string> style, attributes;
   std::vector<std::unique_ptr<Node>> children;
   Node *parent = nullptr;
@@ -78,6 +84,7 @@ public:
   void state(int id, const std::string &name, bool value);
   bool event(int id, const std::string &name, const std::string &key = "");
   void input(int id, const std::string &value);
+  void link(int id, const std::string &url);
   void select(int id, const std::string &value);
   void toggle(int id);
   bool scroll(int id, float x, float y);

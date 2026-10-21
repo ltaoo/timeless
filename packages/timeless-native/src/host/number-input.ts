@@ -1,6 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
+import { requestNativeLayout } from "../stylesheet";
 
 export type NativeNumberInput = VNodeView<any> & {
   t: "number-input";
@@ -129,7 +130,9 @@ export function NativeNumberInput(props: {
       methods.setupEventListener(elm.events);
     },
     setValue(value: string) {
-      $elm.value = value;
+      $elm.value = String(value ?? "");
+      ($elm as any)._onValueChange?.($elm.value);
+      requestNativeLayout();
     },
     focus() {},
     blur() {},

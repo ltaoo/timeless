@@ -1,0 +1,15 @@
+**
+!LICENSE
+!packages/
+!packages/timeless-windows/
+!packages/timeless-windows/native/
+!packages/timeless-windows/native/**
+!apps/
+!apps/web-shadcn/
+!apps/web-shadcn/dist/
+!apps/web-shadcn/dist/windows/
+!apps/web-shadcn/dist/windows/app.js
+!apps/web-shadcn/build/
+!apps/web-shadcn/build/windows-sources/
+!apps/web-shadcn/build/windows-sources/**
+**/.git

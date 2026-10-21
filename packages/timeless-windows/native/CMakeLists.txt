@@ -30,6 +30,11 @@ if(BUILD_TESTING)
   add_executable(timeless_windows_test tests/runtime_test.cpp)
   target_link_libraries(timeless_windows_test PRIVATE timeless_windows_core)
   add_test(NAME windows-runtime COMMAND timeless_windows_test "${TIMELESS_TEST_BUNDLE}")
+  add_executable(timeless_rich_text_test tests/rich_text_test.cpp)
+  target_link_libraries(timeless_rich_text_test PRIVATE timeless_windows_core)
+  add_test(NAME windows-rich-text COMMAND timeless_rich_text_test
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../timeless/dist/timeless.umd.min.js"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../timeless-native/dist/timeless.native.umd.min.js")
 endif()
 
 if(WIN32)

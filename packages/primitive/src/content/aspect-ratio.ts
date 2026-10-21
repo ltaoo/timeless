@@ -45,6 +45,7 @@ export function AspectRatio(props: AspectRatioProps, children?: ViewChildren) {
 
   const methods = {
     subscribe_props() {
+      box$.methods.subscribe_props();
       if (ratio !== undefined) {
         if (isRef(ratio)) {
           state.ratio = ratio.value;
@@ -72,6 +73,7 @@ export function AspectRatio(props: AspectRatioProps, children?: ViewChildren) {
       return $elm;
     },
     set $elm(v) {
+      box$.methods.set$elm(v);
       $elm = v;
     },
     state,
@@ -82,6 +84,7 @@ export function AspectRatio(props: AspectRatioProps, children?: ViewChildren) {
       }
     },
     onUnmounted() {
+      box$.methods.destroy();
       if (rest.onUnmounted) {
         rest.onUnmounted();
       }

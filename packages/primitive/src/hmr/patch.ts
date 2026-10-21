@@ -1,4 +1,5 @@
 import { isElement, TimelessElement } from "@/content/type";
+import type { RichTextDocument } from "@/content/rich-text-document";
 
 // ─── Action types ────────────────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ export type SwapEventsAction = {
 };
 
 export type PatchAction =
+  | { type: "set_rich_text"; elm: any; document: RichTextDocument }
   | SetTextAction
   | SetStyleAction
   | SetStyleSetAction
@@ -120,6 +122,17 @@ function diff_element_internal(
   }
 
   const actions: PatchAction[] = [];
+  if (
+    new_element.t === "rich-text" &&
+    (old_element.state.content !== new_element.state.content ||
+      old_element.state.format !== new_element.state.format)
+  ) {
+    actions.push({
+      type: "set_rich_text",
+      elm: new_element.$elm,
+      document: new_element.state.document,
+    });
+  }
 
   // ── Text node ──
   if (new_element.t === "text") {
@@ -224,6 +237,9 @@ export function patch(
 
   for (const action of actions) {
     switch (action.type) {
+      case "set_rich_text":
+        action.elm?.setDocument(action.document);
+        break;
       case "set_text":
         if (action.elm) action.elm.setText(action.value);
         break;

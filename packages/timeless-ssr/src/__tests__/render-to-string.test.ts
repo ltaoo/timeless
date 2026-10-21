@@ -1,9 +1,17 @@
 import { describe, it, expect } from "vitest";
-import { Modal, Canvas, Button, ref, Show, View } from "@timeless/timeless";
+import { Modal, Canvas, Button, ref, Show, View, RichText } from "@timeless/timeless";
 
 import { renderToString } from "../index";
 
 describe("renderToString", () => {
+  it("renders the same reading HTML as the DOM RichText host", () => {
+    const element = RichText({ content: "# Heading\n\n**bold**", format: "markdown" });
+    const html = renderToString(element);
+    expect(html).toContain(element.state.document.html);
+    expect(html).toContain('data-n="rich-text-h1"');
+    expect(html).toContain("font-weight:700");
+    expect(html).not.toContain("**bold**");
+  });
   it("renders dedicated surfaces and ignores arbitrary View tags", () => {
     expect(renderToString(Modal({ open: true }, ["Gallery"]))).toBe(
       '<dialog role="dialog" aria-modal="true" open>Gallery</dialog>',

@@ -6,6 +6,7 @@ import {
   ViewProps,
   refobj,
   computed,
+  classNames,
   Icon,
   ListenerManager,
 } from "@timeless/timeless";
@@ -61,7 +62,6 @@ export function Button(
       SIZES[z] || SIZES.default,
       s.loading ? "opacity-70 pointer-events-none cursor-not-allowed" : "",
       s.disabled ? "opacity-50 pointer-events-none cursor-not-allowed" : "",
-      cls,
     ]
       .filter(Boolean)
       .join(" ");
@@ -71,7 +71,7 @@ export function Button(
     {
       ...rest,
       store,
-      class: classname_,
+      class: classNames([classname_, cls]),
       style,
       dataset: {
         "data-slot": "button",

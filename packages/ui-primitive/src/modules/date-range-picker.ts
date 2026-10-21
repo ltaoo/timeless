@@ -5,6 +5,8 @@ import {
   ViewChildren,
   Fragment,
   Portal as NativePortal,
+  Popover,
+  Show,
   For,
   Button,
   ButtonProps,
@@ -34,83 +36,49 @@ export function Trigger(
   children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
-
-  const events: (() => void)[] = [];
-
-  const _input$ = PrimitiveInput({
-    attributes: {
-      ...(rest.attributes || {}),
-      id: props.id || rest.attributes?.id,
-    },
-    style: {
-      position: "absolute",
-      width: "1px",
-      height: "1px",
-      padding: 0,
-      margin: "-1px",
-      overflow: "hidden",
-      clip: "rect(0, 0, 0, 0)",
-      "white-space": "nowrap",
-      "border-width": 0,
-    },
-    onFocus() {
-      if (store.$presence.state.visible) {
-        return;
-      }
-      store.$presence.show();
-      store.$popper.place();
-    },
-  });
-
-  return View(
+  const state = refobj(store.$presence.state);
+  return Button(
     {
       ...rest,
+      attributes: {
+        ...rest.attributes,
+        role: "combobox",
+        "aria-haspopup": "dialog",
+        "aria-expanded": computed(
+          state,
+          (value) => value.visible && !value.exit,
+        ),
+      },
+      onClick(event) {
+        rest.onClick?.(event);
+        if (event.defaultPrevented) return;
+        if (store.$presence.state.visible) store.$presence.hide();
+        else store.$presence.show();
+      },
+      onKeyDown(event) {
+        rest.onKeyDown?.(event);
+        if (event.defaultPrevented) return;
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          store.$presence.show();
+        }
+        if (event.key === "Escape") store.$presence.hide();
+      },
       onMounted(event) {
-        const $elm = event.target;
+        const target = event.target;
         store.$popper.setReference(
-          {
-            $el: $elm,
-            getRect() {
-              return $elm.getBoundingClientRect();
-            },
-          },
+          { $el: target.get$elm(), getRect: () => target.getBoundingClientRect() },
           { force: true },
         );
-
-        const handlePointerDown = (e: PointerEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if ((e.target as HTMLElement).tagName === "INPUT") {
-            return;
-          }
-          if (store.$presence.state.visible) {
-            store.$presence.hide();
-            return;
-          }
-          store.$presence.show();
-          store.$popper.place();
-        };
-        // @ts-ignore
-        $elm.addEventListener("pointerdown", handlePointerDown);
-
-        if (rest.onMounted) {
-          rest.onMounted(event);
-        }
+        const stop = store.$presence.onStateChange((value) => state.as(value));
+        const cleanup = rest.onMounted?.(event);
         return () => {
-          // @ts-ignore
-          $elm.removeEventListener("pointerdown", handlePointerDown);
+          stop();
+          cleanup?.();
         };
-      },
-      onUnmounted() {
-        for (const fn of events) {
-          if (typeof fn === "function") fn();
-        }
-        if (rest.onUnmounted) {
-          rest.onUnmounted();
-        }
       },
     },
-    [_input$, Fragment({}, children)],
+    children,
   );
 }
 
@@ -153,63 +121,22 @@ export function Content(
   children: ViewChildren | (() => ViewChildren),
 ) {
   const { store, animation, ...rest } = props;
-
-  const presence_ = refobj(store.$presence.state);
-  let _was_exiting = false;
-
-  store.$presence.onStateChange((v) => {
-    presence_.as(v);
-  });
-
-  return Presence({ store: store.$presence }, () => [
-    NativePortal({}, [
-      PopperPrimitive.Content(
+  const state = refobj(store.$presence.state);
+  const stop = store.$presence.onStateChange((value) => state.as(value));
+  return Show({
+    when: computed(state, (value) => value.visible && !value.exit),
+    onUnmounted: stop,
+    ok: () =>
+      Popover(
         {
-          store: store.$popper,
-          onDismiss() {
-            store.$presence.hide();
-          },
+          ...rest,
+          open: true,
+          anchor: () => store.$popper.reference?.$el,
+          onClose: () => store.$presence.hide(),
         },
-        [
-          View(
-            {
-              ...rest,
-              class: classNames([
-                rest.class,
-                computed(presence_, (t) => {
-                  if (t.exit) {
-                    _was_exiting = true;
-                  }
-                  if (!t.mounted && _was_exiting) {
-                    _was_exiting = false;
-                    return animation?.out || "";
-                  }
-                  if (t.mounted) {
-                    _was_exiting = false;
-                  }
-                  return [
-                    t.enter && animation?.in ? animation.in : "",
-                    t.exit && animation?.out ? animation.out : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ");
-                }),
-              ]),
-              onAnimationEnd(e: AnimationEvent) {
-                if (e.target === e.currentTarget) {
-                  store.$presence.handleAnimationEnd();
-                }
-                if (rest.onAnimationEnd) {
-                  rest.onAnimationEnd(e);
-                }
-              },
-            },
-            typeof children === "function" ? children() : children,
-          ),
-        ],
+        typeof children === "function" ? children() : children,
       ),
-    ]),
-  ]);
+  });
 }
 
 // 双日历容器
@@ -475,6 +402,11 @@ export function CalendarCell(
   return Button(
     {
       ...rest,
+      attributes: {
+        ...rest.attributes,
+        "data-date": `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`,
+        "aria-label": value.toLocaleDateString(),
+      },
       onClick() {
         store.$calendar.selectDay(value);
         // 只有当范围选择完成后才关闭

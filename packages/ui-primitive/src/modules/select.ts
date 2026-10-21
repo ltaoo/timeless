@@ -5,6 +5,8 @@ import {
   ViewChildren,
   Input as NativeInput,
   Portal as NativePortal,
+  Popover,
+  ScrollView,
   Fragment,
   Show,
   classNames,
@@ -35,96 +37,55 @@ export function Trigger(
   children: ViewChildren = [],
 ) {
   const { store, ...rest } = props;
-
-  const state_ = refobj(store.state);
-  const listener$ = ListenerManager([state_]);
-
-  // 创建隐藏的 input 用于可访问性
-  const _input$ = NativeInput({
-    id: props.id || props.store.id,
-    attributes: rest.attributes,
-    // focused: computed(state_, (t) => t.focused),
-    tabindex: -1,
-    style: {
-      position: "absolute",
-      width: "1px",
-      height: "1px",
-      padding: 0,
-      margin: "-1px",
-      overflow: "hidden",
-      clip: "rect(0, 0, 0, 0)",
-      "white-space": "nowrap",
-      "border-width": 0,
-    },
-  });
-
+  const state = refobj(store.state);
+  const listener = ListenerManager([state]);
   return Button(
     {
       ...rest,
+      disabled: computed(state, (value) => value.disabled),
       attributes: {
+        ...rest.attributes,
         role: "combobox",
-        "aria-expanded": computed(state_, (t) => (t.open ? "true" : "false")),
+        "aria-expanded": computed(state, (value) => String(value.open)),
         "aria-haspopup": "listbox",
-        // 'aria-controls': computed(state_, (t) => t.open ? t.id : undefined),
-        // 'aria-labelledby': computed(state_, (t) => t.id),
-        // 'aria-readonly': computed(state_, (t) => t.readOnly || undefined),
-        "aria-required": computed(state_, (t) => t.required || undefined),
       },
-      onFocus() {
-        logger.log("Trigger Button handle focus");
-        store.show();
+      onClick(event) {
+        rest.onClick?.(event);
+        if (event.defaultPrevented) return;
+        const target = event.target as { tagName?: string; isContentEditable?: boolean };
+        if (["INPUT", "TEXTAREA"].includes(target?.tagName) || target?.isContentEditable) return;
+        store.handleClickTrigger();
       },
-      onBlur() {
-        store.hide();
+      onKeyDown(event) {
+        rest.onKeyDown?.(event);
+        if (event.defaultPrevented) return;
+        if (["ArrowDown", "ArrowUp"].includes(event.key)) {
+          event.preventDefault();
+          if (!store.open) store.show();
+          else if (event.key === "ArrowDown") store.focusNextOption();
+          else store.focusPrevOption();
+        } else if ((event.key === "Enter" || event.key === " ") && store.open) {
+          event.preventDefault();
+          store.selectFocusedOption();
+        } else if (event.key === "Escape") store.hide();
       },
       onMounted(event) {
-        const $elm = event.target.get$elm();
-        store.focus = function () {
-          $elm.focus();
-        };
-        store.blur = function () {
-          $elm.blur();
-        };
-        // 使用整个 trigger 元素作为 reference，而不是 firstElementChild
-        // logger.log("Trigger Mounted", $elm);
+        const element = event.target;
+        store.focus = () => element.focus?.();
+        store.blur = () => element.blur?.();
         store.popper$.setReference(
           {
-            $el: $elm,
-            getRect() {
-              return $elm.getBoundingClientRect();
-            },
+            $el: element.get$elm(),
+            getRect: () => element.getBoundingClientRect(),
           },
           { force: true },
         );
-        const handlePointerDown = (e: any) => {
-          const target = e.target as HTMLElement | null;
-          console.log("[DEBUG] Select Trigger pointerdown FIRED", store.disabled, store.open);
-          logger.log("Trigger handlePointerDown", target?.isContentEditable);
-          if (
-            target &&
-            (target.tagName === "INPUT" ||
-              target.tagName === "TEXTAREA" ||
-              target.isContentEditable)
-          ) {
-            return;
-          }
-          e.preventDefault();
-          e.stopPropagation();
-          store.handleClickTrigger();
-        };
-        listener$.add($elm.addEventListener("pointerdown", handlePointerDown));
-        listener$.add(
-          store.onStateChange((v) => {
-            state_.as(v);
-          }),
-        );
-        if (rest.onMounted) {
-          listener$.add(rest.onMounted(event));
-        }
-        return listener$.destroy;
+        listener.add(store.onStateChange((value) => state.as(value)));
+        listener.add(rest.onMounted?.(event));
+        return listener.destroy;
       },
     },
-    [_input$, Fragment({}, children)],
+    children,
   );
 }
 
@@ -214,57 +175,45 @@ export function Content(
   children: ViewChildren,
 ) {
   const { store, animation, onMounted, ...rest } = props;
-
-  const presence_ = refobj(store.presence$.state);
-
-  const listener$ = ListenerManager([presence_]);
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        store.focusNextOption();
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        store.focusPrevOption();
-        break;
-      case "Enter":
-        e.preventDefault();
-        store.selectFocusedOption();
-        break;
-      case "Escape":
-        e.preventDefault();
-        store.hide();
-        break;
-    }
-  };
-
+  const state = refobj(store.state);
+  const listener = ListenerManager([state]);
   return Show({
-    when: computed(presence_, (t) => {
-      return t.mounted;
-    }),
+    when: computed(state, (value) => value.open),
     onMounted(event) {
-      listener$.add(
-        store.presence$.onStateChange((v) => {
-          presence_.as(v);
-        }),
-      );
-      if (onMounted) {
-        listener$.add(onMounted(event));
-      }
-      return listener$.destroy;
+      listener.add(store.onStateChange((value) => state.as(value)));
+      listener.add(onMounted?.(event));
+      return listener.destroy;
     },
-    ok() {
-      return [
-        NativePortal({}, [
-          PopperPositionContent(
-            { ...rest, store, animation, onKeyDown: handleKeyDown },
-            children,
-          ),
-        ]),
-      ];
-    },
+    ok: () =>
+      Popover(
+        {
+          ...rest,
+          open: true,
+          anchor: () => store.popper$.reference?.$el,
+          onClose: () => store.hide(),
+          onKeyDown(event) {
+            rest.onKeyDown?.(event);
+            if (event.defaultPrevented) return;
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              store.focusNextOption();
+            }
+            if (event.key === "ArrowUp") {
+              event.preventDefault();
+              store.focusPrevOption();
+            }
+            if (event.key === "Enter") {
+              event.preventDefault();
+              store.selectFocusedOption();
+            }
+            if (event.key === "Escape") {
+              event.preventDefault();
+              store.hide();
+            }
+          },
+        },
+        children,
+      ),
   });
 }
 
@@ -364,36 +313,14 @@ export function Viewport(
   children: ViewChildren,
 ) {
   const { store, ...rest } = props;
-
-  return Fragment({}, [
-    Style(
-      {},
-      `.__t_no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-}
-.__t_no-scrollbar::-webkit-scrollbar{
-  display: none;
-}`,
-    ),
-    PopperPrimitive.Viewport(
-      {
-        ...rest,
-        dataset: {
-          "radix-select-viewport": "",
-        },
-        class: classNames([rest.class, "__t_no-scrollbar"]),
-        style: {
-          position: "relative",
-          flex: "1 1 0%",
-          overflow: "hidden auto",
-        },
-        store: store.popper$,
-      },
-      children,
-    ),
-  ]);
+  return ScrollView(
+    {
+      ...rest,
+      horizontal: "hidden",
+      style: { maxHeight: "240px", ...rest.style },
+    },
+    children,
+  );
 }
 
 export function Item(
@@ -411,11 +338,16 @@ export function Item(
   return Button(
     {
       ...rest,
+      disabled: computed(state_, (value) => !!value.disabled),
+      onFocus(event) {
+        rest.onFocus?.(event);
+        select$.focusOption(store.value);
+      },
       onMounted(event) {
         const $elm = event.target.get$elm();
         select$.handleItemMounted({
-          offsetTop: $elm.offsetTop,
-          height: $elm.offsetHeight,
+          offsetTop: $elm.offsetTop ?? 0,
+          height: $elm.offsetHeight ?? 32,
           store,
         });
         listener$.add(

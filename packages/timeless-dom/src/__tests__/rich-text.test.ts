@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { RichText } from "@timeless/timeless";
 
 import { DOMRichText } from "@/host/rich-text";
 import { build } from "@/renderer/build";
@@ -36,6 +37,34 @@ describe("DOMRichText", () => {
     vi.unstubAllGlobals();
   });
 
+  it("handles Markdown links after hydration and refreshes callbacks during HMR", () => {
+    const $element = create_element();
+    const listeners = new Map<string, (event: any) => void>();
+    $element.addEventListener = vi.fn((name: string, handler: any) =>
+      listeners.set(name, handler),
+    ) as any;
+    const link = { getAttribute: () => "https://example.com" };
+    ($element as any).contains = (value: any) => value === link;
+    const first = vi.fn();
+    const second = vi.fn();
+    const element = RichText({
+      content: "[link](https://example.com)",
+      format: "markdown",
+      onLinkPress: first,
+    });
+    const host = build(element) as DOMRichText;
+    host.hydrate(element, $element as unknown as HTMLDivElement);
+    const event = { target: { closest: () => link }, preventDefault: vi.fn() };
+    listeners.get("click")?.(event);
+    expect(first).toHaveBeenCalledWith("https://example.com");
+    expect(event.preventDefault).toHaveBeenCalledOnce();
+    host.setupEventListener({ onLinkPress: second });
+    listeners.get("click")?.(event);
+    expect(first).toHaveBeenCalledOnce();
+    expect(second).toHaveBeenCalledWith("https://example.com");
+    element.onUnmounted();
+  });
+
   it("renders HTML and updates content", () => {
     const $element = create_element();
     vi.stubGlobal("document", {
@@ -59,12 +88,13 @@ describe("DOMRichText", () => {
 
     expect(host.t).toBe("rich-text");
     expect(element.$elm).toBe(host);
-    expect($rendered.innerHTML).toBe("<p>First</p>");
+    expect($rendered.innerHTML).toContain('data-n="rich-text-p">First</p>');
     expect($rendered.attributes.get("class")).toBe("article-body");
     expect($rendered.attributes.get("data-format")).toBe("html");
 
     host.setContent("<strong>Updated</strong>");
 
-    expect($rendered.innerHTML).toBe("<strong>Updated</strong>");
+    expect($rendered.innerHTML).toContain(">Updated</strong>");
+    expect($rendered.innerHTML).toContain("font-weight:700");
   });
 });

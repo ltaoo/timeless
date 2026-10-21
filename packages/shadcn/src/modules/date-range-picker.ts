@@ -31,60 +31,82 @@ function NavButton(props: {
   // 左面板下一月和右面板上一月有限制
   if (type === "leftNext") {
     const tooltip$ = new vm.TooltipCore({ side: "top" });
-    return View({}, [
-      Show({
-        when: computed(calendar_state_, (s) => !s.canLeftNext),
-        ok() {
-          return [
-            Tooltip(
-              {
-                // @ts-ignore
-                store: tooltip$,
-                content: ["不能超过右侧面板"],
-              },
-              [View({ class: NAV_BTN_DISABLED_CLASS }, children)],
-            ),
-          ];
-        },
-      }),
-      Show({
-        when: computed(calendar_state_, (s) => s.canLeftNext),
-        ok() {
-          return [ButtonComponent({ store, class: NAV_BTN_CLASS }, children)];
-        },
-      }),
-    ]);
+    return View(
+      {
+        onMounted: () =>
+          store.$calendar.onChange((value) => calendar_state_.as(value)),
+      },
+      [
+        Show({
+          when: computed(calendar_state_, (s) => !s.canLeftNext),
+          ok() {
+            return [
+              Tooltip(
+                {
+                  // @ts-ignore
+                  store: tooltip$,
+                  content: ["不能超过右侧面板"],
+                },
+                [View({ class: NAV_BTN_DISABLED_CLASS }, children)],
+              ),
+            ];
+          },
+        }),
+        Show({
+          when: computed(calendar_state_, (s) => s.canLeftNext),
+          ok() {
+            return [ButtonComponent({ store, class: NAV_BTN_CLASS }, children)];
+          },
+        }),
+      ],
+    );
   }
 
   if (type === "rightPrev") {
     const tooltip$ = new vm.TooltipCore({ side: "top" });
-    return View({}, [
-      Show({
-        when: computed(calendar_state_, (s) => !s.canRightPrev),
-        ok() {
-          return [
-            Tooltip(
-              {
-                // @ts-ignore
-                store: tooltip$,
-                content: ["不能早于左侧面板"],
-              },
-              [View({ class: NAV_BTN_DISABLED_CLASS }, children)],
-            ),
-          ];
-        },
-      }),
-      Show({
-        when: computed(calendar_state_, (s) => s.canRightPrev),
-        ok() {
-          return [ButtonComponent({ store, class: NAV_BTN_CLASS }, children)];
-        },
-      }),
-    ]);
+    return View(
+      {
+        onMounted: () =>
+          store.$calendar.onChange((value) => calendar_state_.as(value)),
+      },
+      [
+        Show({
+          when: computed(calendar_state_, (s) => !s.canRightPrev),
+          ok() {
+            return [
+              Tooltip(
+                {
+                  // @ts-ignore
+                  store: tooltip$,
+                  content: ["不能早于左侧面板"],
+                },
+                [View({ class: NAV_BTN_DISABLED_CLASS }, children)],
+              ),
+            ];
+          },
+        }),
+        Show({
+          when: computed(calendar_state_, (s) => s.canRightPrev),
+          ok() {
+            return [ButtonComponent({ store, class: NAV_BTN_CLASS }, children)];
+          },
+        }),
+      ],
+    );
   }
 
   // 左面板上一月和右面板下一月没有限制
-  return ButtonComponent({ store, class: NAV_BTN_CLASS }, children);
+  return ButtonComponent(
+    {
+      store,
+      class: NAV_BTN_CLASS,
+      attributes: {
+        n: `calendar-${type}`,
+        "aria-label": type === "leftPrev" ? "上一月" : "下一月",
+      },
+    },
+    children,
+  );
 }
 
 function CalendarPanel(props: {
@@ -100,146 +122,158 @@ function CalendarPanel(props: {
       ? ui.DateRangePickerPrimitive.LeftCalendarHeader
       : ui.DateRangePickerPrimitive.RightCalendarHeader;
 
-  return View({ class: "w-full" }, [
-    // Header
-    View({ class: "flex items-center justify-between mb-2" }, [
-      NavButton({
-        store,
-        type: side === "left" ? "leftPrev" : "rightPrev",
-        children: [Icon({ name: "chevron-left", size: 16 })],
-      }),
-      Header({ store, class: "text-sm font-medium" }),
-      NavButton({
-        store,
-        type: side === "left" ? "leftNext" : "rightNext",
-        children: [Icon({ name: "chevron-right", size: 16 })],
-      }),
-    ]),
-    // Grid
-    ui.DateRangePickerPrimitive.CalendarGrid({ store, class: "w-full" }, [
-      // Weekday Headers
-      View(
-        { class: "grid grid-cols-7 mb-1" },
-        WEEKDAYS.map((day) =>
-          View(
-            {
-              class:
-                "tt-content-inline text-center text-xs text-muted-foreground w-full h-8 flex items-center justify-center",
-            },
-            [day],
+  return View(
+    {
+      class: "w-full",
+      onMounted: () =>
+        store.$calendar.onChange((value) => calendar_state_.as(value)),
+    },
+    [
+      // Header
+      View({ class: "flex items-center justify-between mb-2" }, [
+        NavButton({
+          store,
+          type: side === "left" ? "leftPrev" : "rightPrev",
+          children: [Icon({ name: "chevron-left", size: 16 })],
+        }),
+        Header({ store, class: "text-sm font-medium" }),
+        NavButton({
+          store,
+          type: side === "left" ? "leftNext" : "rightNext",
+          children: [Icon({ name: "chevron-right", size: 16 })],
+        }),
+      ]),
+      // Grid
+      ui.DateRangePickerPrimitive.CalendarGrid({ store, class: "w-full" }, [
+        // Weekday Headers
+        View(
+          { class: "grid grid-cols-7 mb-1" },
+          WEEKDAYS.map((day) =>
+            View(
+              {
+                class:
+                  "tt-content-inline text-center text-xs text-muted-foreground w-full h-8 flex items-center justify-center",
+              },
+              [day],
+            ),
           ),
         ),
-      ),
-      // Calendar Body
-      For({
-        each: computed(calendar_state_, (s) =>
-          side === "left" ? s.left.weeks : s.right.weeks,
-        ) as any,
-        render(week: any) {
-          return View({ class: "grid grid-cols-7" }, [
-            For({
-              each: computed(week, (t: any) => t.dates) as any,
-              render(day: any) {
-                return ui.DateRangePickerPrimitive.CalendarCell(
-                  {
-                    store,
-                    value: day.value,
-                    isToday: day.is_today,
-                    isPrevMonth: day.is_prev_month,
-                    isNextMonth: day.is_next_month,
-                    class: computed(calendar_state_, (s) => {
-                      const isInRange = store.$calendar.isInRange(day.value);
-                      const isRangeStart = store.$calendar.isRangeStart(
-                        day.value,
-                      );
-                      const isRangeEnd = store.$calendar.isRangeEnd(day.value);
-                      const hasEnd = Boolean(s.endDate || s.hoverDate);
-                      const isSingle = isRangeStart && !hasEnd;
-
-                      const baseClass =
-                        "relative w-full h-8 inline-flex items-center justify-center text-sm transition-colors outline-hidden select-none";
-                      const clas: string[] = [];
-
-                      if (isInRange) {
-                        clas.push(
-                          "before:content-[''] before:absolute before:inset-y-1 before:left-0 before:right-0 before:bg-accent/70",
+        // Calendar Body
+        For({
+          each: computed(calendar_state_, (s) =>
+            side === "left" ? s.left.weeks : s.right.weeks,
+          ) as any,
+          render(week: any) {
+            return View({ class: "grid grid-cols-7" }, [
+              For({
+                each: computed(week, (t: any) => t.dates) as any,
+                render(day: any) {
+                  return ui.DateRangePickerPrimitive.CalendarCell(
+                    {
+                      store,
+                      value: day.value,
+                      isToday: day.is_today,
+                      isPrevMonth: day.is_prev_month,
+                      isNextMonth: day.is_next_month,
+                      class: computed(calendar_state_, (s) => {
+                        const isInRange = store.$calendar.isInRange(day.value);
+                        const isRangeStart = store.$calendar.isRangeStart(
+                          day.value,
                         );
-                        if (isSingle) {
-                          clas.push("before:rounded-md");
-                        } else if (isRangeStart && !isRangeEnd) {
-                          clas.push("before:rounded-l-md");
-                        } else if (isRangeEnd && !isRangeStart) {
-                          clas.push("before:rounded-r-md");
-                        } else if (isRangeStart && isRangeEnd) {
-                          clas.push("before:rounded-md");
+                        const isRangeEnd = store.$calendar.isRangeEnd(
+                          day.value,
+                        );
+                        const hasEnd = Boolean(s.endDate || s.hoverDate);
+                        const isSingle = isRangeStart && !hasEnd;
+
+                        const baseClass =
+                          "relative w-full h-8 inline-flex items-center justify-center text-sm transition-colors outline-hidden select-none";
+                        const clas: string[] = [];
+
+                        if (isInRange) {
+                          clas.push(
+                            "before:content-[''] before:absolute before:inset-y-1 before:left-0 before:right-0 before:bg-accent/70",
+                          );
+                          if (isSingle) {
+                            clas.push("before:rounded-md");
+                          } else if (isRangeStart && !isRangeEnd) {
+                            clas.push("before:rounded-l-md");
+                          } else if (isRangeEnd && !isRangeStart) {
+                            clas.push("before:rounded-r-md");
+                          } else if (isRangeStart && isRangeEnd) {
+                            clas.push("before:rounded-md");
+                          }
                         }
-                      }
 
-                      return [baseClass, ...clas].join(" ");
-                    }),
-                  },
-                  [
-                    View(
-                      {
-                        class: classNames([
-                          "tt-content-inline",
-                          computed(calendar_state_, (s) => {
-                            const isInRange = store.$calendar.isInRange(
-                              day.value,
-                            );
-                            const isRangeStart = store.$calendar.isRangeStart(
-                              day.value,
-                            );
-                            const isRangeEnd = store.$calendar.isRangeEnd(
-                              day.value,
-                            );
-                            const hasEnd = Boolean(s.endDate || s.hoverDate);
-                            const isSingle = isRangeStart && !hasEnd;
-
-                            const baseClass =
-                              "relative z-10 inline-flex size-8 items-center justify-center rounded-md";
-                            const clas: string[] = [];
-
-                            if (isSingle || isRangeStart || isRangeEnd) {
-                              clas.push("bg-primary text-primary-foreground");
-                            } else if (isInRange) {
-                              clas.push("text-accent-foreground");
-                            } else if (day.is_prev_month || day.is_next_month) {
-                              clas.push(
-                                "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground",
+                        return [baseClass, ...clas].join(" ");
+                      }),
+                    },
+                    [
+                      View(
+                        {
+                          class: classNames([
+                            "tt-content-inline",
+                            computed(calendar_state_, (s) => {
+                              const isInRange = store.$calendar.isInRange(
+                                day.value,
                               );
-                            } else if (day.is_today) {
-                              clas.push(
-                                "bg-accent text-accent-foreground font-medium",
+                              const isRangeStart = store.$calendar.isRangeStart(
+                                day.value,
                               );
-                            } else {
-                              clas.push(
-                                "hover:bg-accent hover:text-accent-foreground",
+                              const isRangeEnd = store.$calendar.isRangeEnd(
+                                day.value,
                               );
-                            }
+                              const hasEnd = Boolean(s.endDate || s.hoverDate);
+                              const isSingle = isRangeStart && !hasEnd;
 
-                            if (
-                              day.is_today &&
-                              !(isSingle || isRangeStart || isRangeEnd)
-                            ) {
-                              clas.push("ring-1 ring-ring/50");
-                            }
+                              const baseClass =
+                                "relative z-10 inline-flex size-8 items-center justify-center rounded-md";
+                              const clas: string[] = [];
 
-                            return [baseClass, ...clas].join(" ");
-                          }),
-                        ]),
-                      },
-                      [day.text],
-                    ),
-                  ],
-                );
-              },
-            }),
-          ]);
-        },
-      }),
-    ]),
-  ]);
+                              if (isSingle || isRangeStart || isRangeEnd) {
+                                clas.push("bg-primary text-primary-foreground");
+                              } else if (isInRange) {
+                                clas.push("text-accent-foreground");
+                              } else if (
+                                day.is_prev_month ||
+                                day.is_next_month
+                              ) {
+                                clas.push(
+                                  "text-muted-foreground/50 hover:bg-accent hover:text-accent-foreground",
+                                );
+                              } else if (day.is_today) {
+                                clas.push(
+                                  "bg-accent text-accent-foreground font-medium",
+                                );
+                              } else {
+                                clas.push(
+                                  "hover:bg-accent hover:text-accent-foreground",
+                                );
+                              }
+
+                              if (
+                                day.is_today &&
+                                !(isSingle || isRangeStart || isRangeEnd)
+                              ) {
+                                clas.push("ring-1 ring-ring/50");
+                              }
+
+                              return [baseClass, ...clas].join(" ");
+                            }),
+                          ]),
+                        },
+                        [day.text],
+                      ),
+                    ],
+                  );
+                },
+              }),
+            ]);
+          },
+        }),
+      ]),
+    ],
+  );
 }
 
 export function DateRangePicker(
@@ -269,6 +303,10 @@ export function DateRangePicker(
       {
         store,
         id,
+        attributes: {
+          ...rest.attributes,
+          n: `${rest.attributes?.n ?? "date-range"}-trigger`,
+        },
         class: computed(presence_, (d) => {
           const baseClass =
             "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";

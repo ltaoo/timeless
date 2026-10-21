@@ -1,5 +1,5 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
-import * as ASN from "@timeless/icons/asn";
+import * as ASN from "@timeless/inner-icons/asn";
 import { SSRBox } from "./box";
 
 type ASNNode = {

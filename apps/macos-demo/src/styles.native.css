@@ -71,8 +71,7 @@
   background-color: #bdc9dd;
 }
 .button:focus {
-  border-width: 2px;
-  border-color: #768bff;
+  box-shadow: 0px 0px 1px 3px #768bff80;
 }
 .button:disabled {
   opacity: 0.4;

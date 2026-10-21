@@ -1,12 +1,12 @@
-import { Ref, isRef } from "@timeless/inner-reactive";
+import { Ref, DerivedRef, isRef } from "@timeless/inner-reactive";
 
 import { Box, BoxProps } from "@/content/box";
 import { MountedEvent } from "@/event";
 import { bind_disabled, DisabledValue } from "@/util/disabled";
 
 export type FilePickerProps = BoxProps & {
-  accept?: string | Ref<string>;
-  multiple?: boolean | Ref<boolean>;
+  accept?: string | Ref<string> | DerivedRef<string>;
+  multiple?: boolean | Ref<boolean> | DerivedRef<boolean>;
   capture?: string | Ref<string>;
   files?: Ref<FileList | null>;
   disabled?: DisabledValue;
@@ -63,6 +63,7 @@ export function FilePicker(props: FilePickerProps = {}) {
           const unsubscribe = accept.subscribe({
             onChange(v) {
               state.accept = v;
+              box$.methods.apply_attr("accept", v);
             },
           });
           box$.methods.unsubscribe(unsubscribe);
@@ -77,6 +78,7 @@ export function FilePicker(props: FilePickerProps = {}) {
           const unsubscribe = multiple.subscribe({
             onChange(v) {
               state.multiple = v;
+              box$.methods.apply_attr("multiple", v);
             },
           });
           box$.methods.unsubscribe(unsubscribe);

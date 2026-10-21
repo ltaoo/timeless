@@ -1,6 +1,7 @@
 export * from "./box";
 export * from "./view";
 export * from "./text";
+export * from "./rich-text";
 export * from "./button";
 export * from "./input";
 export * from "./img";

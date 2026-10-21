@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN" data-n="shared-document">
+  <head data-n="shared-head">
+    <meta charset="UTF-8" data-n="shared-encoding" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+      data-n="shared-viewport"
+    />
+    <title data-n="shared-title">Timeless · 共享组件示例</title>
+    <script
+      src="/public/tailwindcss@4.js"
+      data-n="shared-tailwind-runtime"
+    ></script>
+    <style type="text/tailwindcss" data-n="shared-utility-source">
+      @import "tailwindcss/theme.css";
+      @import "tailwindcss/preflight.css";
+      @import "tailwindcss/utilities.css" source(none);
+      @source "./src/examples/simple";
+      @source "./index.simple.html";
+    </style>
+  </head>
+  <body class="h-screen m-0" data-n="shared-body">
+    <div id="root" class="h-full" data-n="application-root"></div>
+    <script
+      type="module"
+      src="./index.simple.js"
+      data-n="shared-entry"
+    ></script>
+  </body>
+</html>

@@ -4,16 +4,36 @@
   "description": "Frontend application",
   "type": "module",
   "scripts": {
+    "dev:simple": "vite --config vite.simple.config.ts --host 127.0.0.1",
+    "build:simple": "vite build --config vite.simple.config.ts",
+    "build:test-fixtures": "vite build --config vite.fixture.config.ts",
     "dev": "timeless frontend",
+    "build:macos": "vite build --config vite.macos.config.ts",
+    "dev:macos": "vite build --config vite.macos.config.ts --watch --mode development",
+    "test:macos": "pnpm run build:macos && node scripts/test-native.mjs macos",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "build:macos:app": "pnpm run build:macos && timeless-macos --bundle dist/macos/app.js --output \"build/Timeless Shadcn.app\" --name \"Timeless Shadcn\" --identifier com.timeless.web-shadcn",
+    "start:macos": "open \"build/Timeless Shadcn.app\"",
+    "build:windows": "vite build --config vite.windows.config.ts",
+    "build:windows:orbstack": "node scripts/build-windows.mjs",
+    "test:windows": "pnpm run build:windows && node scripts/test-native.mjs windows"
   },
   "devDependencies": {
     "@timeless/cli": "workspace:*",
     "@timeless/inner-types": "workspace:*",
-    "eslint": "^8.56.0"
+    "@timeless/inner-vite-plugin": "workspace:*",
+    "eslint": "^8.56.0",
+    "tailwindcss": "4.2.1",
+    "vite": "^8.0.0-beta.16"
   },
   "dependencies": {
+    "@timeless/shadcn": "workspace:*",
+    "@timeless/timeless": "workspace:*",
+    "@timeless/timeless-dom": "workspace:*",
+    "@timeless/timeless-macos": "workspace:*",
+    "@timeless/timeless-native": "workspace:*",
+    "@timeless/timeless-windows": "workspace:*",
     "better-sqlite3": "^12.10.0"
   }
 }

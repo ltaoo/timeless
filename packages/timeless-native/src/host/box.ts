@@ -6,6 +6,7 @@ import {
 } from "@timeless/timeless";
 import {
   refreshNativeStyles,
+  invalidateNativeStyles,
   requestNativeLayout,
   setNativeDefaultStyle,
   setNativeInlineStyle,
@@ -139,12 +140,17 @@ export function HostElement(props: {
       if (!$elm) {
         return;
       }
+      const previous = $elm.attrs.class ?? "";
+      if (previous === styleSet.join(" ")) return;
       if (styleSet.length === 0) {
         delete $elm.attrs.class;
       } else {
         $elm.attrs.class = styleSet.join(" ");
       }
-      refreshNativeStyles($elm);
+      invalidateNativeStyles($elm, "classes", [
+        ...previous.split(/\s+/),
+        ...styleSet,
+      ]);
     },
     setDefaultStyle(style) {
       if ($elm) setNativeDefaultStyle($elm, style);
@@ -162,8 +168,9 @@ export function HostElement(props: {
       if (!$elm) {
         return;
       }
+      if ($elm.attrs[key] === value) return;
       $elm.attrs[key] = value;
-      if (key === "class" || key === "disabled") refreshNativeStyles($elm);
+      invalidateNativeStyles($elm, "attributes", [key]);
       if (typeof $elm._onAttributeChange === "function") {
         $elm._onAttributeChange(key, value);
       }
@@ -172,8 +179,9 @@ export function HostElement(props: {
       if (!$elm) {
         return;
       }
+      if (!(key in $elm.attrs)) return;
       delete $elm.attrs[key];
-      if (key === "class" || key === "disabled") refreshNativeStyles($elm);
+      invalidateNativeStyles($elm, "attributes", [key]);
       if (typeof $elm._onAttributeChange === "function") {
         $elm._onAttributeChange(key, null);
       }
@@ -308,6 +316,13 @@ export function HostElement(props: {
         methods.setStyleSet(state.styleSet, opt);
       }
       const attrs = state.attributes;
+      for (const [key, value] of Object.entries((state as any).dataset ?? {})) {
+        if (value !== undefined)
+          methods.setAttribute(
+            key.startsWith("data-") ? key : `data-${key}`,
+            String(value),
+          );
+      }
       if (attrs) {
         for (const [key, value] of Object.entries(attrs)) {
           if (value !== undefined) {
@@ -415,6 +430,7 @@ export function HostElement(props: {
       child_elements = r.child_elements as TimelessElement[];
       child_host_nodes = r.child_host_nodes;
       child_nodes = r.child_nodes;
+      requestNativeLayout();
       setTimeout(() => {
         methods.handleElementsMounted();
       }, 0);
@@ -425,7 +441,7 @@ export function HostElement(props: {
       }
       for (const child of child_nodes) {
         if (child) {
-          child.removeChildren();
+          child.removeChildren?.();
         }
       }
       if ($elm && $elm.children) {
@@ -441,6 +457,7 @@ export function HostElement(props: {
       child_elements = [];
       child_host_nodes = [];
       child_nodes = [];
+      requestNativeLayout();
     },
     insert(idx: number, children: (TimelessElement | null)[]) {
       const inserted_elements: TimelessElement[] = [];

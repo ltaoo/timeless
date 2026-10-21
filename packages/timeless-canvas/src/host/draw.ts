@@ -2,10 +2,12 @@
  * @file canvas 模拟 DOM 实现
  */
 import { isRef } from "@timeless/timeless";
-import * as ASN from "@timeless/icons/asn";
+import * as ASN from "@timeless/inner-icons/asn";
 
 import { Canvas } from "@/biz/canvas";
 import { connectLayer } from "@/biz/canvas/connect.web";
+import type { RichTextDocument } from "@timeless/timeless";
+import { layoutRichText } from "./rich-text-layout";
 
 export type BoundingRect = {
   top: number;
@@ -104,6 +106,8 @@ export interface CanvasAttributes {
 }
 
 export interface CanvasElement extends BaseCanvasNode<"element"> {
+  richText?: RichTextDocument;
+  richTextLayout?: ReturnType<typeof layoutRichText>;
   tag: string;
   attrs: CanvasAttributes;
   className: string;
@@ -1322,6 +1326,22 @@ function recordNodeToDisplayList(
       out.push({ op: "restore" });
     }
 
+    if (node.tag === "rich-text" && node.richTextLayout) {
+      out.push({ op: "save" }, { op: "setGlobalAlpha", alpha });
+      out.push({ op: "setTextAlign", value: "left" }, { op: "setTextBaseline", value: "top" });
+      for (const fragment of node.richTextLayout.fragments) {
+        const x = rect.left + fragment.x, y = rect.top + fragment.y;
+        if (fragment.background) {
+          out.push({ op: "setFillStyle", value: fragment.background }, { op: "fillRect", x, y, w: fragment.width, h: fragment.height });
+        }
+        out.push({ op: "setFillStyle", value: fragment.color }, { op: "setFont", value: fragment.font }, { op: "fillText", text: fragment.text, x, y });
+        for (const decoration of ["underline", "line-through"]) if (fragment.decoration.includes(decoration)) {
+          out.push({ op: "fillRect", x, y: y + fragment.height * (decoration === "underline" ? 0.8 : 0.4), w: fragment.width, h: 1 });
+        }
+      }
+      out.push({ op: "restore" });
+      return;
+    }
     if (node.tag === "text") {
       const text =
         node.textContent ||
@@ -2192,6 +2212,23 @@ function computeRectsForTree(
       const contentLeft = rect.left + padLeft;
       const contentTop = rect.top + padTop;
       const contentWidth = Math.max(0, rect.width - padLeft - padRight);
+
+      if (node.tag === "rich-text" && node.richText) {
+        const style: Record<string, string> = {};
+        for (let parent: CanvasNode | null = node; parent; parent = parent.parentNode) {
+          if (parent.kind !== "element") continue;
+          for (const key of ["fontSize", "fontWeight", "fontStyle", "fontFamily", "color", "textAlign", "lineHeight"]) {
+            const name = key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+            const value = styleGet(parent, key);
+            if (!(name in style) && value !== undefined) style[name] = String(value);
+          }
+        }
+        const layout = layoutRichText(node.richText, contentWidth, style, ctx);
+        node.richTextLayout = { ...layout, fragments: layout.fragments.map((fragment) => ({ ...fragment, x: fragment.x + padLeft, y: fragment.y + padTop })) };
+        if (!hasHeight) { rect.height = layout.height + padTop + padBottom; rect.bottom = rect.top + rect.height; }
+        rectCache.set(node, rect); node.rect = rect;
+        return;
+      }
 
       let cursorY = contentTop;
       let maxChildRight = contentLeft;

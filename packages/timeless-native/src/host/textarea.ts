@@ -1,6 +1,7 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
 import { HostElement, BoxMethods } from "./box";
+import { requestNativeLayout } from "../stylesheet";
 
 export type NativeTextarea = VNodeView<any> & {
   t: "textarea";
@@ -84,6 +85,8 @@ export function NativeTextarea(props: {
     },
     setValue(value: string) {
       $elm.value = value;
+      ($elm as any)._onValueChange?.(value);
+      requestNativeLayout();
     },
     render() {
       methods.set$elm($elm);

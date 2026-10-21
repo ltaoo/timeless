@@ -35,7 +35,7 @@ export function NativeGrid(props: {
       const $elm = view$.render();
 
       if (props.elm.state) {
-        const cols = props.elm.state.columns ?? 4;
+        const cols = props.elm.state.cols ?? 4;
         const gap = props.elm.state.gap ?? 16;
         setNativeDefaultStyle($elm, {
           display: "grid",

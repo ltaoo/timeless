@@ -31,6 +31,8 @@ type VNodeViewType =
   | "reactive";
 
 export type VNodeView<HostElm = any> = {
+  focus?(): void;
+  blur?(): void;
   // $elm: HostElm;
   getType(): VNodeViewType;
   isDocumentFragment(): boolean;

@@ -1,4 +1,4 @@
-import { ref, computed } from "../core";
+import { ref, computed, refobj } from "../core";
 import { FilePicker as NativeFilePicker } from "../core";
 import {
   View,
@@ -19,8 +19,44 @@ export function Root(
 export function Input(
   props: ViewProps & { store: FilePickerCore; id?: string },
 ) {
-  const { store, style: st, class: cls, dataset = {}, id, ...rest } = props;
-  return NativeFilePicker(props);
+  const { store, ...rest } = props;
+  const state = refobj(store.state);
+  return NativeFilePicker({
+    ...rest,
+    disabled: computed(state, (value) => value.disabled || value.loading),
+    accept: computed(state, (value) => value.accept ?? ""),
+    multiple: computed(state, (value) => value.multiple),
+    onChange(event) {
+      rest.onChange?.(event);
+      const files = Array.from((event.target as HTMLInputElement)?.files ?? []);
+      if (files.length) {
+        store.handleDrop({ files: files as any });
+        if (!store.value?.length) (event.target as any).value = "";
+      }
+    },
+    onMounted(event) {
+      const target = event.target as any;
+      const input = target.get$elm?.() ?? target;
+      store.focus = () => input.focus?.();
+      const stop = store.onStateChange((value) => {
+        state.as(value);
+      });
+      const clear = store.onChange((value) => {
+        if (!value?.length) input.value = "";
+      });
+      const click = store.onClick(() => {
+        if (target.click) target.click();
+        else input.click?.();
+      });
+      const cleanup = rest.onMounted?.(event);
+      return () => {
+        stop();
+        clear();
+        click();
+        cleanup?.();
+      };
+    },
+  });
 }
 
 export function Clear(

@@ -1,11 +1,18 @@
 import {
+  AspectRatio,
+  Button,
   Checkbox,
+  Grid,
+  NumberInput,
   Radio,
   ScrollView,
   Select,
+  Textarea,
   View,
   ref,
   refarr,
+  ui,
+  vm,
 } from "@timeless/timeless";
 import { describe, expect, it, vi } from "vitest";
 import { buildAndRender } from "../renderer";
@@ -17,6 +24,82 @@ function options(node: any): any[] {
 }
 
 describe("native form and scroll protocols", () => {
+  it("keeps selected files through intermediate picker state and clears them on reset", () => {
+    const store = new vm.FilePickerCore({ accept: ".txt", multiple: true });
+    const picker = ui.FilePickerPrimitive.Input({ store });
+    const { dom } = buildAndRender(picker);
+    picker.onMounted({ target: picker.$elm });
+    const file = { name: "example.txt", type: "text/plain", kind: "file" };
+    dom._receiveFiles([file]);
+    expect(store.value).toEqual([file]);
+    expect(dom.files).toEqual([file]);
+    store.setAccept(".pdf");
+    store.setMultiple(false);
+    expect(dom.attrs.accept).toBe(".pdf");
+    expect(dom.attrs.multiple).toBeUndefined();
+    store.clear();
+    expect(dom.files).toEqual([]);
+    picker.onUnmounted();
+  });
+
+  it("bubbles keyboard events with the original target and honors cancellation", () => {
+    const calls: any[] = [];
+    const child = Button({ onKeyDown(event) { event.preventDefault(); } }, ["Option"]);
+    const { dom } = buildAndRender(View({ onKeyDown(event) { calls.push(event); } }, [child]));
+    const button = dom.children[0];
+    expect(button._dispatchNativeEvent("keydown", { key: "ArrowDown" })).toBe(true);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ target: button, currentTarget: dom, key: "ArrowDown", defaultPrevented: true });
+    button.listeners.keydown = (event: any) => event.stopPropagation();
+    button._dispatchNativeEvent("keydown", { key: "Escape" });
+    expect(calls).toHaveLength(1);
+    child.onUnmounted();
+  });
+
+  it("delivers NumberInput changes and resets numeric/multiline native controls", () => {
+    const number = ref(1);
+    const content = ref("Draft");
+    const input = NumberInput({
+      value: number,
+      onChange: (event) => number.as(Number((event.target as any).value)),
+    });
+    const textarea = Textarea({ value: content });
+    const numeric = buildAndRender(input).dom;
+    const multiline = buildAndRender(textarea).dom;
+    numeric.value = "3";
+    numeric._dispatchNativeEvent("change");
+    expect(number.value).toBe(3);
+    const update = vi.fn();
+    multiline._onValueChange = update;
+    content.as("");
+    number.as(1);
+    expect([numeric.value, multiline.value]).toEqual(["1", ""]);
+    expect(update).toHaveBeenCalledWith("");
+    input.onUnmounted();
+    textarea.onUnmounted();
+  });
+
+  it("uses the Grid shape's column and gap props", () => {
+    const { dom } = buildAndRender(Grid({ cols: 3, gap: 10 }));
+    expect(dom.style["grid-template-columns"]).toBe("repeat(3, 1fr)");
+    expect(dom.style.gap).toBe("10px");
+  });
+
+  it("preserves AspectRatio attributes and reactive classes", () => {
+    const class_name = ref("preview");
+    const ratio = AspectRatio({
+      ratio: 2,
+      class: class_name,
+      attributes: { n: "preview-ratio" },
+    });
+    const { dom } = buildAndRender(ratio);
+    expect(dom.attrs).toMatchObject({ n: "preview-ratio", class: "preview" });
+    expect(dom.ratio).toBe(2);
+    class_name.as("compact");
+    expect(dom.attrs.class).toBe("compact");
+    ratio.onUnmounted();
+  });
+
   it("keeps Select classes, grouped options, values and reactive option changes", () => {
     const value = ref(["b"]);
     const items = ref<any[]>([

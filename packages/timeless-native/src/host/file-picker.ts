@@ -1,161 +1,64 @@
-import { TimelessElement, VNodeView } from "@timeless/timeless";
-
-import { HostElement, BoxMethods } from "./box";
-
-export type NativeFilePicker = VNodeView<any> & {
-  t: "file-picker";
-  render(): any;
-  setValue(file: File): void;
-  focus(): void;
-  blur(): void;
-};
+import { ref, Text, TimelessElement, VNodeView } from "@timeless/timeless";
+import { NativeButton } from "./button";
 
 export function NativeFilePicker(props: {
   build: (elm: TimelessElement) => VNodeView<any>;
   elm: TimelessElement;
-}): NativeFilePicker {
-  const t = "file-picker";
-  const box$ = HostElement({ t, $elm: null, build: props.build });
-
-  const $elm = {
-    type: "file-picker",
-    value: null as File | null,
-    placeholder: "" as string,
-    disabled: false,
-    accept: "" as string,
-    multiple: false,
-    style: {} as Record<string, string>,
-    attrs: {} as Record<string, string>,
-    listeners: {} as Record<string, any>,
+}) {
+  const label = ref("选择文件");
+  const button = NativeButton({
+    ...props,
+    elm: { ...props.elm, children: [Text(label)] },
+  });
+  let files: any[] = [];
+  const click = () => {
+    const node = button.get$elm();
+    if (node.attrs.disabled === undefined) node._pickFiles?.();
   };
-
-  const methods: BoxMethods = box$.methods;
-
   return {
-    ...methods,
-    t,
-    get $elm() {
-      return $elm;
-    },
-    getType() {
-      return "input";
-    },
-    isDocumentFragment() {
-      return false;
-    },
-    setStyle(style: any) {
-      methods.setStyle(style);
-    },
-    setStyleValue(key: string, value: string) {
-      methods.setStyleValue(key, value);
-    },
-    setStyleSet(names: string[]) {
-      methods.setStyleSet(names);
-    },
-    setAttribute(key: string, value: string) {
-      methods.setAttribute(key, value);
-    },
-    removeAttribute(key: string) {
-      methods.removeAttribute(key);
-    },
-    addEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      $elm.listeners[type] = handler;
-    },
-    removeEventListener(
-      type: string,
-      handler: (event: any) => void,
-      options?: any,
-    ) {
-      delete $elm.listeners[type];
-    },
-    getBoundingClientRect() {
-      return {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      };
+    ...button,
+    t: "file-picker",
+    click,
+    focus: () => button.get$elm()._focus?.(),
+    blur: () => button.get$elm()._blur?.(),
+    setValue() {
+      files = [];
+      label.as("选择文件");
     },
     render() {
-      methods.set$elm($elm);
-      methods.applyState(props.elm.state, { initial: true });
-      methods.setupEventListener(props.elm.events);
-
-      if (props.elm.state.id) {
-        $elm.attrs.id = props.elm.state.id;
-      }
-      if (props.elm.state.name) {
-        $elm.attrs.name = props.elm.state.name;
-      }
-      if (props.elm.state.placeholder) {
-        $elm.placeholder = props.elm.state.placeholder;
-      }
-      if (props.elm.state.disabled) {
-        $elm.disabled = props.elm.state.disabled;
-      }
-      if (props.elm.state.accept) {
-        $elm.accept = props.elm.state.accept;
-      }
-      if (props.elm.state.multiple) {
-        $elm.multiple = props.elm.state.multiple;
-      }
-
-      const events = props.elm.events;
-      if (events) {
-        if (events.onChange) {
-          $elm.listeners.change = events.onChange;
-        }
-        if (events.onFocus) {
-          $elm.listeners.focus = events.onFocus;
-        }
-        if (events.onBlur) {
-          $elm.listeners.blur = events.onBlur;
-        }
-        if (events.onKeyDown) {
-          $elm.listeners.keydown = events.onKeyDown;
-        }
-      }
-
-      return $elm;
-    },
-    hydrate(elm: TimelessElement, $dom: any) {
-      methods.set$elm($dom);
-      methods.setupEventListener(elm.events);
-    },
-    setValue(file: File) {
-      $elm.value = file;
-    },
-    focus() {},
-    blur() {},
-    buildChildren(children: (TimelessElement | null)[]) {
-      return methods.buildChildren(children);
-    },
-    insertChildren(children: (TimelessElement | null)[]) {
-      methods.insertChildren(children);
-    },
-    removeChildren() {
-      methods.removeChildren();
-    },
-    getParent() {
-      return null;
-    },
-    get$elm() {
-      return $elm;
-    },
-    getChildren() {
-      return methods.getChildren();
+      const node = button.render();
+      node.filePicker = {
+        get accept() {
+          return props.elm.state.accept ?? "";
+        },
+        get multiple() {
+          return !!props.elm.state.multiple;
+        },
+      };
+      Object.defineProperty(node, "files", { get: () => files });
+      Object.defineProperty(node, "value", {
+        get: () => files.map((file) => file.name).join(", "),
+        set: (value) => {
+          if (!value) {
+            files = [];
+            label.as("选择文件");
+          }
+        },
+      });
+      node._receiveFiles = (selected: any[]) => {
+        if (node.attrs.disabled !== undefined || !selected.length) return;
+        files = selected;
+        label.as(files.map((file) => file.name).join("、"));
+        node._dispatchNativeEvent("change", {});
+      };
+      node.listeners.click = click;
+      return node;
     },
   };
 }
-
-export function isNativeFilePicker(value: any): value is NativeFilePicker {
+export function isNativeFilePicker(
+  value: any,
+): value is ReturnType<typeof NativeFilePicker> {
   return value.t === "file-picker";
 }
+export type NativeFilePicker = ReturnType<typeof NativeFilePicker>;

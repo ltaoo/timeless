@@ -29,6 +29,7 @@ export function Root(
     {
       ...rest,
       attributes: {
+        ...rest.attributes,
         role: "switch",
         "aria-checked": computed(state_, (d) => d.checked),
         "aria-disabled": computed(state_, (d) => d.disabled),

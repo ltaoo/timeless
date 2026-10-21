@@ -5,7 +5,10 @@ declare const __nativeBridge_render: (tree: any) => void;
 declare const __nativeBridge_relayout: (() => void) | undefined;
 
 import { NativeView, isNativeView } from "@/host/view";
+import { NativeModal } from "@/host/modal";
+import { NativeTooltip } from "@/host/tooltip";
 import { NativeText } from "@/host/text";
+import { NativeRichText } from "@/host/rich-text";
 import { NativeImg } from "@/host/img";
 import { NativeButton } from "@/host/button";
 import { NativeInput } from "@/host/input";
@@ -32,6 +35,11 @@ import { NativeScrollView } from "@/host/scroll-view";
 import { NativeTabView, NativeTabPane } from "@/host/tab-view";
 
 function build(elm: TimelessElement): any {
+  if (elm.t === "rich-text") {
+    const host = NativeRichText({ build, elm });
+    elm.$elm = host;
+    return host;
+  }
   console.log(
     "[Native Render] build called with element type:",
     elm?.t,
@@ -39,6 +47,16 @@ function build(elm: TimelessElement): any {
     elm?.children?.length,
   );
 
+  if (elm.t === "modal" || elm.t === "popover") {
+    const surface = NativeModal({ build, elm });
+    elm.$elm = surface;
+    return surface;
+  }
+  if (elm.t === "tooltip") {
+    const tooltip = NativeTooltip({ build, elm });
+    elm.$elm = tooltip;
+    return tooltip;
+  }
   if (elm.t === "view") {
     const view$ = NativeView({ build, elm });
     elm.$elm = view$;

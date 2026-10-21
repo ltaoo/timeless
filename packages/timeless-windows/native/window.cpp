@@ -8,6 +8,7 @@
 #include <dwrite.h>
 #include <filesystem>
 #include <iostream>
+#include <sstream>
 #include <initguid.h> // Instantiate the accessibility GUIDs declared by oleacc.h.
 #include <oleacc.h>
 #include <shellapi.h>
@@ -157,6 +158,26 @@ class Window {
     check(text_factory_->CreateTextLayout(
         text.c_str(), static_cast<UINT32>(text.size()), format.Get(),
         std::max(0.01f, width), 1000000, &layout));
+    if (!label) for (const auto &span : node.text_spans) {
+      if (span.end > text.size()) continue;
+      DWRITE_TEXT_RANGE range{span.start, span.end - span.start};
+      auto property = [&](const char *key) {
+        auto found = span.style.find(key);
+        return found == span.style.end() ? node.property(key) : found->second;
+      };
+      auto size = property("font-size");
+      float font_size = timeless::pixels(size, node.number("font-size", 14));
+      if (size.ends_with("em")) font_size *= node.number("font-size", 14);
+      check(layout->SetFontSize(std::clamp(font_size, 1.f, 512.f), range));
+      auto weight = property("font-weight");
+      check(layout->SetFontWeight(static_cast<DWRITE_FONT_WEIGHT>(weight == "bold" ? 700 : std::clamp(static_cast<int>(timeless::pixels(weight, 400)), 1, 999)), range));
+      check(layout->SetFontStyle(property("font-style") == "italic" ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL, range));
+      auto family = property("font-family");
+      if (!family.empty()) check(layout->SetFontFamilyName(wide(family == "monospace" ? "Consolas" : family).c_str(), range));
+      auto decoration = property("text-decoration");
+      check(layout->SetUnderline(decoration.find("underline") != std::string::npos, range));
+      check(layout->SetStrikethrough(decoration.find("line-through") != std::string::npos, range));
+    }
     return layout;
   }
 
@@ -174,12 +195,59 @@ class Window {
     check(target_->BindDC(dc, &rectangle));
   }
 
+  void draw_shadows(const Node &node) {
+    std::istringstream shadows(node.property("box-shadow"));
+    std::string item;
+    std::vector<std::string> items;
+    while (std::getline(shadows, item, ',')) items.push_back(item);
+    for (auto entry = items.rbegin(); entry != items.rend(); ++entry) {
+      std::istringstream values(*entry);
+      std::string x, y, blur, spread, tint;
+      if (!(values >> x >> y >> blur >> spread >> tint)) continue;
+      auto shade = color(tint);
+      if (shade.a <= 0) continue;
+      float dx, dy, radius, expansion;
+      try { dx = std::stof(x); dy = std::stof(y); radius = std::max(0.f, std::stof(blur)) / 2; expansion = std::stof(spread); }
+      catch (const std::exception &) { continue; }
+      auto box = D2D1::RectF(node.x, node.y, node.x + node.width, node.y + node.height);
+      float corner = std::min(node.number("border-radius"), std::min(node.width, node.height) / 2);
+      ComPtr<ID2D1RoundedRectangleGeometry> inside;
+      check(factory_->CreateRoundedRectangleGeometry(D2D1::RoundedRect(box, corner, corner), &inside));
+      int samples = radius > 0 ? std::max(1, static_cast<int>(std::ceil(radius * 3 * scale_))) : 0;
+      float total = 0, accumulated = 0;
+      for (int i = -samples; i <= samples; ++i) total += samples ? std::exp(-.5f * i * i / (radius * radius * scale_ * scale_)) : 1;
+      for (int i = samples; i >= -samples; --i) {
+        float weight = (samples ? std::exp(-.5f * i * i / (radius * radius * scale_ * scale_)) : 1) / total;
+        float extent = expansion + i / scale_;
+        auto outer_box = D2D1::RectF(box.left + dx - extent, box.top + dy - extent, box.right + dx + extent, box.bottom + dy + extent);
+        if (outer_box.right <= outer_box.left || outer_box.bottom <= outer_box.top) continue;
+        float outer_corner = std::clamp(corner + extent, 0.f, std::min(outer_box.right - outer_box.left, outer_box.bottom - outer_box.top) / 2);
+        ComPtr<ID2D1RoundedRectangleGeometry> outside;
+        ComPtr<ID2D1PathGeometry> ring;
+        ComPtr<ID2D1GeometrySink> sink;
+        check(factory_->CreateRoundedRectangleGeometry(D2D1::RoundedRect(outer_box, outer_corner, outer_corner), &outside));
+        check(factory_->CreatePathGeometry(&ring));
+        check(ring->Open(&sink));
+        check(outside->CombineWithGeometry(inside.Get(), D2D1_COMBINE_MODE_EXCLUDE, nullptr, sink.Get()));
+        check(sink->Close());
+        auto sample_color = shade;
+        sample_color.a = std::min(1.f, shade.a * weight / std::max(.0001f, 1 - shade.a * accumulated));
+        accumulated += weight;
+        brush_->SetColor(sample_color);
+        target_->FillGeometry(ring.Get(), brush_.Get());
+      }
+    }
+  }
+
   void draw_node(const Node &node, bool child_control) {
-    if (node.hidden() ||
+    if (node.hidden()) return;
+    if (!child_control && node.button()) { draw_shadows(node); return; }
+    if (
         (!child_control &&
-         (node.button() || node.type == "text" || node.toggle() ||
+         (node.type == "text" || node.toggle() ||
           node.type == "select" || node.type == "scroll-view")))
       return;
+    draw_shadows(node);
     float opacity = std::clamp(node.number("opacity", 1), 0.f, 1.f);
     if (opacity < 1)
       target_->PushLayer(
@@ -209,8 +277,30 @@ class Window {
           brush_.Get(), border);
     }
     if (node.type == "text") {
-      brush_->SetColor(color(node.property("color"), D2D1::ColorF(0x202938)));
       auto layout = text_layout(node, node.width);
+      const auto text_length = wide(node.text).size();
+      for (const auto &span : node.text_spans) {
+        if (span.end > text_length) continue;
+        DWRITE_TEXT_RANGE range{span.start, span.end - span.start};
+        auto foreground = span.style.find("color");
+        if (foreground != span.style.end()) {
+          ComPtr<ID2D1SolidColorBrush> ink;
+          check(target_->CreateSolidColorBrush(color(foreground->second, D2D1::ColorF(0x202938)), &ink));
+          check(layout->SetDrawingEffect(ink.Get(), range));
+        }
+        auto background = span.style.find("background-color");
+        if (background != span.style.end()) {
+          UINT32 count = 0;
+          layout->HitTestTextRange(range.startPosition, range.length, node.x, node.y, nullptr, 0, &count);
+          std::vector<DWRITE_HIT_TEST_METRICS> boxes(count);
+          if (count) {
+            check(layout->HitTestTextRange(range.startPosition, range.length, node.x, node.y, boxes.data(), count, &count));
+            brush_->SetColor(color(background->second));
+            for (const auto &box : boxes) target_->FillRectangle(D2D1::RectF(box.left, box.top, box.left + box.width, box.top + box.height), brush_.Get());
+          }
+        }
+      }
+      brush_->SetColor(color(node.property("color"), D2D1::ColorF(0x202938)));
       target_->DrawTextLayout(D2D1::Point2F(node.x, node.y), layout.Get(),
                               brush_.Get());
     }
@@ -307,7 +397,8 @@ class Window {
         entry->owner = this;
         entry->id = node.id;
         DWORD style = WS_CHILD | WS_CLIPSIBLINGS |
-                      (static_text ? SS_OWNERDRAW : WS_TABSTOP);
+                      (static_text ? SS_OWNERDRAW | SS_NOTIFY : WS_TABSTOP);
+        if (static_text && !node.text_spans.empty()) style |= WS_TABSTOP;
         if (scroll)
           style |= WS_CLIPCHILDREN | SS_NOTIFY;
         else if (select)
@@ -527,6 +618,20 @@ class Window {
                : nullptr;
   }
 
+  void press_link(const Node &node, float x, float y) {
+    if (node.disabled || node.text_spans.empty()) return;
+    auto layout = text_layout(node, node.width);
+    BOOL trailing = FALSE, inside = FALSE;
+    DWRITE_HIT_TEST_METRICS position{};
+    check(layout->HitTestPoint(x, y, &trailing, &inside, &position));
+    if (inside) for (const auto &span : node.text_spans) {
+      if (!span.href.empty() && position.textPosition >= span.start && position.textPosition < span.end) {
+        runtime_.link(node.id, span.href);
+        break;
+      }
+    }
+  }
+
   bool wheel(Node *node, int delta, bool horizontal) {
     UINT lines = 3;
     SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &lines, 0);
@@ -601,6 +706,19 @@ class Window {
     auto self = control->owner;
     try {
       auto node = self->runtime_.find(control->id);
+      if (node && node->type == "text" && !node->text_spans.empty()) {
+        if (message == WM_LBUTTONUP) {
+          self->press_link(*node, GET_X_LPARAM(lparam) / self->scale_, GET_Y_LPARAM(lparam) / self->scale_);
+          return 0;
+        }
+        if (message == WM_KEYDOWN && wparam == VK_RETURN) {
+          for (const auto &span : node->text_spans) if (!span.href.empty()) {
+            self->runtime_.link(node->id, span.href);
+            break;
+          }
+          return 0;
+        }
+      }
       if (node && node->type == "scroll-view" &&
           (message == WM_COMMAND || message == WM_DRAWITEM ||
            message == WM_MEASUREITEM || message == WM_CTLCOLOREDIT ||
@@ -635,6 +753,7 @@ class Window {
         return DLGC_WANTARROWS;
       if (!self->syncing_ && !self->failed_) {
         if (message == WM_KEYDOWN || message == WM_KEYUP) {
+          if (message == WM_KEYDOWN) self->runtime_.state(control->id, "focus-visible", true);
           auto key = wparam == VK_RETURN   ? "Enter"
                      : wparam == VK_SPACE  ? " "
                      : wparam == VK_TAB    ? "Tab"
@@ -668,6 +787,7 @@ class Window {
         if (message == WM_LBUTTONDOWN ||
             (message == WM_KEYDOWN && wparam == VK_SPACE))
           self->runtime_.state(control->id, "active", true);
+        if (message == WM_LBUTTONDOWN) self->runtime_.state(control->id, "focus-visible", false);
         if (message == WM_LBUTTONUP || message == WM_CAPTURECHANGED ||
             (message == WM_KEYUP && wparam == VK_SPACE))
           self->runtime_.state(control->id, "active", false);
@@ -677,6 +797,7 @@ class Window {
           return 0;
         if (message == WM_SETFOCUS || message == WM_KILLFOCUS) {
           self->runtime_.state(control->id, "focus", message == WM_SETFOCUS);
+          self->runtime_.state(control->id, "focus-visible", message == WM_SETFOCUS && !(GetKeyState(VK_LBUTTON) & 0x8000));
           self->runtime_.event(control->id,
                                message == WM_SETFOCUS ? "focus" : "blur");
           if (message == WM_SETFOCUS) {
@@ -831,6 +952,13 @@ class Window {
       refresh();
       return 0;
     }
+    case WM_LBUTTONUP: {
+      float x = GET_X_LPARAM(lparam) / scale_, y = GET_Y_LPARAM(lparam) / scale_;
+      auto node = hit(runtime_.root(), x, y);
+      if (!node || node->disabled || node->text_spans.empty()) break;
+      press_link(*node, x - node->x, y - node->y);
+      return 0;
+    }
     case WM_MOUSEWHEEL:
     case WM_MOUSEHWHEEL: {
       POINT point{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
@@ -946,12 +1074,6 @@ class Window {
       }
       if (node && (node->button() || node->type == "text")) {
         paint(item->hDC, item->rcItem, node);
-        if (node->button() && (item->itemState & ODS_FOCUS) &&
-            !(item->itemState & ODS_NOFOCUSRECT)) {
-          RECT ring = item->rcItem;
-          InflateRect(&ring, -3, -3);
-          DrawFocusRect(item->hDC, &ring);
-        }
         return TRUE;
       }
       break;

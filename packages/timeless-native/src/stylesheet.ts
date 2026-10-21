@@ -1,3 +1,9 @@
+import {
+  computeWebStyle,
+  onWebStylesChange,
+  webStyleChangeNeedsRoot,
+} from "./web-styles";
+
 export type NativeStyleRule = {
   classes: string[];
   states: string[];
@@ -69,10 +75,12 @@ function state(node: StyleNode) {
   if (!node._nativeStyle) {
     node._nativeStyle = { inline: { ...node.style }, defaults: {}, states: {} };
     node._setStyleState = (name, value) => {
+      if (!!node._nativeStyle!.states[name] === value) return;
       node._nativeStyle!.states[name] = value;
-      refreshNativeStyles(node);
+      invalidateNativeStyles(node, "states", [name]);
     };
     node._dispatchNativeEvent = (name, payload = {}) => {
+      let stopped = false;
       const event = {
         ...payload,
         type: name,
@@ -82,16 +90,55 @@ function state(node: StyleNode) {
         preventDefault() {
           this.defaultPrevented = true;
         },
-        stopPropagation() {},
+        stopPropagation() {
+          stopped = true;
+        },
       };
-      node.listeners?.[name]?.(event);
+      let target: StyleNode | undefined = node;
+      do {
+        event.currentTarget = target;
+        target.listeners?.[name]?.(event);
+        target = target.parentNode;
+      } while (
+        target &&
+        !stopped &&
+        !["focus", "blur", "mouseenter", "mouseleave"].includes(name)
+      );
       return event.defaultPrevented;
     };
   }
   return node._nativeStyle;
 }
 
-export function refreshNativeStyles(node: StyleNode) {
+export function invalidateNativeStyles(
+  node: StyleNode,
+  type: "classes" | "attributes" | "states",
+  names: string[],
+) {
+  refreshNativeStyles(node, webStyleChangeNeedsRoot(type, names));
+}
+
+const paint_properties = new Set([
+  "color",
+  "background",
+  "background-color",
+  "opacity",
+  "border-radius",
+  "border-color",
+  "border-top-color",
+  "border-right-color",
+  "border-bottom-color",
+  "border-left-color",
+  "box-shadow",
+  "outline",
+  "outline-width",
+  "outline-offset",
+  "outline-style",
+  "outline-color",
+]);
+
+export function refreshNativeStyles(node: StyleNode, from_root = false) {
+  if (from_root) while (node.parentNode) node = node.parentNode;
   const current = state(node);
   const classes = new Set(
     (node.attrs?.class || "").split(/\s+/).filter(Boolean),
@@ -128,17 +175,41 @@ export function refreshNativeStyles(node: StyleNode) {
     delete style.width;
     delete style.height;
   }
+  const resolved_style =
+    computeWebStyle(
+      node,
+      Object.fromEntries(
+        inherited_keys.flatMap((key) =>
+          node.parentNode?.style[key] !== undefined
+            ? [[key, node.parentNode.style[key]]]
+            : [],
+        ),
+      ),
+      style,
+      current.inline,
+    ) ?? style;
   const changed =
-    Object.keys(style).length !== Object.keys(node.style).length ||
-    Object.keys(style).some((key) => style[key] !== node.style[key]);
-  node.style = style;
+    Object.keys(resolved_style).length !== Object.keys(node.style).length ||
+    Object.keys(resolved_style).some(
+      (key) => resolved_style[key] !== node.style[key],
+    );
+  const layout_changed =
+    changed &&
+    [
+      ...new Set([...Object.keys(node.style), ...Object.keys(resolved_style)]),
+    ].some(
+      (key) =>
+        !paint_properties.has(key) && node.style[key] !== resolved_style[key],
+    );
+  node.style = resolved_style;
   if (changed && node._onStyleChange) {
-    node._onStyleChange(style);
-    requestNativeLayout();
+    node._onStyleChange(node.style);
+    if (layout_changed) requestNativeLayout();
   }
   for (const child of node.children || []) {
     child.parentNode = node;
-    refreshNativeStyles(child);
+    // Hidden pages receive current inherited styles when they become visible.
+    if (resolved_style.display !== "none") refreshNativeStyles(child);
   }
 }
 
@@ -171,3 +242,7 @@ export function bindNativeStyleRoot(node: StyleNode) {
   registry.root = node;
   refreshNativeStyles(node);
 }
+
+onWebStylesChange(() => {
+  if (registry.root) refreshNativeStyles(registry.root);
+});

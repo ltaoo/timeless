@@ -1,14 +1,14 @@
 /**
- * RichText - A component for rendering HTML content.
+ * RichText - Portable HTML and Markdown reading content.
  *
- * RichText displays HTML/Rich text content inside a component.
- * Supports reactive content for dynamic HTML updates.
+ * Parses content in the shared model; hosts render UTF-16 style spans.
+ * HTML is restricted to reading elements, safe URLs and text styles.
  *
  * Use case: When you need to render HTML from a CMS or user input.
  *
  * @example
  * ```tsx
- * <RichText content={htmlString} />
+ * RichText({ content: markdownRef, format: "markdown" })
  * ```
  */
 import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
@@ -16,16 +16,31 @@ import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 import { MountedEvent } from "@/event";
 
 import { Box, BoxProps } from "./box";
+import {
+  parseRichText,
+  type RichTextDocument,
+  type RichTextFormat,
+} from "./rich-text-document";
+export { parseRichText } from "./rich-text-document";
+export type {
+  RichTextDocument,
+  RichTextSpan,
+  RichTextFormat,
+} from "./rich-text-document";
 
 /** Props for RichText component */
 export type RichTextProps = BoxProps & {
-  /** HTML content string */
+  /** HTML by default, or Markdown when format is "markdown". */
   content: string | DerivedRef<string> | Ref<string>;
+  format?: RichTextFormat;
+  onLinkPress?: (url: string) => void;
 };
 
 /** Internal state for RichText */
 type RichTextState = {
   content: string;
+  format: RichTextFormat;
+  document: RichTextDocument;
 };
 
 /**
@@ -35,18 +50,28 @@ type RichTextState = {
  * @returns A TimelessElement representing rich text content
  */
 export function RichText(props: RichTextProps) {
-  const { content, ...rest } = props;
+  const { content, format = "html", onLinkPress, ...rest } = props;
 
   let $elm: any = null;
 
-  const box$ = Box<RichTextState>(rest, { content: "" });
+  const box$ = Box<RichTextState>(
+    { ...rest, attributes: { n: "rich-text", ...rest.attributes } },
+    {
+      content: "",
+      format,
+      document: { text: "", spans: [], html: "" },
+    },
+  );
   const state = box$.state;
   const events = box$.events;
 
   const methods = {
     set_content(value: string) {
       state.content = value;
-      if ($elm && typeof $elm.setContent === "function") {
+      state.document = parseRichText(value, format);
+      if ($elm && typeof $elm.setDocument === "function") {
+        $elm.setDocument(state.document);
+      } else if ($elm && typeof $elm.setContent === "function") {
         $elm.setContent(value);
       }
     },
@@ -80,7 +105,8 @@ export function RichText(props: RichTextProps) {
       $elm = v;
     },
     state,
-    events,
+    events: { ...events, onLinkPress },
+    _hmr_dispose: box$.methods.destroy,
     onMounted(event: MountedEvent) {
       state.rendered = true;
       if (rest.onMounted) {

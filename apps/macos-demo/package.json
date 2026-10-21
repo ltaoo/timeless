@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite build --watch --mode development",
-    "dev:app": "swift run TimelessMacDemo -- --dev",
+    "dev:app": "swift run --package-path ../../packages/timeless-macos/native TimelessMacOS --dev",
     "build": "vite build",
-    "test:app": "swift test -Xswiftc -cxx-interoperability-mode=default",
+    "test:app": "swift test --package-path ../../packages/timeless-macos/native",
     "build:app": "vite build && ./scripts/build-macos.sh"
   },
   "dependencies": {

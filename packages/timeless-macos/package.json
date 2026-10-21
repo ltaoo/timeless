@@ -1,0 +1,33 @@
+{
+  "name": "@timeless/timeless-macos",
+  "version": "0.34.2",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/timeless.macos.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/timeless.macos.esm.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "timeless-macos": "scripts/build-app.mjs"
+  },
+  "files": [
+    "dist",
+    "scripts",
+    "native/Package.swift",
+    "native/Package.resolved",
+    "native/Sources",
+    "native/Tests"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test:host": "swift test --package-path native"
+  },
+  "dependencies": {
+    "@timeless/timeless-native": "workspace:*"
+  }
+}

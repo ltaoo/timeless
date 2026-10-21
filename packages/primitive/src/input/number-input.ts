@@ -115,6 +115,7 @@ export function NumberInput(props: NumberInputProps = {}) {
   };
 
   methods.subscribe_props();
+  box$.methods.add_event();
 
   return {
     t: "number-input",

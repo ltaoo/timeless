@@ -22,8 +22,14 @@
 import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 import { Logger } from "@/util/logger";
 
-import { destroyElement, isElement, TimelessElement, ViewChildren } from "../content/type";
+import {
+  destroyElement,
+  isElement,
+  TimelessElement,
+  ViewChildren,
+} from "../content/type";
 import { Box, BoxProps } from "../content/box";
+import { View } from "../content/view";
 
 const logger = Logger({ prefix: "primitive", scope: "floating/tooltip" });
 
@@ -43,6 +49,7 @@ export type TooltipProps = BoxProps & {
   side?: TooltipSide;
   /** Alignment along the placement side */
   align?: TooltipAlign;
+  onClose?: () => void;
 };
 
 /** Internal state for Tooltip */
@@ -68,6 +75,7 @@ export function Tooltip(
     content,
     side = "top",
     align = "center",
+    onClose,
     ...rest
   } = props;
 
@@ -76,10 +84,16 @@ export function Tooltip(
 
   const state = box$.state as typeof box$.state & TooltipState;
   const events = box$.events;
+  const content_view = View(
+    { attributes: { n: `${rest.attributes?.n ?? "tooltip"}-content` } },
+    typeof content === "string" ? [content] : content,
+  );
+  Object.assign(state, { content: content_view, onClose });
 
   const _mount_cleanups: (() => void)[] = [];
 
   const _unmount = () => {
+    $elm?.setVisible?.(false);
     _mount_cleanups.forEach((fn) => fn());
     _mount_cleanups.length = 0;
     box$.methods.set$elm(null);
@@ -102,6 +116,7 @@ export function Tooltip(
         const unsub = visible.subscribe({
           onChange(v) {
             state.visible = v as boolean;
+            $elm?.setVisible?.(Boolean(v));
           },
         });
         box$.methods.unsubscribe(unsub);
@@ -132,6 +147,7 @@ export function Tooltip(
     events,
     onMounted(event) {
       state.rendered = true;
+      content_view.onMounted?.({ target: content_view.$elm });
       if (rest.onMounted) {
         const cleanup = rest.onMounted(event);
         if (typeof cleanup === "function") {
@@ -146,6 +162,7 @@ export function Tooltip(
       }
     },
     beforeUnmounted() {
+      content_view.beforeUnmounted?.();
       if (rest.beforeUnmounted) {
         rest.beforeUnmounted();
       }
@@ -162,6 +179,7 @@ export function Tooltip(
     destroy() {
       _unmount();
       box$.methods.destroy();
+      destroyElement(content_view);
       for (let i = 0; i < state.children.length; i += 1) {
         destroyElement(state.children[i]);
       }

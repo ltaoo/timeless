@@ -8,6 +8,7 @@ import { SSRView } from "./host/view";
 import { SSRModal } from "./host/modal";
 import { SSRCanvas } from "./host/canvas";
 import { SSRText } from "./host/text";
+import { SSRRichText } from "./host/rich-text";
 import { SSRFragment } from "./host/fragment";
 import { SSRShow } from "./host/show";
 import { SSRMatch } from "./host/match";
@@ -33,6 +34,7 @@ export function getPortalContent(): string {
 }
 
 function build(elm: TimelessElement): VNodeView<string> {
+  if (elm.t === "rich-text") return SSRRichText({ elm });
   if (elm.t === "show") return SSRShow({ build, elm });
   if (elm.t === "match") return SSRMatch({ build, elm });
   if (elm.t === "for") return SSRFor({ build, elm });

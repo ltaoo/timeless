@@ -21,6 +21,7 @@ export * from "./content/view";
 export * from "./content/disclosure";
 export * from "./content/canvas";
 export * from "./floating/modal";
+export * from "./floating/popover";
 export * from "./content/text";
 export * from "./content/portal";
 export * as SVG from "./content/svg";

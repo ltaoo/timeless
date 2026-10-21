@@ -5,6 +5,7 @@ import { CanvasView, isCanvasView } from "@/host/view";
 import { CanvasFor } from "@/host/for";
 import { CanvasGrid } from "@/host/grid";
 import { CanvasText } from "@/host/text";
+import { CanvasRichText } from "@/host/rich-text";
 import { CanvasHostNode } from "@/host/type";
 import { CanvasDocument, createCanvasDocument } from "@/host/draw";
 import { CanvasImg } from "@/host/img";
@@ -15,6 +16,11 @@ function build(
   canvas: CanvasDocument,
   opt: Partial<{ root: boolean }> = {},
 ): VNodeView<any> {
+  if (elm.t === "rich-text") {
+    const host = CanvasRichText({ canvas, build, elm });
+    elm.$elm = host;
+    return host;
+  }
   if (elm.t === "view") {
     const view$ = CanvasView({ canvas, build, elm });
     elm.$elm = view$;
@@ -92,7 +98,7 @@ export function render(
     }
 
     // 将根元素添加到 canvas.body 中
-    canvas.appendChild(canvas.body, host$.$elm);
+    canvas.appendChild(canvas.body, host$.render());
     // 调用 canvas.draw() 渲染整个文档树
     canvas.draw();
     if (typeof elm.onMounted === "function") {

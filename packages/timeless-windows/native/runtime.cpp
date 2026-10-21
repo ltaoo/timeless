@@ -328,6 +328,14 @@ void Runtime::input(int id, const std::string &text) {
   call(node->object.get(), "_dispatchNativeEvent", 2, args);
 }
 
+void Runtime::link(int id, const std::string &url) {
+  auto node = find(id);
+  if (!node || node->disabled) return;
+  Value value(context_, JS_NewString(context_, url.c_str()));
+  JSValueConst args[] = {value.get()};
+  call(node->object.get(), "_onLinkPress", 1, args);
+}
+
 void Runtime::select(int id, const std::string &value) {
   auto node = find(id);
   if (!node || node->type != "select" || node->disabled || node->readonly)
@@ -559,6 +567,8 @@ static void styles(Node &node) {
     YGNodeStyleSetPositionType(layout, YGPositionTypeAbsolute);
   if (node.property("display") == "none")
     YGNodeStyleSetDisplay(layout, YGDisplayNone);
+  else if (node.property("display") == "contents")
+    YGNodeStyleSetDisplay(layout, YGDisplayContents);
 }
 
 std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
@@ -619,6 +629,29 @@ std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
   }
   Value text(context_, JS_GetPropertyStr(context_, object, "value"));
   node->text = string(context_, text.get());
+  Value rich_text(context_, JS_GetPropertyStr(context_, object, "richText"));
+  if (JS_IsObject(rich_text.get())) {
+    Value spans(context_, JS_GetPropertyStr(context_, rich_text.get(), "spans"));
+    if (JS_IsArray(spans.get())) {
+      Value length(context_, JS_GetPropertyStr(context_, spans.get(), "length"));
+      uint32_t count = 0;
+      if (JS_ToUint32(context_, &count, length.get()) < 0) check(JS_EXCEPTION);
+      if (count > 100000) throw std::runtime_error("Rich text span count exceeds limit");
+      for (uint32_t i = 0; i < count; ++i) {
+        Value span(context_, JS_GetPropertyUint32(context_, spans.get(), i));
+        Value start(context_, JS_GetPropertyStr(context_, span.get(), "start"));
+        Value end(context_, JS_GetPropertyStr(context_, span.get(), "end"));
+        Value style(context_, JS_GetPropertyStr(context_, span.get(), "style"));
+        Value href(context_, JS_GetPropertyStr(context_, span.get(), "href"));
+        Node::TextSpan run{};
+        if (JS_ToUint32(context_, &run.start, start.get()) < 0 || JS_ToUint32(context_, &run.end, end.get()) < 0) check(JS_EXCEPTION);
+        if (run.end <= run.start) continue;
+        run.style = properties(context_, style.get());
+        run.href = string(context_, href.get());
+        node->text_spans.push_back(std::move(run));
+      }
+    }
+  }
   Value placeholder(context_,
                     JS_GetPropertyStr(context_, object, "placeholder"));
   node->placeholder = string(context_, placeholder.get());

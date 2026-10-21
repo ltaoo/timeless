@@ -1,6 +1,7 @@
 import { NativeGrid } from "./grid";
 import { NativeView } from "./view";
 import { NativeText } from "./text";
+import { NativeRichText } from "./rich-text";
 import { NativeLabel } from "./label";
 import { NativeFragment } from "./fragment";
 import { NativeLazyView } from "./lazy-view";
@@ -29,6 +30,7 @@ export type NativeHostNode =
   | NativeLazyView
   | NativeView
   | NativeText
+  | ReturnType<typeof NativeRichText>
   | NativeLabel
   | NativeImg
   | NativeIcon

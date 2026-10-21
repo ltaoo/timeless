@@ -1,0 +1,19 @@
+# syntax=docker/dockerfile:1
+FROM node:22-bookworm-slim AS build
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git cmake make g++-mingw-w64-x86-64-posix && rm -rf /var/lib/apt/lists/*
+WORKDIR /workspace
+COPY LICENSE ./LICENSE
+COPY packages/timeless-windows/native ./packages/timeless-windows/native
+COPY apps/web-shadcn/dist/windows/app.js /application/app.js
+COPY apps/web-shadcn/build/windows-sources /sources
+RUN --network=none cmake -S packages/timeless-windows/native -B /native-build \
+      -DCMAKE_TOOLCHAIN_FILE=cmake/mingw.cmake -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_TESTING=OFF -DTIMELESS_TEST_BUNDLE=/application/app.js \
+      -DFETCHCONTENT_SOURCE_DIR_QUICKJS=/sources/quickjs -DFETCHCONTENT_SOURCE_DIR_YOGA=/sources/yoga \
+    && cmake --build /native-build --target timeless-windows --parallel 4
+FROM scratch AS artifact
+COPY --from=build /native-build/timeless-windows.exe /Timeless-Shadcn.exe
+COPY --from=build /native-build/app.js /app.js
+COPY --from=build /native-build/LICENSE.txt /LICENSE.txt
+COPY --from=build /native-build/QUICKJS-LICENSE.txt /QUICKJS-LICENSE.txt
+COPY --from=build /native-build/YOGA-LICENSE.txt /YOGA-LICENSE.txt

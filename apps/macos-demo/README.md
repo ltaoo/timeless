@@ -2,7 +2,7 @@
 
 通过 `*.native.css` 为 Timeless 的 macOS 视图设置外观。Button 用 AppKit 视图承载 Timeless 子节点，背景、边框、圆角和文字由样式控制；Input 保留 AppKit 编辑器和输入法，移除系统边框。
 
-当前接入的是本目录的 Swift Package 示例。`packages/timeless-native/ios/TimelessNativeMac` 的旧 Xcode 示例没有接入这些 Swift 宿主改动。Checkbox、Radio、Select、TabView 等仍使用原有系统控件；本实现不提供浏览器完整 CSS 或现有主题包的直接兼容。
+Swift 宿主现位于 `packages/timeless-macos/native`，本目录保留示例 JS 和构建命令。`packages/timeless-native/ios/TimelessNativeMac` 的旧 Xcode 示例没有接入这些 Swift 宿主改动。Checkbox、Radio、Select、TabView 等仍使用原有系统控件；本实现不提供浏览器完整 CSS 或现有主题包的直接兼容。
 
 ## 运行示例
 
@@ -56,11 +56,13 @@ export function SaveButtonView(model) {
 | 状态事件 | View / Button 的 hover、active、focus；Input 的 hover、focus；disabled 来自属性 |
 | 布局 | 宽高、最小/最大宽高、padding、margin、gap、Flex 方向/对齐/换行/grow/shrink/basis、relative/absolute 与四边定位、display: flex/none |
 | 外观 | background-color、color、border-width、border-color、border-radius、opacity |
+| macOS View / Button 轮廓 | outline-style（solid / none）、outline-width、outline-color、outline-offset；独立于 Yoga 布局，跟随 border-radius |
+| macOS View / Button 阴影 | `box-shadow: x y blur spread color` 或 `none`；支持单层外阴影、模糊与扩展，不影响 Yoga 布局 |
 | 文字 | font-size、font-weight、text-align；传递给后代文字节点 |
 | 数值 | 长度支持 px 或无单位数字；宽高及最小/最大宽高支持百分比；width/height/flex-basis 支持 auto |
 | 颜色 | `#rgb`、`#rgba`、`#rrggbb`、`#rrggbbaa`、transparent、black、white |
 
-padding / margin 支持 1～4 值缩写。CSS 不支持后代选择器、属性选择器、at-rule、变量、`calc()`、阴影、动画及 `!important`；编译时会带文件位置报错。布局和文字最终效果以当前 Yoga/AppKit 映射为准，Input 的内部编辑区域仍采用 AppKit 的排版。
+padding / margin 支持 1～4 值缩写。CSS 不支持后代选择器、属性选择器、at-rule、变量、`calc()`、多重或 inset 阴影、动画及 `!important`；编译时会带文件位置报错。布局和文字最终效果以当前 Yoga/AppKit 映射为准，Input 的内部编辑区域仍采用 AppKit 的排版。
 
 相同属性按“组件默认值 → 匹配的 class 规则 → 内联 style”覆盖。class 规则按选择器优先级和样式表顺序决定，不依赖 `class` 字符串中类名的顺序。移除 class 会清除旧声明；变化后的文字重新测量，布局请求在同一轮事件中合并。
 

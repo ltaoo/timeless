@@ -41,6 +41,8 @@ const bareTailwindUtilities = new Set([
   "fixed",
   "grid",
   "grow",
+  "group",
+  "peer",
   "hidden",
   "inline",
   "inline-block",
