@@ -45,6 +45,16 @@ class RootViewController: NSViewController {
             self?.renderer.relayout()
         }
 
+        bridge.prefersDarkMode = {
+            NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+        }
+        bridge.onDarkModeChange = { [weak self] dark in
+            guard let self = self else { return }
+            let appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+            self.view.appearance = appearance
+            self.view.window?.appearance = appearance
+        }
+
         bridge.run()
 
         let scroll = NSScrollView(frame: view.bounds)
@@ -70,6 +80,8 @@ class RootViewController: NSViewController {
 
     override func viewDidAppear() {
         super.viewDidAppear()
+        // Initial rendering can select a theme before the view has a window.
+        view.window?.appearance = view.appearance
         view.window?.makeFirstResponder(view)
     }
 
@@ -136,6 +148,8 @@ class RootViewController: NSViewController {
         guard containerWidth > 0, containerHeight > 0 else { return }
 
         if renderer.rootView != nil {
+            guard containerWidth != renderer.lastContainerWidth ||
+                  containerHeight != renderer.lastContainerHeight else { return }
             renderer.relayout(containerWidth: containerWidth, containerHeight: containerHeight)
             return
         }

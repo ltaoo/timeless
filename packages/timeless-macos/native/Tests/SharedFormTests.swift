@@ -17,7 +17,10 @@ final class SharedFormTests: XCTestCase {
         let window = NSWindow(contentRect: view.bounds, styleMask: [.titled], backing: .buffered, defer: false)
         window.contentView = view
         defer { window.orderOut(nil) }
-        func settle() { RunLoop.main.run(until: Date().addingTimeInterval(0.05)) }
+        func settle() {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+            renderer.relayout()
+        }
         func all(_ node: NSView) -> [NSView] { [node] + node.subviews.flatMap(all) }
         func element(_ name: String) throws -> NSView { try XCTUnwrap(all(view).first { $0.identifier?.rawValue == name }, name) }
         func press(_ name: String) throws { XCTAssertTrue(try XCTUnwrap(element(name) as? FlippedView).accessibilityPerformPress()); settle() }
@@ -36,8 +39,23 @@ final class SharedFormTests: XCTestCase {
         }
         settle()
         try press("nav-data_entry")
+        let selectTrigger = try element("form-role")
+        let dateTrigger = try element("form-dates-trigger")
+        let arrow = try XCTUnwrap(all(selectTrigger).compactMap { $0 as? NSImageView }.first)
+        let calendarIcon = try XCTUnwrap(all(dateTrigger).compactMap { $0 as? NSImageView }.first)
+        let arrowFrame = selectTrigger.convert(arrow.bounds, from: arrow)
+        let calendarFrame = dateTrigger.convert(calendarIcon.bounds, from: calendarIcon)
+        XCTAssertEqual(arrowFrame.width, 16, accuracy: 0.1)
+        XCTAssertEqual(arrowFrame.height, 16, accuracy: 0.1)
+        XCTAssertEqual(arrowFrame.size, calendarFrame.size)
+        XCTAssertEqual(arrowFrame.midY, selectTrigger.bounds.midY, accuracy: 0.1)
+        XCTAssertEqual(selectTrigger.bounds.maxX - arrowFrame.maxX, dateTrigger.bounds.maxX - calendarFrame.maxX, accuracy: 0.1)
+        let closedArrow = arrow.image
         XCTAssertEqual(try text("label-name"), "姓名")
         XCTAssertGreaterThan(try element("label-name").frame.height, 0)
+        for name in ["form-name", "form-email", "form-quantity", "form-bio"] {
+            XCTAssertGreaterThan(try element(name).layer?.cornerRadius ?? 0, 0, "Controls revealed from hidden routes keep their CSS rounding")
+        }
         XCTAssertEqual(try element("form-agreed-box").frame.height, 16, accuracy: 0.1)
         let notifications = try XCTUnwrap(element("form-notifications") as? FlippedView)
         XCTAssertEqual(notifications.frame.width, 44, accuracy: 0.1)
@@ -58,6 +76,7 @@ final class SharedFormTests: XCTestCase {
             settle()
         }
         try press("form-role")
+        XCTAssertFalse(arrow.image === closedArrow, "Opening Select changes the SVG arrow direction")
         func key(_ code: UInt16, _ characters: String) throws {
             let target = try XCTUnwrap(window.firstResponder as? FlippedView)
             let event = try XCTUnwrap(NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber, context: nil, characters: characters, charactersIgnoringModifiers: characters, isARepeat: false, keyCode: code))
@@ -66,6 +85,7 @@ final class SharedFormTests: XCTestCase {
         try key(125, "\u{F701}")
         try key(36, "\r")
         XCTAssertTrue(try text("form-role").contains("设计师"), "ArrowDown and Enter select an option through the native keyboard bridge")
+        XCTAssertTrue(arrow.image === closedArrow)
         try press("form-role")
         let select = try XCTUnwrap(renderer.floatingLayer?.presented.last)
         XCTAssertGreaterThan(select.surface.frame.width, 100)
@@ -102,6 +122,8 @@ final class SharedFormTests: XCTestCase {
         XCTAssertEqual(descriptor.first?["size"] as? Int, 7)
         picker.jsNode?.forProperty("_receiveFiles")?.call(withArguments: [descriptor]); settle()
         XCTAssertEqual(try text("form-file-value"), file.lastPathComponent)
+        let clear = try XCTUnwrap(picker.superview?.subviews.flatMap(all).compactMap { $0 as? FlippedView }.first { !$0.isHiddenOrHasHiddenAncestor && $0.jsNode?.forProperty("style")?.forProperty("position")?.toString() == "absolute" })
+        XCTAssertEqual(clear.superview!.convert(clear.frame, to: picker.superview).midY, picker.frame.midY, accuracy: 1)
         picker.jsNode?.forProperty("_pickFiles")?.call(withArguments: []); settle()
         let sheet = try XCTUnwrap(window.attachedSheet as? NSOpenPanel)
         sheet.cancel(nil); settle()

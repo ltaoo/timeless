@@ -113,7 +113,10 @@ final class NativeStylesTests: XCTestCase {
         document.addSubview(view)
         window.contentView = document
         defer { window.orderOut(nil) }
-        func settle() { RunLoop.main.run(until: Date().addingTimeInterval(0.03)) }
+        func settle() {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.03))
+            renderer.relayout()
+        }
         func element(_ name: String) throws -> NSView { try XCTUnwrap(find(name, in: view), name) }
         func press(_ name: String) throws {
             let button = try XCTUnwrap(element(name) as? FlippedView)

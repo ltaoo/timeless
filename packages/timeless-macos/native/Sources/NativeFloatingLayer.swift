@@ -6,6 +6,7 @@ final class NativeFloatingPlaceholder: NSView {
     var node: NativeNode
     let surface: NSView
     weak var savedResponder: NSResponder?
+    weak var anchorView: NSView?
     var presented = false
 
     init(node: NativeNode, surface: NSView) {
@@ -33,6 +34,10 @@ private final class FloatingOverlay: FlippedView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         owner?.refresh()
+    }
+    override func viewDidChangeBackingProperties() {
+        super.viewDidChangeBackingProperties()
+        owner?.refresh(layout: false)
     }
 }
 
@@ -65,7 +70,7 @@ final class NativeFloatingLayer {
         scrollObserver = NotificationCenter.default.addObserver(forName: NSView.boundsDidChangeNotification, object: nil, queue: .main) { [weak self] notification in
             guard let self = self, let clip = notification.object as? NSClipView,
                   clip.window === self.root?.window else { return }
-            self.refresh()
+            self.refresh(layout: false)
         }
         windowObserver = NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: nil, queue: .main) { [weak self] notification in
             guard let self = self, notification.object as? NSWindow === self.root?.window else { return }
@@ -82,15 +87,21 @@ final class NativeFloatingLayer {
 
     private func anchor(for surface: NativeFloatingPlaceholder) -> NSView? {
         guard let value = surface.js?.forProperty("anchor"), value.isObject, let root = root else { return nil }
+        func matches(_ view: NSView) -> Bool {
+            let node = (view as? FlippedView)?.jsNode ?? (view as? StyledTextField)?.nativeNode
+            return node?.isEqual(to: value) == true
+        }
+        if let cached = surface.anchorView, cached.isDescendant(of: root), matches(cached) { return cached }
         func find(_ view: NSView) -> NSView? {
-            if let node = (view as? FlippedView)?.jsNode, node.isEqual(to: value), view.frame.width > 0 { return view }
-            if let node = (view as? StyledTextField)?.nativeNode, node.isEqual(to: value) { return view }
+            if matches(view) { return view }
             return view.subviews.lazy.compactMap { find($0) }.first
         }
-        return find(root)
+        surface.anchorView = find(root)
+        return surface.anchorView
     }
 
-    func refresh() {
+    func refresh(layout: Bool = true) {
+        if !layout && presented.isEmpty { return }
         guard !refreshing, let root = root, let renderer = renderer else { return }
         refreshing = true
         defer { refreshing = false }
@@ -113,11 +124,15 @@ final class NativeFloatingLayer {
                    !anchor.visibleRect.isEmpty {
                     reference = anchor.convert(anchor.bounds, to: overlay)
                     shouldPresent = shouldPresent && overlay.bounds.intersects(reference!)
+                } else if let anchor = surface.js?.forProperty("anchor"), anchor.isObject, anchor.hasProperty("getBoundingClientRect"),
+                          let rect = anchor.invokeMethod("getBoundingClientRect", withArguments: [])?.toDictionary() as? [String: Double],
+                          let x = rect["x"] ?? rect["left"], let y = rect["y"] ?? rect["top"], x.isFinite, y.isFinite {
+                    reference = CGRect(x: x, y: y, width: rect["width"] ?? 0, height: rect["height"] ?? 0)
                 } else { shouldPresent = false }
                 if surface.presented && surface.open && !shouldPresent { requestDismiss(surface) }
             }
             if !shouldPresent { hide(surface); continue }
-            renderer.layoutFloatingSurface(surface, available: overlay.bounds.size)
+            if layout || !surface.presented { renderer.layoutFloatingSurface(surface, available: overlay.bounds.size) }
             if !surface.presented {
                 surface.savedResponder = root.window?.firstResponder
                 surface.presented = true
@@ -131,21 +146,31 @@ final class NativeFloatingLayer {
             let size = surface.surface.frame.size
             let origin: NSPoint
             if let reference = reference {
+                let offset = surface.js?.forProperty("offset")?.toDouble() ?? 8
+                let crossOffset = surface.js?.forProperty("crossOffset")?.toDouble() ?? 0
                 origin = Self.position(size: size, anchor: reference, viewport: overlay.bounds,
                     side: surface.js?.forProperty("side")?.toString() ?? "bottom",
                     align: surface.js?.forProperty("align")?.toString() ?? "start",
-                    offset: CGFloat(surface.js?.forProperty("offset")?.toDouble() ?? 8))
+                    offset: CGFloat(offset.isFinite ? offset : 8),
+                    crossOffset: CGFloat(crossOffset.isFinite ? crossOffset : 0))
+            } else if let side = surface.js?.forProperty("drawerSide"), !side.isUndefined {
+                let edge = side.toString() ?? "right"
+                origin = NSPoint(x: edge == "right" ? overlay.bounds.width - size.width : 0,
+                                 y: edge == "bottom" ? overlay.bounds.height - size.height : 0)
             } else {
                 origin = NSPoint(x: (overlay.bounds.width - size.width) / 2, y: (overlay.bounds.height - size.height) / 2)
             }
-            surface.surface.setFrameOrigin(origin)
+            // Trackpad coordinates can lie between physical pixels and blur the entire menu.
+            let alignedOrigin = overlay.backingAlignedRect(NSRect(origin: origin, size: size), options: .alignAllEdgesNearest).origin
+            if surface.surface.frame.origin != alignedOrigin { surface.surface.setFrameOrigin(alignedOrigin) }
             visible.append(surface)
         }
+        let orderChanged = presented.count != visible.count || zip(presented, visible).contains { $0.0 !== $0.1 }
         presented = visible
         backdrop.isHidden = !visible.contains(where: { $0.modal })
-        overlay.addSubview(backdrop, positioned: .above, relativeTo: nil)
-        for surface in visible {
-            overlay.addSubview(surface.surface, positioned: .above, relativeTo: nil)
+        if orderChanged {
+            overlay.addSubview(backdrop, positioned: .above, relativeTo: nil)
+            for surface in visible { overlay.addSubview(surface.surface, positioned: .above, relativeTo: nil) }
         }
         for view in root.subviews where view !== overlay { view.setAccessibilityHidden(!backdrop.isHidden) }
     }
@@ -205,6 +230,10 @@ final class NativeFloatingLayer {
         let point = overlay.convert(event.locationInWindow, from: nil)
         if event.type == .scrollWheel {
             if let modal = presented.last(where: { $0.modal }), !modal.surface.frame.contains(point) { return nil }
+            if let scroll = scrollTarget(at: point) {
+                scroll.scrollWheel(with: event)
+                return nil
+            }
             return event
         }
         for surface in presented.reversed() where surface.kind != "tooltip" {
@@ -216,13 +245,20 @@ final class NativeFloatingLayer {
         return event
     }
 
-    static func position(size: NSSize, anchor: CGRect, viewport: CGRect, side: String, align: String, offset: CGFloat) -> NSPoint {
+    func scrollTarget(at point: NSPoint) -> NSScrollView? {
+        guard let surface = presented.reversed().first(where: { $0.kind != "tooltip" && $0.surface.frame.contains(point) }), !surface.modal else { return nil }
+        let hit = overlay.hitTest(point)
+        guard !(hit is NSScrollView), hit?.enclosingScrollView == nil else { return nil }
+        return anchor(for: surface)?.enclosingScrollView
+    }
+
+    static func position(size: NSSize, anchor: CGRect, viewport: CGRect, side: String, align: String, offset: CGFloat, crossOffset: CGFloat = 0) -> NSPoint {
         func origin(_ side: String) -> NSPoint {
             let horizontal = side == "top" || side == "bottom"
             let cross = horizontal ? anchor.minX : anchor.minY
             let length = horizontal ? anchor.width : anchor.height
             let extent = horizontal ? size.width : size.height
-            let aligned = cross + (align == "end" ? length - extent : align == "center" ? (length - extent) / 2 : 0)
+            let aligned = cross + (align == "end" ? length - extent : align == "center" ? (length - extent) / 2 : 0) + crossOffset
             switch side {
             case "top": return NSPoint(x: aligned, y: anchor.minY - size.height - offset)
             case "left": return NSPoint(x: anchor.minX - size.width - offset, y: aligned)

@@ -7,10 +7,32 @@ final class TextMeasureContext {
     let font: NSFont
     var document: [String: Any]?
     var style: [String: String] = [:]
+    var measurements: [(width: CGFloat, widthMode: YGMeasureMode, heightMode: YGMeasureMode, size: NSSize)] = []
 
     init(text: String, font: NSFont) {
         self.text = text
         self.font = font
+    }
+
+    func plainTextSize(_ value: String, width: CGFloat, widthMode: YGMeasureMode) -> NSSize {
+        if value.isEmpty { return .zero }
+        let cell = NSTextFieldCell(textCell: value)
+        cell.font = font
+        let wraps = style["white-space"] != "nowrap"
+        cell.wraps = wraps
+        cell.isScrollable = !wraps
+        cell.lineBreakMode = wraps ? .byWordWrapping : .byClipping
+        let size = widthMode == .undefined || !wraps ? cell.cellSize : cell.cellSize(forBounds: NSRect(x: 0, y: 0, width: width, height: .greatestFiniteMagnitude))
+        return NSSize(width: ceil(size.width), height: ceil(size.height))
+    }
+
+    func needsLayout(for value: String) -> Bool {
+        guard !measurements.isEmpty else { return true }
+        return measurements.contains { measurement in
+            let next = plainTextSize(value, width: measurement.width, widthMode: measurement.widthMode)
+            return (measurement.widthMode != .exactly && next.width != measurement.size.width) ||
+                (measurement.heightMode != .exactly && next.height != measurement.size.height)
+        }
     }
 }
 
@@ -21,6 +43,13 @@ private final class GridLayoutContext {
     let gap: Float
     let widths: [Float]?
     init(columns: Int, gap: Float, widths: [Float]? = nil) { self.columns = columns; self.gap = gap; self.widths = widths }
+}
+
+private final class ScrollLayoutContext {
+    let node: NativeNode
+    var rightGutter: Float = 0
+    var bottomGutter: Float = 0
+    init(node: NativeNode) { self.node = node }
 }
 
 enum YogaLayoutEngine {
@@ -88,6 +117,44 @@ enum YogaLayoutEngine {
         YGNodeCalculateLayout(root, width, height, .LTR)
         resolveGridWidths(root)
         YGNodeCalculateLayout(root, width, height, .LTR)
+        // Legacy scrollers consume layout space; overlay scrollers do not.
+        while NSScroller.preferredScrollerStyle == .legacy && reserveScrollbars(root) {
+            YGNodeCalculateLayout(root, width, height, .LTR)
+            resolveGridWidths(root)
+            YGNodeCalculateLayout(root, width, height, .LTR)
+        }
+    }
+
+    private static func reserveScrollbars(_ node: YGNodeRef) -> Bool {
+        var changed = false
+        var extent = CGRect.zero
+        for index in 0..<YGNodeGetChildCount(node) {
+            guard let child = YGNodeGetChild(node, index) else { continue }
+            if reserveScrollbars(child) { changed = true }
+            extent = extent.union(frame(of: child))
+        }
+        guard let pointer = YGNodeGetContext(node),
+              let context = Unmanaged<AnyObject>.fromOpaque(pointer).takeUnretainedValue() as? ScrollLayoutContext,
+              case .scrollView(let horizontal, let vertical, _, let js) = context.node else { return changed }
+        let width = YGNodeLayoutGetWidth(node) - context.rightGutter
+        let height = YGNodeLayoutGetHeight(node) - context.bottomGutter
+        let explicitWidth = js?.forProperty("contentWidth")
+        let explicitHeight = js?.forProperty("contentHeight")
+        let contentWidth = explicitWidth?.isNumber == true ? Float(explicitWidth!.toDouble()) : Float(extent.maxX)
+        let contentHeight = explicitHeight?.isNumber == true ? Float(explicitHeight!.toDouble()) : Float(extent.maxY)
+        let gutter = Float(NSScroller.scrollerWidth(for: .regular, scrollerStyle: .legacy))
+        let style = context.node.style
+        if vertical != "hidden", contentHeight > height, context.rightGutter == 0 {
+            context.rightGutter = gutter
+            YGNodeStyleSetPadding(node, .right, Float(parsePx(style["padding-right"] ?? style["padding"])) + gutter)
+            changed = true
+        }
+        if horizontal != "hidden", contentWidth > width, context.bottomGutter == 0 {
+            context.bottomGutter = gutter
+            YGNodeStyleSetPadding(node, .bottom, Float(parsePx(style["padding-bottom"] ?? style["padding"])) + gutter)
+            changed = true
+        }
+        return changed
     }
 
     private static func resolveGridWidths(_ node: YGNodeRef) {
@@ -142,9 +209,9 @@ enum YogaLayoutEngine {
         case .text(let value, let style, let js):
             let font = resolveFont(style)
             let ctx = TextMeasureContext(text: value, font: font)
+            ctx.style = style
             if let document = js?.forProperty("richText")?.toDictionary() as? [String: Any] {
                 ctx.document = document
-                ctx.style = style
             }
             let ptr = Unmanaged.passRetained(ctx).toOpaque()
             YGNodeSetContext(yogaNode, ptr)
@@ -228,6 +295,7 @@ enum YogaLayoutEngine {
             YGNodeStyleSetFlexGrow(yogaNode, 1)
             YGNodeStyleSetOverflow(yogaNode, .scroll)
             applyStyleDict(yogaNode, style: js?.forProperty("style")?.toDictionary() as? [String: String] ?? [:])
+            YGNodeSetContext(yogaNode, Unmanaged.passRetained(ScrollLayoutContext(node: node)).toOpaque())
 
         case .tabView(_, _, let children, _):
             YGNodeStyleSetFlexDirection(yogaNode, .column)
@@ -284,7 +352,13 @@ enum YogaLayoutEngine {
         applyEdgeValues(node, style: style, property: "margin", setter: YGNodeStyleSetMargin)
         if let width = style["border-width"] { YGNodeStyleSetBorder(node, .all, Float(parsePx(width))) }
         for (edge, key) in [(YGEdge.top, "top"), (.right, "right"), (.bottom, "bottom"), (.left, "left")] {
-            if let value = style[key] { YGNodeStyleSetPosition(node, edge, Float(parsePx(value))) }
+            if let width = style["border-\(key)-width"] { YGNodeStyleSetBorder(node, edge, Float(parsePx(width))) }
+        }
+        for (edge, key) in [(YGEdge.top, "top"), (.right, "right"), (.bottom, "bottom"), (.left, "left")] {
+            if let value = style[key] {
+                if value.hasSuffix("%"), let percent = Float(value.dropLast()) { YGNodeStyleSetPositionPercent(node, edge, percent) }
+                else { YGNodeStyleSetPosition(node, edge, Float(parsePx(value))) }
+            }
         }
 
         // Flex direction (can be overridden by node type)
@@ -509,8 +583,12 @@ enum YogaLayoutEngine {
             maxWidth = CGFloat.greatestFiniteMagnitude
         }
 
-        let str = ctx.document.map { NativeRichText.attributed($0, style: ctx.style, width: maxWidth) }
-            ?? NSAttributedString(string: ctx.text, attributes: [.font: ctx.font])
+        if ctx.document == nil {
+            let size = ctx.plainTextSize(ctx.text, width: maxWidth, widthMode: widthMode)
+            ctx.measurements.append((maxWidth, widthMode, heightMode, size))
+            return YGSize(width: Float(size.width), height: Float(size.height))
+        }
+        let str = NativeRichText.attributed(ctx.document!, style: ctx.style, width: maxWidth)
         let size = str.boundingRect(
             with: NSSize(width: maxWidth, height: .greatestFiniteMagnitude),
             options: [.usesLineFragmentOrigin, .usesFontLeading]

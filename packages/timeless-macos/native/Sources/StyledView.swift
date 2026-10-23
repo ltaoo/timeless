@@ -9,17 +9,20 @@ class FlippedView: NSView {
     private var pressed = false
     private var pointerFocus = false
     private var tracking: NSTrackingArea?
-    private(set) var outlineLayer: CALayer?
-    private var outlineOffset: CGFloat = 0
-    private(set) var shadowLayers: [CALayer] = []
-    var shadowLayer: CALayer? { shadowLayers.first }
-    private var shadowSpreads: [CGFloat] = []
-    private var cssCornerRadius: CGFloat = 0
-
-    func applyCornerRadius(_ radius: CGFloat) {
-        cssCornerRadius = radius
-        layer?.cornerRadius = min(max(0, radius), max(0, min(bounds.width, bounds.height) / 2))
+    var labelAction: (() -> Void)?
+    lazy var decoration = NativeViewDecoration(view: self)
+    lazy var animation = NativeViewAnimation(view: self)
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if window == nil {
+            DispatchQueue.main.async { [weak self] in
+                if self?.window == nil { self?.animation.cancel() }
+            }
+        }
     }
+    var outlineLayer: CALayer? { decoration.outlineLayer }
+    var shadowLayers: [CALayer] { decoration.shadowLayers }
+    var shadowLayer: CALayer? { decoration.shadowLayer }
 
     var disabled: Bool {
         guard let value = jsNode?.forProperty("attrs")?.forProperty("disabled") else { return false }
@@ -42,6 +45,13 @@ class FlippedView: NSView {
         }
         node?.setObject(focus, forKeyedSubscript: "_focus" as NSString)
         node?.setObject(blur, forKeyedSubscript: "_blur" as NSString)
+        let rect: @convention(block) () -> [String: CGFloat] = { [weak self] in
+            guard let self = self, let content = self.window?.contentView else { return [:] }
+            let frame = self.convert(self.bounds, to: content)
+            let y = content.isFlipped ? frame.minY : content.bounds.height - frame.maxY
+            return ["x": frame.minX, "y": y, "left": frame.minX, "top": y, "right": frame.maxX, "bottom": y + frame.height, "width": frame.width, "height": frame.height]
+        }
+        node?.setObject(rect, forKeyedSubscript: "_getBoundingClientRect" as NSString)
         if node?.forProperty("filePicker")?.isObject == true {
             let pick: @convention(block) () -> Void = { [weak self] in
                 guard let self = self, !self.disabled, let node = self.jsNode else { return }
@@ -52,19 +62,24 @@ class FlippedView: NSView {
     }
 
     private var clickable: Bool {
-        button || jsNode?.forProperty("listeners")?.forProperty("click")?.isObject == true
+        button || labelAction != nil || jsNode?.forProperty("listeners")?.forProperty("click")?.isObject == true
     }
 
-    override var acceptsFirstResponder: Bool { clickable && !disabled && !isHiddenOrHasHiddenAncestor }
+    override var acceptsFirstResponder: Bool {
+        let tabIndex = jsNode?.forProperty("attrs")?.forProperty("tabindex")
+        return ((clickable && labelAction == nil) || (tabIndex != nil && !tabIndex!.isUndefined && tabIndex!.toInt32() >= 0)) && !disabled && !isHiddenOrHasHiddenAncestor
+    }
 
     override func hitTest(_ point: NSPoint) -> NSView? {
         let hit = super.hitTest(point)
+        if labelAction != nil, let field = hit as? NSTextField, field.isEditable { return field }
         return (button || (clickable && hit is NSTextField)) && hit != nil ? self : hit
     }
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
-        if let tracking = tracking { removeTrackingArea(tracking) }
+        // inVisibleRect follows scrolling and resizing without replacing the area.
+        guard tracking == nil else { return }
         let area = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self, userInfo: nil)
         addTrackingArea(area)
         tracking = area
@@ -75,51 +90,75 @@ class FlippedView: NSView {
         needsDisplay = true
     }
 
+    private func batchStyleUpdates(_ update: @escaping () -> Void) {
+        guard let batch = jsNode?.forProperty("_batchStyleUpdates"), batch.isObject else { update(); return }
+        let callback: @convention(block) () -> Void = { update() }
+        batch.call(withArguments: [callback])
+    }
+
     @discardableResult
     private func emit(_ name: String, _ payload: [String: Any] = [:]) -> Bool {
-        jsNode?.forProperty("_dispatchNativeEvent")?.call(withArguments: [name, payload])?.toBool() ?? false
+        var prevented = false
+        batchStyleUpdates { [self] in
+            prevented = jsNode?.forProperty("_dispatchNativeEvent")?.call(withArguments: [name, payload])?.toBool() ?? false
+        }
+        return prevented
     }
 
     override func mouseEntered(with event: NSEvent) {
-        setState("hover", true)
-        emit("mouseenter")
+        batchStyleUpdates { [self] in
+            setState("hover", true)
+            emit("mouseenter")
+        }
     }
 
     override func mouseExited(with event: NSEvent) {
-        setState("hover", false)
-        emit("mouseleave")
+        batchStyleUpdates { [self] in
+            setState("hover", false)
+            emit("mouseleave")
+        }
     }
 
     override func mouseDown(with event: NSEvent) {
         guard clickable else { super.mouseDown(with: event); return }
         guard !disabled else { return }
-        pointerFocus = true
-        window?.makeFirstResponder(self)
-        setState("focus-visible", false)
-        pointerFocus = false
-        pressed = true
-        setState("active", true)
-        emit("pointerdown", ["button": 0])
+        batchStyleUpdates { [self] in
+            pointerFocus = true
+            window?.makeFirstResponder(self)
+            setState("focus-visible", false)
+            pointerFocus = false
+            pressed = true
+            setState("active", true)
+            emit("pointerdown", ["button": 0])
+        }
     }
 
     override func mouseDragged(with event: NSEvent) {
         if pressed { setState("active", bounds.contains(convert(event.locationInWindow, from: nil))) }
     }
 
+    override func rightMouseDown(with event: NSEvent) {
+        guard !disabled, let content = window?.contentView else { return }
+        let point = content.convert(event.locationInWindow, from: nil)
+        emit("contextmenu", ["button": 2, "clientX": point.x, "clientY": content.isFlipped ? point.y : content.bounds.height - point.y])
+    }
+
     override func mouseUp(with event: NSEvent) {
         let activate = pressed && bounds.contains(convert(event.locationInWindow, from: nil))
-        pressed = false
-        setState("active", false)
-        if !disabled {
-            emit("pointerup", ["button": 0])
-            if activate { emit("click", ["button": 0]) }
+        batchStyleUpdates { [self] in
+            pressed = false
+            setState("active", false)
+            if !disabled {
+                emit("pointerup", ["button": 0])
+                if activate && !emit("click", ["button": 0]) { labelAction?() }
+            }
         }
     }
 
     override func keyDown(with event: NSEvent) {
         if clickable && !disabled { setState("focus-visible", true) }
-        let key = [UInt16(49): " ", 36: "Enter", 48: "Tab", 53: "Escape", 123: "ArrowLeft", 124: "ArrowRight", 125: "ArrowDown", 126: "ArrowUp"][event.keyCode] ?? event.characters ?? ""
-        if emit("keydown", ["key": key]) { return }
+        let key = [UInt16(49): " ", 36: "Enter", 48: "Tab", 53: "Escape", 109: "F10", 115: "Home", 119: "End", 123: "ArrowLeft", 124: "ArrowRight", 125: "ArrowDown", 126: "ArrowUp"][event.keyCode] ?? event.characters ?? ""
+        if emit("keydown", ["key": key, "shiftKey": event.modifierFlags.contains(.shift)]) { return }
         if key == "Tab" {
             window?.recalculateKeyViewLoop()
             if event.modifierFlags.contains(.shift) { window?.selectPreviousKeyView(self) }
@@ -143,132 +182,34 @@ class FlippedView: NSView {
 
     override func becomeFirstResponder() -> Bool {
         guard acceptsFirstResponder else { return false }
-        setState("focus", true)
-        setState("focus-visible", !pointerFocus)
-        emit("focus")
+        batchStyleUpdates { [self] in
+            setState("focus", true)
+            setState("focus-visible", !pointerFocus)
+            emit("focus")
+        }
         return true
     }
 
     override func resignFirstResponder() -> Bool {
-        pressed = false
-        setState("active", false)
-        setState("focus", false)
-        setState("focus-visible", false)
-        emit("blur")
+        batchStyleUpdates { [self] in
+            pressed = false
+            setState("active", false)
+            setState("focus", false)
+            setState("focus-visible", false)
+            emit("blur")
+        }
         return true
-    }
-
-    func applyOutlineStyle(_ style: [String: String]) {
-        focusRingType = .none
-        let width = NativeViewRenderer.parsePx(style["outline-width"])
-        guard style["outline-style"] == "solid", width > 0 else {
-            outlineLayer?.removeFromSuperlayer()
-            outlineLayer = nil
-            return
-        }
-        if outlineLayer == nil {
-            let outline = CALayer()
-            layer?.addSublayer(outline)
-            outlineLayer = outline
-        }
-        // Outline is decoration outside the box; Yoga only measures the actual border.
-        clipsToBounds = false
-        layer?.masksToBounds = false
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        outlineLayer?.borderWidth = width
-        outlineLayer?.borderColor = NativeViewRenderer.parseColor(style["outline-color"] ?? style["color"] ?? "black")?.cgColor
-        outlineOffset = NativeViewRenderer.parsePx(style["outline-offset"])
-        updateOutlineFrame()
-        CATransaction.commit()
     }
 
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        applyCornerRadius(cssCornerRadius)
-        updateOutlineFrame()
-        updateShadowFrame()
-    }
-
-    func applyBoxShadowStyle(_ style: [String: String]) {
-        let sources = (style["box-shadow"] ?? "").split(separator: ",")
-        var shadows: [(lengths: [Double], color: NSColor)] = []
-        for source in sources {
-            let parts = source.split(whereSeparator: { $0.isWhitespace }).map(String.init)
-            let lengths = parts.prefix(4).compactMap { Double($0.replacingOccurrences(of: "px", with: "")) }
-            guard parts.count == 5, lengths.count == 4, lengths.allSatisfy({ $0.isFinite }), lengths[2] >= 0,
-                  let color = NativeViewRenderer.parseColor(parts[4]) else { shadows = []; break }
-            shadows.append((lengths, color))
-        }
-        while shadowLayers.count > shadows.count { shadowLayers.removeLast().removeFromSuperlayer() }
-        while shadowLayers.count < shadows.count {
-            let shadow = CALayer()
-            let mask = CAShapeLayer()
-            mask.fillRule = .evenOdd
-            shadow.mask = mask
-            // CSS lists the topmost shadow first.
-            layer?.insertSublayer(shadow, at: 0)
-            shadowLayers.append(shadow)
-        }
-        shadowSpreads = shadows.map { CGFloat($0.lengths[3]) }
-        guard !shadows.isEmpty else { return }
-        clipsToBounds = false
-        layer?.masksToBounds = false
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        for (index, spec) in shadows.enumerated() {
-            let shadow = shadowLayers[index]
-            shadow.shadowColor = spec.color.withAlphaComponent(1).cgColor
-            shadow.shadowOpacity = Float(spec.color.alphaComponent)
-            shadow.shadowOffset = CGSize(width: spec.lengths[0], height: spec.lengths[1])
-            shadow.shadowRadius = CGFloat(spec.lengths[2]) / 2
-        }
-        updateShadowFrame()
-        CATransaction.commit()
-    }
-
-    private func updateShadowFrame() {
-        guard !shadowLayers.isEmpty else { return }
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        for (index, shadow) in shadowLayers.enumerated() {
-            guard let mask = shadow.mask as? CAShapeLayer else { continue }
-            let shadowSpread = shadowSpreads[index]
-            let extent = max(0, shadowSpread) + shadow.shadowRadius * 4 + max(abs(shadow.shadowOffset.width), abs(shadow.shadowOffset.height)) + 1
-            shadow.frame = bounds.insetBy(dx: -extent, dy: -extent)
-            let box = CGRect(origin: CGPoint(x: extent, y: extent), size: bounds.size)
-            let radius = min(layer?.cornerRadius ?? 0, max(0, min(box.width, box.height) / 2))
-            let expanded = box.insetBy(dx: -shadowSpread, dy: -shadowSpread)
-            if expanded.size.width > 0 && expanded.size.height > 0 {
-                let outerRadius = min(max(0, radius + shadowSpread), min(expanded.width, expanded.height) / 2)
-                shadow.shadowPath = CGPath(roundedRect: expanded, cornerWidth: outerRadius, cornerHeight: outerRadius, transform: nil)
-            } else {
-                shadow.shadowPath = CGMutablePath()
-            }
-            // CSS outer shadows never paint inside the box, including transparent buttons.
-            let cutout = CGMutablePath()
-            cutout.addRect(shadow.bounds)
-            cutout.addRoundedRect(in: box, cornerWidth: radius, cornerHeight: radius)
-            mask.frame = shadow.bounds
-            mask.path = cutout
-        }
-        CATransaction.commit()
-    }
-
-    private func updateOutlineFrame() {
-        guard let outline = outlineLayer else { return }
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        let outset = outline.borderWidth + outlineOffset
-        outline.frame = bounds.insetBy(dx: -outset, dy: -outset)
-        outline.cornerRadius = max(0, (layer?.cornerRadius ?? 0) + outset)
-        CATransaction.commit()
+        decoration.updateFrame()
     }
 
     override func isAccessibilityElement() -> Bool { clickable || jsNode?.forProperty("attrs")?.forProperty("role")?.toString() == "dialog" }
     override func accessibilityRole() -> NSAccessibility.Role? {
         if jsNode?.forProperty("attrs")?.forProperty("role")?.toString() == "dialog" { return .group }
-        return clickable ? .button : .group
+        return labelAction != nil ? .staticText : clickable ? .button : .group
     }
     override func accessibilitySubrole() -> NSAccessibility.Subrole? {
         jsNode?.forProperty("attrs")?.forProperty("role")?.toString() == "dialog" ? NSAccessibility.Subrole(rawValue: "AXDialog") : nil
@@ -281,7 +222,7 @@ class FlippedView: NSView {
     }
     override func accessibilityPerformPress() -> Bool {
         guard clickable && !disabled else { return false }
-        emit("click", ["button": 0])
+        if !emit("click", ["button": 0]) { labelAction?() }
         return true
     }
 }

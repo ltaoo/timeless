@@ -22,13 +22,20 @@ final class SharedButtonTests: XCTestCase {
         document.addSubview(view)
         window.contentView = document
         defer { window.orderOut(nil) }
-        func settle() { RunLoop.main.run(until: Date().addingTimeInterval(0.03)) }
+        func settle() {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.03))
+            renderer.relayout()
+        }
         func find(_ name: String, in current: NSView) -> NSView? {
             if current.identifier?.rawValue == name { return current }
             return current.subviews.lazy.compactMap { find(name, in: $0) }.first
         }
         func element(_ name: String) throws -> NSView { try XCTUnwrap(find(name, in: view), name) }
-        func frames(_ current: NSView) -> [NSRect] { [current.frame] + current.subviews.flatMap(frames) }
+        func frames(_ current: NSView, restoringTranslationOf button: NSView? = nil) -> [NSRect] {
+            var frame = current.frame
+            if current === button { frame.origin.y -= 1 }
+            return [frame] + current.subviews.flatMap { frames($0, restoringTranslationOf: button) }
+        }
         settle()
         let buttons = try ["default", "secondary", "outline", "ghost", "destructive", "link"].map { try XCTUnwrap(element("button-\($0)") as? FlippedView) }
         for width: CGFloat in [1000, 760] {
@@ -44,7 +51,7 @@ final class SharedButtonTests: XCTestCase {
                 button.mouseDown(with: event)
                 settle()
                 XCTAssertNil(button.shadowLayer, "Mouse focus follows the shared focus-visible selector")
-                XCTAssertEqual(frames(view), before)
+                XCTAssertEqual(frames(view, restoringTranslationOf: button), before, "Shared active CSS moves only the pressed button by 1px; layout and focus decoration keep their dimensions")
                 XCTAssertTrue(window.makeFirstResponder(nil))
                 XCTAssertTrue(window.makeFirstResponder(button))
                 settle()

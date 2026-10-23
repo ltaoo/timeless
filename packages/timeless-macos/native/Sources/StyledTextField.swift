@@ -6,6 +6,8 @@ final class StyledTextField: NSTextField {
     private var jsNode: JSValue?
     var nativeNode: JSValue? { jsNode }
     private var tracking: NSTrackingArea?
+    private var focused = false
+    lazy var decoration = NativeViewDecoration(view: self)
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -13,6 +15,26 @@ final class StyledTextField: NSTextField {
     }
 
     required init?(coder: NSCoder) { super.init(coder: coder) }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        decoration.updateFrame()
+    }
+
+    override func becomeFirstResponder() -> Bool {
+        guard super.becomeFirstResponder() else { return false }
+        // AppKit's editing notification starts on the first text change, after focus.
+        setFocused(true)
+        return true
+    }
+
+    func setFocused(_ value: Bool) {
+        guard focused != value else { return }
+        focused = value
+        jsNode?.forProperty("_setStyleState")?.call(withArguments: ["focus", value])
+        jsNode?.forProperty("_setStyleState")?.call(withArguments: ["focus-visible", value])
+        jsNode?.forProperty("_dispatchNativeEvent")?.call(withArguments: [value ? "focus" : "blur", [:]])
+    }
 
     func applyContentStyle(_ style: [String: String]) {
         (cell as? PaddedTextFieldCell)?.insets = NSEdgeInsets(
@@ -30,8 +52,15 @@ final class StyledTextField: NSTextField {
         }
         let attributesChanged: @convention(block) (String, JSValue) -> Void = { [weak self] key, value in
             guard let self = self else { return }
-            if key == "disabled" { self.isEnabled = value.isNull || value.isUndefined }
-            if key == "placeholder" { self.placeholderString = value.isNull ? nil : value.toString() }
+            if key == "disabled" {
+                let enabled = value.isNull || value.isUndefined
+                if self.isEnabled != enabled { self.isEnabled = enabled }
+            }
+            if key == "placeholder" {
+                let placeholder = value.isNull || value.isUndefined ? nil : value.toString()
+                // Reassigning an unchanged placeholder restarts AppKit's editor and emits blur.
+                if (self.placeholderAttributedString?.string ?? self.placeholderString) != placeholder { self.placeholderString = placeholder }
+            }
         }
         node.setObject(attributesChanged, forKeyedSubscript: "_onAttributeChange" as NSString)
         let valueChanged: @convention(block) (String) -> Void = { [weak self] value in

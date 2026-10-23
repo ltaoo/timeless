@@ -19,6 +19,7 @@ class NativeViewRenderer {
     private(set) var rootView: NSView?
     private(set) var floatingLayer: NativeFloatingLayer?
     private let bindings = NSMapTable<NSView, JSValue>.weakToStrongObjects()
+    private let textMeasurements = NSMapTable<NSTextField, TextMeasureContext>.weakToStrongObjects()
 
     init(bridge: JSBridge) {
         self.bridge = bridge
@@ -69,7 +70,7 @@ class NativeViewRenderer {
 
         // Update the document view height if inside a scroll view
         if let docView = rootView.superview {
-            docView.frame.size = rootView.frame.size
+            if docView.frame.size != rootView.frame.size { docView.frame.size = rootView.frame.size }
         }
         floatingLayer?.refresh()
     }
@@ -82,7 +83,15 @@ class NativeViewRenderer {
     /// be overwritten with Yoga child frames.
     private func updateFrames(view: NSView, yogaNode: YGNodeRef, node: NativeNode) {
         let frame = Self.translatedFrame(YogaLayoutEngine.frame(of: yogaNode), style: node.style)
-        view.frame = frame
+        if view.frame != frame { view.frame = frame }
+        // Keep hidden native children cached until their page is shown again.
+        if node.style["display"] == "none" { return }
+        if case .text = node, let label = view as? NSTextField {
+            if node.style["white-space"] != "nowrap" { label.preferredMaxLayoutWidth = frame.width }
+            if let pointer = YGNodeGetContext(yogaNode) {
+                textMeasurements.setObject(Unmanaged<TextMeasureContext>.fromOpaque(pointer).takeUnretainedValue(), forKey: label)
+            }
+        }
         view.needsDisplay = true
 
         if let placeholder = view as? NativeFloatingPlaceholder {
@@ -90,7 +99,10 @@ class NativeViewRenderer {
             return
         }
 
+        if !(view is FlippedView), node.style["border-radius"] != nil { Self.applyStyle(node.style, to: view) }
+
         synchronizeControl(view, node: node)
+        if let list = view as? NativeVirtualList { list.synchronizeDocument(); return }
         let children = YogaLayoutEngine.nodeChildren(node)
         let container = (view as? NativeScrollView)?.documentView ?? view
         guard container is FlippedView else { return }
@@ -219,13 +231,23 @@ class NativeViewRenderer {
             label.isBezeled = false
             label.drawsBackground = false
             label.maximumNumberOfLines = 0
+            if style["white-space"] != "nowrap" {
+                label.lineBreakMode = .byWordWrapping
+                label.cell?.wraps = true
+                label.cell?.isScrollable = false
+            }
             label.preferredMaxLayoutWidth = frame.width
             NativeViewRenderer.applyTextStyle(style, to: label)
             label.frame = frame
+            if let pointer = YGNodeGetContext(yogaNode) {
+                textMeasurements.setObject(Unmanaged<TextMeasureContext>.fromOpaque(pointer).takeUnretainedValue(), forKey: label)
+            }
 
             if let jsValue = jsValue {
-                let onContentChange: @convention(block) (String) -> Void = { [weak label] newValue in
-                    label?.stringValue = newValue
+                let onContentChange: @convention(block) (String) -> Bool = { [weak self, weak label] newValue in
+                    guard let label = label else { return true }
+                    label.stringValue = newValue
+                    return self?.textMeasurements.object(forKey: label)?.needsLayout(for: newValue) ?? true
                 }
                 jsValue.setValue(onContentChange, forProperty: "_onContentChange")
 
@@ -244,6 +266,12 @@ class NativeViewRenderer {
             NativeViewRenderer.applyStyle(style, to: container)
             addChildren(children, to: container, yogaParent: yogaNode)
             registerContainerCallbacks(jsValue: jsValue, view: container)
+            if jsValue?.forProperty("type")?.toString() == "label" {
+                container.labelAction = { [weak self, weak container] in
+                    guard let container = container else { return }
+                    self?.activateLabel(container)
+                }
+            }
             return container
 
         case .img(let src, let style, let jsValue):
@@ -321,17 +349,15 @@ class NativeViewRenderer {
             textView.string = value
             textView.isEditable = !disabled
             textView.isRichText = false
-            textView.font = .systemFont(ofSize: 14)
-            textView.textColor = NativeViewRenderer.parseColor(style["color"] ?? "#18181b")
-            textView.font = YogaLayoutEngine.resolveFont(style)
             textView.drawsBackground = false
-            textView.textContainerInset = NSSize(width: NativeViewRenderer.parsePx(style["padding-left"]), height: NativeViewRenderer.parsePx(style["padding-top"]))
+            textView.focusRingType = .none
+            textView.jsNode = jsValue
             textView.textContainer?.lineFragmentPadding = 0
             textView.isVerticallyResizable = true
             textView.autoresizingMask = [.width]
             textView.textContainer?.widthTracksTextView = true
-            NativeViewRenderer.applyStyle(style, to: scrollView)
             scrollView.documentView = textView
+            NativeViewRenderer.applyStyle(style, to: scrollView)
             if let jsValue = jsValue {
                 let delegate = LiveTextViewInputDelegate(placeholder: placeholder, jsValue: jsValue)
                 textView.delegate = delegate
@@ -352,6 +378,7 @@ class NativeViewRenderer {
             NativeViewRenderer.applyStyle(style, to: textField)
             NativeViewRenderer.applyTextStyle(style, to: textField)
             if let jsValue = jsValue {
+                textField.bind(jsValue)
                 let delegate = LiveTextFieldInputDelegate(jsValue: jsValue)
                 textField.delegate = delegate
                 objc_setAssociatedObject(textField, "inputDelegate", delegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -502,6 +529,13 @@ class NativeViewRenderer {
             return container
 
         case .scrollView(let horizontal, let vertical, let children, let jsValue):
+            if let js = jsValue, js.forProperty("type")?.toString() == "list-view-v2" {
+                let list = NativeVirtualList(frame: frame, node: js, renderer: self)
+                registerContainerCallbacks(jsValue: js, view: list)
+                Self.applyStyle(node.style, to: list)
+                list.synchronizeDocument()
+                return list
+            }
             let scrollView = NativeScrollView(frame: frame)
             scrollView.bind(jsValue)
             NativeViewRenderer.applyStyle(jsValue?.forProperty("style")?.toDictionary() as? [String: String] ?? [:], to: scrollView)
@@ -580,15 +614,77 @@ class NativeViewRenderer {
 
     // MARK: - Container Callbacks (structural + style)
 
+    private func activateLabel(_ label: NSView) {
+        func findID(_ view: NSView, id: String) -> NSView? {
+            if let attrs = bindings.object(forKey: view)?.forProperty("attrs"), attrs.isObject,
+               let value = attrs.forProperty("id"), value.isString, value.toString() == id { return view }
+            return view.subviews.lazy.compactMap { findID($0, id: id) }.first
+        }
+        func focusTarget(_ view: NSView) -> NSView? {
+            guard !view.isHiddenOrHasHiddenAncestor else { return nil }
+            if let control = view as? NSControl, !control.isEnabled { return nil }
+            if let control = view as? FlippedView, control.disabled { return nil }
+            if let text = (view as? NSScrollView)?.documentView as? NSTextView {
+                return text.isEditable ? text : nil
+            }
+            if view.acceptsFirstResponder { return view }
+            return view.subviews.lazy.compactMap(focusTarget).first
+        }
+        let target: NSView?
+        if let controlID = bindings.object(forKey: label)?.forProperty("attrs")?.forProperty("for"), !controlID.isUndefined, !controlID.isNull {
+            guard let root = rootView, let id = controlID.toString(), !id.isEmpty else { return }
+            target = findID(root, id: id)
+        } else {
+            target = label.subviews.lazy.compactMap(focusTarget).first
+        }
+        guard let associated = target, let control = focusTarget(associated) else { return }
+        control.scrollToVisible(control.bounds)
+        label.window?.makeFirstResponder(control)
+        if let button = control as? NSButton { button.performClick(nil) }
+        if let button = control as? FlippedView,
+           let role = button.jsNode?.forProperty("attrs")?.forProperty("role")?.toString(),
+           role == "checkbox" || role == "switch" { _ = button.accessibilityPerformPress() }
+    }
+
     func layoutFloatingSurface(_ placeholder: NativeFloatingPlaceholder, available: NSSize) {
         guard case .floating(var style, let children, let js) = placeholder.node else { return }
-        let maxWidth = max(0, available.width - 32)
-        style["max-width"] = "\(min(maxWidth, style["max-width"].map { NativeViewRenderer.parsePx($0) } ?? maxWidth))px"
-        style["max-height"] = "\(max(0, available.height - 32))px"
+        let drawerSide = js?.forProperty("drawerSide")
+        let edge = drawerSide != nil && !drawerSide!.isUndefined ? drawerSide!.toString() : nil
+        let inset: CGFloat = edge == nil ? 32 : 0
+        let maxWidth = max(0, available.width - inset)
+        let limit: CGFloat
+        if let value = style["max-width"], value.hasSuffix("%"), let percent = Double(value.dropLast()) {
+            limit = available.width * CGFloat(percent) / 100
+        } else if let value = style["max-width"], let pixels = Double(value.replacingOccurrences(of: "px", with: "")) {
+            limit = CGFloat(pixels)
+        } else { limit = maxWidth }
+        style["max-width"] = "\(max(0, min(maxWidth, limit)))px"
+        if style["width"] == "fit-content" { style["width"] = "auto" }
+        style["max-height"] = "\(max(0, available.height - inset))px"
+        if let edge = edge {
+            if edge == "left" || edge == "right" { style["height"] = "\(available.height)px" }
+            else { style["width"] = "\(available.width)px" }
+        }
         let node = NativeNode.view(style: style, children: children, jsValue: js)
         let yoga = YogaLayoutEngine.buildYogaTree(from: node)
         YogaLayoutEngine.calculateLayout(yoga, width: Float.nan)
         updateFrames(view: placeholder.surface, yogaNode: yoga, node: node)
+        YogaLayoutEngine.freeTree(yoga)
+    }
+
+    func buildListRow(_ js: JSValue, width: CGFloat, height: CGFloat) -> NSView? {
+        guard let node = bridge?.parseNode(js) else { return nil }
+        let yoga = YogaLayoutEngine.buildYogaTree(from: node)
+        YogaLayoutEngine.calculateLayout(yoga, width: Float(width), height: Float(height))
+        defer { YogaLayoutEngine.freeTree(yoga) }
+        return buildNSView(node: node, yogaNode: yoga)
+    }
+
+    func layoutListRow(_ js: JSValue, view: NSView, width: CGFloat, height: CGFloat) {
+        guard let node = bridge?.parseNode(js) else { return }
+        let yoga = YogaLayoutEngine.buildYogaTree(from: node)
+        YogaLayoutEngine.calculateLayout(yoga, width: Float(width), height: Float(height))
+        updateFrames(view: view, yogaNode: yoga, node: node)
         YogaLayoutEngine.freeTree(yoga)
     }
 
@@ -672,6 +768,7 @@ class NativeViewRenderer {
 
     static func applyStyle(_ style: [String: String], to view: NSView) {
         (view as? StyledTextField)?.applyContentStyle(style)
+        (view as? StyledTextareaScrollView)?.applyContentStyle(style)
         (view as? StyledPopUpButton)?.contentStyle = style
         view.wantsLayer = true
         if style["display"] == "contents" { view.clipsToBounds = false; view.layer?.masksToBounds = false }
@@ -679,12 +776,11 @@ class NativeViewRenderer {
         view.layer?.borderColor = parseColor(style["border-color"] ?? "black")?.cgColor
         view.layer?.borderWidth = parsePx(style["border-width"])
         let radius = parsePx(style["border-radius"])
-        if let flipped = view as? FlippedView { flipped.applyCornerRadius(radius) }
+        if let decoration = (view as? FlippedView)?.decoration ?? (view as? StyledTextField)?.decoration ?? (view as? StyledTextareaScrollView)?.decoration { decoration.apply(style) }
         else { view.layer?.cornerRadius = min(max(0, radius), max(0, min(view.bounds.width, view.bounds.height) / 2)) }
-        (view as? FlippedView)?.applyOutlineStyle(style)
-        (view as? FlippedView)?.applyBoxShadowStyle(style)
         view.alphaValue = CGFloat(Double(style["opacity"] ?? "1") ?? 1)
         view.isHidden = style["display"] == "none" || view.superview is NativeFloatingPlaceholder
+        (view as? FlippedView)?.animation.apply(style)
     }
 
     static func applyTextStyle(_ style: [String: String], to label: NSTextField) {
@@ -762,13 +858,11 @@ class LiveTextFieldInputDelegate: NSObject, NSTextFieldDelegate {
     }
 
     func controlTextDidBeginEditing(_ obj: Notification) {
-        jsValue.forProperty("_setStyleState")?.call(withArguments: ["focus", true])
-        jsValue.forProperty("_dispatchNativeEvent")?.call(withArguments: ["focus", [:]])
+        (obj.object as? StyledTextField)?.setFocused(true)
     }
 
     func controlTextDidEndEditing(_ obj: Notification) {
-        jsValue.forProperty("_setStyleState")?.call(withArguments: ["focus", false])
-        jsValue.forProperty("_dispatchNativeEvent")?.call(withArguments: ["blur", [:]])
+        (obj.object as? StyledTextField)?.setFocused(false)
     }
 
     func controlTextDidChange(_ obj: Notification) {
@@ -826,6 +920,29 @@ class LivePopUpButtonChangeHelper: NSObject {
 
 private final class PlaceholderTextView: NSTextView {
     var placeholder = ""
+    var jsNode: JSValue?
+    private var focused = false
+
+    override func becomeFirstResponder() -> Bool {
+        guard super.becomeFirstResponder() else { return false }
+        setFocused(true)
+        return true
+    }
+
+    override func resignFirstResponder() -> Bool {
+        guard super.resignFirstResponder() else { return false }
+        setFocused(false)
+        return true
+    }
+
+    private func setFocused(_ value: Bool) {
+        guard focused != value else { return }
+        focused = value
+        jsNode?.forProperty("_setStyleState")?.call(withArguments: ["focus", value])
+        jsNode?.forProperty("_setStyleState")?.call(withArguments: ["focus-visible", value])
+        jsNode?.forProperty("_dispatchNativeEvent")?.call(withArguments: [value ? "focus" : "blur", [:]])
+    }
+
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         if string.isEmpty && !placeholder.isEmpty {
@@ -838,6 +955,21 @@ private final class PlaceholderTextView: NSTextView {
 }
 
 private final class StyledTextareaScrollView: NSScrollView {
+    lazy var decoration = NativeViewDecoration(view: self)
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        decoration.updateFrame()
+    }
+
+    func applyContentStyle(_ style: [String: String]) {
+        guard let text = documentView as? NSTextView else { return }
+        text.textContainerInset = NSSize(width: NativeViewRenderer.parsePx(style["padding-left"]), height: NativeViewRenderer.parsePx(style["padding-top"]))
+        text.font = YogaLayoutEngine.resolveFont(style)
+        text.textColor = NativeViewRenderer.parseColor(style["color"] ?? "#18181b")
+        text.needsDisplay = true
+    }
+
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         guard let layer = layer, layer.borderWidth > 0, let color = layer.borderColor else { return }

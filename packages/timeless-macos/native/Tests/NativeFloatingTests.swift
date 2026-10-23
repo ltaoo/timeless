@@ -20,6 +20,8 @@ final class NativeFloatingTests: XCTestCase {
         let left = NativeFloatingLayer.position(size: size, anchor: CGRect(x: 10, y: 100, width: 50, height: 30), viewport: viewport, side: "left", align: "end", offset: 8)
         XCTAssertEqual(left.x, 68)
         XCTAssertGreaterThanOrEqual(left.y, 8)
+        let shifted = NativeFloatingLayer.position(size: size, anchor: CGRect(x: 40, y: 40, width: 100, height: 40), viewport: viewport, side: "bottom", align: "start", offset: 8, crossOffset: 7)
+        XCTAssertEqual(shifted, NSPoint(x: 47, y: 88))
     }
 
     func testGalleryModalPopoverAndTooltip() throws {
@@ -37,7 +39,10 @@ final class NativeFloatingTests: XCTestCase {
         document.addSubview(view)
         window.contentView = document
         defer { window.orderOut(nil) }
-        func settle() { RunLoop.main.run(until: Date().addingTimeInterval(0.04)) }
+        func settle() {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.04))
+            renderer.relayout()
+        }
         func element(_ name: String) throws -> NSView { try XCTUnwrap(find(name, in: view), name) }
         func press(_ name: String) throws {
             let button = try XCTUnwrap(element(name) as? FlippedView)

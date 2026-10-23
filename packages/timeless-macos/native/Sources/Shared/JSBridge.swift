@@ -78,12 +78,17 @@ class JSBridge {
     /// Called when JS requests relayout after HMR patch.
     var onRelayout: (() -> Void)?
 
+    var prefersDarkMode: (() -> Bool)?
+    var onDarkModeChange: ((Bool) -> Void)?
+
     /// The root $elm JSValue — stored for relayout (re-parsing into NativeNode).
     private(set) var rootElmJSValue: JSValue?
 
     // Timer management — allows cleanup on HMR reload
     private var timerItems: [Int: DispatchWorkItem] = [:]
     private var intervalActive: [Int: Bool] = [:]
+    // JavaScript Numbers cannot round-trip random 64-bit timer IDs for cancellation.
+    private var timerId = 0
 
     init(devScriptPath: String? = nil) {
         self.devScriptPath = devScriptPath
@@ -92,6 +97,7 @@ class JSBridge {
         setupNativeHMR()
         setupRenderBridge()
         setupRelayoutBridge()
+        setupAppearanceBridge()
     }
 
     /// Evaluate the app script. Call `onRender` before this to capture the initial tree.
@@ -142,6 +148,17 @@ class JSBridge {
         ctx.setObject(relayoutBlock, forKeyedSubscript: "__nativeBridge_relayout" as NSString)
     }
 
+    private func setupAppearanceBridge() {
+        let prefersDark: @convention(block) () -> Bool = { [weak self] in
+            self?.prefersDarkMode?() ?? false
+        }
+        let setDark: @convention(block) (Bool) -> Void = { [weak self] dark in
+            self?.onDarkModeChange?(dark)
+        }
+        ctx.setObject(prefersDark, forKeyedSubscript: "__nativeBridge_prefersDarkMode" as NSString)
+        ctx.setObject(setDark, forKeyedSubscript: "__nativeBridge_setDarkMode" as NSString)
+    }
+
     private func setupContext() {
         ctx.exceptionHandler = { [weak self] _, exception in
             self?.runtimeErrors.append(exception?.toString() ?? "Unknown JavaScript exception")
@@ -167,7 +184,8 @@ class JSBridge {
         let setTimeoutBlock: @convention(block) (JSValue, JSValue) -> Int = { [weak self] callback, ms in
             guard let self = self else { return 0 }
             let delay = ms.toInt32()
-            let id = Int.random(in: 1...Int.max)
+            self.timerId += 1
+            let id = self.timerId
             let workItem = DispatchWorkItem { [weak self] in
                 self?.timerItems.removeValue(forKey: id)
                 callback.call(withArguments: [])
@@ -189,10 +207,11 @@ class JSBridge {
         ctx.setObject(clearTimeoutBlock, forKeyedSubscript: "clearTimeout" as NSString)
 
         let setIntervalBlock: @convention(block) (JSValue, JSValue) -> Int = { [weak self] callback, ms in
-            guard self != nil else { return 0 }
+            guard let bridge = self else { return 0 }
             let interval = max(Int(ms.toInt32()), 16)
-            let id = Int.random(in: 1...Int.max)
-            self?.intervalActive[id] = true
+            bridge.timerId += 1
+            let id = bridge.timerId
+            bridge.intervalActive[id] = true
             func tick() {
                 guard self?.intervalActive[id] == true else { return }
                 DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(interval)) {
@@ -284,7 +303,7 @@ class JSBridge {
             return .view(style: style, children: parseChildren(value), jsValue: value)
         }
 
-        if type == "view" || type == "label" {
+        if type == "view" || type == "label" || type == "form" || type == "table" || type.hasPrefix("table-") {
             let style = property("style") as? [String: String] ?? [:]
             let children = parseChildren(value)
             return .view(style: style, children: children, jsValue: value)
@@ -437,10 +456,10 @@ class JSBridge {
             return .splitPane(size: size, minSize: minSize, maxSize: maxSize, collapsible: collapsible, collapsedSize: collapsedSize, children: children, jsValue: value)
         }
 
-        if type == "scroll-view" {
+        if type == "scroll-view" || type == "list-view-v2" {
             let horizontal = property("horizontal") as? String ?? "auto"
             let vertical = property("vertical") as? String ?? "auto"
-            let children = parseChildren(value)
+            let children = type == "list-view-v2" ? [] : parseChildren(value)
             return .scrollView(horizontal: horizontal, vertical: vertical, children: children, jsValue: value)
         }
 
@@ -462,14 +481,16 @@ class JSBridge {
     }
 
     private func parseChildren(_ value: JSValue) -> [NativeNode] {
+        if let style = value.forProperty("style"), style.isObject,
+           style.forProperty("display")?.toString() == "none" { return [] }
         var children: [NativeNode] = []
         guard let jsChildren = value.forProperty("children"), jsChildren.isArray else { return children }
         let length = Int(jsChildren.forProperty("length").toInt32())
         for i in 0..<length {
             guard let child = jsChildren.atIndex(i) else { continue }
-            // Flatten transparent logical containers (For, Fragment) into their parent's children
+            // Transparent logical containers must not create zero-size mouse hit regions.
             if let childType = child.forProperty("type")?.toString(),
-               childType == "for" || childType == "fragment" {
+               childType == "for" || childType == "fragment" || childType == "show" {
                 children.append(contentsOf: parseChildren(child))
                 continue
             }

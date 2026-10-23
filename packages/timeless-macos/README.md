@@ -6,6 +6,8 @@
 import { render } from "@timeless/timeless-macos";
 ```
 
+共享 native 样式运行时默认按选择器依赖更新样式，macOS 和 Windows 的所有页面自动生效，无需页面开关或适配代码。class、属性、交互状态和节点增删只影响相关选择器的目标；纯背景、边框等变化不向子树传播，继承值、CSS 变量和隐藏内容重新显示时才继续更新后代。全局主题和样式表替换仍会更新其实际影响的范围。回归覆盖见 [`style-invalidation.test.ts`](../timeless-native/src/__tests__/style-invalidation.test.ts)。
+
 `Icon({ name, size, color })` 使用 primitive 的图标注册表渲染 SVG，支持自定义
 `registerIcons()`、响应式属性和 HMR。默认 `currentColor` 跟随父级样式及明暗主题；
 SVG 的固定颜色保留。未注册的名称继续使用 SF Symbols（例如 `house.fill`）。
