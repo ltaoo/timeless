@@ -1,10 +1,5 @@
 import { Fragment, refobj } from "../core";
-import {
-  ViewProps,
-  ViewChildren,
-  ListenerManager,
-  VNodeEvent,
-} from "../core";
+import { ViewProps, ViewChildren, ListenerManager, VNodeEvent } from "../core";
 import {
   DropdownMenuCore,
   MenuCore,
@@ -40,7 +35,7 @@ export function Trigger(
           }),
         );
         const $elm = event.target;
-        const nodes = $elm.get$children();
+        const nodes = $elm.getChildren();
         const $ref = nodes[0] || $elm;
         // console.log("[DropdownMenu]find child $elm", nodes, $ref);
         // console.log(
@@ -48,17 +43,33 @@ export function Trigger(
         //   nodes,
         //   $ref.getBoundingClientRect(),
         // );
-        setTimeout(() => {
-          props.store.setReference(
-            {
-              $el: $ref,
-              getRect() {
-                return $ref.getBoundingClientRect();
-              },
+        props.store.setReference(
+          {
+            $el: $ref,
+            getRect() {
+              return $ref.getBoundingClientRect();
             },
-            { force: true },
-          );
-        }, 0);
+          },
+          { force: true },
+        );
+        const sync = () => {
+          $ref.setAttribute("aria-haspopup", "menu");
+          $ref.setAttribute("aria-expanded", String(store.menu.state.open));
+        };
+        sync();
+        listener$.add(store.menu.onStateChange(sync));
+        const keydown = (event: KeyboardEvent) => {
+          if (
+            !["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key) ||
+            store.disabled
+          )
+            return;
+          event.preventDefault();
+          store.show();
+          store.menu.focusItem(event.key === "ArrowUp" ? "last" : "first");
+        };
+        $ref.addEventListener("keydown", keydown);
+        listener$.add(() => $ref.removeEventListener("keydown", keydown));
         // Handle click trigger
         if (store.trigger === "click") {
           const handlePointerDown = (e: any) => {

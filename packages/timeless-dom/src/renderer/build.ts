@@ -4,6 +4,7 @@ import { DOMView } from "@/host/view";
 import { DOMCanvas } from "@/host/canvas";
 import { DOMModal } from "@/host/modal";
 import { DOMPopover } from "@/host/popover";
+import { DOMTooltip } from "@/host/tooltip";
 import { DOMForm } from "@/host/form";
 import { DOMGrid } from "@/host/grid";
 import { DOMText } from "@/host/text";
@@ -78,6 +79,11 @@ export function buildAndRender(elm: TimelessElement): {
 }
 
 export function build(elm: TimelessElement): VNodeView<any> {
+  if (elm.t === "tooltip") {
+    const host = DOMTooltip({ build, elm });
+    elm.$elm = host;
+    return host;
+  }
   if (elm.t === "popover") {
     const host = DOMPopover({ build, elm });
     elm.$elm = host;

@@ -7,6 +7,7 @@ import {
 import { Logger } from "../core";
 import {
   View,
+  Popover,
   ViewProps,
   ViewChildren,
   Portal as NativePortal,
@@ -109,71 +110,104 @@ export function ContentImpl(
     ok() {
       // logger.log("Content mounted");
       return [
-        NativePortal({}, [
-          PopperPrimitive.Content(
-            {
-              store: props.store.popper,
-              onDismiss() {
-                props.store.hide({ reason: "popper dismiss callback" });
-              },
-              onReferenceOutOfView() {
-                props.store.hide({ reason: "reference out of view callback" });
-              },
-              onMouseEnter(event) {
-                store.handleEnter();
-                if (onMouseEnter) {
-                  onMouseEnter(event);
-                }
-              },
-              onMouseLeave(event) {
-                store.handleLeave();
-                if (onMouseLeave) {
-                  onMouseLeave(event);
-                }
-              },
+        Popover(
+          {
+            open: computed(state_, (value) => value.open),
+            anchor: () => store.popper.reference?.$el,
+            side: store.popper.placement.split("-")[0] as
+              | "top"
+              | "bottom"
+              | "left"
+              | "right",
+            align: (store.popper.placement.split("-")[1] ?? "center") as
+              | "start"
+              | "center"
+              | "end",
+            offset:
+              4 +
+              (store.popper.placement.startsWith("top") ||
+              store.popper.placement.startsWith("bottom")
+                ? store.popper.offsetY
+                : store.popper.offsetX),
+            crossOffset:
+              store.popper.placement.startsWith("top") ||
+              store.popper.placement.startsWith("bottom")
+                ? store.popper.offsetX
+                : store.popper.offsetY,
+            class: "w-fit",
+            attributes: {
+              n: `${content_props.attributes?.n ?? "menu"}-surface`,
+              role: "menu",
             },
-            [
-              View(
-                {
-                  ...content_props,
-                  class: classNames([
-                    content_props.class,
-                    computed(presence_, (t) => {
-                      if (t.exit) {
-                        _was_exiting = true;
-                      }
-                      // Keep exit animation class during unmount to prevent flash
-                      // When exit=false but mounted=false, the animation class would become ""
-                      // causing the element to snap to full opacity before DOM removal
-                      if (!t.mounted && _was_exiting) {
-                        _was_exiting = false;
-                        return animation?.out || "";
-                      }
-                      if (t.mounted) {
-                        _was_exiting = false;
-                      }
-                      return [
-                        t.enter && animation?.in ? animation.in : "",
-                        t.exit && animation?.out ? animation.out : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ");
-                    }),
-                  ]),
-                  onAnimationEnd(e: AnimationEvent) {
-                    if (e.target === e.currentTarget) {
-                      store.presence.handleAnimationEnd();
+            onClose: () => store.hide({ reason: "host dismissal" }),
+            onKeyDown(event) {
+              if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+                event.preventDefault();
+                store.focusItem(
+                  event.key === "ArrowDown"
+                    ? 1
+                    : event.key === "ArrowUp"
+                      ? -1
+                      : event.key === "Home"
+                        ? "first"
+                        : "last",
+                );
+              }
+            },
+            onMouseEnter(event) {
+              store.handleEnter();
+              if (onMouseEnter) {
+                onMouseEnter(event);
+              }
+            },
+            onMouseLeave(event) {
+              store.handleLeave();
+              if (onMouseLeave) {
+                onMouseLeave(event);
+              }
+            },
+          },
+          [
+            View(
+              {
+                ...content_props,
+                class: classNames([
+                  content_props.class,
+                  computed(presence_, (t) => {
+                    if (t.exit) {
+                      _was_exiting = true;
                     }
-                    if (onAnimationEnd) {
-                      onAnimationEnd(e);
+                    // Keep exit animation class during unmount to prevent flash
+                    // When exit=false but mounted=false, the animation class would become ""
+                    // causing the element to snap to full opacity before DOM removal
+                    if (!t.mounted && _was_exiting) {
+                      _was_exiting = false;
+                      return animation?.out || "";
                     }
-                  },
+                    if (t.mounted) {
+                      _was_exiting = false;
+                    }
+                    return [
+                      t.enter && animation?.in ? animation.in : "",
+                      t.exit && animation?.out ? animation.out : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+                  }),
+                ]),
+                onAnimationEnd(e: AnimationEvent) {
+                  if (e.target === e.currentTarget) {
+                    store.presence.handleAnimationEnd();
+                  }
+                  if (onAnimationEnd) {
+                    onAnimationEnd(e);
+                  }
                 },
-                children,
-              ),
-            ],
-          ),
-        ]),
+              },
+              children,
+            ),
+          ],
+        ),
       ];
     },
   });
@@ -206,15 +240,20 @@ export function ItemImpl(
   // const host = getHost();
   const { store, ...rest } = props;
   const state_ = refobj(props.store.state);
+  const listener = ListenerManager([state_]);
 
   return PrimitiveButton(
     {
       ...rest,
+      disabled: computed(state_, (value) => Boolean(value.disabled)),
       attributes: {
         ...(rest.attributes || {}),
-        "tab-index": computed(state_, (t) => {
+        n: rest.attributes?.n ?? `menu-item-${store.label}`,
+        role: "menuitem",
+        tabindex: computed(state_, (t) => {
           return t.disabled ? undefined : -1;
         }),
+        "aria-disabled": computed(state_, (value) => String(value.disabled)),
       },
       onMounted(event) {
         // logger.log(
@@ -222,10 +261,12 @@ export function ItemImpl(
         //   props.store.label,
         //   !!props.store.menu,
         // );
-        props.store.onStateChange((v) => {
-          // console.log("[ItemImpl] handle store.onStateChange", v.focused);
-          state_.as(v);
-        });
+        listener.add(
+          props.store.onStateChange((v) => {
+            // console.log("[ItemImpl] handle store.onStateChange", v.focused);
+            state_.as(v);
+          }),
+        );
         const $el = event.target;
         // console.log("[ItemImpl] mounted", props.store.label);
         if (props.store.menu) {
@@ -236,17 +277,20 @@ export function ItemImpl(
             },
           });
         }
-        props.store.onFocus(() => {
-          // @ts-ignore
-          $el.focus();
-        });
-        props.store.onBlur(() => {
-          // @ts-ignore
-          $el.blur();
-        });
-        if (rest.onMounted) {
-          return rest.onMounted(event);
-        }
+        listener.add(
+          props.store.onFocus(() => {
+            // @ts-ignore
+            $el.focus();
+          }),
+        );
+        listener.add(
+          props.store.onBlur(() => {
+            // @ts-ignore
+            $el.blur();
+          }),
+        );
+        listener.add(rest.onMounted?.(event));
+        return listener.destroy;
       },
       onClick() {
         props.store.handleClick();

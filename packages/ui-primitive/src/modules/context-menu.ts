@@ -1,9 +1,5 @@
 import { Fragment, refobj } from "../core";
-import {
-  ViewProps,
-  ViewChildren,
-  ListenerManager,
-} from "../core";
+import { ViewProps, ViewChildren, ListenerManager } from "../core";
 import {
   ContextMenuCore,
   MenuCore,
@@ -38,7 +34,7 @@ export function Trigger(
           }),
         );
         const $elm = event.target;
-        const nodes = $elm.get$children?.() ?? [];
+        const nodes = $elm.getChildren?.() ?? [];
         const refs = nodes.length ? nodes : [$elm];
         // Don't set reference here - it will be set dynamically on contextmenu event
         // Handle context menu (right-click)
@@ -49,7 +45,7 @@ export function Trigger(
           }
           store.show({
             x: e.clientX,
-            y: e.clientY - 4,
+            y: e.clientY,
           });
         };
         for (let i = 0; i < refs.length; i += 1) {
@@ -57,7 +53,24 @@ export function Trigger(
           if (!$ref?.addEventListener) {
             continue;
           }
-          listener$.add($ref.addEventListener("contextmenu", handleContextMenu));
+          listener$.add(
+            $ref.addEventListener("contextmenu", handleContextMenu),
+          );
+          const keydown = (event: KeyboardEvent) => {
+            if (
+              store.disabled ||
+              !(
+                event.key === "ContextMenu" ||
+                (event.key === "F10" && event.shiftKey)
+              )
+            )
+              return;
+            event.preventDefault();
+            const rect = $ref.getBoundingClientRect();
+            store.show({ x: rect.left, y: rect.bottom });
+          };
+          $ref.addEventListener("keydown", keydown);
+          listener$.add(() => $ref.removeEventListener("keydown", keydown));
         }
 
         return listener$.destroy;

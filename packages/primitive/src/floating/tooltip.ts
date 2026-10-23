@@ -160,6 +160,7 @@ export function Tooltip(
           child.onMounted({ target: child.$elm });
         }
       }
+      $elm?.setVisible?.(Boolean(state.visible));
     },
     beforeUnmounted() {
       content_view.beforeUnmounted?.();

@@ -7,6 +7,7 @@ export function DOMPopover(props: {
 }) {
   const view = DOMView(props);
   let previous: HTMLElement | null = null;
+  let openDisplay = "";
   function anchor(): HTMLElement | undefined {
     const source = props.elm.state.anchor;
     const target = typeof source === "function" ? source() : source?.$elm;
@@ -20,6 +21,7 @@ export function DOMPopover(props: {
     const offset = props.elm.state.offset ?? 8;
     const side = props.elm.state.side ?? "bottom";
     const align = props.elm.state.align ?? "start";
+    const crossOffset = props.elm.state.crossOffset ?? 0;
     let x =
       align === "end"
         ? reference.right - rect.width
@@ -35,12 +37,19 @@ export function DOMPopover(props: {
         side === "left"
           ? reference.left - rect.width - offset
           : reference.right + offset;
-      y = reference.top;
+      y =
+        align === "end"
+          ? reference.bottom - rect.height
+          : align === "center"
+            ? reference.top + (reference.height - rect.height) / 2
+            : reference.top;
     } else if (
       y + rect.height > innerHeight &&
       reference.top > rect.height + offset
     )
       y = reference.top - rect.height - offset;
+    if (side === "left" || side === "right") y += crossOffset;
+    else x += crossOffset;
     element.style.left = `${Math.max(8, Math.min(x, innerWidth - rect.width - 8))}px`;
     element.style.top = `${Math.max(8, Math.min(y, innerHeight - rect.height - 8))}px`;
   }
@@ -52,13 +61,22 @@ export function DOMPopover(props: {
       if (open) {
         if (!element.matches(":popover-open")) {
           previous = document.activeElement as HTMLElement;
+          element.style.display = openDisplay;
           element.showPopover();
         }
         position();
-        element.querySelector<HTMLElement>("button:not(:disabled), input:not(:disabled), [tabindex='0']")?.focus();
+        if (props.elm.state.attributes?.role !== "tooltip")
+          element
+            .querySelector<HTMLElement>(
+              "button:not(:disabled), input:not(:disabled), [tabindex='0']",
+            )
+            ?.focus();
       } else {
-        const restore = element.contains(document.activeElement) || (!element.isConnected && document.activeElement === document.body);
+        const restore =
+          element.contains(document.activeElement) ||
+          (!element.isConnected && document.activeElement === document.body);
         if (element.matches(":popover-open")) element.hidePopover();
+        element.style.display = "none";
         if (restore && previous?.isConnected) previous.focus();
         previous = null;
       }
@@ -93,6 +111,8 @@ export function DOMPopover(props: {
     render() {
       const element = view.render() as HTMLElement;
       element.popover = "manual";
+      openDisplay = element.style.display;
+      element.style.display = "none";
       Object.assign(element.style, {
         position: "fixed",
         inset: "auto",

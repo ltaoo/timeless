@@ -28,6 +28,7 @@ export function DOMModal(props: {
   const t = "modal";
   const box$ = HostElement({ $elm: null, t, build: props.build });
   let closing = false;
+  let openDisplay = "";
 
   return {
     ...box$.methods,
@@ -42,12 +43,14 @@ export function DOMModal(props: {
       const element = box$.methods.get$elm() as HTMLDialogElement | null;
       if (!element) return;
       if (open && !element.open) {
+        element.style.display = openDisplay;
         if (modal) element.showModal();
         else element.show();
       } else if (!open && element.open) {
         closing = true;
         element.close();
       }
+      if (!open) element.style.display = "none";
     },
     bindDismiss(onClose?: () => void) {
       const element = box$.methods.get$elm() as HTMLDialogElement;
@@ -58,6 +61,7 @@ export function DOMModal(props: {
         }
       };
       const close = () => {
+        if (!element.open) element.style.display = "none";
         if (closing) {
           closing = false;
           return;
@@ -88,6 +92,8 @@ export function DOMModal(props: {
       const $elm = document.createElement("dialog");
       box$.methods.set$elm($elm);
       box$.methods.applyState(props.elm.state, { initial: true });
+      openDisplay = $elm.style.display;
+      $elm.style.display = "none";
       const $fragment = box$.methods.render(props.elm.children);
       box$.methods.setupEventListener(props.elm.events);
       $elm.appendChild($fragment);

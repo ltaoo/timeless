@@ -411,6 +411,17 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       ...this.state,
     });
   }
+  focusItem(direction: 1 | -1 | "first" | "last") {
+    const collect = (entries: MenuEntry[]): MenuItemCore[] => entries.flatMap((item) =>
+      item instanceof MenuGroupCore ? collect(item.items) : item instanceof MenuItemCore && !item.state.disabled && !item.hidden ? [item] : [],
+    );
+    const items = collect(this.items);
+    if (!items.length) return;
+    const current = items.findIndex((item) => item.state.focused);
+    const index = direction === "first" ? 0 : direction === "last" ? items.length - 1 : current < 0 ? (direction === 1 ? 0 : items.length - 1) : (current + direction + items.length) % items.length;
+    if (current >= 0 && current !== index) items[current].blur();
+    items[index].focus();
+  }
   setOffset(offset: { x: number; y: number }) {
     // this.offsetX = offset.x;
     // this.offsetY = offset.y;

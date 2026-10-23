@@ -7,6 +7,7 @@ export type PopoverProps = Omit<ModalProps, "modal"> & {
   side?: "top" | "bottom" | "left" | "right";
   align?: "start" | "center" | "end";
   offset?: number;
+  crossOffset?: number;
 };
 
 export function Popover(props: PopoverProps, children?: ViewChildren) {
@@ -15,10 +16,11 @@ export function Popover(props: PopoverProps, children?: ViewChildren) {
     side = "bottom",
     align = "start",
     offset = 8,
+    crossOffset = 0,
     ...rest
   } = props;
   const surface = Modal({ ...rest, modal: false }, children);
   surface.t = "popover";
-  Object.assign(surface.state, { anchor, side, align, offset });
+  Object.assign(surface.state, { anchor, side, align, offset, crossOffset });
   return surface;
 }
