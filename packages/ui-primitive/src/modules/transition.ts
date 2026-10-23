@@ -38,6 +38,7 @@ export function Transition(
         View(
           {
             ...rest,
+            attributes: { n: "transition-content", ...rest.attributes },
             class: computed(state, (s) => {
               if (s.exit) {
                 _was_exiting = true;
@@ -64,6 +65,10 @@ export function Transition(
               if (rest.onAnimationEnd) {
                 rest.onAnimationEnd(e);
               }
+            },
+            onAnimationStart(e: AnimationEvent) {
+              if (e.target === e.currentTarget) store.handleAnimationStart();
+              rest.onAnimationStart?.(e);
             },
           },
           children,

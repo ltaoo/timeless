@@ -167,7 +167,21 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       this.unmount();
     }, 150);
   }
+  handleAnimationStart() {
+    if (this.show_timer) {
+      clearTimeout(this.show_timer);
+      this.show_timer = null;
+    }
+    if (this.hide_timer) {
+      clearTimeout(this.hide_timer);
+      this.hide_timer = null;
+    }
+  }
   handleAnimationEnd() {
+    if (this.show_timer) {
+      clearTimeout(this.show_timer);
+      this.show_timer = null;
+    }
     if (this.hide_timer) {
       clearTimeout(this.hide_timer);
       this.hide_timer = null;
