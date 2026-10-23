@@ -10,11 +10,13 @@ import {
   Checkbox,
   Switch,
   Label,
+  Form,
+  Field,
 } from "@timeless/shadcn";
 
 export function FormPageView(model) {
   const field = (key, title, children) =>
-    View(
+    Field(
       {
         class: "flex w-full flex-col gap-3",
         attributes: { n: `field-${key}` },
@@ -26,10 +28,11 @@ export function FormPageView(model) {
         ...children,
       ],
     );
-  return View(
+  return Form(
     {
       class: "flex w-full max-w-2xl flex-col gap-6",
       attributes: { n: "form-page" },
+      onSubmit: model.preventSubmit,
     },
     [
       View(

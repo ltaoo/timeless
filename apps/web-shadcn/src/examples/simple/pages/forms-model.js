@@ -65,6 +65,7 @@ export function FormPageModel() {
     result,
     dateText,
     fileNames,
+    preventSubmit(event) { event.preventDefault(); },
     submit: new vm.ButtonCore({
       onClick() {
         if (!name.value.trim()) {
