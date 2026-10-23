@@ -7390,6 +7390,7 @@ declare module "packages/primitive/src/content/box" {
     import { TimelessElement, ViewAttributes, ViewChildren } from "packages/primitive/src/content/type";
     /** Props for Box component - common to all box-like elements */
     export type BoxProps = {
+        id?: string;
         /** Unique key for list rendering */
         key?: string | number;
         /** HTML tag to render as */
@@ -7438,6 +7439,7 @@ declare module "packages/primitive/src/content/box" {
         onDrop?: (e: DragEvent) => void;
         onWheel?: (e: WheelEvent) => void;
         onAnimationEnd?: (e: AnimationEvent) => void;
+        onAnimationStart?: (e: AnimationEvent) => void;
     }>;
     /** Internal state structure for Box */
     export type BoxState = {
@@ -7492,6 +7494,7 @@ declare module "packages/primitive/src/content/box" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         methods: {
             set$elm(elm: any): void;
@@ -7788,10 +7791,11 @@ declare module "packages/primitive/src/floating/popover" {
     import { ModalProps } from "packages/primitive/src/floating/modal";
     /** An anchored, non-modal surface. Positioning and dismissal belong to the host. */
     export type PopoverProps = Omit<ModalProps, "modal"> & {
-        anchor: TimelessElement;
+        anchor: TimelessElement | (() => unknown);
         side?: "top" | "bottom" | "left" | "right";
         align?: "start" | "center" | "end";
         offset?: number;
+        crossOffset?: number;
     };
     export function Popover(props: PopoverProps, children?: ViewChildren): any;
 }
@@ -7945,6 +7949,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -7988,6 +7993,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8034,6 +8040,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8083,6 +8090,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8128,6 +8136,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8175,6 +8184,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8219,6 +8229,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8263,6 +8274,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8322,6 +8334,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8365,6 +8378,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8409,6 +8423,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8457,6 +8472,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8507,6 +8523,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8558,6 +8575,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8604,6 +8622,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8653,6 +8672,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8697,6 +8717,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -8744,6 +8765,7 @@ declare module "packages/primitive/src/content/svg" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -9007,6 +9029,7 @@ declare module "packages/primitive/src/content/img" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -9131,6 +9154,7 @@ declare module "packages/primitive/src/content/video" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -9246,6 +9270,7 @@ declare module "packages/primitive/src/content/audio" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -9363,6 +9388,7 @@ declare module "packages/primitive/src/content/rich-text" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         };
         _hmr_dispose: () => void;
         onMounted(event: MountedEvent): void;
@@ -9600,57 +9626,129 @@ declare module "packages/primitive/src/floating/tooltip" {
     export function Tooltip(props: TooltipProps, children?: ViewChildren): TimelessElement<TooltipState>;
     export type Tooltip = ReturnType<typeof Tooltip>;
 }
+declare module "packages/primitive/src/style/index" {
+    import { Ref, Subscriber, Signal, DerivedRef } from "packages/reactive/src/index";
+    type ViewStylePropValue = DerivedRef<string | number | boolean | null | undefined> | Ref<string | number | boolean | null | undefined> | string | number | boolean | undefined | null;
+    export type ViewStyleProperties = {
+        [k: string]: ViewStylePropValue;
+    };
+    export type ViewStyle = ViewStyleProperties | DerivedRef<ViewStyleProperties> | Ref<ViewStyleProperties>;
+    export interface RawViewStyleProperties {
+        width?: number | string;
+        height?: number | string;
+        minWidth?: number | string;
+        minHeight?: number | string;
+        maxWidth?: number | string;
+        maxHeight?: number | string;
+        margin?: number | string;
+        marginTop?: number | string;
+        marginRight?: number | string;
+        marginBottom?: number | string;
+        marginLeft?: number | string;
+        padding?: number | string;
+        paddingTop?: number | string;
+        paddingRight?: number | string;
+        paddingBottom?: number | string;
+        paddingLeft?: number | string;
+        position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
+        top?: number | string;
+        right?: number | string;
+        bottom?: number | string;
+        left?: number | string;
+        zIndex?: number;
+        color?: string;
+        backgroundColor?: string;
+        opacity?: number;
+        borderWidth?: number;
+        borderStyle?: "none" | "solid" | "dashed" | "dotted";
+        borderColor?: string;
+        borderRadius?: number;
+        borderTopWidth?: number;
+        borderRightWidth?: number;
+        borderBottomWidth?: number;
+        borderLeftWidth?: number;
+        borderTopLeftRadius?: number;
+        borderTopRightRadius?: number;
+        borderBottomLeftRadius?: number;
+        borderBottomRightRadius?: number;
+        fontSize?: number;
+        fontWeight?: number | "bold" | "normal";
+        fontFamily?: string;
+        fontStyle?: "normal" | "italic";
+        lineHeight?: number;
+        letterSpacing?: number;
+        textAlign?: "left" | "center" | "right" | "justify";
+        textDecoration?: "none" | "underline" | "line-through";
+        textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
+        maxLines?: number;
+        overflow?: "visible" | "hidden";
+        pointerEvents?: "auto" | "none";
+        transforms?: VNodeTransform[];
+        shadows?: VNodeShadow[];
+        [key: string]: any;
+    }
+    export interface VNodeTransform {
+        translate?: {
+            x?: number;
+            y?: number;
+            z?: number;
+        };
+        rotate?: number;
+        rotateX?: number;
+        rotateY?: number;
+        rotateZ?: number;
+        scale?: number | {
+            x?: number;
+            y?: number;
+        };
+        skew?: {
+            x?: number;
+            y?: number;
+        };
+    }
+    export interface VNodeShadow {
+        color: string;
+        offsetX: number;
+        offsetY: number;
+        blurRadius: number;
+        spreadRadius?: number;
+    }
+    export type ClassNameRef = {
+        __cn_ref: true;
+        value: string[];
+        subscribe(ctx: Subscriber<string[]>): () => void;
+        destroy(): void;
+        as(v: string): void;
+        del(v: string): void;
+        add(v: string): void;
+        append(c: string): void;
+        diff(v: string): void;
+        toString(): string;
+    };
+    export function isClassNameRef(v: any): v is ClassNameRef;
+    export function classNames(items: (string | DerivedRef<string> | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
+    export function join(v: (string | Signal<string>)[]): Signal<string>;
+    export type StyleObject = Record<string, any>;
+    export interface StyleRef {
+        __style_ref: true;
+        value: StyleObject;
+        subscribe(ctx: Subscriber<StyleObject>): () => void;
+        toString(): string;
+    }
+    export function isStyleRef(v: any): v is StyleRef;
+    export function styleNames(items: (ViewStyleProperties | DerivedRef<StyleRef | ViewStyleProperties> | Ref<StyleRef | ViewStyleProperties> | StyleRef | undefined)[]): DerivedRef<ViewStyleProperties>;
+}
 declare module "packages/primitive/src/floating/drawer" {
-    /**
-     * Drawer - A panel that slides in from the edge of the screen.
-     *
-     * Drawer renders an overlay + sliding panel from a specified side.
-     * Commonly used for:
-     * - Side sheets
-     * - Slide-out menus
-     * - Bottom sheets
-     * - Detail panels
-     *
-     * Supports reactive `visible` prop and `side` placement.
-     *
-     * @example
-     * ```tsx
-     * <Drawer
-     *   visible={isOpen}
-     *   side="right"
-     *   onClose={() => isOpen.as(false)}
-     * >
-     *   <Text>Drawer content</Text>
-     * </Drawer>
-     * ```
-     */
     import { DerivedRef, Ref } from "packages/reactive/src/index";
-    import { TimelessElement, ViewChildren } from "packages/primitive/src/content/type";
-    import { BoxProps } from "packages/primitive/src/content/box";
-    /** Side from which the drawer enters */
+    import { ViewChildren } from "packages/primitive/src/content/type";
+    import { ModalProps } from "packages/primitive/src/floating/modal";
     export type DrawerSide = "top" | "right" | "bottom" | "left";
-    /** Props for Drawer component */
-    export type DrawerProps = BoxProps & {
-        /** Whether the drawer is visible */
+    export type DrawerProps = Omit<ModalProps, "open" | "modal"> & {
         visible: boolean | DerivedRef<boolean> | Ref<boolean>;
-        /** Called when the drawer requests to close (overlay click) */
-        onClose?: () => void;
-        /** Edge the drawer slides in from */
         side?: DrawerSide;
     };
-    /** Internal state for Drawer */
-    type DrawerState = {
-        visible: boolean;
-        side: DrawerSide;
-    };
-    /**
-     * Creates a Drawer component - a sliding panel.
-     *
-     * @param props - Drawer props (visible, side, onClose, etc.)
-     * @param children - Drawer content
-     * @returns A TimelessElement representing a sliding drawer
-     */
-    export function Drawer(props: DrawerProps, children?: ViewChildren): TimelessElement<DrawerState>;
+    /** A modal panel at a viewport edge, with the host's focus and dismissal behavior. */
+    export function Drawer(props: DrawerProps, children?: ViewChildren): any;
     export type Drawer = ReturnType<typeof Drawer>;
 }
 declare module "packages/primitive/src/floating/popconfirm" {
@@ -9978,6 +10076,7 @@ declare module "packages/primitive/src/content/list-item-view" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         readonly children: TimelessElement<any, any>[];
         unbind: () => void;
@@ -10079,6 +10178,7 @@ declare module "packages/primitive/src/content/list-view" {
                 onDrop?: (e: DragEvent) => void;
                 onWheel?: (e: WheelEvent) => void;
                 onAnimationEnd?: (e: AnimationEvent) => void;
+                onAnimationStart?: (e: AnimationEvent) => void;
             }>;
             readonly children: TimelessElement<any, any>[];
             unbind: () => void;
@@ -10131,6 +10231,8 @@ declare module "packages/primitive/src/content/list-view-v2" {
     export type ListViewV2Props<T extends Record<string, unknown>> = BoxProps & {
         each: T[] | Ref<T[]> | DerivedRef<T[]>;
         render: (item: Ref<T>, index: Ref<number>) => ViewChildren;
+        /** Content shown when each is empty; callbacks are evaluated lazily. */
+        empty?: ViewChildren;
         key?: ListViewV2Key<T>;
         size?: number;
         buffer?: number;
@@ -10182,19 +10284,31 @@ declare module "packages/primitive/src/content/list-view-v2" {
     export function ListViewV2<T extends Record<string, unknown>>(props: ListViewV2Props<T>): ListViewV2Element<T>;
 }
 declare module "packages/primitive/src/content/icon" {
+    /**
+     * Icon - A component for rendering icons.
+     *
+     * Icon renders a named icon from an icon library.
+     * Supports reactive name, color, and size props for dynamic updates.
+     *
+     * @example
+     * ```tsx
+     * <Icon name="home" size={24} color="blue" />
+     * ```
+     */
+    import { type Ref, type DerivedRef } from "packages/reactive/src/index";
     import { MountedEvent } from "@/event";
-    import { BoxProps, BoxState } from "packages/primitive/src/content/box";
+    import { BoxProps } from "packages/primitive/src/content/box";
     /** Props for Icon component */
     type IconProps = BoxProps & {
         /** Icon name from the icon library */
-        name: string;
+        name: string | Ref<string> | DerivedRef<string>;
         /** Icon color - defaults to "currentColor" */
-        color?: string;
+        color?: string | Ref<string> | DerivedRef<string>;
         /** Icon size in pixels - defaults to 24 */
-        size?: number;
+        size?: number | Ref<number> | DerivedRef<number>;
     };
     /** Internal state for Icon */
-    type IconState = {
+    export type IconState = {
         name: string;
         size: number;
         color: string;
@@ -10217,7 +10331,8 @@ declare module "packages/primitive/src/content/icon" {
     export function Icon(props: IconProps): {
         t: string;
         $elm: any;
-        state: BoxState & IconState;
+        state: import("packages/primitive/src/content/box").BoxState & IconState;
+        _hmr_dispose: () => void;
         onMounted(event: MountedEvent): void;
         onUnmounted(): void;
     };
@@ -10930,7 +11045,7 @@ declare module "packages/primitive/src/input/input" {
     import { DerivedRef, Ref } from "packages/reactive/src/index";
     import { BoxProps } from "@/content/box";
     import { MountedEvent } from "@/event";
-    export type InputProps = BoxProps & {
+    export type InputProps = Omit<BoxProps, "id"> & {
         type?: string | DerivedRef<string> | Ref<string>;
         id?: string | null;
         name?: string | DerivedRef<string> | Ref<string>;
@@ -11184,13 +11299,13 @@ declare module "packages/primitive/src/input/slider" {
     };
 }
 declare module "packages/primitive/src/input/file-picker" {
-    import { Ref } from "packages/reactive/src/index";
+    import { Ref, DerivedRef } from "packages/reactive/src/index";
     import { BoxProps } from "@/content/box";
     import { MountedEvent } from "@/event";
     import { DisabledValue } from "@/util/disabled";
     export type FilePickerProps = BoxProps & {
-        accept?: string | Ref<string>;
-        multiple?: boolean | Ref<boolean>;
+        accept?: string | Ref<string> | DerivedRef<string>;
+        multiple?: boolean | Ref<boolean> | DerivedRef<boolean>;
         capture?: string | Ref<string>;
         files?: Ref<FileList | null>;
         disabled?: DisabledValue;
@@ -11234,11 +11349,11 @@ declare module "packages/primitive/src/input/textarea" {
         value: string;
         state: TextareaState;
         events: {
-            onInput: any;
-            onChange: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
+            onInput: (e: Event) => void;
+            onChange: (e: Event) => void;
+            onFocus: BoxProps;
+            onBlur: BoxProps;
+            onKeyDown: BoxProps;
         };
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -11845,118 +11960,6 @@ declare module "packages/primitive/src/interaction/button" {
         destroy(): void;
     };
 }
-declare module "packages/primitive/src/style/index" {
-    import { Ref, Subscriber, Signal, DerivedRef } from "packages/reactive/src/index";
-    type ViewStylePropValue = DerivedRef<string | number | boolean | null | undefined> | Ref<string | number | boolean | null | undefined> | string | number | boolean | undefined | null;
-    export type ViewStyleProperties = {
-        [k: string]: ViewStylePropValue;
-    };
-    export type ViewStyle = ViewStyleProperties | DerivedRef<ViewStyleProperties> | Ref<ViewStyleProperties>;
-    export interface RawViewStyleProperties {
-        width?: number | string;
-        height?: number | string;
-        minWidth?: number | string;
-        minHeight?: number | string;
-        maxWidth?: number | string;
-        maxHeight?: number | string;
-        margin?: number | string;
-        marginTop?: number | string;
-        marginRight?: number | string;
-        marginBottom?: number | string;
-        marginLeft?: number | string;
-        padding?: number | string;
-        paddingTop?: number | string;
-        paddingRight?: number | string;
-        paddingBottom?: number | string;
-        paddingLeft?: number | string;
-        position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
-        top?: number | string;
-        right?: number | string;
-        bottom?: number | string;
-        left?: number | string;
-        zIndex?: number;
-        color?: string;
-        backgroundColor?: string;
-        opacity?: number;
-        borderWidth?: number;
-        borderStyle?: "none" | "solid" | "dashed" | "dotted";
-        borderColor?: string;
-        borderRadius?: number;
-        borderTopWidth?: number;
-        borderRightWidth?: number;
-        borderBottomWidth?: number;
-        borderLeftWidth?: number;
-        borderTopLeftRadius?: number;
-        borderTopRightRadius?: number;
-        borderBottomLeftRadius?: number;
-        borderBottomRightRadius?: number;
-        fontSize?: number;
-        fontWeight?: number | "bold" | "normal";
-        fontFamily?: string;
-        fontStyle?: "normal" | "italic";
-        lineHeight?: number;
-        letterSpacing?: number;
-        textAlign?: "left" | "center" | "right" | "justify";
-        textDecoration?: "none" | "underline" | "line-through";
-        textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
-        maxLines?: number;
-        overflow?: "visible" | "hidden";
-        pointerEvents?: "auto" | "none";
-        transforms?: VNodeTransform[];
-        shadows?: VNodeShadow[];
-        [key: string]: any;
-    }
-    export interface VNodeTransform {
-        translate?: {
-            x?: number;
-            y?: number;
-            z?: number;
-        };
-        rotate?: number;
-        rotateX?: number;
-        rotateY?: number;
-        rotateZ?: number;
-        scale?: number | {
-            x?: number;
-            y?: number;
-        };
-        skew?: {
-            x?: number;
-            y?: number;
-        };
-    }
-    export interface VNodeShadow {
-        color: string;
-        offsetX: number;
-        offsetY: number;
-        blurRadius: number;
-        spreadRadius?: number;
-    }
-    export type ClassNameRef = {
-        __cn_ref: true;
-        value: string[];
-        subscribe(ctx: Subscriber<string[]>): () => void;
-        destroy(): void;
-        as(v: string): void;
-        del(v: string): void;
-        add(v: string): void;
-        append(c: string): void;
-        diff(v: string): void;
-        toString(): string;
-    };
-    export function isClassNameRef(v: any): v is ClassNameRef;
-    export function classNames(items: (string | DerivedRef<string> | Ref<string> | ClassNameRef | undefined)[]): ClassNameRef;
-    export function join(v: (string | Signal<string>)[]): Signal<string>;
-    export type StyleObject = Record<string, any>;
-    export interface StyleRef {
-        __style_ref: true;
-        value: StyleObject;
-        subscribe(ctx: Subscriber<StyleObject>): () => void;
-        toString(): string;
-    }
-    export function isStyleRef(v: any): v is StyleRef;
-    export function styleNames(items: (ViewStyleProperties | DerivedRef<StyleRef | ViewStyleProperties> | Ref<StyleRef | ViewStyleProperties> | StyleRef | undefined)[]): DerivedRef<ViewStyleProperties>;
-}
 declare module "packages/primitive/src/util/lazy" {
     export function lazy(path: string): () => Promise<any>;
 }
@@ -11995,6 +11998,8 @@ declare module "packages/primitive/src/vnode/view" {
     };
     type VNodeViewType = "view" | "form" | "text" | "button" | "input" | "fragment" | "portal" | "reactive";
     export type VNodeView<HostElm = any> = {
+        focus?(): void;
+        blur?(): void;
         getType(): VNodeViewType;
         isDocumentFragment(): boolean;
         getChildren(): (VNodeView<any> | null)[];
@@ -12715,6 +12720,7 @@ declare module "packages/ui-vm/src/menu/index" {
         listen_item(item: MenuItemCore): void;
         listen_items(items: MenuEntry[]): void;
         setItems(items: MenuEntry[]): void;
+        focusItem(direction: 1 | -1 | "first" | "last"): void;
         setOffset(offset: {
             x: number;
             y: number;
@@ -15575,6 +15581,7 @@ declare module "packages/ui-vm/src/presence/index" {
             reason: "show_sibling" | "back" | "forward";
             destroy: boolean;
         }>): void;
+        handleAnimationStart(): void;
         handleAnimationEnd(): void;
         /** 将 DOM 从页面卸载 */
         unmount(): void;
@@ -15617,8 +15624,8 @@ declare module "packages/ui-vm/src/progress/index" {
         };
         setValue(v: number): void;
         update(v: number): void;
-        onValueChange(handler: Handler<TheTypesOfEvents[Events.ValueChange]>): void;
-        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): void;
+        onValueChange(handler: Handler<TheTypesOfEvents[Events.ValueChange]>): () => void;
+        onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>): () => void;
     }
 }
 declare module "packages/ui-vm/src/roving-focus/index" {
@@ -23383,6 +23390,7 @@ declare module "packages/ui-primitive/src/modules/avatar" {
             onDrop?: (e: DragEvent) => void;
             onWheel?: (e: WheelEvent) => void;
             onAnimationEnd?: (e: AnimationEvent) => void;
+            onAnimationStart?: (e: AnimationEvent) => void;
         }>;
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -23407,7 +23415,7 @@ declare module "packages/ui-primitive/src/modules/progress" {
     }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
     export function Indicator(props: ViewProps & {
         store?: ProgressCore;
-        value: Ref<number>;
+        value?: Ref<number> | number;
         max?: number;
     }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
 }
@@ -23975,7 +23983,17 @@ declare module "packages/ui-primitive/src/modules/accordion" {
     export function Trigger(props: ViewProps & {
         store: AccordionCore;
         index: number;
-    }, children: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        destroy(): void;
+    };
     export function Chevron(props: ViewProps & {
         store: AccordionCore;
         index: number;
@@ -24119,11 +24137,11 @@ declare module "packages/ui-primitive/src/modules/textarea" {
             minLength?: number;
         };
         events: {
-            onInput: any;
-            onChange: any;
-            onFocus: any;
-            onBlur: any;
-            onKeyDown: any;
+            onInput: (e: Event) => void;
+            onChange: (e: Event) => void;
+            onFocus: BoxProps;
+            onBlur: BoxProps;
+            onKeyDown: BoxProps;
         };
         onMounted(event: MountedEvent): void;
         beforeUnmounted(): void;
@@ -24237,16 +24255,17 @@ declare module "packages/ui-primitive/src/modules/select" {
     }, children: ViewChildren): {
         t: string;
         $elm: any;
-        state: import("packages/primitive/src/content/box").BoxState & {
-            rendered: boolean;
-            children: import("packages/ui-primitive/src/core").TimelessElement[];
-        };
-        children: import("packages/ui-primitive/src/core").TimelessElement<any, any>[];
-        destroy(): void;
-        append(node: any): void;
-        onMounted(event: MountedEvent): void;
-        beforeUnmounted(): void;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: any): void;
         onUnmounted(): void;
+        methods: {
+            subscribe_props(): void;
+            scrollTo(x?: number, y?: number): void;
+            scrollToTop(): void;
+            scrollToBottom(): void;
+        };
     };
     export function Item(props: ViewProps & {
         select$: SelectCore<any>;
@@ -24709,7 +24728,17 @@ declare module "packages/ui-primitive/src/modules/date-range-picker" {
     export function Trigger(props: ViewProps & {
         store: DateRangePickerCore;
         id?: string;
-    }, children?: ViewChildren): import("packages/ui-primitive/src/core").TimelessElement<{}, any>;
+    }, children?: ViewChildren): {
+        t: string;
+        $elm: any;
+        state: any;
+        children: any;
+        events: any;
+        onMounted(event: MountedEvent): void;
+        beforeUnmounted(): void;
+        onUnmounted(): void;
+        destroy(): void;
+    };
     export function Value(props: ViewProps & {
         store: DateRangePickerCore;
         placeholder?: string;
@@ -26828,6 +26857,30 @@ declare module "packages/shadcn/src/modules/progress" {
 declare module "packages/shadcn/src/modules/button" {
     import { vm } from "packages/timeless/src/index";
     import { ViewChildren, ViewProps } from "packages/timeless/src/index";
+    const VARIANTS: {
+        readonly default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80";
+        readonly outline: "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50";
+        readonly secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground";
+        readonly ghost: "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50";
+        readonly destructive: "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40";
+        readonly link: "text-primary underline-offset-4 hover:underline";
+    };
+    const SIZES: {
+        readonly default: "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2";
+        readonly xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3";
+        readonly sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5";
+        readonly lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3";
+        readonly icon: "size-8";
+        readonly "icon-xs": "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3";
+        readonly "icon-sm": "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg";
+        readonly "icon-lg": "size-9";
+    };
+    type ButtonVariant = keyof typeof VARIANTS;
+    export type ButtonSize = keyof typeof SIZES;
+    export const buttonVariants: ({ variant, size, }?: {
+        variant?: ButtonVariant;
+        size?: ButtonSize;
+    }) => string;
     export function Button(props: ViewProps & {
         store: vm.ButtonCore;
         prefix?: ViewChildren;
@@ -26905,6 +26958,21 @@ declare module "packages/shadcn/src/modules/steps" {
         store: vm.StepCore;
         items: StepItem[];
     }): import("@timeless/timeless").TimelessElement<{}, any>;
+}
+declare module "packages/shadcn/src/modules/pagination" {
+    import { ButtonProps, ViewProps, ViewChildren, Ref, DerivedRef, TimelessElement } from "packages/timeless/src/index";
+    import { ButtonSize } from "packages/shadcn/src/modules/button";
+    export function Pagination(props?: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
+    export function PaginationContent(props?: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
+    export function PaginationItem(props?: ViewProps, children?: ViewChildren): TimelessElement<{}, any>;
+    export type PaginationLinkProps = ButtonProps & {
+        isActive?: boolean | Ref<boolean> | DerivedRef<boolean>;
+        size?: ButtonSize;
+    };
+    export function PaginationLink(props?: PaginationLinkProps, children?: ViewChildren): TimelessElement;
+    export function PaginationPrevious(props?: PaginationLinkProps, children?: ViewChildren): TimelessElement;
+    export function PaginationNext(props?: PaginationLinkProps, children?: ViewChildren): TimelessElement;
+    export function PaginationEllipsis(props?: ViewProps): TimelessElement<{}, any>;
 }
 declare module "packages/shadcn/src/modules/scroll-view" {
     import { vm } from "packages/timeless/src/index";
@@ -27037,7 +27105,7 @@ declare module "packages/shadcn/src/modules/field" {
     export function FieldHelp(props: {}, children?: ViewChildren): TimelessElement<{}, any>;
     export function FieldError(props: {}, children?: ViewChildren): TimelessElement<{}, any>;
     export function Field(props: ViewProps & {
-        store: vm.SingleFieldCore<any>;
+        store?: vm.SingleFieldCore<any>;
         id?: string;
         orientation?: "vertical" | "horizontal";
         inline?: boolean;
@@ -27319,6 +27387,8 @@ declare module "packages/shadcn/src/index" {
     import { Tabs } from "packages/shadcn/src/modules/tabs";
     import { Steps } from "packages/shadcn/src/modules/steps";
     import { Button } from "packages/shadcn/src/modules/button";
+    export { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "packages/shadcn/src/modules/pagination";
+    export type { PaginationLinkProps } from "packages/shadcn/src/modules/pagination";
     import { ScrollView } from "packages/shadcn/src/modules/scroll-view";
     import { Badge } from "packages/shadcn/src/modules/badge";
     import { Separator } from "packages/shadcn/src/modules/separator";
@@ -33963,6 +34033,13 @@ declare const LLMProviderForm: typeof import("@timeless/shadcn").LLMProviderForm
 declare const Label: typeof import("@timeless/shadcn").Label;
 declare const Link: typeof import("@timeless/shadcn").Link;
 declare const NumberInput: typeof import("@timeless/shadcn").NumberInput;
+declare const Pagination: typeof import("@timeless/shadcn").Pagination;
+declare const PaginationContent: typeof import("@timeless/shadcn").PaginationContent;
+declare const PaginationEllipsis: typeof import("@timeless/shadcn").PaginationEllipsis;
+declare const PaginationItem: typeof import("@timeless/shadcn").PaginationItem;
+declare const PaginationLink: typeof import("@timeless/shadcn").PaginationLink;
+declare const PaginationNext: typeof import("@timeless/shadcn").PaginationNext;
+declare const PaginationPrevious: typeof import("@timeless/shadcn").PaginationPrevious;
 declare const Popconfirm: typeof import("@timeless/shadcn").Popconfirm;
 declare const Popover: typeof import("@timeless/shadcn").Popover;
 declare const Progress: typeof import("@timeless/shadcn").Progress;
