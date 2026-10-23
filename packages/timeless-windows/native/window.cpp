@@ -1,14 +1,24 @@
 #include "runtime.hpp"
+#include "tests/shared_shadcn.hpp"
 #include <windows.h>
 
 #include <algorithm>
+#include <charconv>
 #include <cmath>
 #include <commctrl.h>
 #include <d2d1.h>
 #include <dwrite.h>
+#include <dwmapi.h>
+#include <shobjidl.h>
+#include <wincodec.h>
+#include <winhttp.h>
+#include <shlwapi.h>
+#include <future>
+#include <fstream>
 #include <filesystem>
 #include <iostream>
 #include <sstream>
+#include <source_location>
 #include <initguid.h> // Instantiate the accessibility GUIDs declared by oleacc.h.
 #include <oleacc.h>
 #include <shellapi.h>
@@ -17,14 +27,19 @@
 #include <windowsx.h>
 #include <wrl/client.h>
 
+#define NANOSVG_IMPLEMENTATION
+#include <nanosvg.h>
+#define NANOSVGRAST_IMPLEMENTATION
+#include <nanosvgrast.h>
+
 using Microsoft::WRL::ComPtr;
 using timeless::Node;
 
 namespace {
-void check(HRESULT result) {
+void check(HRESULT result, const std::source_location location = std::source_location::current()) {
   if (FAILED(result))
     throw std::runtime_error(
-        "Windows API failed: " +
+        "Windows API failed at line " + std::to_string(location.line()) + ": " +
         std::to_string(static_cast<unsigned long>(result)));
 }
 std::wstring wide(const std::string &text) {
@@ -78,13 +93,10 @@ D2D1_COLOR_F color(std::string value,
     value += "ff";
   if (value.size() != 8)
     return fallback;
-  try {
-    auto rgba = std::stoul(value, nullptr, 16);
-    return D2D1::ColorF(static_cast<UINT32>(rgba >> 8),
-                        static_cast<float>(rgba & 255) / 255.f);
-  } catch (const std::exception &) {
-    return fallback;
-  }
+  uint32_t rgba = 0;
+  auto result = std::from_chars(value.data(), value.data() + value.size(), rgba, 16);
+  if (result.ec != std::errc{} || result.ptr != value.data() + value.size()) return fallback;
+  return D2D1::ColorF(rgba >> 8, static_cast<float>(rgba & 255) / 255.f);
 }
 D2D1_COLOR_F background(const Node *node) {
   if (!node)
@@ -114,9 +126,12 @@ class Window {
     HFONT font = nullptr;
     HBRUSH background = nullptr;
     int font_size = 0, font_weight = 0;
+    int clip_width = 0, clip_height = 0, clip_radius = -1;
     COLORREF background_color = 0;
     std::vector<std::string> option_signature;
+    HWND backdrop = nullptr;
     ~Control() {
+      if (backdrop && IsWindow(backdrop)) DestroyWindow(backdrop);
       if (window && IsWindow(window))
         DestroyWindow(window);
       if (font)
@@ -129,7 +144,8 @@ class Window {
   HWND window_ = nullptr;
   ComPtr<ID2D1Factory> factory_;
   ComPtr<IDWriteFactory> text_factory_;
-  ComPtr<ID2D1DCRenderTarget> target_;
+  ComPtr<ID2D1DCRenderTarget> dc_target_;
+  ComPtr<ID2D1RenderTarget> target_;
   ComPtr<ID2D1SolidColorBrush> brush_;
   ComPtr<IAccPropServices> accessibility_;
   std::unordered_map<int, std::unique_ptr<Control>> controls_;
@@ -140,15 +156,168 @@ class Window {
   ULONGLONG last_poll_ = 0;
   bool dev_ = false, syncing_ = false, failed_ = false, quiet_ = false;
   float scale_ = 1;
+  int pending_focus_ = 0;
+  bool changing_focus_ = false;
+  HWND restore_target_ = nullptr;
+  std::vector<int> floating_;
+  std::unordered_map<int, HWND> restore_focus_;
+  std::unordered_map<std::string, ComPtr<ID2D1Bitmap>> icons_;
+  struct Image {
+    std::future<std::vector<BYTE>> task;
+    std::vector<BYTE> pixels;
+    UINT width = 0, height = 0;
+    bool done = false;
+    std::string error;
+    ComPtr<ID2D1Bitmap> bitmap;
+  };
+  std::unordered_map<std::string, Image> images_;
+
+  void set_focus(HWND target) {
+    if (changing_focus_ || !target || !IsWindow(target) || GetFocus() == target) return;
+    // Focus messages can synchronously rebuild the tree before SetFocus returns.
+    changing_focus_ = true;
+    SetFocus(target);
+    changing_focus_ = false;
+  }
+
+  static std::vector<BYTE> read_image(const std::string &source, const std::filesystem::path &base) {
+    constexpr size_t maximum = 32 * 1024 * 1024;
+    std::vector<BYTE> bytes;
+    if (!source.starts_with("https://") && !source.starts_with("http://")) {
+      std::ifstream file(base / timeless::file_path(source), std::ios::binary | std::ios::ate);
+      if (!file || file.tellg() < 0 || file.tellg() > maximum) throw std::runtime_error("Cannot read image: " + source);
+      bytes.resize(static_cast<size_t>(file.tellg()));
+      file.seekg(0);
+      if (!file.read(reinterpret_cast<char *>(bytes.data()), bytes.size())) throw std::runtime_error("Incomplete image: " + source);
+      return bytes;
+    }
+    using Internet = std::unique_ptr<void, decltype(&WinHttpCloseHandle)>;
+    auto url = wide(source);
+    URL_COMPONENTS parts{sizeof(parts)};
+    parts.dwHostNameLength = parts.dwUrlPathLength = parts.dwExtraInfoLength = static_cast<DWORD>(-1);
+    if (!WinHttpCrackUrl(url.c_str(), 0, 0, &parts)) throw std::runtime_error("Invalid image URL");
+    Internet session(WinHttpOpen(L"Timeless", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, nullptr, nullptr, 0), WinHttpCloseHandle);
+    if (!session) throw std::runtime_error("Cannot open image connection");
+    WinHttpSetTimeouts(session.get(), 5000, 5000, 5000, 5000);
+    auto host = std::wstring(parts.lpszHostName, parts.dwHostNameLength);
+    Internet connection(WinHttpConnect(session.get(), host.c_str(), parts.nPort, 0), WinHttpCloseHandle);
+    if (!connection) throw std::runtime_error("Cannot connect image server");
+    auto path = std::wstring(parts.lpszUrlPath, parts.dwUrlPathLength) + std::wstring(parts.lpszExtraInfo, parts.dwExtraInfoLength);
+    Internet request(WinHttpOpenRequest(connection.get(), L"GET", path.c_str(), nullptr, nullptr, WINHTTP_DEFAULT_ACCEPT_TYPES,
+      parts.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0), WinHttpCloseHandle);
+    if (!request || !WinHttpSendRequest(request.get(), nullptr, 0, nullptr, 0, 0, 0) || !WinHttpReceiveResponse(request.get(), nullptr))
+      throw std::runtime_error("Image request failed");
+    DWORD status = 0, length = sizeof(status);
+    if (!WinHttpQueryHeaders(request.get(), WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, nullptr, &status, &length, nullptr) || status < 200 || status >= 300)
+      throw std::runtime_error("Image server returned an error");
+    for (;;) {
+      BYTE chunk[16384];
+      DWORD count = 0;
+      if (!WinHttpReadData(request.get(), chunk, sizeof(chunk), &count)) throw std::runtime_error("Image download failed");
+      if (!count) break;
+      if (bytes.size() + count > maximum) throw std::runtime_error("Image exceeds 32 MiB");
+      bytes.insert(bytes.end(), chunk, chunk + count);
+    }
+    return bytes;
+  }
+
+  void poll_images() {
+    for (auto &[source, image] : images_) {
+      if (image.done || image.task.wait_for(std::chrono::seconds(0)) != std::future_status::ready) continue;
+      image.done = true;
+      try {
+        auto bytes = image.task.get();
+        ComPtr<IStream> stream;
+        stream.Attach(SHCreateMemStream(bytes.data(), static_cast<UINT>(bytes.size())));
+        if (!stream) throw std::runtime_error("Cannot open image data");
+        ComPtr<IWICImagingFactory> factory;
+        check(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory)));
+        ComPtr<IWICBitmapDecoder> decoder;
+        check(factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder));
+        ComPtr<IWICBitmapFrameDecode> frame;
+        check(decoder->GetFrame(0, &frame));
+        check(frame->GetSize(&image.width, &image.height));
+        if (!image.width || !image.height || image.width > 16384 || image.height > 16384 ||
+            static_cast<uint64_t>(image.width) * image.height > 32 * 1024 * 1024)
+          throw std::runtime_error("Image dimensions exceed native limit");
+        ComPtr<IWICFormatConverter> converter;
+        check(factory->CreateFormatConverter(&converter));
+        check(converter->Initialize(frame.Get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0, WICBitmapPaletteTypeCustom));
+        image.pixels.resize(image.width * image.height * 4);
+        check(converter->CopyPixels(nullptr, image.width * 4, static_cast<UINT>(image.pixels.size()), image.pixels.data()));
+      } catch (const std::exception &error) {
+        image.error = error.what();
+        std::cerr << "Image " << source << ": " << image.error << '\n';
+      }
+      std::function<void(Node &)> notify = [&](Node &node) {
+        if (node.type == "img" && node.src == source) runtime_.event(node.id, image.error.empty() ? "load" : "error");
+        for (auto &child : node.children) notify(*child);
+      };
+      if (runtime_.root()) notify(*runtime_.root());
+      runtime_.request_update();
+    }
+  }
+
+  void draw_image(const Node &node) {
+    if (node.src.empty()) return;
+    auto found = images_.find(node.src);
+    if (found == images_.end()) {
+      Image image;
+      auto base = timeless::file_path(bundle_).parent_path();
+      image.task = std::async(std::launch::async, [source = node.src, base] { return read_image(source, base); });
+      images_.emplace(node.src, std::move(image));
+      return;
+    }
+    auto &image = found->second;
+    if (!image.done || !image.error.empty() || image.pixels.empty()) return;
+    if (!image.bitmap)
+      check(target_->CreateBitmap(D2D1::SizeU(image.width, image.height), image.pixels.data(), image.width * 4,
+        D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)), &image.bitmap));
+    auto rectangle = D2D1::RectF(node.x, node.y, node.x + node.width, node.y + node.height);
+    auto fit = node.property("object-fit", "fill");
+    float width = node.width, height = node.height;
+    if (fit == "cover" || fit == "contain") {
+      float ratio = fit == "cover" ? std::max(width / image.width, height / image.height) : std::min(width / image.width, height / image.height);
+      width = image.width * ratio; height = image.height * ratio;
+    }
+    target_->PushAxisAlignedClip(rectangle, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+    target_->DrawBitmap(image.bitmap.Get(), D2D1::RectF(node.x + (node.width - width) / 2,
+      node.y + (node.height - height) / 2, node.x + (node.width + width) / 2, node.y + (node.height + height) / 2));
+    target_->PopAxisAlignedClip();
+  }
+
+  static std::wstring font_family(const Node &node) {
+    auto family = node.property("font-family");
+    family = family.substr(0, family.find(','));
+    if (family == "monospace" || family == "ui-monospace") return L"Consolas";
+    if (family.empty() || family == "ui-sans-serif" || family == "sans-serif" || family == "system-ui") {
+      static const auto system = [] {
+        NONCLIENTMETRICSW metrics{sizeof(metrics)};
+        return SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0)
+          ? std::wstring(metrics.lfMessageFont.lfFaceName) : std::wstring(L"Segoe UI");
+      }();
+      return system;
+    }
+    family.erase(std::remove(family.begin(), family.end(), '"'), family.end());
+    family.erase(std::remove(family.begin(), family.end(), '\''), family.end());
+    return wide(family);
+  }
 
   ComPtr<IDWriteTextLayout> text_layout(const Node &node, float width,
                                         const std::string *label = nullptr) {
     auto text = wide(label ? *label : node.text);
     ComPtr<IDWriteTextFormat> format;
     check(text_factory_->CreateTextFormat(
-        L"Segoe UI", nullptr, static_cast<DWRITE_FONT_WEIGHT>(weight(node)),
+        font_family(node).c_str(), nullptr, static_cast<DWRITE_FONT_WEIGHT>(weight(node)),
         DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
         node.number("font-size", 14), L"", &format));
+    format->SetWordWrapping(node.property("white-space") == "nowrap" ? DWRITE_WORD_WRAPPING_NO_WRAP : DWRITE_WORD_WRAPPING_WRAP);
+    float line_height = node.number("line-height");
+    if (line_height > 0 && !node.property("line-height").ends_with("px"))
+      line_height *= node.number("font-size", 14);
+    if (line_height > 0)
+      format->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, line_height,
+                            (line_height - node.number("font-size", 14)) / 2 + node.number("font-size", 14) * .8f);
     auto align = node.property("text-align");
     format->SetTextAlignment(align == "center" ? DWRITE_TEXT_ALIGNMENT_CENTER
                              : align == "right"
@@ -181,18 +350,53 @@ class Window {
     return layout;
   }
 
+  void draw_icon(const Node &node) {
+    if (node.svg.empty() || node.width <= 0 || node.height <= 0) return;
+    auto source = node.svg;
+    auto tint = node.property("color", "#000000");
+    for (size_t position = 0; (position = source.find("currentColor", position)) != std::string::npos; position += 7)
+      source.replace(position, 12, tint.substr(0, 7));
+    auto width = static_cast<UINT>(std::ceil(node.width * scale_));
+    auto height = static_cast<UINT>(std::ceil(node.height * scale_));
+    if (width > 4096 || height > 4096) throw std::runtime_error("Icon dimensions exceed native limit");
+    auto key = source + std::to_string(width) + "x" + std::to_string(height);
+    auto &bitmap = icons_[key];
+    if (!bitmap) {
+      std::vector<char> xml(source.begin(), source.end());
+      xml.push_back('\0');
+      std::unique_ptr<NSVGimage, decltype(&nsvgDelete)> image(nsvgParse(xml.data(), "px", 96), nsvgDelete);
+      if (!image || image->width <= 0 || image->height <= 0) return;
+      std::unique_ptr<NSVGrasterizer, decltype(&nsvgDeleteRasterizer)> rasterizer(nsvgCreateRasterizer(), nsvgDeleteRasterizer);
+      if (!rasterizer) throw std::runtime_error("Cannot allocate SVG rasterizer");
+      std::vector<BYTE> pixels(width * height * 4);
+      nsvgRasterize(rasterizer.get(), image.get(), 0, 0, width / image->width, pixels.data(), width, height, width * 4);
+      float alpha = color(tint, D2D1::ColorF(0)).a;
+      for (size_t i = 0; i < pixels.size(); i += 4) {
+        std::swap(pixels[i], pixels[i + 2]);
+        pixels[i + 3] = static_cast<BYTE>(pixels[i + 3] * alpha);
+        for (size_t channel = 0; channel < 3; ++channel)
+          pixels[i + channel] = static_cast<BYTE>(pixels[i + channel] * pixels[i + 3] / 255);
+      }
+      check(target_->CreateBitmap(D2D1::SizeU(width, height), pixels.data(), width * 4,
+        D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
+          96 * scale_, 96 * scale_), &bitmap));
+    }
+    target_->DrawBitmap(bitmap.Get(), D2D1::RectF(node.x, node.y, node.x + node.width, node.y + node.height));
+  }
+
   void resources(HDC dc, const RECT &rectangle) {
-    if (!target_) {
+    if (!dc_target_) {
       auto properties = D2D1::RenderTargetProperties(
           D2D1_RENDER_TARGET_TYPE_DEFAULT,
           D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
                             D2D1_ALPHA_MODE_IGNORE));
       check(
-          factory_->CreateDCRenderTarget(&properties, target_.GetAddressOf()));
+          factory_->CreateDCRenderTarget(&properties, dc_target_.GetAddressOf()));
+      target_ = dc_target_;
       check(target_->CreateSolidColorBrush(D2D1::ColorF(0), &brush_));
     }
-    target_->SetDpi(96 * scale_, 96 * scale_);
-    check(target_->BindDC(dc, &rectangle));
+    dc_target_->SetDpi(96 * scale_, 96 * scale_);
+    check(dc_target_->BindDC(dc, &rectangle));
   }
 
   void draw_shadows(const Node &node) {
@@ -206,9 +410,10 @@ class Window {
       if (!(values >> x >> y >> blur >> spread >> tint)) continue;
       auto shade = color(tint);
       if (shade.a <= 0) continue;
-      float dx, dy, radius, expansion;
-      try { dx = std::stof(x); dy = std::stof(y); radius = std::max(0.f, std::stof(blur)) / 2; expansion = std::stof(spread); }
-      catch (const std::exception &) { continue; }
+      float dx = timeless::pixels(x, NAN), dy = timeless::pixels(y, NAN);
+      float radius = std::max(0.f, timeless::pixels(blur, NAN)) / 2;
+      float expansion = timeless::pixels(spread, NAN);
+      if (!std::isfinite(dx) || !std::isfinite(dy) || !std::isfinite(radius) || !std::isfinite(expansion)) continue;
       auto box = D2D1::RectF(node.x, node.y, node.x + node.width, node.y + node.height);
       float corner = std::min(node.number("border-radius"), std::min(node.width, node.height) / 2);
       ComPtr<ID2D1RoundedRectangleGeometry> inside;
@@ -223,41 +428,65 @@ class Window {
         if (outer_box.right <= outer_box.left || outer_box.bottom <= outer_box.top) continue;
         float outer_corner = std::clamp(corner + extent, 0.f, std::min(outer_box.right - outer_box.left, outer_box.bottom - outer_box.top) / 2);
         ComPtr<ID2D1RoundedRectangleGeometry> outside;
-        ComPtr<ID2D1PathGeometry> ring;
-        ComPtr<ID2D1GeometrySink> sink;
+        ComPtr<ID2D1GeometryGroup> ring;
         check(factory_->CreateRoundedRectangleGeometry(D2D1::RoundedRect(outer_box, outer_corner, outer_corner), &outside));
-        check(factory_->CreatePathGeometry(&ring));
-        check(ring->Open(&sink));
-        check(outside->CombineWithGeometry(inside.Get(), D2D1_COMBINE_MODE_EXCLUDE, nullptr, sink.Get()));
-        check(sink->Close());
+        ID2D1Geometry *outlines[] = {outside.Get(), inside.Get()};
+        check(factory_->CreateGeometryGroup(D2D1_FILL_MODE_ALTERNATE, outlines, 2, &ring));
         auto sample_color = shade;
         sample_color.a = std::min(1.f, shade.a * weight / std::max(.0001f, 1 - shade.a * accumulated));
         accumulated += weight;
         brush_->SetColor(sample_color);
+        // Masking the alternating outlines subtracts the interior without a geometry Boolean operation.
+        target_->PushLayer(D2D1::LayerParameters(D2D1::InfiniteRect(), outside.Get()), nullptr);
         target_->FillGeometry(ring.Get(), brush_.Get());
+        target_->PopLayer();
       }
     }
   }
 
-  void draw_node(const Node &node, bool child_control) {
+  void draw_node(const Node &node, bool child_control, bool composited = false) {
     if (node.hidden()) return;
     if (!child_control && node.button()) { draw_shadows(node); return; }
     if (
         (!child_control &&
          (node.type == "text" || node.toggle() ||
-          node.type == "select" || node.type == "scroll-view")))
+          node.type == "select" || node.scrollable() || node.type == "floating")))
       return;
+    float opacity = std::clamp(node.animated ? node.animation_opacity : node.number("opacity", 1), 0.f, 1.f);
+    if (!composited && opacity < 1 && node.width > 0 && node.height > 0) {
+      if (opacity <= 0) return;
+      ComPtr<ID2D1BitmapRenderTarget> surface;
+      auto size = D2D1::SizeF(node.width, node.height);
+      auto format = D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED);
+      check(target_->CreateCompatibleRenderTarget(&size, nullptr, &format, D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE, &surface));
+      auto parent = target_;
+      auto brush = brush_;
+      target_ = surface;
+      try {
+        check(target_->CreateSolidColorBrush(D2D1::ColorF(0), brush_.ReleaseAndGetAddressOf()));
+        target_->BeginDraw();
+        target_->Clear(D2D1::ColorF(0, 0.f));
+        target_->SetTransform(D2D1::Matrix3x2F::Translation(-node.x, -node.y));
+        draw_node(node, child_control, true);
+        check(target_->EndDraw());
+      } catch (...) { target_ = parent; brush_ = brush; throw; }
+      target_ = parent;
+      brush_ = brush;
+      ComPtr<ID2D1Bitmap> bitmap;
+      check(surface->GetBitmap(&bitmap));
+      target_->DrawBitmap(bitmap.Get(), D2D1::RectF(node.x, node.y, node.x + node.width, node.y + node.height), opacity);
+      return;
+    }
     draw_shadows(node);
-    float opacity = std::clamp(node.number("opacity", 1), 0.f, 1.f);
-    if (opacity < 1)
-      target_->PushLayer(
-          D2D1::LayerParameters(D2D1::InfiniteRect(), nullptr,
-                                D2D1_ANTIALIAS_MODE_PER_PRIMITIVE,
-                                D2D1::IdentityMatrix(), opacity),
-          nullptr);
     auto rect =
         D2D1::RectF(node.x, node.y, node.x + node.width, node.y + node.height);
     float radius = node.number("border-radius");
+    bool clip = node.property("overflow") == "hidden";
+    ComPtr<ID2D1RoundedRectangleGeometry> clipping;
+    if (clip) {
+      check(factory_->CreateRoundedRectangleGeometry(D2D1::RoundedRect(rect, radius, radius), &clipping));
+      target_->PushLayer(D2D1::LayerParameters(D2D1::InfiniteRect(), clipping.Get()), nullptr);
+    }
     auto fill =
         color(node.property("background-color", node.property("background")));
     if (fill.a > 0) {
@@ -276,6 +505,21 @@ class Window {
                             std::max(0.f, radius - half)),
           brush_.Get(), border);
     }
+    for (auto [side, x1, y1, x2, y2] : {
+      std::tuple{"top", rect.left, rect.top, rect.right, rect.top},
+      {"right", rect.right, rect.top, rect.right, rect.bottom},
+      {"bottom", rect.left, rect.bottom, rect.right, rect.bottom},
+      {"left", rect.left, rect.top, rect.left, rect.bottom}}) {
+      float width = node.number(std::string("border-") + side + "-width");
+      auto edge_color = node.property(std::string("border-") + side + "-color", node.property("border-color"));
+      if (width == border && edge_color == node.property("border-color")) continue;
+      if (width > 0) {
+        brush_->SetColor(color(edge_color));
+        target_->DrawLine(D2D1::Point2F(x1, y1), D2D1::Point2F(x2, y2), brush_.Get(), width);
+      }
+    }
+    if (node.type == "icon") draw_icon(node);
+    if (node.type == "img") draw_image(node);
     if (node.type == "text") {
       auto layout = text_layout(node, node.width);
       const auto text_length = wide(node.text).size();
@@ -358,9 +602,8 @@ class Window {
     }
     if (!node.input() && node.type != "select")
       for (const auto &child : node.children)
-        draw_node(*child, child_control && node.type != "scroll-view");
-    if (opacity < 1)
-      target_->PopLayer();
+        draw_node(*child, child_control && !node.scrollable());
+    if (clip) target_->PopLayer();
   }
 
   void paint(HDC dc, const RECT &rectangle, Node *control = nullptr) {
@@ -369,15 +612,21 @@ class Window {
     target_->SetTransform(D2D1::IdentityMatrix());
     target_->Clear(control ? background(control->parent)
                            : D2D1::ColorF(0xffffff));
-    if (control)
+    if (control && control->animated)
+      target_->SetTransform(D2D1::Matrix3x2F::Translation(-control->x, -control->y) *
+        D2D1::Matrix3x2F::Scale(control->scale_x, control->scale_y));
+    else if (control)
       target_->SetTransform(
           D2D1::Matrix3x2F::Translation(-control->x, -control->y));
     if (auto root = control ? control : runtime_.root())
       draw_node(*root, control != nullptr);
     auto result = target_->EndDraw();
     if (result == D2DERR_RECREATE_TARGET) {
+      for (auto &[source, image] : images_) image.bitmap.Reset();
+      icons_.clear();
       brush_.Reset();
       target_.Reset();
+      dc_target_.Reset();
       InvalidateRect(window_, nullptr, FALSE);
     } else
       check(result);
@@ -386,48 +635,69 @@ class Window {
   void collect(Node &node, std::unordered_set<int> &live,
                std::unordered_map<HWND, HWND> &previous, HWND parent,
                const Node *viewport = nullptr, bool inside_button = false) {
+    if (node.hidden()) return;
+    bool floating = node.type == "floating";
+    bool animated = node.animated && node.type == "view";
+    bool focusable = node.type == "view" && node.attributes.count("tabindex");
+    if (floating) { parent = window_; viewport = nullptr; }
     bool static_text = node.type == "text" && !inside_button;
-    bool scroll = node.type == "scroll-view", select = node.type == "select";
+    bool scroll = node.scrollable(), select = node.type == "select";
     if (node.button() || node.input() || node.toggle() || scroll || select ||
-        static_text) {
+        static_text || floating || animated || focusable) {
       live.insert(node.id);
       auto &entry = controls_[node.id];
       if (!entry) {
         entry = std::make_unique<Control>();
         entry->owner = this;
         entry->id = node.id;
-        DWORD style = WS_CHILD | WS_CLIPSIBLINGS |
-                      (static_text ? SS_OWNERDRAW | SS_NOTIFY : WS_TABSTOP);
+        DWORD style = (floating ? WS_POPUP : WS_CHILD) | WS_CLIPSIBLINGS |
+                      (static_text ? SS_OWNERDRAW | SS_NOTIFY : floating || animated ? SS_NOTIFY : WS_TABSTOP);
         if (static_text && !node.text_spans.empty()) style |= WS_TABSTOP;
-        if (scroll)
+        if (focusable && node.attributes.at("tabindex") == "-1") style &= ~WS_TABSTOP;
+        if (scroll || floating || animated || focusable)
           style |= WS_CLIPCHILDREN | SS_NOTIFY;
         else if (select)
           style |= CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS |
                    WS_VSCROLL;
         else if (node.toggle())
           style |= node.type == "radio" ? BS_RADIOBUTTON : BS_3STATE;
-        else if (!static_text)
+        else if (!static_text && !floating && !animated && !focusable)
           style |= node.button() ? BS_OWNERDRAW
                                  : (node.type == "textarea"
                                         ? ES_MULTILINE | ES_AUTOVSCROLL |
                                               ES_WANTRETURN | WS_VSCROLL
                                         : ES_AUTOHSCROLL);
         entry->window = CreateWindowExW(
-            scroll ? WS_EX_CONTROLPARENT : 0,
-            (static_text || scroll)            ? L"STATIC"
+            (scroll || floating ? WS_EX_CONTROLPARENT : 0) | (floating ? WS_EX_TOOLWINDOW : 0) |
+              (floating && node.kind == "tooltip" ? WS_EX_NOACTIVATE : 0),
+            (static_text || scroll || floating || animated || focusable) ? L"STATIC"
             : select                           ? L"COMBOBOX"
             : (node.button() || node.toggle()) ? L"BUTTON"
                                                : L"EDIT",
             L"", style, 0, 0, 1, 1, parent,
-            reinterpret_cast<HMENU>(static_cast<INT_PTR>(node.id)),
+            floating ? nullptr : reinterpret_cast<HMENU>(static_cast<INT_PTR>(node.id)),
             GetModuleHandleW(nullptr), nullptr);
         if (!entry->window)
-          throw std::runtime_error("Cannot create Windows control");
+          throw std::runtime_error("Cannot create Windows control " + node.type + ": " + std::to_string(GetLastError()));
         if (!SetWindowSubclass(entry->window, control_proc, 1,
                                reinterpret_cast<DWORD_PTR>(entry.get())))
           throw std::runtime_error("Cannot subclass Windows control");
       }
       auto &control = *entry;
+      if (floating && node.modal) {
+        if (!control.backdrop) {
+          control.backdrop = CreateWindowExW(WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW, L"STATIC", L"",
+            WS_POPUP | SS_NOTIFY, 0, 0, 1, 1, window_, nullptr, GetModuleHandleW(nullptr), nullptr);
+          if (!control.backdrop || !SetWindowSubclass(control.backdrop, control_proc, 1, reinterpret_cast<DWORD_PTR>(&control)))
+            throw std::runtime_error("Cannot create modal backdrop");
+          if (!SetLayeredWindowAttributes(control.backdrop, 0, 128, LWA_ALPHA))
+            throw std::runtime_error("Cannot set modal backdrop opacity");
+        }
+        RECT client;
+        GetClientRect(window_, &client);
+        POINT origin{0, 0}; ClientToScreen(window_, &origin);
+        SetWindowPos(control.backdrop, HWND_TOP, origin.x, origin.y, client.right, client.bottom, SWP_SHOWWINDOW | SWP_NOACTIVATE);
+      } else if (control.backdrop) ShowWindow(control.backdrop, SW_HIDE);
       if (GetParent(control.window) != parent)
         SetParent(control.window, parent);
       auto label = node.attributes.count("aria-label")
@@ -438,9 +708,14 @@ class Window {
                                        CHILDID_SELF, PROPID_ACC_NAME,
                                        wide(label).c_str());
       EnableWindow(control.window, !node.disabled);
+      if (node.attributes.count("tabindex")) {
+        auto style = GetWindowLongPtrW(control.window, GWL_STYLE);
+        SetWindowLongPtrW(control.window, GWL_STYLE,
+          node.attributes.at("tabindex") == "-1" ? style & ~WS_TABSTOP : style | WS_TABSTOP);
+      }
       ShowWindow(control.window, node.hidden() ? SW_HIDE : SW_SHOWNA);
       auto value =
-          wide(node.button() || static_text ? node.content() : node.text);
+          wide(node.button() ? label : static_text || focusable ? node.content() : node.text);
       if (!select && !scroll && window_text(control.window) != value)
         SetWindowTextW(control.window, value.c_str());
       // shortcut: EDIT paints its own text; replace it when exact CSS text
@@ -530,7 +805,7 @@ class Window {
         HFONT font = CreateFontW(-font_size, 0, 0, 0, font_weight, FALSE, FALSE,
                                  FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
                                  CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                                 DEFAULT_PITCH, L"Segoe UI");
+                                 DEFAULT_PITCH, font_family(node).c_str());
         if (!font)
           throw std::runtime_error("Cannot create Windows control font");
         SendMessageW(control.window, WM_SETFONT, reinterpret_cast<WPARAM>(font),
@@ -551,6 +826,13 @@ class Window {
       float x = node.x - (viewport ? viewport->x : 0),
             y = node.y - (viewport ? viewport->y : 0), width = node.width,
             height = node.height;
+      if (animated) {
+        x += node.translate_x + width * (1 - node.scale_x) / 2;
+        y += node.translate_y + height * (1 - node.scale_y) / 2;
+        width *= node.scale_x; height *= node.scale_y;
+      }
+      POINT origin{0, 0};
+      if (floating) ClientToScreen(window_, &origin);
       if (select)
         height += 28 * std::min<size_t>(8, node.options.size() + 1);
       if (node.input()) {
@@ -569,24 +851,111 @@ class Window {
       // Keep tree order within each viewport for clipping and keyboard
       // traversal.
       SetWindowPos(control.window,
-                   previous[parent] ? previous[parent] : HWND_TOP,
-                   static_cast<int>(std::round(x * scale_)),
-                   static_cast<int>(std::round(y * scale_)),
+                   floating ? HWND_TOP : previous[parent] ? previous[parent] : HWND_TOP,
+                   static_cast<int>(std::round(x * scale_)) + origin.x,
+                   static_cast<int>(std::round(y * scale_)) + origin.y,
                    std::max(1, static_cast<int>(std::round(width * scale_))),
                    std::max(1, static_cast<int>(std::round(height * scale_))),
                    SWP_NOACTIVATE);
+      if (floating) {
+        int w = std::max(1, static_cast<int>(std::round(width * scale_)));
+        int h = std::max(1, static_cast<int>(std::round(height * scale_)));
+        int radius = static_cast<int>(std::round(node.number("border-radius") * scale_));
+        if (w != control.clip_width || h != control.clip_height || radius != control.clip_radius) {
+          auto region = CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
+          if (!region || !SetWindowRgn(control.window, region, TRUE)) {
+            if (region) DeleteObject(region);
+            throw std::runtime_error("Cannot clip popup corners");
+          }
+          control.clip_width = w; control.clip_height = h; control.clip_radius = radius;
+        }
+      }
       previous[parent] = control.window;
       InvalidateRect(control.window, nullptr, FALSE);
     }
     if (select)
       return;
-    if (scroll) {
+    // shortcut: Animated display groups are composited; add interactive child HWND transforms when a page needs them.
+    if (animated) return;
+    if (scroll || floating || focusable) {
       parent = controls_.at(node.id)->window;
       viewport = &node;
     }
     for (auto &child : node.children)
-      collect(*child, live, previous, parent, viewport,
+      if (child->type != "floating") collect(*child, live, previous, parent, viewport,
               inside_button || node.button());
+  }
+
+  void pick_files(int id) {
+    auto node = runtime_.find(id);
+    if (!node) return;
+    auto context = runtime_.context();
+    timeless::Value settings(context, JS_GetPropertyStr(context, node->object.get(), "filePicker"));
+    timeless::Value multiple(context, JS_GetPropertyStr(context, settings.get(), "multiple"));
+    ComPtr<IFileOpenDialog> dialog;
+    check(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog)));
+    DWORD options;
+    check(dialog->GetOptions(&options));
+    check(dialog->SetOptions(options | FOS_FILEMUSTEXIST | FOS_FORCEFILESYSTEM |
+                            (JS_ToBool(context, multiple.get()) > 0 ? FOS_ALLOWMULTISELECT : 0)));
+    HRESULT result = dialog->Show(window_);
+    if (result == HRESULT_FROM_WIN32(ERROR_CANCELLED)) return;
+    check(result);
+    ComPtr<IShellItemArray> items;
+    check(dialog->GetResults(&items));
+    DWORD count;
+    check(items->GetCount(&count));
+    std::vector<std::string> paths;
+    for (DWORD index = 0; index < count; ++index) {
+      ComPtr<IShellItem> item;
+      check(items->GetItemAt(index, &item));
+      PWSTR path = nullptr;
+      check(item->GetDisplayName(SIGDN_FILESYSPATH, &path));
+      std::wstring selected(path);
+      CoTaskMemFree(path);
+      paths.push_back(utf8(selected));
+    }
+    runtime_.receive_files(id, paths);
+  }
+
+  bool floating_key(WPARAM key) {
+    if (floating_.empty()) return false;
+    auto node = runtime_.find(floating_.back());
+    if (!node) return false;
+    if (key == VK_ESCAPE) {
+      runtime_.dismiss(node->id);
+      refresh();
+      return true;
+    }
+    if (key == VK_TAB && node->modal) {
+      std::vector<HWND> candidates;
+      std::function<void(Node &)> visit = [&](Node &item) {
+        auto control = controls_.find(item.id);
+        if (!item.hidden() && !item.disabled && control != controls_.end() &&
+            (GetWindowLongPtrW(control->second->window, GWL_STYLE) & WS_TABSTOP))
+          candidates.push_back(control->second->window);
+        for (auto &child : item.children) visit(*child);
+      };
+      visit(*node);
+      if (!candidates.empty()) {
+        auto current = std::find(candidates.begin(), candidates.end(), GetFocus());
+        int direction = GetKeyState(VK_SHIFT) & 0x8000 ? -1 : 1;
+        int index = current == candidates.end() ? (direction > 0 ? -1 : 0) : static_cast<int>(current - candidates.begin());
+        set_focus(candidates[(index + direction + candidates.size()) % candidates.size()]);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  void outside_press(int id) {
+    if (floating_.empty()) return;
+    auto popup = runtime_.find(floating_.back());
+    auto target = runtime_.find(id);
+    if (!popup || popup->kind == "tooltip") return;
+    for (auto current = target; current; current = current->parent)
+      if (current->id == popup->id || current->id == popup->anchor) return;
+    runtime_.dismiss(popup->id);
   }
 
   void hover(Node *node) {
@@ -594,18 +963,22 @@ class Window {
     for (auto current = node; current; current = current->parent)
       next.insert(current->id);
     for (int id : hovered_)
-      if (!next.count(id))
+      if (!next.count(id)) {
         runtime_.state(id, "hover", false);
+        runtime_.event(id, "mouseleave");
+      }
     for (int id : next)
-      if (!hovered_.count(id))
+      if (!hovered_.count(id)) {
         runtime_.state(id, "hover", true);
+        runtime_.event(id, "mouseenter");
+      }
     hovered_ = std::move(next);
   }
 
   Node *hit(Node *node, float x, float y) {
     if (!node || node->hidden())
       return nullptr;
-    if (node->type == "scroll-view" &&
+    if (node->scrollable() &&
         (x < node->x || y < node->y || x >= node->x + node->client_width ||
          y >= node->y + node->client_height))
       return nullptr;
@@ -636,7 +1009,8 @@ class Window {
     UINT lines = 3;
     SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &lines, 0);
     for (; node; node = node->parent) {
-      if (node->type != "scroll-view" ||
+      if (node->type == "floating" && node->modal) return true;
+      if (!node->scrollable() ||
           (horizontal ? node->horizontal : node->vertical) == "hidden")
         continue;
       float distance =
@@ -704,8 +1078,26 @@ class Window {
                                        DWORD_PTR data) {
     auto control = reinterpret_cast<Control *>(data);
     auto self = control->owner;
+    const int control_id = control->id;
     try {
-      auto node = self->runtime_.find(control->id);
+      auto node = self->runtime_.find(control_id);
+      if (node && node->type == "floating" && node->kind == "tooltip" && message == WM_NCHITTEST)
+        return HTTRANSPARENT;
+      if (window == control->backdrop) {
+        if (message == WM_PAINT) {
+          PAINTSTRUCT info{};
+          auto dc = BeginPaint(window, &info);
+          FillRect(dc, &info.rcPaint, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
+          EndPaint(window, &info);
+          return 0;
+        }
+        if (message == WM_LBUTTONDOWN) {
+          self->runtime_.dismiss(control_id);
+          self->refresh();
+          return 0;
+        }
+        return DefSubclassProc(window, message, wparam, lparam);
+      }
       if (node && node->type == "text" && !node->text_spans.empty()) {
         if (message == WM_LBUTTONUP) {
           self->press_link(*node, GET_X_LPARAM(lparam) / self->scale_, GET_Y_LPARAM(lparam) / self->scale_);
@@ -719,13 +1111,15 @@ class Window {
           return 0;
         }
       }
-      if (node && node->type == "scroll-view" &&
+      if (node && (node->scrollable() || node->type == "floating" ||
+                   (node->type == "view" && node->attributes.count("tabindex"))) &&
           (message == WM_COMMAND || message == WM_DRAWITEM ||
            message == WM_MEASUREITEM || message == WM_CTLCOLOREDIT ||
            message == WM_CTLCOLORSTATIC))
         return self->message(message, wparam, lparam);
       bool custom = node && (node->toggle() || node->type == "select" ||
-                             node->type == "scroll-view");
+                             node->scrollable() || node->type == "floating" || node->animated ||
+                             (node->type == "view" && node->attributes.count("tabindex")));
       if (custom && message == WM_ERASEBKGND)
         return 1;
       if (custom && message == WM_PAINT) {
@@ -736,11 +1130,6 @@ class Window {
         try {
           if (rectangle.right > 0 && rectangle.bottom > 0)
             self->paint(dc, rectangle, node);
-          if (GetFocus() == window &&
-              !(SendMessageW(window, WM_QUERYUISTATE, 0, 0) & UISF_HIDEFOCUS)) {
-            InflateRect(&rectangle, -2, -2);
-            DrawFocusRect(dc, &rectangle);
-          }
         } catch (...) {
           EndPaint(window, &info);
           throw;
@@ -749,11 +1138,12 @@ class Window {
         return 0;
       }
       if (node && message == WM_GETDLGCODE &&
-          (node->type == "scroll-view" || node->type == "radio"))
-        return DLGC_WANTARROWS;
+          (node->scrollable() || node->type == "radio" || node->keyboard))
+        return DefSubclassProc(window, message, wparam, lparam) | DLGC_WANTARROWS;
       if (!self->syncing_ && !self->failed_) {
         if (message == WM_KEYDOWN || message == WM_KEYUP) {
-          if (message == WM_KEYDOWN) self->runtime_.state(control->id, "focus-visible", true);
+          if (message == WM_KEYDOWN && self->floating_key(wparam)) return 0;
+          if (message == WM_KEYDOWN) self->runtime_.state(control_id, "focus-visible", true);
           auto key = wparam == VK_RETURN   ? "Enter"
                      : wparam == VK_SPACE  ? " "
                      : wparam == VK_TAB    ? "Tab"
@@ -766,12 +1156,26 @@ class Window {
                      : wparam == VK_HOME   ? "Home"
                      : wparam == VK_END    ? "End"
                      : wparam == VK_ESCAPE ? "Escape"
+                     : wparam == VK_F10    ? "F10"
+                     : wparam == VK_APPS   ? "ContextMenu"
                                            : "";
-          if (self->runtime_.event(control->id,
+          if (self->runtime_.event(control_id,
                                    message == WM_KEYDOWN ? "keydown" : "keyup",
-                                   key)) {
+                                   key, (GetKeyState(VK_SHIFT) & 0x8000 ? 1 : 0) |
+                                     (GetKeyState(VK_CONTROL) & 0x8000 ? 2 : 0) | (GetKeyState(VK_MENU) & 0x8000 ? 4 : 0))) {
             self->refresh();
             return 0;
+          }
+        }
+        if (node && message == WM_CONTEXTMENU) {
+          POINT point{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
+          if (point.x == -1 && point.y == -1) {
+            RECT bounds; GetWindowRect(window, &bounds); point = {bounds.left, bounds.bottom};
+          }
+          ScreenToClient(self->window_, &point);
+          auto target = self->hit(self->runtime_.root(), point.x / self->scale_, point.y / self->scale_);
+          if (self->runtime_.pointer(target ? target->id : node->id, "contextmenu", point.x / self->scale_, point.y / self->scale_, 2)) {
+            self->refresh(); return 0;
           }
         }
         if (message == WM_MOUSEMOVE) {
@@ -782,33 +1186,45 @@ class Window {
           self->hover(self->hit(self->runtime_.root(), point.x / self->scale_,
                                 point.y / self->scale_));
         }
+        if (message == WM_LBUTTONDOWN) self->outside_press(control_id);
         if (message == WM_MOUSELEAVE)
           self->hover(nullptr);
         if (message == WM_LBUTTONDOWN ||
             (message == WM_KEYDOWN && wparam == VK_SPACE))
-          self->runtime_.state(control->id, "active", true);
-        if (message == WM_LBUTTONDOWN) self->runtime_.state(control->id, "focus-visible", false);
+          self->runtime_.state(control_id, "active", true);
+        if (message == WM_LBUTTONDOWN) self->runtime_.state(control_id, "focus-visible", false);
         if (message == WM_LBUTTONUP || message == WM_CAPTURECHANGED ||
             (message == WM_KEYUP && wparam == VK_SPACE))
-          self->runtime_.state(control->id, "active", false);
+          self->runtime_.state(control_id, "active", false);
+        if (node && (message == WM_LBUTTONDOWN || message == WM_LBUTTONUP)) {
+          POINT point{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
+          MapWindowPoints(window, self->window_, &point, 1);
+          if (message == WM_LBUTTONDOWN && node->type == "view" && node->attributes.count("tabindex"))
+            self->set_focus(window);
+          node = self->runtime_.find(control_id);
+          if (self->runtime_.pointer(control_id, message == WM_LBUTTONDOWN ? "pointerdown" : "pointerup",
+                                    point.x / self->scale_, point.y / self->scale_)) {
+            self->refresh(); return 0;
+          }
+        }
         if (node && node->type == "select" && node->readonly &&
             (message == WM_LBUTTONDOWN || message == WM_LBUTTONDBLCLK ||
              message == WM_KEYDOWN || message == WM_MOUSEWHEEL))
           return 0;
         if (message == WM_SETFOCUS || message == WM_KILLFOCUS) {
-          self->runtime_.state(control->id, "focus", message == WM_SETFOCUS);
-          self->runtime_.state(control->id, "focus-visible", message == WM_SETFOCUS && !(GetKeyState(VK_LBUTTON) & 0x8000));
-          self->runtime_.event(control->id,
+          self->runtime_.state(control_id, "focus", message == WM_SETFOCUS);
+          self->runtime_.state(control_id, "focus-visible", message == WM_SETFOCUS && !(GetKeyState(VK_LBUTTON) & 0x8000));
+          self->runtime_.event(control_id,
                                message == WM_SETFOCUS ? "focus" : "blur");
           if (message == WM_SETFOCUS) {
             std::vector<int> ancestors;
-            for (auto current = self->runtime_.find(control->id); current;
+            for (auto current = self->runtime_.find(control_id); current;
                  current = current->parent)
-              if (current->type == "scroll-view" && current->id != control->id)
+              if (current->scrollable() && current->id != control_id)
                 ancestors.push_back(current->id);
             for (int id : ancestors) {
               auto viewport = self->runtime_.find(id);
-              auto focused = self->runtime_.find(control->id);
+              auto focused = self->runtime_.find(control_id);
               if (!viewport || !focused)
                 continue;
               float dx =
@@ -827,7 +1243,7 @@ class Window {
             }
           }
         }
-        node = self->runtime_.find(control->id);
+        node = self->runtime_.find(control_id);
         if (node && (message == WM_MOUSEWHEEL || message == WM_MOUSEHWHEEL)) {
           bool horizontal = message == WM_MOUSEHWHEEL ||
                             (GET_KEYSTATE_WPARAM(wparam) & MK_SHIFT);
@@ -859,7 +1275,7 @@ class Window {
           }
           return 0;
         }
-        if (node && node->type == "scroll-view") {
+        if (node && node->scrollable()) {
           if (message == WM_VSCROLL || message == WM_HSCROLL) {
             self->scroll_bar(*node, message == WM_HSCROLL ? SB_HORZ : SB_VERT,
                              LOWORD(wparam), window);
@@ -905,7 +1321,7 @@ class Window {
             int id =
                 group[(index + direction + static_cast<int>(group.size())) %
                       group.size()];
-            SetFocus(self->controls_.at(id)->window);
+            self->set_focus(self->controls_.at(id)->window);
             self->runtime_.toggle(id);
             self->refresh();
             return 0;
@@ -922,7 +1338,7 @@ class Window {
       self->failure(error);
       return 0;
     }
-    return DefSubclassProc(window, message, wparam, lparam);
+    return IsWindow(window) ? DefSubclassProc(window, message, wparam, lparam) : 0;
   }
 
   LRESULT message(UINT message, WPARAM wparam, LPARAM lparam) {
@@ -933,6 +1349,10 @@ class Window {
     case WM_ERASEBKGND:
       return 1;
     case WM_SIZE:
+      refresh();
+      return 0;
+    case WM_MOVE:
+      runtime_.request_update();
       refresh();
       return 0;
     case WM_DPICHANGED: {
@@ -959,6 +1379,13 @@ class Window {
       press_link(*node, x - node->x, y - node->y);
       return 0;
     }
+    case WM_LBUTTONDOWN:
+      outside_press(0);
+      refresh();
+      return 0;
+    case WM_KEYDOWN:
+      if (floating_key(wparam)) return 0;
+      break;
     case WM_MOUSEWHEEL:
     case WM_MOUSEHWHEEL: {
       POINT point{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
@@ -1125,6 +1552,7 @@ class Window {
 public:
   Window(const std::string &bundle, bool dev, bool test)
       : bundle_(bundle), dev_(dev), quiet_(test) {
+    if (test) runtime_.turn_budget = std::chrono::seconds(30);
     check(D2D1CreateFactory(
         D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), nullptr,
         reinterpret_cast<void **>(factory_.GetAddressOf())));
@@ -1133,16 +1561,27 @@ public:
         reinterpret_cast<IUnknown **>(text_factory_.GetAddressOf())));
     // Native BUTTON/EDIT retain their built-in accessibility providers; set
     // their semantic names.
-    check(CoCreateInstance(
+    auto accessibility = CoCreateInstance(
         CLSID_AccPropServices, nullptr, CLSCTX_INPROC_SERVER,
         IID_IAccPropServices,
-        reinterpret_cast<void **>(accessibility_.GetAddressOf())));
+        reinterpret_cast<void **>(accessibility_.GetAddressOf()));
+    // Native controls retain their MSAA provider if the optional annotation service is unavailable.
+    if (FAILED(accessibility)) std::cerr << "MSAA annotation service unavailable: " << static_cast<unsigned long>(accessibility) << '\n';
     runtime_.measure = [this](const Node &node, float width) {
+      if (node.text.empty()) return YGSize{0, 0};
       auto layout = text_layout(node, width);
       DWRITE_TEXT_METRICS metrics{};
       check(layout->GetMetrics(&metrics));
       return YGSize{metrics.widthIncludingTrailingWhitespace, metrics.height};
     };
+    runtime_.focus_control = [this](int id, bool focus) {
+      if (focus) pending_focus_ = id;
+      else if (auto control = controls_.find(id); control != controls_.end() && GetFocus() == control->second->window)
+        set_focus(window_);
+    };
+    runtime_.pick_files = [this](int id) { pick_files(id); };
+    BOOL animations = TRUE;
+    if (SystemParametersInfoW(SPI_GETCLIENTAREAANIMATION, 0, &animations, 0)) runtime_.reduce_motion = !animations;
     WNDCLASSW type{};
     type.lpfnWndProc = window_proc;
     type.hInstance = GetModuleHandleW(nullptr);
@@ -1169,6 +1608,7 @@ public:
   void refresh() {
     if (syncing_ || failed_ || !window_)
       return;
+    poll_images();
     runtime_.pump();
     RECT rectangle;
     GetClientRect(window_, &rectangle);
@@ -1187,6 +1627,48 @@ public:
       std::unordered_set<int> live;
       std::unordered_map<HWND, HWND> previous;
       collect(*runtime_.root(), live, previous, window_);
+      std::vector<int> next_floating;
+      std::function<void(Node &)> popups = [&](Node &node) {
+        if (node.hidden()) return;
+        if (node.type == "floating") {
+          next_floating.push_back(node.id);
+          if (std::find(floating_.begin(), floating_.end(), node.id) == floating_.end())
+            restore_focus_[node.id] = GetFocus();
+          collect(node, live, previous, window_);
+          if (node.modal && !pending_focus_ && !changing_focus_) {
+            HWND focus = GetFocus();
+            bool inside = false;
+            for (auto current = runtime_.find(GetDlgCtrlID(focus)); current; current = current->parent)
+              if (current->id == node.id) inside = true;
+            if (!inside) {
+              std::function<void(Node &)> first = [&](Node &item) {
+                if (!pending_focus_ && !item.disabled && !item.hidden() && (item.input() || item.button())) pending_focus_ = item.id;
+                for (auto &child : item.children) first(*child);
+              };
+              first(node);
+            }
+          }
+        }
+        for (auto &child : node.children) popups(*child);
+      };
+      popups(*runtime_.root());
+      for (int id : floating_) if (std::find(next_floating.begin(), next_floating.end(), id) == next_floating.end()) {
+        auto restore = restore_focus_.find(id);
+        if (restore != restore_focus_.end()) restore_target_ = restore->second;
+        restore_focus_.erase(id);
+      }
+      floating_ = std::move(next_floating);
+      if (!floating_.empty()) {
+        auto popup = runtime_.find(floating_.back());
+        if (popup && popup->modal) {
+          for (auto &[id, control] : controls_) {
+            bool inside = false;
+            for (auto current = runtime_.find(id); current; current = current->parent)
+              if (current->id == popup->id) inside = true;
+            if (!inside) EnableWindow(control->window, FALSE);
+          }
+        }
+      }
       for (auto it = controls_.begin(); it != controls_.end();) {
         if (!live.count(it->first))
           it = controls_.erase(it);
@@ -1195,6 +1677,16 @@ public:
       }
       InvalidateRect(window_, nullptr, FALSE);
       syncing_ = false;
+      if (restore_target_ && !changing_focus_) {
+        HWND target = restore_target_;
+        restore_target_ = nullptr;
+        set_focus(target);
+      }
+      if (pending_focus_ && !changing_focus_) {
+        auto focus = controls_.find(pending_focus_);
+        pending_focus_ = 0;
+        if (focus != controls_.end() && IsWindowVisible(focus->second->window)) set_focus(focus->second->window);
+      }
     } catch (...) {
       syncing_ = false;
       throw;
@@ -1205,6 +1697,7 @@ public:
     MSG message{};
     int result;
     while ((result = GetMessageW(&message, nullptr, 0, 0)) > 0) {
+      if (message.message == WM_KEYDOWN && floating_key(message.wParam)) continue;
       if (message.message == WM_KEYDOWN && message.wParam == VK_RETURN) {
         auto node = runtime_.find(GetDlgCtrlID(message.hwnd));
         if (node && node->button()) {
@@ -1212,7 +1705,9 @@ public:
           continue;
         }
       }
-      if (!IsDialogMessageW(window_, &message)) {
+      HWND dialog = !floating_.empty() && controls_.count(floating_.back())
+        ? controls_.at(floating_.back())->window : window_;
+      if (!IsDialogMessageW(dialog, &message)) {
         TranslateMessage(&message);
         DispatchMessageW(&message);
       }
@@ -1353,6 +1848,167 @@ public:
     ReleaseDC(window_, dc);
     std::cout << "Windows native controls and Direct2D smoke test passed\n";
   }
+  void test_shadcn() {
+    ShowWindow(window_, SW_SHOW);
+    auto update = [&] { for (int pass = 0; pass < 3; ++pass) refresh(); };
+    test_shared_shadcn(runtime_, update, [&](int id) {
+      auto control = controls_.find(id);
+      if (control == controls_.end()) throw std::runtime_error("Shared interactive node has no HWND");
+      if (IsWindowEnabled(control->second->window)) SendMessageW(control->second->window, BM_CLICK, 0, 0);
+    }, [&](const std::string &name) { screenshot(name); });
+    runtime_.event(runtime_.find("nav-navigation")->id, "click"); update();
+    auto tab = controls_.at(runtime_.find("components-tabs-tab-account")->id)->window;
+    set_focus(tab);
+    if (!(SendMessageW(tab, WM_GETDLGCODE, VK_RIGHT, 0) & DLGC_WANTARROWS))
+      throw std::runtime_error("Tabs must receive arrow keys through dialog navigation");
+    MSG arrow{};
+    arrow.hwnd = tab; arrow.message = WM_KEYDOWN; arrow.wParam = VK_RIGHT;
+    if (!IsDialogMessageW(window_, &arrow)) { TranslateMessage(&arrow); DispatchMessageW(&arrow); }
+    update();
+    if (runtime_.find("components-tabs-tab-password")->attributes["aria-selected"] != "true")
+      throw std::runtime_error("Native arrow key must select the next shared tab");
+    if (GetWindowLongPtrW(tab, GWL_STYLE) & WS_TABSTOP)
+      throw std::runtime_error("Inactive shared tab must leave the native Tab sequence");
+    runtime_.event(runtime_.find("nav-floating")->id, "click"); update();
+    auto dropdown = controls_.at(runtime_.find("floating-dropdown-trigger")->id)->window;
+    SendMessageW(dropdown, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(8, 8));
+    SendMessageW(dropdown, WM_LBUTTONUP, 0, MAKELPARAM(8, 8)); update();
+    if (!runtime_.find("floating-dropdown-content-surface")->open)
+      throw std::runtime_error("Native pointerdown must open the shared DropdownMenu");
+    floating_key(VK_ESCAPE); update();
+    auto context_menu = controls_.at(runtime_.find("floating-context-trigger")->id)->window;
+    set_focus(context_menu);
+    SendMessageW(context_menu, WM_KEYDOWN, VK_APPS, 0); update();
+    if (!runtime_.find("floating-context-content-surface")->open)
+      throw std::runtime_error("Keyboard context menu must open from its native focus target");
+    floating_key(VK_ESCAPE); update();
+    auto trigger = controls_.at(runtime_.find("floating-modal-trigger")->id)->window;
+    for (int cycle = 0; cycle < 10; ++cycle) {
+      set_focus(trigger);
+      SendMessageW(trigger, BM_CLICK, 0, 0); update();
+      auto focused = runtime_.find(GetDlgCtrlID(GetFocus()));
+      bool inside = false;
+      for (auto current = focused; current; current = current->parent)
+        if (current->id == runtime_.find("floating-modal")->id) inside = true;
+      if (!inside) throw std::runtime_error("Opening a modal must move focus inside");
+      if (!floating_key(VK_TAB)) throw std::runtime_error("Modal must trap keyboard Tab");
+      if (!floating_key(VK_ESCAPE) || runtime_.find("floating-modal")->open)
+        throw std::runtime_error("Escape must close the modal");
+      if (GetFocus() != trigger) throw std::runtime_error("Closing a modal must restore focus");
+    }
+    test_image();
+    std::cout << "Windows shared shadcn HWND/Direct2D integration passed\n";
+  }
+  void test_image() {
+    auto file = std::filesystem::temp_directory_path() /
+      wide("timeless-image-" + std::to_string(GetCurrentProcessId()) + ".bmp");
+    BITMAPFILEHEADER header{};
+    header.bfType = 0x4d42;
+    header.bfOffBits = sizeof(header) + sizeof(BITMAPINFOHEADER);
+    header.bfSize = header.bfOffBits + 16;
+    BITMAPINFOHEADER info{};
+    info.biSize = sizeof(info); info.biWidth = 2; info.biHeight = 2;
+    info.biPlanes = 1; info.biBitCount = 32;
+    const DWORD pixels[] = {0x0000ff00, 0x0000ff00, 0x0000ff00, 0x0000ff00};
+    std::ofstream output(file, std::ios::binary);
+    output.write(reinterpret_cast<const char *>(&header), sizeof(header));
+    output.write(reinterpret_cast<const char *>(&info), sizeof(info));
+    output.write(reinterpret_cast<const char *>(pixels), sizeof(pixels));
+    output.close();
+    if (!output) throw std::runtime_error("Cannot write image test fixture");
+    auto context = runtime_.context();
+    timeless::Value global(context, JS_GetGlobalObject(context));
+    JS_SetPropertyStr(context, global.get(), "__image_fixture", JS_NewString(context, utf8(file.wstring()).c_str()));
+    runtime_.evaluate("__nativeBridge_render({type:'img',src:__image_fixture,style:{width:'64px',height:'64px'},attrs:{n:'image-test'},children:[]})");
+    try {
+      auto deadline = GetTickCount64() + 5000;
+      auto source = utf8(file.wstring());
+      do {
+        refresh();
+        HDC dc = GetDC(window_);
+        RECT rectangle; GetClientRect(window_, &rectangle);
+        try { paint(dc, rectangle); }
+        catch (...) { ReleaseDC(window_, dc); throw; }
+        ReleaseDC(window_, dc);
+        auto image = images_.find(source);
+        if (image != images_.end() && image->second.done) {
+          if (!image->second.error.empty()) throw std::runtime_error(image->second.error);
+          if (image->second.width != 2 || image->second.height != 2 || !image->second.bitmap)
+            throw std::runtime_error("WIC image decoding or Direct2D bitmap upload failed");
+          screenshot("image");
+          std::filesystem::remove(file);
+          return;
+        }
+        Sleep(5);
+      } while (GetTickCount64() < deadline);
+      throw std::runtime_error("Image test timed out");
+    } catch (...) { std::filesystem::remove(file); throw; }
+  }
+  void screenshot(const std::string &name) {
+    wchar_t directory[32768];
+    DWORD length = GetEnvironmentVariableW(L"TIMELESS_WINDOWS_SCREENSHOTS", directory, 32768);
+    if (!length) return;
+    if (length >= 32768) throw std::runtime_error("Screenshot path is too long");
+    std::filesystem::create_directories(directory);
+    auto path = std::filesystem::path(directory) / wide(name + ".png");
+    RedrawWindow(window_, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+    for (int id : floating_) {
+      auto control = controls_.find(id);
+      if (control == controls_.end()) continue;
+      if (control->second->backdrop)
+        RedrawWindow(control->second->backdrop, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
+      RedrawWindow(control->second->window, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+    }
+    GdiFlush();
+    DwmFlush();
+    RECT rectangle;
+    GetClientRect(window_, &rectangle);
+    POINT origin{0, 0};
+    ClientToScreen(window_, &origin);
+    HDC source = GetDC(nullptr), memory = CreateCompatibleDC(source);
+    BITMAPINFO info{};
+    info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    info.bmiHeader.biWidth = rectangle.right;
+    info.bmiHeader.biHeight = -rectangle.bottom;
+    info.bmiHeader.biPlanes = 1;
+    info.bmiHeader.biBitCount = 32;
+    info.bmiHeader.biCompression = BI_RGB;
+    void *pixels = nullptr;
+    HBITMAP bitmap = CreateDIBSection(source, &info, DIB_RGB_COLORS, &pixels, nullptr, 0);
+    if (!bitmap || !memory || !source) throw std::runtime_error("Cannot capture native window");
+    auto previous = SelectObject(memory, bitmap);
+    try {
+      if (!BitBlt(memory, 0, 0, rectangle.right, rectangle.bottom, source, origin.x, origin.y, SRCCOPY | CAPTUREBLT))
+        throw std::runtime_error("Cannot copy native window pixels");
+      if (name == "modal") {
+        auto sample = static_cast<BYTE *>(pixels) + (8 * rectangle.right + 8) * 4;
+        if (sample[0] < 30 || sample[0] > 220)
+          throw std::runtime_error("Modal backdrop must composite with the background");
+      }
+      ComPtr<IWICImagingFactory> factory;
+      check(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory)));
+      ComPtr<IWICStream> stream;
+      check(factory->CreateStream(&stream));
+      check(stream->InitializeFromFilename(path.c_str(), GENERIC_WRITE));
+      ComPtr<IWICBitmapEncoder> encoder;
+      check(factory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder));
+      check(encoder->Initialize(stream.Get(), WICBitmapEncoderNoCache));
+      ComPtr<IWICBitmapFrameEncode> frame;
+      check(encoder->CreateNewFrame(&frame, nullptr));
+      check(frame->Initialize(nullptr));
+      check(frame->SetSize(rectangle.right, rectangle.bottom));
+      WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGR;
+      check(frame->SetPixelFormat(&format));
+      check(frame->WritePixels(rectangle.bottom, rectangle.right * 4,
+                              rectangle.right * rectangle.bottom * 4, static_cast<BYTE *>(pixels)));
+      check(frame->Commit());
+      check(encoder->Commit());
+    } catch (...) {
+      SelectObject(memory, previous); DeleteObject(bitmap); DeleteDC(memory); ReleaseDC(nullptr, source);
+      throw;
+    }
+    SelectObject(memory, previous); DeleteObject(bitmap); DeleteDC(memory); ReleaseDC(nullptr, source);
+  }
 };
 } // namespace
 
@@ -1362,6 +2018,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
     return 1;
   int result = 1;
   bool test = false;
+  bool shared_test = false;
   try {
     INITCOMMONCONTROLSEX controls{sizeof(controls), ICC_STANDARD_CLASSES};
     if (!InitCommonControlsEx(&controls))
@@ -1378,6 +2035,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
         dev = true;
       else if (argument == L"--self-test")
         test = true;
+      else if (argument == L"--test-shadcn")
+        test = shared_test = true;
       else
         bundle = utf8(argument);
     }
@@ -1395,7 +2054,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
     }
     Window window(bundle, dev, test);
     if (test) {
-      window.test();
+      if (shared_test) window.test_shadcn(); else window.test();
       result = 0;
     } else
       result = window.run();

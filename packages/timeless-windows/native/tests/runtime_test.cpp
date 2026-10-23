@@ -14,6 +14,10 @@ int main(int argc, char **argv) {
         argc == 2 || (argc == 3 && std::string(argv[2]) == "--hmr"),
         "Pass the built Windows demo JS bundle, optionally followed by --hmr");
     timeless::Runtime runtime;
+    require(timeless::pixels("12px") == 12 && timeless::pixels(".5") == .5f,
+            "Pixel and unitless CSS numbers");
+    for (const char *value : {"auto", "fit-content", "50%", "NaN", "inf", "calc(100% - 8px)"})
+      require(timeless::pixels(value, 7) == 7, "Non-pixel CSS lengths retain their fallback");
     // Deterministic measurements for layout assertions; Windows uses
     // DirectWrite instead.
     runtime.measure = [](const timeless::Node &node, float width) {

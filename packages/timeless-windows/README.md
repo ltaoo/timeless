@@ -2,7 +2,9 @@
 
 Windows 原生宿主：QuickJS 执行业务 JS，Yoga 计算布局，Win32 承载窗口与交互，Direct2D / DirectWrite 绘制 Timeless 外观和文字。复用 `@timeless/timeless-native` 的节点、响应式行为和 `.native.css` 样式协议。
 
-当前实现需要 Windows 10 1703+。支持 View、Text、Button、Input、Textarea、NumberInput、ScrollView、Select、Checkbox、Radio、Row、Column、AspectRatio，以及 For / Show / Fragment 等逻辑容器。Image、Icon、SplitView、TabView 等宿主能力尚未接入，遇到对应节点会报告类型并停止渲染。
+当前实现需要 Windows 10 1703+。支持 View、Text、Button、Input、Textarea、NumberInput、ScrollView、Select、Checkbox、Radio、Row、Column、AspectRatio，以及 For / Show / Fragment 等逻辑容器。现已接入共享 shadcn 示例所需的 SVG Icon、位图 Image、Form、Table、CSS Grid、浮层、虚拟列表和单次关键帧动画。SplitView / TabView 暂仅支持解码和布局。
+
+共享 shadcn 应用的构建、OrbStack / Wine 验证和覆盖边界见 [Windows 应用说明](../../apps/web-shadcn/README.windows.md)。该入口目前覆盖十个共享示例页，尚未覆盖完整 Web 文档站。
 
 ## 在 Windows 上运行
 
@@ -16,7 +18,7 @@ pnpm --filter @timeless/windows-demo build:host
 pnpm --filter @timeless/windows-demo start
 ```
 
-CMake 首次配置会下载固定版本的 QuickJS-NG 和 Yoga。使用 Visual Studio 默认生成器时，程序在 `apps/windows-demo/build/Release/timeless-windows.exe`；同目录的 `app.js` 是应用 bundle，两者一起复制即可运行。直接双击 `.exe` 会读取旁边的 `app.js`。
+CMake 首次配置会下载固定版本的 QuickJS-NG、Yoga 和 NanoSVG。使用 Visual Studio 默认生成器时，程序在 `apps/windows-demo/build/Release/timeless-windows.exe`；同目录的 `app.js` 是应用 bundle，两者一起复制即可运行。直接双击 `.exe` 会读取旁边的 `app.js`。
 
 可显式指定其他应用 bundle：
 

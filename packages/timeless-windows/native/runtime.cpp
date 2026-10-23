@@ -5,6 +5,11 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <regex>
+#include <array>
+#include <map>
+#include <cstdlib>
+#include <cctype>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>
@@ -29,14 +34,10 @@ std::string string(JSContext *context, JSValueConst value) {
 float pixels(const std::string &value, float fallback) {
   if (value.empty())
     return fallback;
-  try {
-    size_t end = 0;
-    float result = std::stof(value, &end);
-    if (std::isfinite(result) &&
-        (end == value.size() || value.substr(end) == "px"))
-      return result;
-  } catch (const std::exception &) {
-  }
+  char *end = nullptr;
+  float result = std::strtof(value.c_str(), &end);
+  if (end != value.c_str() && std::isfinite(result) && (*end == '\0' || std::string_view(end) == "px"))
+    return result;
   return fallback;
 }
 
@@ -79,10 +80,20 @@ float Node::number(const std::string &name, float fallback) const {
   return pixels(property(name), fallback);
 }
 bool Node::hidden() const {
-  return property("display") == "none" || (parent && parent->hidden());
+  return property("display") == "none" || (type == "floating" && !open) ||
+         (parent && parent->hidden());
 }
 bool Node::button() const { return type == "button" || clickable; }
 bool Node::toggle() const { return type == "checkbox" || type == "radio"; }
+bool Node::scrollable() const {
+  return type == "scroll-view" || type == "list-view-v2";
+}
+bool Node::contents() const {
+  auto display = property("display");
+  return display == "contents" || (display.empty() &&
+    (type == "for" || type == "show" || type == "match" || type == "fragment" ||
+     type == "portal" || type == "lazy-view"));
+}
 bool Node::input() const {
   return type == "input" || type == "textarea" || type == "number-input";
 }
@@ -154,7 +165,7 @@ void Runtime::check(JSValueConst value) {
 }
 
 void Runtime::evaluate(const std::string &source, const std::string &filename) {
-  deadline_ = Clock::now() + std::chrono::seconds(5);
+  deadline_ = Clock::now() + turn_budget;
   Value result(context_, JS_Eval(context_, source.data(), source.size(),
                                  filename.c_str(), JS_EVAL_TYPE_GLOBAL));
   check(result.get());
@@ -194,7 +205,7 @@ void Runtime::jobs() {
 }
 
 void Runtime::pump() {
-  deadline_ = Clock::now() + std::chrono::seconds(5);
+  deadline_ = Clock::now() + turn_budget;
   std::vector<int> due;
   auto now = Clock::now();
   for (const auto &[id, timer] : timers_)
@@ -278,16 +289,90 @@ JSValue Runtime::cancel(JSContext *context, JSValueConst, int argc,
 
 bool Runtime::call(JSValueConst object, const char *name, int argc,
                    JSValueConst *argv) {
+  auto result = invoke(object, name, argc, argv);
+  return JS_ToBool(context_, result.get()) > 0;
+}
+
+Value Runtime::invoke(JSValueConst object, const char *name, int argc,
+                       JSValueConst *argv) {
   Value function(context_, JS_GetPropertyStr(context_, object, name));
   check(function.get());
   if (!JS_IsFunction(context_, function.get()))
-    return false;
-  deadline_ = Clock::now() + std::chrono::seconds(5);
+    return Value(context_, JS_UNDEFINED);
+  deadline_ = Clock::now() + turn_budget;
   Value result(context_, JS_Call(context_, function.get(), object, argc, argv));
   check(result.get());
   jobs();
   dirty_ = true;
-  return JS_ToBool(context_, result.get()) > 0;
+  return result;
+}
+
+JSValue Runtime::host_method(JSContext *context, JSValueConst, int,
+                              JSValueConst *, int method, JSValue *data) {
+  auto self = static_cast<Runtime *>(JS_GetContextOpaque(context));
+  int32_t id = 0;
+  if (JS_ToInt32(context, &id, data[0]) < 0) return JS_EXCEPTION;
+  auto node = self->find(id);
+  if (!node) return JS_UNDEFINED;
+  try {
+    if (method == 0 || method == 1) {
+      if (self->focus_control) self->focus_control(id, method == 0);
+    } else if (method == 2) {
+      JSValue rect = JS_NewObject(context);
+      for (auto [key, value] : {std::pair{"x", node->x}, {"y", node->y},
+             {"left", node->x}, {"top", node->y}, {"width", node->width},
+             {"height", node->height}, {"right", node->x + node->width},
+             {"bottom", node->y + node->height}})
+        JS_SetPropertyStr(context, rect, key, JS_NewFloat64(context, value));
+      return rect;
+    } else if (self->pick_files && !node->disabled) self->pick_files(id);
+  } catch (const std::exception &error) {
+    return JS_ThrowInternalError(context, "%s", error.what());
+  }
+  return JS_UNDEFINED;
+}
+
+void Runtime::focus(int id) {
+  auto node = find(id);
+  if (!node || node->hidden() || node->disabled) return;
+  invoke(node->object.get(), "_focus");
+}
+
+void Runtime::dismiss(int id) {
+  auto node = find(id);
+  if (!node || node->type != "floating" || !node->open) return;
+  Value listeners(context_, JS_GetPropertyStr(context_, node->object.get(), "listeners"));
+  if (JS_IsObject(listeners.get())) invoke(listeners.get(), "dismiss");
+}
+
+void Runtime::receive_files(int id, const std::vector<std::string> &paths) {
+  auto node = find(id);
+  if (!node || node->disabled || paths.empty()) return;
+  Value files(context_, JS_NewArray(context_));
+  uint32_t index = 0;
+  for (const auto &path : paths) {
+    auto file = file_path(path);
+    auto size = std::filesystem::file_size(file);
+    auto name = file.filename().u8string();
+    auto extension = file.extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    static const std::unordered_map<std::string, std::string> types = {
+      {".txt", "text/plain"}, {".json", "application/json"}, {".csv", "text/csv"},
+      {".pdf", "application/pdf"}, {".png", "image/png"}, {".jpg", "image/jpeg"},
+      {".jpeg", "image/jpeg"}, {".svg", "image/svg+xml"}, {".webp", "image/webp"}};
+    Value item(context_, JS_NewObject(context_));
+    for (auto [key, value] : {std::pair{"path", path},
+           {"name", std::string(name.begin(), name.end())},
+           {"type", types.count(extension) ? types.at(extension) : ""}, {"kind", std::string("file")}})
+      JS_SetPropertyStr(context_, item.get(), key, JS_NewString(context_, value.c_str()));
+    JS_SetPropertyStr(context_, item.get(), "size", JS_NewFloat64(context_, static_cast<double>(size)));
+    auto modified = std::filesystem::last_write_time(file) - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(modified.time_since_epoch()).count();
+    JS_SetPropertyStr(context_, item.get(), "lastModified", JS_NewFloat64(context_, static_cast<double>(milliseconds)));
+    JS_SetPropertyUint32(context_, files.get(), index++, JS_DupValue(context_, item.get()));
+  }
+  JSValueConst args[] = {files.get()};
+  invoke(node->object.get(), "_receiveFiles", 1, args);
 }
 
 void Runtime::state(int id, const std::string &name, bool value) {
@@ -299,7 +384,7 @@ void Runtime::state(int id, const std::string &name, bool value) {
   call(node->object.get(), "_setStyleState", 2, args);
 }
 
-bool Runtime::event(int id, const std::string &name, const std::string &key) {
+bool Runtime::event(int id, const std::string &name, const std::string &key, int modifiers) {
   auto node = find(id);
   if (!node || node->disabled || node->hidden())
     return false;
@@ -307,9 +392,24 @@ bool Runtime::event(int id, const std::string &name, const std::string &key) {
   Value payload(context_, JS_NewObject(context_));
   JS_SetPropertyStr(context_, payload.get(), "button",
                     JS_NewInt32(context_, 0));
+  JS_SetPropertyStr(context_, payload.get(), "shiftKey", JS_NewBool(context_, modifiers & 1));
+  JS_SetPropertyStr(context_, payload.get(), "ctrlKey", JS_NewBool(context_, modifiers & 2));
+  JS_SetPropertyStr(context_, payload.get(), "altKey", JS_NewBool(context_, modifiers & 4));
   if (!key.empty())
     JS_SetPropertyStr(context_, payload.get(), "key",
                       JS_NewString(context_, key.c_str()));
+  JSValueConst args[] = {type.get(), payload.get()};
+  return call(node->object.get(), "_dispatchNativeEvent", 2, args);
+}
+
+bool Runtime::pointer(int id, const std::string &name, float x, float y, int button) {
+  auto node = find(id);
+  if (!node || node->hidden() || node->disabled) return false;
+  Value type(context_, JS_NewString(context_, name.c_str()));
+  Value payload(context_, JS_NewObject(context_));
+  JS_SetPropertyStr(context_, payload.get(), "clientX", JS_NewFloat64(context_, x));
+  JS_SetPropertyStr(context_, payload.get(), "clientY", JS_NewFloat64(context_, y));
+  JS_SetPropertyStr(context_, payload.get(), "button", JS_NewInt32(context_, button));
   JSValueConst args[] = {type.get(), payload.get()};
   return call(node->object.get(), "_dispatchNativeEvent", 2, args);
 }
@@ -392,7 +492,7 @@ void Runtime::toggle(int id) {
 
 bool Runtime::scroll(int id, float x, float y) {
   auto node = find(id);
-  if (!node || node->type != "scroll-view" || node->hidden() || node->disabled)
+  if (!node || !node->scrollable() || node->hidden() || node->disabled)
     return false;
   x = std::clamp(x, 0.f,
                  std::max(0.f, node->content_width - node->client_width));
@@ -420,14 +520,18 @@ void Runtime::scroll_event(Node &node, float x, float y) {
                     JS_NewFloat64(context_, x));
   JS_SetPropertyStr(context_, payload.get(), "scrollTop",
                     JS_NewFloat64(context_, y));
+  JS_SetPropertyStr(context_, payload.get(), "clientHeight", JS_NewFloat64(context_, node.client_height));
+  JS_SetPropertyStr(context_, payload.get(), "clientWidth", JS_NewFloat64(context_, node.client_width));
   JSValueConst args[] = {type.get(), payload.get()};
   call(node.object.get(), "_dispatchNativeEvent", 2, args);
 }
 
 static void styles(Node &node) {
   auto layout = node.layout;
+  if (node.contents()) YGNodeStyleSetDisplay(layout, YGDisplayContents);
   YGNodeStyleSetFlexDirection(layout,
-                              node.type == "row" || node.type == "button"
+                              node.type == "row" || node.type == "button" ||
+                                      node.property("display") == "flex" || node.property("display") == "inline-flex"
                                   ? YGFlexDirectionRow
                                   : YGFlexDirectionColumn);
   if (node.type == "button") {
@@ -441,7 +545,7 @@ static void styles(Node &node) {
   }
   if (node.type == "select")
     YGNodeStyleSetHeight(layout, 32);
-  if (node.type == "scroll-view")
+  if (node.scrollable())
     YGNodeStyleSetOverflow(layout, YGOverflowScroll);
   if (node.input())
     YGNodeStyleSetHeight(layout, node.type == "textarea" ? 80 : 28);
@@ -465,7 +569,7 @@ static void styles(Node &node) {
     auto value = node.property(d.name);
     if (value.empty())
       continue;
-    if (value == "auto") {
+    if (value == "auto" || value == "fit-content" || value == "max-content" || value == "min-content") {
       if (std::string(d.name) == "width")
         YGNodeStyleSetWidthAuto(layout);
       else if (std::string(d.name) == "height")
@@ -503,11 +607,17 @@ static void styles(Node &node) {
   }
   for (int i = 0; i < 4; ++i) {
     auto value = node.property(names[i]);
-    if (!value.empty())
-      YGNodeStyleSetPosition(layout, edges[i], pixels(value));
+    if (!value.empty()) {
+      if (value.ends_with('%')) YGNodeStyleSetPositionPercent(layout, edges[i], pixels(value.substr(0, value.size() - 1)));
+      else YGNodeStyleSetPosition(layout, edges[i], pixels(value));
+    }
   }
   if (node.style.count("border-width"))
     YGNodeStyleSetBorder(layout, YGEdgeAll, node.number("border-width"));
+  for (int i = 0; i < 4; ++i) {
+    auto key = std::string("border-") + names[i] + "-width";
+    if (node.style.count(key)) YGNodeStyleSetBorder(layout, edges[i], node.number(key));
+  }
   for (auto [name, gutter] : {std::pair{"gap", YGGutterAll},
                               {"row-gap", YGGutterRow},
                               {"column-gap", YGGutterColumn}})
@@ -517,8 +627,16 @@ static void styles(Node &node) {
     YGNodeStyleSetFlexGrow(layout, node.number("flex-grow"));
   if (node.style.count("flex-shrink"))
     YGNodeStyleSetFlexShrink(layout, node.number("flex-shrink"));
-  if (node.style.count("flex"))
-    YGNodeStyleSetFlex(layout, node.number("flex"));
+  if (node.style.count("flex")) {
+    std::istringstream parts(node.property("flex"));
+    float grow = 0, shrink = 1;
+    std::string basis;
+    if (parts >> grow >> shrink >> basis) {
+      YGNodeStyleSetFlexGrow(layout, grow);
+      YGNodeStyleSetFlexShrink(layout, shrink);
+      YGNodeStyleSetFlexBasis(layout, pixels(basis));
+    } else YGNodeStyleSetFlex(layout, node.number("flex"));
+  }
   auto direction = node.property("flex-direction");
   if (direction == "row")
     YGNodeStyleSetFlexDirection(layout, YGFlexDirectionRow);
@@ -563,12 +681,39 @@ static void styles(Node &node) {
     YGNodeStyleSetFlexWrap(layout, YGWrapWrap);
   if (wrap == "wrap-reverse")
     YGNodeStyleSetFlexWrap(layout, YGWrapWrapReverse);
-  if (node.property("position") == "absolute")
+  if (node.property("position") == "absolute" || node.property("position") == "fixed")
     YGNodeStyleSetPositionType(layout, YGPositionTypeAbsolute);
   if (node.property("display") == "none")
     YGNodeStyleSetDisplay(layout, YGDisplayNone);
   else if (node.property("display") == "contents")
     YGNodeStyleSetDisplay(layout, YGDisplayContents);
+
+  if (node.property("display") == "grid") {
+    auto columns = std::regex_replace(node.property("grid-template-columns"),
+      std::regex(R"(minmax\(\s*0(?:px)?\s*,\s*1fr\s*\))"), "1fr");
+    std::smatch repeat;
+    if (std::regex_match(columns, repeat, std::regex(R"(repeat\(\s*(\d+)\s*,\s*1fr\s*\))")))
+      node.grid_count = std::clamp(std::stoi(repeat[1]), 1, 1024);
+    else {
+      std::istringstream parts(columns);
+      for (std::string part; parts >> part;) {
+        if (part == "1fr") ++node.grid_count;
+        else if (part.ends_with("px") && pixels(part) > 0) {
+          node.grid_columns.push_back(pixels(part));
+          ++node.grid_count;
+        } else throw std::runtime_error("Unsupported native grid columns: " + columns);
+      }
+    }
+    if (node.grid_count > 0) {
+      YGNodeStyleSetFlexDirection(layout, YGFlexDirectionRow);
+      YGNodeStyleSetFlexWrap(layout, YGWrapWrap);
+      if (!node.grid_columns.empty() && !node.style.count("width")) {
+        float width = node.number("gap") * (node.grid_count - 1);
+        for (float column : node.grid_columns) width += column;
+        YGNodeStyleSetWidth(layout, width);
+      }
+    }
+  }
 }
 
 std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
@@ -586,7 +731,10 @@ std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
       "aspect-ratio", "for",          "show",          "match",
       "fragment",     "portal",       "lazy-view",     "label",
       "scroll-view",  "select",       "select-option", "select-option-group",
-      "checkbox",     "radio"};
+      "checkbox",     "radio", "icon", "floating", "form", "grid",
+      "table", "table-header", "table-body", "table-footer", "table-row",
+      "table-head", "table-cell", "table-caption", "list-view-v2",
+      "split-view", "split-pane", "tab-view", "tab-pane", "img"};
   if (!supported.count(node->type))
     throw std::runtime_error("Windows host does not implement native node: " +
                              node->type);
@@ -606,12 +754,52 @@ std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
   node->name = node->attributes["n"];
   node->disabled = node->attributes.count("disabled") != 0;
   node->readonly = node->attributes.count("readonly") != 0;
+  if (node->type == "floating") {
+    auto read = [&](const char *name) { return Value(context_, JS_GetPropertyStr(context_, object, name)); };
+    node->open = JS_ToBool(context_, read("open").get()) > 0;
+    node->modal = JS_ToBool(context_, read("modal").get()) > 0;
+    node->kind = string(context_, read("kind").get());
+    node->side = string(context_, read("side").get());
+    node->align = string(context_, read("align").get());
+    node->drawer_side = string(context_, read("drawerSide").get());
+    node->offset = pixels(string(context_, read("offset").get()), 8);
+    node->cross_offset = pixels(string(context_, read("crossOffset").get()));
+    auto anchor = read("anchor");
+    if (JS_IsObject(anchor.get())) {
+      Value id(context_, JS_GetPropertyStr(context_, anchor.get(), "__windows_id"));
+      if (!JS_IsUndefined(id.get()) && JS_ToInt32(context_, &node->anchor, id.get()) < 0) check(JS_EXCEPTION);
+      if (!node->anchor) {
+        auto bounds = invoke(anchor.get(), "getBoundingClientRect");
+        if (JS_IsObject(bounds.get())) {
+          node->virtual_anchor = true;
+          for (auto [key, field] : {std::pair{"x", &node->anchor_x}, {"y", &node->anchor_y},
+                 {"width", &node->anchor_width}, {"height", &node->anchor_height}}) {
+            Value value(context_, JS_GetPropertyStr(context_, bounds.get(), key));
+            *field = pixels(string(context_, value.get()));
+          }
+        }
+      }
+    }
+  }
+  if (node->type == "icon") {
+    Value svg(context_, JS_GetPropertyStr(context_, object, "svg"));
+    node->svg = string(context_, svg.get());
+    Value size(context_, JS_GetPropertyStr(context_, object, "size"));
+    auto length = string(context_, size.get());
+    if (!node->style.count("width")) node->style["width"] = length;
+    if (!node->style.count("height")) node->style["height"] = length;
+    node->style["flex-shrink"] = "0";
+  }
+  if (node->type == "img") {
+    Value source(context_, JS_GetPropertyStr(context_, object, "src"));
+    node->src = string(context_, source.get());
+  }
   for (auto [key, field] : {std::pair{"checked", &node->checked},
                             {"indeterminate", &node->indeterminate}}) {
     Value flag(context_, JS_GetPropertyStr(context_, object, key));
     *field = JS_ToBool(context_, flag.get()) > 0;
   }
-  if (node->type == "scroll-view") {
+  if (node->scrollable()) {
     Value horizontal(context_,
                      JS_GetPropertyStr(context_, object, "horizontal"));
     Value vertical(context_, JS_GetPropertyStr(context_, object, "vertical"));
@@ -621,8 +809,12 @@ std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
         node->property("overflow-y", string(context_, vertical.get()));
   }
   Value listeners(context_, JS_GetPropertyStr(context_, object, "listeners"));
+  if (JS_IsObject(listeners.get())) {
+    Value keydown(context_, JS_GetPropertyStr(context_, listeners.get(), "keydown"));
+    node->keyboard = JS_IsFunction(context_, keydown.get());
+  }
   if (JS_IsObject(listeners.get()) && !node->input() && !node->toggle() &&
-      node->type != "select" && node->type != "scroll-view") {
+      node->type != "select" && !node->scrollable()) {
     Value click(context_,
                 JS_GetPropertyStr(context_, listeners.get(), "click"));
     node->clickable = JS_IsFunction(context_, click.get());
@@ -656,6 +848,13 @@ std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
                     JS_GetPropertyStr(context_, object, "placeholder"));
   node->placeholder = string(context_, placeholder.get());
   styles(*node);
+  Value host_id(context_, JS_NewInt32(context_, node->id));
+  JSValue data[] = {host_id.get()};
+  int method = 0;
+  for (const char *key : {"_focus", "_blur", "_getBoundingClientRect", "_pickFiles"})
+    JS_SetPropertyStr(context_, object, key,
+      JS_NewCFunctionData(context_, host_method, 0, method++, 1, data));
+  if (node->type == "list-view-v2") virtual_rows(object, !node->hidden());
   if (node->type == "aspect-ratio") {
     Value ratio(context_, JS_GetPropertyStr(context_, object, "ratio"));
     double value = 0;
@@ -690,7 +889,7 @@ std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
         if (!JS_IsObject(child.get()))
           continue;
         auto parsed = parse(child.get(), node.get(), depth + 1);
-        if (node->type != "select")
+        if (node->type != "select" && parsed->type != "floating")
           YGNodeInsertChild(node->layout, parsed->layout,
                             YGNodeGetChildCount(node->layout));
         node->children.push_back(std::move(parsed));
@@ -719,14 +918,81 @@ std::unique_ptr<Node> Runtime::parse(JSValueConst object, Node *parent,
     for (const auto &child : node->children)
       options(*child, "");
   }
+  if (node->type == "list-view-v2") {
+    for (auto &row : node->children) {
+      int index = std::stoi(row->attributes.at("data-index"));
+      JSValueConst args[] = {JS_NewInt32(context_, index)};
+      auto offset = invoke(object, "_rowOffset", 1, args);
+      auto height = invoke(object, "_rowHeight", 1, args);
+      YGNodeStyleSetPositionType(row->layout, YGPositionTypeAbsolute);
+      YGNodeStyleSetPosition(row->layout, YGEdgeTop, pixels(string(context_, offset.get())));
+      YGNodeStyleSetWidthPercent(row->layout, 100);
+      YGNodeStyleSetHeight(row->layout, pixels(string(context_, height.get()), 40));
+    }
+  }
   return node;
+}
+
+void Runtime::virtual_rows(JSValueConst object, bool visible) {
+  Value top(context_, JS_GetPropertyStr(context_, object, "scrollTop"));
+  Value style(context_, JS_GetPropertyStr(context_, object, "style"));
+  Value height(context_, JS_GetPropertyStr(context_, style.get(), "height"));
+  JSValueConst args[] = {JS_NewFloat64(context_, pixels(string(context_, top.get()))),
+    JS_NewFloat64(context_, pixels(string(context_, height.get()), height_))};
+  auto range = invoke(object, "_visibleRange", 2, args);
+  int start = 0, end = 0;
+  if (visible) {
+    Value first(context_, JS_GetPropertyStr(context_, range.get(), "start"));
+    Value last(context_, JS_GetPropertyStr(context_, range.get(), "end"));
+    if (JS_ToInt32(context_, &start, first.get()) < 0 || JS_ToInt32(context_, &end, last.get()) < 0) check(JS_EXCEPTION);
+  }
+  Value children(context_, JS_GetPropertyStr(context_, object, "children"));
+  Value length(context_, JS_GetPropertyStr(context_, children.get(), "length"));
+  uint32_t count = 0;
+  if (JS_ToUint32(context_, &count, length.get()) < 0) check(JS_EXCEPTION);
+  std::vector<int> release;
+  for (uint32_t i = 0; i < count; ++i) {
+    Value child(context_, JS_GetPropertyUint32(context_, children.get(), i));
+    Value attrs(context_, JS_GetPropertyStr(context_, child.get(), "attrs"));
+    Value index(context_, JS_GetPropertyStr(context_, attrs.get(), "data-index"));
+    int row = std::stoi(string(context_, index.get()));
+    if (row < start || row >= end) release.push_back(row);
+  }
+  for (int row : release) {
+    JSValueConst index[] = {JS_NewInt32(context_, row)};
+    invoke(object, "_releaseRow", 1, index);
+  }
+  for (int row = start; row < end; ++row) {
+    JSValueConst index[] = {JS_NewInt32(context_, row)};
+    invoke(object, "_renderRow", 1, index);
+  }
+}
+
+void Runtime::grid_widths(Node &node) {
+  if (node.grid_count > 0) {
+    float inner = YGNodeLayoutGetWidth(node.layout) -
+      YGNodeLayoutGetPadding(node.layout, YGEdgeLeft) - YGNodeLayoutGetPadding(node.layout, YGEdgeRight) -
+      YGNodeLayoutGetBorder(node.layout, YGEdgeLeft) - YGNodeLayoutGetBorder(node.layout, YGEdgeRight);
+    float width = std::max(0.f, (inner - node.number("column-gap", node.number("gap")) * (node.grid_count - 1)) / node.grid_count);
+    size_t index = 0;
+    std::function<void(Node &)> assign = [&](Node &child) {
+      if (child.type == "floating") return;
+      if (child.contents()) { for (auto &entry : child.children) assign(*entry); return; }
+      YGNodeStyleSetFlexBasis(child.layout, node.grid_columns.empty() ? width : node.grid_columns.at(index % node.grid_columns.size()));
+      YGNodeStyleSetFlexGrow(child.layout, 0);
+      YGNodeStyleSetFlexShrink(child.layout, 0);
+      ++index;
+    };
+    for (auto &child : node.children) assign(*child);
+  }
+  for (auto &child : node.children) grid_widths(*child);
 }
 
 bool Runtime::scroll_metrics(Node &node) {
   bool changed = false;
   for (auto &child : node.children)
     changed = scroll_metrics(*child) || changed;
-  if (node.type != "scroll-view")
+  if (!node.scrollable())
     return changed;
   auto layout = node.layout;
   float width = YGNodeLayoutGetWidth(layout),
@@ -740,7 +1006,7 @@ bool Runtime::scroll_metrics(Node &node) {
         y += YGNodeLayoutGetTop(child.layout);
         right = std::max(right, x + YGNodeLayoutGetWidth(child.layout));
         bottom = std::max(bottom, y + YGNodeLayoutGetHeight(child.layout));
-        if (child.type != "scroll-view")
+        if (!child.scrollable() && child.type != "floating")
           for (const auto &entry : child.children)
             extent(*entry, x, y);
       };
@@ -796,21 +1062,194 @@ void Runtime::frames(Node &node, float x, float y) {
   node.y = y + YGNodeLayoutGetTop(node.layout);
   node.width = YGNodeLayoutGetWidth(node.layout);
   node.height = YGNodeLayoutGetHeight(node.layout);
-  if (node.type == "scroll-view") {
+  if (node.scrollable()) {
     for (auto [key, value] : {std::pair{"scrollLeft", node.scroll_x},
                               {"scrollTop", node.scroll_y},
                               {"scrollWidth", node.content_width},
-                              {"scrollHeight", node.content_height}})
+                              {"scrollHeight", node.content_height},
+                              {"clientWidth", node.client_width}, {"clientHeight", node.client_height}})
       JS_SetPropertyStr(context_, node.object.get(), key,
                         JS_NewFloat64(context_, value));
   }
   for (auto &child : node.children)
-    frames(*child, node.x - node.scroll_x, node.y - node.scroll_y);
+    if (child->type != "floating") frames(*child, node.x - node.scroll_x, node.y - node.scroll_y);
+}
+
+void Runtime::floating_frames(Node &node) {
+  if (node.type == "floating" && !node.hidden()) {
+    float limit = std::max(0.f, width_ - 16);
+    auto relative = [](std::string value, float extent) {
+      return value.ends_with('%') ? pixels(value.substr(0, value.size() - 1)) * extent / 100 : pixels(value, extent);
+    };
+    YGNodeStyleSetMaxWidth(node.layout, std::min(limit, relative(node.property("max-width"), width_)));
+    YGNodeStyleSetMaxHeight(node.layout, std::max(0.f, height_ - 16));
+    if (node.property("width").ends_with('%'))
+      YGNodeStyleSetWidth(node.layout, width_ * pixels(node.property("width").substr(0, node.property("width").size() - 1)) / 100);
+    float maximum = relative(node.property("max-width"), limit);
+    if (!node.style.count("width") && node.modal) YGNodeStyleSetWidth(node.layout, std::min(maximum, 480.f));
+    if (!node.drawer_side.empty()) {
+      bool horizontal = node.drawer_side == "left" || node.drawer_side == "right";
+      if (horizontal) YGNodeStyleSetHeight(node.layout, height_);
+      else YGNodeStyleSetWidth(node.layout, width_);
+      YGNodeStyleSetMaxHeight(node.layout, height_);
+      YGNodeStyleSetMaxWidth(node.layout, width_);
+    }
+    YGNodeCalculateLayout(node.layout, YGUndefined, YGUndefined, YGDirectionLTR);
+    grid_widths(node);
+    YGNodeCalculateLayout(node.layout, YGUndefined, YGUndefined, YGDirectionLTR);
+    float width = YGNodeLayoutGetWidth(node.layout), height = YGNodeLayoutGetHeight(node.layout);
+    float x = (width_ - width) / 2, y = (height_ - height) / 2;
+    auto anchor = find(node.anchor);
+    if ((anchor || node.virtual_anchor) && !node.modal) {
+      float ax = anchor ? anchor->x : node.anchor_x, ay = anchor ? anchor->y : node.anchor_y;
+      float aw = anchor ? anchor->width : node.anchor_width, ah = anchor ? anchor->height : node.anchor_height;
+      bool horizontal = node.side == "left" || node.side == "right";
+      x = horizontal ? (node.side == "left" ? ax - width - node.offset : ax + aw + node.offset) : ax;
+      y = horizontal ? ay : (node.side == "top" ? ay - height - node.offset : ay + ah + node.offset);
+      if (node.align == "center") { if (horizontal) y += (ah - height) / 2; else x += (aw - width) / 2; }
+      if (node.align == "end") { if (horizontal) y += ah - height; else x += aw - width; }
+      if (horizontal) y += node.cross_offset; else x += node.cross_offset;
+      if (!horizontal && y + height > height_ - 8) y = ay - height - node.offset;
+      if (horizontal && x + width > width_ - 8) x = ax - width - node.offset;
+      x = std::clamp(x, 8.f, std::max(8.f, width_ - width - 8));
+      y = std::clamp(y, 8.f, std::max(8.f, height_ - height - 8));
+    }
+    if (node.drawer_side == "right") { x = width_ - width; y = 0; }
+    if (node.drawer_side == "left") { x = 0; y = 0; }
+    if (node.drawer_side == "top") { x = 0; y = 0; }
+    if (node.drawer_side == "bottom") { x = 0; y = height_ - height; }
+    frames(node, x - YGNodeLayoutGetLeft(node.layout), y - YGNodeLayoutGetTop(node.layout));
+  }
+  for (auto &child : node.children) floating_frames(*child);
+}
+
+static float seconds(const std::string &value) {
+  auto text = value.ends_with("ms") ? value.substr(0, value.size() - 2) : value.ends_with('s') ? value.substr(0, value.size() - 1) : value;
+  return pixels(text) / (value.ends_with("ms") ? 1000.f : 1.f);
+}
+
+static std::array<float, 4> transform(const std::string &value, const Node &node) {
+  std::array<float, 4> result{0, 0, 1, 1};
+  static const std::regex expression(R"(([A-Za-z0-9]+)\(([^()]*)\))");
+  for (auto it = std::sregex_iterator(value.begin(), value.end(), expression); it != std::sregex_iterator(); ++it) {
+    auto name = (*it)[1].str(), text = (*it)[2].str();
+    std::replace(text.begin(), text.end(), ',', ' ');
+    std::istringstream parts(text);
+    std::string first, second;
+    parts >> first >> second;
+    auto length = [](const std::string &part, float extent) {
+      return part.ends_with('%') ? pixels(part.substr(0, part.size() - 1)) * extent / 100 : pixels(part);
+    };
+    if (name == "translate" || name == "translate3d") {
+      result[0] += length(first, node.width); result[1] += length(second, node.height);
+    } else if (name == "translateX") result[0] += length(first, node.width);
+    else if (name == "translateY") result[1] += length(first, node.height);
+    else if (name == "scale" || name == "scale3d") {
+      result[2] *= pixels(first, 1); result[3] *= pixels(second, pixels(first, 1));
+    } else if (name == "scaleX") result[2] *= pixels(first, 1);
+    else if (name == "scaleY") result[3] *= pixels(first, 1);
+  }
+  return result;
+}
+
+void Runtime::animate() {
+  for (auto it = animations_.begin(); it != animations_.end();) {
+    auto node = find(it->first);
+    if (!node || node->hidden() || node->property("-timeless-animation").empty()) it = animations_.erase(it);
+    else ++it;
+  }
+  std::vector<std::pair<int, std::string>> events;
+  for (const auto &[id, node] : nodes_) {
+    auto source = node->property("-timeless-animation");
+    if (source.empty() || node->hidden()) continue;
+    auto &animation = animations_[id];
+    if (source != animation.source) {
+      animation = Animation{};
+      animation.source = source;
+      animation.start = Clock::now();
+      Value spec(context_, JS_ParseJSON(context_, source.data(), source.size(), "animation.json"));
+      check(spec.get());
+      auto field = [&](const char *key) {
+        Value value(context_, JS_GetPropertyStr(context_, spec.get(), key));
+        return string(context_, value.get());
+      };
+      animation.name = field("name"); animation.fill = field("fill"); animation.timing = field("timing");
+      animation.duration = std::max(0.f, seconds(field("duration"))); animation.delay = seconds(field("delay"));
+      animation.reverse = field("direction") == "reverse" || field("direction") == "alternate-reverse";
+      Value frames(context_, JS_GetPropertyStr(context_, spec.get(), "frames"));
+      Value length(context_, JS_GetPropertyStr(context_, frames.get(), "length"));
+      uint32_t count = 0;
+      if (JS_ToUint32(context_, &count, length.get()) < 0) check(JS_EXCEPTION);
+      if (count > 1000) throw std::runtime_error("Animation exceeds keyframe limit");
+      for (uint32_t i = 0; i < count; ++i) {
+        Value frame(context_, JS_GetPropertyUint32(context_, frames.get(), i));
+        Value offset(context_, JS_GetPropertyStr(context_, frame.get(), "offset"));
+        Value style(context_, JS_GetPropertyStr(context_, frame.get(), "style"));
+        animation.frames.push_back({pixels(string(context_, offset.get())), properties(context_, style.get())});
+      }
+    }
+    float elapsed = std::chrono::duration<float>(Clock::now() - animation.start).count() - animation.delay;
+    float progress = reduce_motion ? 1 : elapsed < 0 ? 0 : animation.duration <= 0 ? 1 : std::clamp(elapsed / animation.duration, 0.f, 1.f);
+    bool ended = progress >= 1;
+    if (!animation.started && (elapsed >= 0 || reduce_motion)) {
+      animation.started = true;
+      events.emplace_back(id, "animationstart");
+    }
+    if (ended && !animation.ended) { animation.ended = true; events.emplace_back(id, "animationend"); }
+    if (!ended) dirty_ = true;
+    node->animated = true;
+    bool apply = elapsed < 0 ? animation.fill == "both" || animation.fill == "backwards" :
+      !ended || animation.fill == "both" || animation.fill == "forwards";
+    if (!apply) continue;
+    // CSS timing uses a cubic Bezier's x-coordinate as time.
+    std::array<float, 4> bezier{.25f, .1f, .25f, 1};
+    if (animation.timing == "ease-in") bezier = {.42f, 0, 1, 1};
+    else if (animation.timing == "ease-out") bezier = {0, 0, .58f, 1};
+    else if (animation.timing == "ease-in-out") bezier = {.42f, 0, .58f, 1};
+    else if (animation.timing.starts_with("cubic-bezier(")) {
+      auto values = animation.timing.substr(13);
+      std::replace(values.begin(), values.end(), ',', ' ');
+      std::istringstream input(values);
+      input >> bezier[0] >> bezier[1] >> bezier[2] >> bezier[3];
+    }
+    if (animation.timing != "linear") {
+      auto cubic = [](float t, float a, float b) { return 3 * (1 - t) * (1 - t) * t * a + 3 * (1 - t) * t * t * b + t * t * t; };
+      float low = 0, high = 1;
+      for (int i = 0; i < 16; ++i) {
+        float middle = (low + high) / 2;
+        if (cubic(middle, bezier[0], bezier[2]) < progress) low = middle; else high = middle;
+      }
+      progress = cubic((low + high) / 2, bezier[1], bezier[3]);
+    }
+    if (animation.reverse) progress = 1 - progress;
+    for (const char *property : {"opacity", "transform"}) {
+      auto base = node->property(property, std::string(property) == "opacity" ? "1" : "none");
+      std::map<float, std::string> frames{{0, base}, {1, base}};
+      for (const auto &frame : animation.frames) {
+        auto value = frame.style.find(property);
+        if (value != frame.style.end()) frames[frame.offset] = value->second;
+      }
+      auto upper = frames.lower_bound(progress);
+      if (upper == frames.end()) upper = std::prev(frames.end());
+      auto lower = upper == frames.begin() ? upper : std::prev(upper);
+      float fraction = upper->first == lower->first ? 0 : (progress - lower->first) / (upper->first - lower->first);
+      auto mix = [&](float a, float b) { return a + (b - a) * fraction; };
+      if (std::string(property) == "opacity") node->animation_opacity = std::clamp(mix(pixels(lower->second, 1), pixels(upper->second, 1)), 0.f, 1.f);
+      else {
+        auto from = transform(lower->second, *node), to = transform(upper->second, *node);
+        node->translate_x = mix(from[0], to[0]); node->translate_y = mix(from[1], to[1]);
+        node->scale_x = mix(from[2], to[2]); node->scale_y = mix(from[3], to[3]);
+      }
+    }
+  }
+  for (const auto &[id, name] : events) event(id, name);
 }
 
 bool Runtime::update(float width, float height) {
+  deadline_ = Clock::now() + turn_budget;
   if (!JS_IsObject(root_object_))
     return false;
+  for (const auto &[id, animation] : animations_) if (!animation.ended) dirty_ = true;
   if (!dirty_ && width == width_ && height == height_)
     return false;
   width_ = width;
@@ -821,19 +1260,23 @@ bool Runtime::update(float width, float height) {
   try {
     auto next = parse(root_object_, nullptr, 0);
     YGNodeCalculateLayout(next->layout, width, height, YGDirectionLTR);
+    grid_widths(*next);
+    YGNodeCalculateLayout(next->layout, width, height, YGDirectionLTR);
     for (int pass = 0; pass < 4 && scroll_metrics(*next); ++pass)
       YGNodeCalculateLayout(next->layout, width, height, YGDirectionLTR);
     scroll_metrics(*next);
     frames(*next, 0, 0);
+    floating_frames(*next);
     root_ = std::move(next);
   } catch (...) {
     nodes_ = std::move(previous);
     throw;
   }
   dirty_ = false;
+  animate();
   std::vector<int> scrolled;
   for (const auto &[id, node] : nodes_) {
-    if (node->type != "scroll-view")
+    if (!node->scrollable())
       continue;
     Value x(context_, JS_GetPropertyStr(context_, node->object.get(),
                                         "__windows_scroll_x"));

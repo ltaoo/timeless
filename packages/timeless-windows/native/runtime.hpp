@@ -47,7 +47,18 @@ struct Node {
   std::vector<std::unique_ptr<Node>> children;
   Node *parent = nullptr;
   bool disabled = false;
+  bool open = true, modal = false;
+  std::string kind, side, align, drawer_side, svg, src;
+  int anchor = 0;
+  bool virtual_anchor = false;
+  float anchor_x = 0, anchor_y = 0, anchor_width = 0, anchor_height = 0;
+  float offset = 8, cross_offset = 0;
+  bool animated = false;
+  float animation_opacity = 1, translate_x = 0, translate_y = 0, scale_x = 1, scale_y = 1;
+  std::vector<float> grid_columns;
+  int grid_count = 0;
   bool clickable = false;
+  bool keyboard = false;
   bool checked = false, indeterminate = false, readonly = false;
   struct Option {
     std::string value, label;
@@ -66,6 +77,8 @@ struct Node {
   bool button() const;
   bool input() const;
   bool toggle() const;
+  bool scrollable() const;
+  bool contents() const;
   std::string content() const;
 };
 
@@ -82,11 +95,15 @@ public:
   bool update(float width, float height);
   void request_update() { dirty_ = true; }
   void state(int id, const std::string &name, bool value);
-  bool event(int id, const std::string &name, const std::string &key = "");
+  bool event(int id, const std::string &name, const std::string &key = "", int modifiers = 0);
+  bool pointer(int id, const std::string &name, float x, float y, int button = 0);
   void input(int id, const std::string &value);
   void link(int id, const std::string &url);
   void select(int id, const std::string &value);
   void toggle(int id);
+  void dismiss(int id);
+  void focus(int id);
+  void receive_files(int id, const std::vector<std::string> &paths);
   bool scroll(int id, float x, float y);
   float scrollbar_size = 17;
   Node *find(int id) const;
@@ -94,6 +111,10 @@ public:
   Node *root() const { return root_.get(); }
   JSContext *context() const { return context_; }
   std::function<YGSize(const Node &, float)> measure;
+  std::function<void(int, bool)> focus_control;
+  std::function<void(int)> pick_files;
+  bool reduce_motion = false;
+  std::chrono::milliseconds turn_budget{5000};
 
 private:
   using Clock = std::chrono::steady_clock;
@@ -108,6 +129,15 @@ private:
   std::unique_ptr<Node> root_;
   std::unordered_map<int, Node *> nodes_;
   std::unordered_map<int, Timer> timers_;
+  struct Animation {
+    struct Frame { float offset; std::unordered_map<std::string, std::string> style; };
+    std::string source, name, fill, timing;
+    std::vector<Frame> frames;
+    Clock::time_point start;
+    float duration = 0, delay = 0;
+    bool reverse = false, started = false, ended = false;
+  };
+  std::unordered_map<int, Animation> animations_;
   int next_node_ = 1, next_timer_ = 1;
   bool dirty_ = false;
   float width_ = 0, height_ = 0;
@@ -115,10 +145,16 @@ private:
   std::unique_ptr<Node> parse(JSValueConst object, Node *parent, int depth);
   bool call(JSValueConst object, const char *name, int argc,
             JSValueConst *argv);
+  Value invoke(JSValueConst object, const char *name, int argc = 0,
+               JSValueConst *argv = nullptr);
   void check(JSValueConst value);
   void jobs();
   void frames(Node &node, float x, float y);
   bool scroll_metrics(Node &node);
+  void grid_widths(Node &node);
+  void floating_frames(Node &node);
+  void virtual_rows(JSValueConst object, bool visible);
+  void animate();
   void scroll_event(Node &node, float x, float y);
   static JSValue render(JSContext *, JSValueConst, int, JSValueConst *);
   static JSValue invalidate(JSContext *, JSValueConst, int, JSValueConst *);
@@ -126,6 +162,7 @@ private:
   static JSValue schedule(JSContext *, JSValueConst, int, JSValueConst *, int);
   static JSValue cancel(JSContext *, JSValueConst, int, JSValueConst *);
   static int interrupt(JSRuntime *, void *);
+  static JSValue host_method(JSContext *, JSValueConst, int, JSValueConst *, int, JSValue *);
 };
 
 std::string string(JSContext *context, JSValueConst value);
