@@ -1,4 +1,4 @@
-import { DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
+import { computed, DerivedRef, isRef, Ref } from "@timeless/inner-reactive";
 
 import { MountedEvent } from "@/event";
 
@@ -10,7 +10,8 @@ import {
   run_with_owner,
   dispose_owner,
 } from "@/context/context";
-import { isElement, TimelessElement, ViewChildren } from "./type";
+import { destroyElement, isElement, TimelessElement, ViewChildren } from "./type";
+import { Show } from "@/reactive/show";
 
 export type ListViewV2Reactive<T> = T | Ref<T> | DerivedRef<T>;
 export type ListViewV2Key<T> = keyof T | ((item: T, index: number) => unknown);
@@ -37,6 +38,8 @@ export type ListViewV2ItemResizeEvent<T> = {
 export type ListViewV2Props<T extends Record<string, unknown>> = BoxProps & {
   each: T[] | Ref<T[]> | DerivedRef<T[]>;
   render: (item: Ref<T>, index: Ref<number>) => ViewChildren;
+  /** Content shown when each is empty; callbacks are evaluated lazily. */
+  empty?: ViewChildren;
   key?: ListViewV2Key<T>;
   size?: number;
   buffer?: number;
@@ -253,6 +256,7 @@ export function ListViewV2<T extends Record<string, unknown>>(
   const {
     each,
     render,
+    empty,
     key,
     size = 4,
     buffer = 0,
@@ -287,6 +291,15 @@ export function ListViewV2<T extends Record<string, unknown>>(
     itemHeight: initial_item_height,
     gutter: isRef(gutter) ? gutter.value : gutter,
   });
+  const empty_when = empty === undefined
+    ? undefined
+    : isRef(each)
+      ? computed(each, (items) => items.length === 0)
+      : initial_items.length === 0;
+  const children = empty_when === undefined
+    ? []
+    : [Show({ when: empty_when, ok: () => empty, else: () => null })];
+  box$.state.children = children;
   const parent_owner = get_owner();
   let host: any = null;
   let mounted_cleanup: (() => void) | undefined;
@@ -299,6 +312,8 @@ export function ListViewV2<T extends Record<string, unknown>>(
     if (destroyed) return;
     destroyed = true;
     host?.destroy?.();
+    children.forEach(destroyElement);
+    if (isRef(empty_when)) empty_when.destroy();
     mounted_cleanup?.();
     onUnmounted?.();
     box$.methods.destroy();
@@ -316,7 +331,7 @@ export function ListViewV2<T extends Record<string, unknown>>(
     },
     state: box$.state,
     events: box$.events,
-    children: [],
+    children,
     source: each,
     config: {
       key,
@@ -372,9 +387,11 @@ export function ListViewV2<T extends Record<string, unknown>>(
       box$.state.rendered = true;
       const cleanup = onMounted?.(event);
       if (typeof cleanup === "function") mounted_cleanup = cleanup;
+      children.forEach((child) => child.onMounted({ target: child.$elm }));
     },
     beforeUnmounted() {
       beforeUnmounted?.();
+      children.forEach((child) => child.beforeUnmounted?.());
     },
     onUnmounted: destroy,
     destroy,

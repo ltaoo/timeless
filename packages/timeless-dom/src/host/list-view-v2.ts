@@ -375,6 +375,9 @@ export function DOMListViewV2(props: {
     });
     content.appendChild(viewport);
     root.appendChild(content);
+    if (element.children.length) {
+      root.appendChild(box$.methods.render(element.children));
+    }
 
     const handle_scroll = () => {
       element.config.onScroll?.(scroll_event());

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createListViewV2Model, ListViewV2 } from "@/content/list-view-v2";
 
-import { ref, computed, combine } from "@timeless/inner-reactive";
+import { ref, refarr, computed, combine } from "@timeless/inner-reactive";
 import { View } from "@/content/view";
 import { For } from "@/reactive/for";
 import { Show } from "@/reactive/show";
@@ -42,6 +42,60 @@ describe("ListViewV2", () => {
     expect(list.t).toBe("list-view-v2");
     expect(list.state.attributes.n).toBe("list-view-v2");
     list.destroy?.();
+  });
+});
+
+describe("ListViewV2 empty content", () => {
+  it("shows eager content only for an empty list", () => {
+    for (const each of [[], [{ id: 1 }]]) {
+      const content = View({ attributes: { n: "empty-list" } }, ["No items"]);
+      const list = ListViewV2({ each, render: () => null, empty: content });
+      expect(list.children?.[0]?.children).toEqual(each.length ? [] : [content]);
+      list.destroy?.();
+    }
+  });
+
+  it("updates on array patches and releases lazy content subscriptions", () => {
+    const items = refarr<{ id: number }>([]);
+    const label = ref("No items");
+    const render_empty = vi.fn(() => View(
+      { attributes: { n: "empty-list" } },
+      [computed(label, (value) => value)],
+    ));
+    const list = ListViewV2({ each: items, render: () => null, empty: render_empty });
+    expect(render_empty).toHaveBeenCalledOnce();
+    expect(label.getDeps()).toHaveLength(1);
+    items.push({ id: 1 });
+    expect(list.children?.[0]?.children).toEqual([]);
+    expect(label.getDeps()).toHaveLength(0);
+    items.clear();
+    expect(render_empty).toHaveBeenCalledTimes(2);
+    list.destroy?.();
+    list.destroy?.();
+    expect(label.getDeps()).toHaveLength(0);
+    expect(items.getDeps()).toHaveLength(0);
+    items.push({ id: 2 });
+    items.clear();
+    expect(render_empty).toHaveBeenCalledTimes(2);
+  });
+
+  it("defers the factory for populated lists and inherits context", () => {
+    const context = createContext("empty-context");
+    const items = ref([{ id: 1 }]);
+    const render_empty = vi.fn(() => [View({ attributes: {
+      n: "empty-list", title: use(context),
+    } }), "No items"]);
+    let list!: ReturnType<typeof ListViewV2>;
+    const parent = Scope(() => provide(context, "parent"), () => {
+      list = ListViewV2({ each: items, render: () => null, empty: render_empty });
+      return list;
+    });
+    expect(render_empty).not.toHaveBeenCalled();
+    items.as([]);
+    expect(list.children?.[0]?.children?.[0]?.state.attributes.title).toBe("parent");
+    expect(list.children?.[0]?.children?.[1]?.state.value).toBe("No items");
+    parent.destroy?.();
+    expect(items.getDeps()).toHaveLength(0);
   });
 });
 
