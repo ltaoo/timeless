@@ -8,7 +8,7 @@ import { bind_disabled } from "@/util/disabled";
 
 const logger = Logger({ prefix: "primitive", scope: "input/input" });
 
-export type InputProps = BoxProps & {
+export type InputProps = Omit<BoxProps, "id"> & {
   type?: string | DerivedRef<string> | Ref<string>;
   id?: string | null;
   name?: string | DerivedRef<string> | Ref<string>;

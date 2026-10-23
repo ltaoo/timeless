@@ -50,7 +50,7 @@ function buildAttributes(state: TimelessElement["state"]): string[] {
     for (const [key, value] of Object.entries(state.dataset)) {
       if (value !== undefined && value !== null) {
         attributes.push({
-          key: `data-${camelToKebab(key)}`,
+          key: key.startsWith("data-") ? key : `data-${camelToKebab(key)}`,
           value: attrEscape(String(value)),
         });
       }

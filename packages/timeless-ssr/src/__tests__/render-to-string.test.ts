@@ -92,13 +92,14 @@ describe("renderToString", () => {
         dataset: {
           "user-id": "123",
           "is-active": "true",
+          "data-slot": "picker",
         },
       },
       [],
     );
 
     const result = renderToString(element);
-    expect(result).toBe(`<div data-user-id="123" data-is-active="true"></div>`);
+    expect(result).toBe(`<div data-user-id="123" data-is-active="true" data-slot="picker"></div>`);
   });
 
   it("button element", () => {

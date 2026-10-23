@@ -34,6 +34,7 @@ const native_events = {
   "onDragLeave": "dragleave",
   "onDrop": "drop",
   "onAnimationEnd": "animationend",
+  "onAnimationStart": "animationstart",
   "onWheel": "wheel"
 };
 
@@ -328,7 +329,7 @@ export function HostElement(props: {
       const dataset = state.dataset;
       if (dataset) {
         for (const [key, value] of Object.entries(dataset)) {
-          const k = `data-${key}`;
+          const k = key.startsWith("data-") ? key : `data-${key}`;
           if (value !== undefined) {
             methods.setAttribute(k, String(value));
           } else {

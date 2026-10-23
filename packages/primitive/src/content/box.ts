@@ -43,6 +43,7 @@ import { Text } from "./text";
 
 /** Props for Box component - common to all box-like elements */
 export type BoxProps = {
+  id?: string;
   /** Unique key for list rendering */
   key?: string | number;
   /** HTML tag to render as */
@@ -99,6 +100,7 @@ export type BoxEvents = Partial<{
   onDrop?: (e: DragEvent) => void;
   onWheel?: (e: WheelEvent) => void;
   onAnimationEnd?: (e: AnimationEvent) => void;
+  onAnimationStart?: (e: AnimationEvent) => void;
 }>;
 
 /** Internal state structure for Box */
@@ -143,6 +145,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
     },
     // Helper: apply attribute
     apply_attr(k: string, v: any) {
+      if (k.startsWith("aria-") && typeof v === "boolean") v = String(v);
       if (v === undefined || v === null || v === false) {
         // host.removeAttribute($elm, k);
         if ($elm && typeof $elm.removeAttribute === "function") {
@@ -247,7 +250,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
           });
         }
       }
-      const attributes = props.attributes;
+      const attributes = props.id === undefined ? props.attributes : { ...props.attributes, id: props.id ?? undefined };
       if (attributes) {
         Object.keys(attributes).forEach((k) => {
           const vv = attributes[k];
@@ -276,8 +279,9 @@ export function Box<T>(props: BoxProps, extra_state: T) {
               state.dataset[k] = vv.value;
               const unsubscribe = vv.subscribe({
                 onChange(v) {
+                  state.dataset[k] = v;
                   if ($elm) {
-                    methods.apply_attr(k, v);
+                    methods.apply_attr(k.startsWith("data-") ? k : `data-${k}`, typeof v === "boolean" ? String(v) : v);
                   }
                 },
               });
@@ -293,8 +297,9 @@ export function Box<T>(props: BoxProps, extra_state: T) {
               state.dataset[k] = vv.value;
               const unsubscribe = vv.subscribe({
                 onChange(v) {
+                  state.dataset[k] = v;
                   if ($elm) {
-                    methods.apply_attr(k, v);
+                    methods.apply_attr(k.startsWith("data-") ? k : `data-${k}`, typeof v === "boolean" ? String(v) : v);
                   }
                 },
               });
@@ -414,6 +419,7 @@ export function Box<T>(props: BoxProps, extra_state: T) {
       if (props.onAnimationEnd) {
         events.onAnimationEnd = props.onAnimationEnd;
       }
+      if (props.onAnimationStart) events.onAnimationStart = props.onAnimationStart;
       if (props.onWheel) {
         events.onWheel = props.onWheel;
       }

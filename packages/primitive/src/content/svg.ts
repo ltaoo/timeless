@@ -118,7 +118,8 @@ function createSVGBox<T>(props: SVGBaseProps, extraState: T) {
     attributes[key] = value as AttrValue;
   }
 
-  return Box({ ...props, attributes }, extraState);
+  const { id, ...rest } = props;
+  return Box({ ...rest, attributes }, extraState);
 }
 
 export interface SVGProps extends SVGBaseProps, SVGPresentationAttrs {
