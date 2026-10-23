@@ -13,7 +13,10 @@ enum NativeIconLoader {
         do {
             let document = try XMLDocument(xmlString: svg, options: [.nodeLoadExternalEntitiesNever])
             guard let root = document.rootElement(), root.name == "svg" else { return nil }
-            for (name, value) in ["width": String(Double(size)), "height": String(Double(size)), "color": color] {
+            // AppKit's SVG decoder does not accept CSS's computed #RRGGBBAA colors.
+            let rgb = NativeViewRenderer.parseColor(color)?.usingColorSpace(.sRGB)
+            let svgColor = rgb.map { String(format: "rgba(%d,%d,%d,%.6f)", Int(($0.redComponent * 255).rounded()), Int(($0.greenComponent * 255).rounded()), Int(($0.blueComponent * 255).rounded()), $0.alphaComponent) } ?? color
+            for (name, value) in ["width": String(Double(size)), "height": String(Double(size)), "color": svgColor] {
                 root.removeAttribute(forName: name)
                 root.addAttribute(XMLNode.attribute(withName: name, stringValue: value) as! XMLNode)
             }

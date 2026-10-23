@@ -37,6 +37,15 @@ final class NativeIconTests: XCTestCase {
         XCTAssertNil(NativeIconLoader.image(svg: "<svg", size: 24, color: "#000000"))
     }
 
+    func testSVGCurrentColorAcceptsComputedCSSHexColors() throws {
+        for color in ["#fafafaff", "#ff0000ff", "#0000ffff"] {
+            let expected = try XCTUnwrap(NativeViewRenderer.parseColor(color)?.usingColorSpace(.genericRGB))
+            let image = try XCTUnwrap(NativeIconLoader.image(svg: svg, size: 24, color: color))
+            XCTAssertTrue(try hasColor(image, red: expected.redComponent, green: expected.greenComponent, blue: expected.blueComponent), color)
+            XCTAssertTrue(try hasColor(image, red: 0, green: 1, blue: 0), "Fixed SVG colors must remain unchanged")
+        }
+    }
+
     func testBridgeUpdatesSVGColorSizeAndSFSymbolFallback() throws {
         _ = NSApplication.shared
         let script = FileManager.default.temporaryDirectory.appendingPathComponent("timeless-icons-\(UUID().uuidString).js")
@@ -67,6 +76,32 @@ final class NativeIconTests: XCTestCase {
         context.evaluateScript("icon.svg=null; icon.name='house.fill'; icon._onIconChange()")
         XCTAssertNotNil(view.image)
         XCTAssertNotNil(view.contentTintColor)
+        XCTAssertTrue(bridge.runtimeErrors.isEmpty, bridge.runtimeErrors.joined(separator: "\n"))
+    }
+
+    func testSharedNavigationIconsFollowTheTextTheme() throws {
+        guard let path = ProcessInfo.processInfo.environment["TIMELESS_MACOS_TEST_BUNDLE"] else { throw XCTSkip("Set TIMELESS_MACOS_TEST_BUNDLE") }
+        _ = NSApplication.shared
+        let bridge = JSBridge(devScriptPath: path)
+        let renderer = NativeViewRenderer(bridge: bridge)
+        var root: NSView?
+        bridge.onRender = { root = renderer.render($0, containerWidth: 1000, containerHeight: 800) }
+        bridge.onRelayout = { renderer.relayout() }
+        bridge.run()
+        let view = try XCTUnwrap(root)
+        func all(_ node: NSView) -> [NSView] { [node] + node.subviews.flatMap(all) }
+        func element(_ name: String) throws -> NSView { try XCTUnwrap(all(view).first { $0.identifier?.rawValue == name }, name) }
+        for _ in 0..<3 {
+            for page in ["overview", "general", "data_entry", "floating", "navigation", "data_display", "layout"] {
+                let button = try XCTUnwrap(element("nav-" + page) as? FlippedView)
+                let label = try XCTUnwrap(button.subviews.compactMap { $0 as? NSTextField }.first)
+                let color = try XCTUnwrap(label.textColor?.usingColorSpace(.genericRGB))
+                let icon = try XCTUnwrap(element("nav-" + page + "-icon") as? NSImageView)
+                XCTAssertTrue(try hasColor(XCTUnwrap(icon.image), red: color.redComponent, green: color.greenComponent, blue: color.blueComponent), page)
+            }
+            XCTAssertTrue(try XCTUnwrap(element("theme-toggle") as? FlippedView).accessibilityPerformPress())
+            RunLoop.main.run(until: Date().addingTimeInterval(0.03))
+        }
         XCTAssertTrue(bridge.runtimeErrors.isEmpty, bridge.runtimeErrors.joined(separator: "\n"))
     }
 }
