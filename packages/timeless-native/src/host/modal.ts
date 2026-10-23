@@ -13,6 +13,7 @@ export function NativeModal(
   const view = NativeView(props);
   function setOpen(open: boolean, modal = kind === "modal") {
     const node = view.get$elm();
+    if (node.open === open && node.modal === modal) return;
     node.open = open;
     node.modal = modal;
     requestNativeLayout();
@@ -41,6 +42,8 @@ export function NativeModal(
         side: props.elm.state.side ?? "bottom",
         align: props.elm.state.align ?? "start",
         offset: props.elm.state.offset ?? 8,
+        crossOffset: props.elm.state.crossOffset ?? 0,
+        drawerSide: props.elm.state.drawerSide,
       });
       Object.defineProperty(node, "anchor", {
         configurable: true,

@@ -66,16 +66,7 @@ export function NativeButton(props: {
       delete $elm.listeners[type];
     },
     getBoundingClientRect() {
-      return {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      };
+      return methods.getBoundingClientRect();
     },
     render() {
       methods.set$elm($elm);

@@ -8,9 +8,39 @@ function floating(node: any): any {
   return node.children?.map(floating).find(Boolean);
 }
 
-afterEach(() => registerNativeStyleSheet("floating-test", []));
+afterEach(() => {
+  if (vi.isFakeTimers()) vi.runOnlyPendingTimers();
+  vi.useRealTimers();
+  delete (globalThis as any).__nativeBridge_relayout;
+  registerNativeStyleSheet("floating-test", []);
+});
 
 describe("native floating surfaces", () => {
+  it("does not schedule page layout when Tooltip mounts or repeats the current visibility", () => {
+    vi.useFakeTimers();
+    const visible = ref(false);
+    const tooltip = Tooltip({ visible, content: "Help" }, [Button({}, ["Trigger"])]);
+    const { dom, vnode } = buildAndRender(tooltip);
+    vi.runAllTimers();
+    const relayout = vi.fn();
+    (globalThis as any).__nativeBridge_relayout = relayout;
+    tooltip.onMounted({ target: tooltip.$elm });
+    vi.runAllTimers();
+    expect(relayout).not.toHaveBeenCalled();
+    visible.as(true);
+    vi.runAllTimers();
+    expect(floating(dom).open).toBe(true);
+    expect(relayout).toHaveBeenCalledTimes(1);
+    vnode.setVisible(true);
+    vi.runAllTimers();
+    expect(relayout).toHaveBeenCalledTimes(1);
+    visible.as(false);
+    vi.runAllTimers();
+    expect(floating(dom).open).toBe(false);
+    expect(relayout).toHaveBeenCalledTimes(2);
+    tooltip.onUnmounted();
+  });
+
   it("synchronizes Modal state, controlled dismissal and unmount cleanup", () => {
     const open = ref(false);
     const close = vi.fn(() => open.as(false));

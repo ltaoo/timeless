@@ -24,6 +24,22 @@ function options(node: any): any[] {
 }
 
 describe("native form and scroll protocols", () => {
+  it("updates data attributes and preserves false ARIA values", () => {
+    const checked = ref<string | undefined>("");
+    const accessible = ref(true);
+    const view = View({ dataset: { checked, "data-slot": "switch" }, attributes: { "aria-checked": accessible } });
+    const { dom } = buildAndRender(view);
+    expect(dom.attrs["data-slot"]).toBe("switch");
+    expect(dom.attrs["data-checked"]).toBe("");
+    checked.as(undefined);
+    accessible.as(false);
+    expect(dom.attrs["data-checked"]).toBeUndefined();
+    expect(dom.attrs["aria-checked"]).toBe("false");
+    checked.as("");
+    expect(dom.attrs["data-checked"]).toBe("");
+    view.onUnmounted();
+  });
+
   it("keeps selected files through intermediate picker state and clears them on reset", () => {
     const store = new vm.FilePickerCore({ accept: ".txt", multiple: true });
     const picker = ui.FilePickerPrimitive.Input({ store });

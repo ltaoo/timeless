@@ -1,6 +1,6 @@
 import { TimelessElement, VNodeView } from "@timeless/timeless";
 
-import { requestNativeLayout } from "../stylesheet";
+import { invalidateNativeStyles, requestNativeLayout } from "../stylesheet";
 
 import { HostElement, BoxMethods } from "./box";
 
@@ -52,19 +52,19 @@ export function NativeRadio(props: {
       methods.setStyleSet(names);
     },
     setAttribute(key: string, value: string) {
+      if (key === "checked") $elm.checked = String(value) !== "false";
       methods.setAttribute(key, value);
       if (key === "readOnly") {
         if (String(value) === "false") methods.removeAttribute("readonly");
         else methods.setAttribute("readonly", "");
       }
-      if (key === "checked") $elm.checked = String(value) !== "false";
       if (key === "indeterminate")
         $elm.indeterminate = String(value) !== "false";
       requestNativeLayout();
     },
     removeAttribute(key: string) {
-      methods.removeAttribute(key);
       if (key === "checked") $elm.checked = false;
+      methods.removeAttribute(key);
       if (key === "indeterminate") $elm.indeterminate = false;
       requestNativeLayout();
     },
@@ -128,7 +128,9 @@ export function NativeRadio(props: {
       requestNativeLayout();
     },
     setChecked(checked: boolean) {
+      if ($elm.checked === checked) return;
       $elm.checked = checked;
+      invalidateNativeStyles($elm, "states", ["checked"]);
       requestNativeLayout();
     },
     buildChildren: methods.buildChildren,

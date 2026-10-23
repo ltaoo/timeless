@@ -92,6 +92,7 @@ export function NativeInput(props: {
     render() {
       methods.set$elm($elm);
       methods.applyState(props.elm.state, { initial: true });
+      if (props.elm.state.id !== undefined) methods.setAttribute("id", props.elm.state.id);
       methods.setupEventListener(props.elm.events);
       if (props.elm.state.value !== undefined) {
         $elm.value = String(props.elm.state.value);

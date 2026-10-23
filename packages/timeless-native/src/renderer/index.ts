@@ -1,10 +1,16 @@
 import { type TimelessElement, isElement, patch } from "@timeless/timeless";
-import { bindNativeStyleRoot, refreshNativeStyles } from "../stylesheet";
+import {
+  batchNativeStyles,
+  bindNativeStyleRoot,
+  clearNativeLayout,
+  refreshNativeStyles,
+  invalidateNativeStyles,
+} from "../stylesheet";
 
 declare const __nativeBridge_render: (tree: any) => void;
 declare const __nativeBridge_relayout: (() => void) | undefined;
 
-import { NativeView, isNativeView } from "@/host/view";
+import { NativeView } from "@/host/view";
 import { NativeModal } from "@/host/modal";
 import { NativeTooltip } from "@/host/tooltip";
 import { NativeText } from "@/host/text";
@@ -33,20 +39,31 @@ import { NativeAspectRatio } from "@/host/aspect-ratio";
 import { NativeSplitView, NativeSplitPane } from "@/host/split-view";
 import { NativeScrollView } from "@/host/scroll-view";
 import { NativeTabView, NativeTabPane } from "@/host/tab-view";
+import { NativeTable, isNativeTableType } from "@/host/table";
+import { NativeForm } from "@/host/form";
+import { NativeListViewV2 } from "@/host/list-view-v2";
 
 function build(elm: TimelessElement): any {
+  if (elm.t === "list-view-v2") {
+    const list = NativeListViewV2({ build, elm });
+    elm.$elm = list;
+    return list;
+  }
+  if (elm.t === "form") {
+    const form = NativeForm({ build, elm });
+    elm.$elm = form;
+    return form;
+  }
+  if (isNativeTableType(elm.t)) {
+    const table = NativeTable({ build, elm });
+    elm.$elm = table;
+    return table;
+  }
   if (elm.t === "rich-text") {
     const host = NativeRichText({ build, elm });
     elm.$elm = host;
     return host;
   }
-  console.log(
-    "[Native Render] build called with element type:",
-    elm?.t,
-    "children:",
-    elm?.children?.length,
-  );
-
   if (elm.t === "modal" || elm.t === "popover") {
     const surface = NativeModal({ build, elm });
     elm.$elm = surface;
@@ -209,10 +226,12 @@ function build(elm: TimelessElement): any {
 // ─── buildAndRender ───────────────────────────────────────────────────────────
 
 export function buildAndRender(elm: TimelessElement) {
-  const vnode = build(elm);
-  const dom = vnode.render();
-  refreshNativeStyles(dom);
-  return { vnode, dom };
+  return batchNativeStyles(() => {
+    const vnode = build(elm);
+    const dom = vnode.render();
+    refreshNativeStyles(dom);
+    return { vnode, dom };
+  });
 }
 
 // ─── nativePlatform ───────────────────────────────────────────────────────────
@@ -229,7 +248,7 @@ export function nativePlatform() {
       if (idx !== -1) {
         parent.children[idx] = newDom;
         newDom.parentNode = parent;
-        refreshNativeStyles(newDom);
+        invalidateNativeStyles(parent, "structure", ["children"]);
         oldDom.parentNode = null;
         if (typeof parent._onChildReplaced === "function") {
           parent._onChildReplaced(idx, newDom);
@@ -243,6 +262,7 @@ export function nativePlatform() {
       if (idx !== -1) {
         parent.children.splice(idx, 1);
         dom.parentNode = null;
+        invalidateNativeStyles(parent, "structure", ["children"]);
         if (typeof parent._onChildRemoved === "function") {
           parent._onChildRemoved(idx);
         }
@@ -251,7 +271,7 @@ export function nativePlatform() {
     insertChild(parentDom: any, childDom: any, index: number) {
       parentDom.children.splice(index, 0, childDom);
       childDom.parentNode = parentDom;
-      refreshNativeStyles(childDom);
+      invalidateNativeStyles(parentDom, "structure", ["children"]);
       if (typeof parentDom._onChildInserted === "function") {
         parentDom._onChildInserted(index, childDom);
       }
@@ -260,7 +280,7 @@ export function nativePlatform() {
       // Native: children go INSIDE the anchor-based element, not as siblings
       anchorDom.children.push(childDom);
       childDom.parentNode = anchorDom;
-      refreshNativeStyles(childDom);
+      invalidateNativeStyles(anchorDom, "structure", ["children"]);
       if (typeof anchorDom._onChildInserted === "function") {
         anchorDom._onChildInserted(anchorDom.children.length - 1, childDom);
       }
@@ -271,13 +291,6 @@ export function nativePlatform() {
 // ─── render ───────────────────────────────────────────────────────────────────
 
 export function render(elm: TimelessElement) {
-  console.log(
-    "[Native Render] render called, elm:",
-    elm?.t,
-    "children:",
-    elm?.children?.length,
-  );
-
   if (!elm) {
     console.error("[Render] Element is null");
     return;
@@ -295,6 +308,7 @@ export function render(elm: TimelessElement) {
       hmr.data.__root = elm;
       bindNativeStyleRoot(elm.$elm.get$elm());
       if (typeof __nativeBridge_relayout !== "undefined") {
+        clearNativeLayout();
         __nativeBridge_relayout();
       }
       // Re-trigger onMounted so timers/effects are re-established after HMR
@@ -307,26 +321,19 @@ export function render(elm: TimelessElement) {
       return;
     }
 
-    // Initial render (existing code)
-    console.log("[Native Render] isElement true, building...");
     const host$ = build(elm);
-    console.log(
-      "[Native Render] build returned:",
-      host$?.$elm,
-      "type:",
-      host$?.t,
-    );
 
     if (!host$) {
       console.error("[Render] Element render return null", elm.t);
       return;
     }
-    const isViewLike = isNativeView(host$) || host$.getType() === "view";
-    console.log("[Native Render] isViewLike:", isViewLike);
-    const $root = host$.render();
-    bindNativeStyleRoot($root);
+    const $root = batchNativeStyles(() => {
+      const node = host$.render();
+      bindNativeStyleRoot(node);
+      return node;
+    });
+    clearNativeLayout();
     __nativeBridge_render($root);
-    console.log("[Native Render] pushing view to root children, $elm:");
 
     // Store root for HMR patching
     if (hmr) {

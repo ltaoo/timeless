@@ -1,6 +1,7 @@
 import { TimelessElement } from "@timeless/timeless";
 import {
   refreshNativeStyles,
+  invalidateNativeStyles,
   requestNativeLayout,
   setNativeInlineStyle,
 } from "../stylesheet";
@@ -12,7 +13,7 @@ export interface NativeTextElm {
   parentNode?: any;
   /** Called by the native bridge when it creates the platform label,
    *  so that future setContent() calls can push updates. */
-  _onContentChange?: (value: string) => void;
+  _onContentChange?: (value: string) => boolean | void;
   _onStyleChange?: (style: Record<string, string>) => void;
 }
 
@@ -45,17 +46,14 @@ export function NativeText(props: { elm: TimelessElement }): NativeText {
       return false;
     },
     setText(v: string | number | null) {
-      if (v !== null && v !== undefined) {
-        const str = String(v);
-        $text.value = str;
-        if (typeof $text._onContentChange === "function") {
-          $text._onContentChange(str);
-        }
-      } else {
-        $text.value = "";
-        $text._onContentChange?.("");
-      }
-      requestNativeLayout();
+      const value = v == null ? "" : String(v);
+      if ($text.value === value) return;
+      const empty_changed = !$text.value !== !value;
+      $text.value = value;
+      if (empty_changed && $text.parentNode)
+        invalidateNativeStyles($text.parentNode, "structure", ["children"]);
+      // Hosts may skip layout when the measured dimensions are unchanged.
+      if ($text._onContentChange?.(value) !== false) requestNativeLayout();
     },
     setStyle(style: Record<string, string>) {
       setNativeInlineStyle($text, style);

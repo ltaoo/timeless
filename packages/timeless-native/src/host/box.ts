@@ -108,6 +108,7 @@ export function HostElement(props: {
       child_nodes = v;
     },
     getBoundingClientRect() {
+      if ($elm?._getBoundingClientRect) return $elm._getBoundingClientRect();
       return {
         x: 0,
         y: 0,
@@ -142,15 +143,18 @@ export function HostElement(props: {
       }
       const previous = $elm.attrs.class ?? "";
       if (previous === styleSet.join(" ")) return;
+      const before = { ...$elm, attrs: { ...$elm.attrs } };
       if (styleSet.length === 0) {
         delete $elm.attrs.class;
       } else {
         $elm.attrs.class = styleSet.join(" ");
       }
-      invalidateNativeStyles($elm, "classes", [
-        ...previous.split(/\s+/),
-        ...styleSet,
-      ]);
+      invalidateNativeStyles(
+        $elm,
+        "classes",
+        [...previous.split(/\s+/), ...styleSet],
+        before,
+      );
     },
     setDefaultStyle(style) {
       if ($elm) setNativeDefaultStyle($elm, style);
@@ -169,8 +173,9 @@ export function HostElement(props: {
         return;
       }
       if ($elm.attrs[key] === value) return;
+      const before = { ...$elm, attrs: { ...$elm.attrs } };
       $elm.attrs[key] = value;
-      invalidateNativeStyles($elm, "attributes", [key]);
+      invalidateNativeStyles($elm, "attributes", [key], before);
       if (typeof $elm._onAttributeChange === "function") {
         $elm._onAttributeChange(key, value);
       }
@@ -180,8 +185,9 @@ export function HostElement(props: {
         return;
       }
       if (!(key in $elm.attrs)) return;
+      const before = { ...$elm, attrs: { ...$elm.attrs } };
       delete $elm.attrs[key];
-      invalidateNativeStyles($elm, "attributes", [key]);
+      invalidateNativeStyles($elm, "attributes", [key], before);
       if (typeof $elm._onAttributeChange === "function") {
         $elm._onAttributeChange(key, null);
       }
@@ -219,6 +225,8 @@ export function HostElement(props: {
       if (events.onClick) {
         $elm.listeners.click = events.onClick;
       }
+      if (events.onSubmit) $elm.listeners.submit = events.onSubmit;
+      if (events.onReset) $elm.listeners.reset = events.onReset;
       if (events.onDoubleClick) {
         $elm.listeners.dblclick = events.onDoubleClick;
       }
@@ -270,6 +278,8 @@ export function HostElement(props: {
       if (events.onAnimationEnd) {
         $elm.listeners.animationend = events.onAnimationEnd;
       }
+      if (events.onAnimationStart)
+        $elm.listeners.animationstart = events.onAnimationStart;
       if (events.onScroll) $elm.listeners.scroll = events.onScroll;
       if (events.onInput) {
         $elm.listeners.input = events.onInput;
@@ -425,7 +435,7 @@ export function HostElement(props: {
           $child.parentNode = $elm;
           $elm.children.push($child);
         }
-        refreshNativeStyles($elm);
+        invalidateNativeStyles($elm, "structure", ["children"]);
       }
       child_elements = r.child_elements as TimelessElement[];
       child_host_nodes = r.child_host_nodes;
@@ -453,6 +463,7 @@ export function HostElement(props: {
           }
         }
       }
+      if ($elm) invalidateNativeStyles($elm, "structure", ["children"]);
       methods.handleElementUnmounted();
       child_elements = [];
       child_host_nodes = [];
@@ -475,13 +486,13 @@ export function HostElement(props: {
             if ($elm && $elm.children) {
               $child.parentNode = $elm;
               $elm.children.splice(host_index, 0, $child);
-              refreshNativeStyles($child);
             }
             host_index += 1;
           }
         }
       }
 
+      if ($elm) invalidateNativeStyles($elm, "structure", ["children"]);
       child_elements.splice(idx, 0, ...inserted_elements);
       child_nodes.splice(idx, 0, ...inserted_child);
 
@@ -502,6 +513,7 @@ export function HostElement(props: {
         if (index !== -1) $elm.children.splice(index, 1);
         if (child) child.parentNode = null;
       }
+      if ($elm) invalidateNativeStyles($elm, "structure", ["children"]);
       requestNativeLayout();
       setTimeout(() => {
         for (const element of removed_elements) element?.onUnmounted?.();
@@ -533,6 +545,7 @@ export function HostElement(props: {
             $elm.children.push($from);
           }
         }
+        invalidateNativeStyles($elm, "structure", ["children"]);
       }
     },
     refresh(data: { children: (TimelessElement | null)[] }) {
@@ -564,7 +577,8 @@ export function HostElement(props: {
       child_host_nodes = next_hosts;
       if ($elm?.children) {
         $elm.children.splice(0, $elm.children.length, ...next_hosts);
-        refreshNativeStyles($elm);
+        for (const child of next_hosts) child.parentNode = $elm;
+        invalidateNativeStyles($elm, "structure", ["children"]);
       }
       requestNativeLayout();
       for (const element of mounted)

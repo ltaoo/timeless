@@ -30,6 +30,7 @@ export function NativeScrollView(props: {
     vertical: "auto",
     scrollTop: 0,
     scrollLeft: 0,
+    scrollRequest: null as { top?: number; left?: number } | null,
     scrollHeight: 0,
     scrollWidth: 0,
     contentWidth: props.elm.state.contentWidth,
@@ -49,6 +50,7 @@ export function NativeScrollView(props: {
     },
     set scrollTop(value: number) {
       $elm.scrollTop = value;
+      $elm.scrollRequest = { ...$elm.scrollRequest, top: value };
       requestNativeLayout();
     },
     get scrollLeft() {
@@ -56,6 +58,7 @@ export function NativeScrollView(props: {
     },
     set scrollLeft(value: number) {
       $elm.scrollLeft = value;
+      $elm.scrollRequest = { ...$elm.scrollRequest, left: value };
       requestNativeLayout();
     },
     get scrollHeight() {
@@ -98,18 +101,6 @@ export function NativeScrollView(props: {
       options?: any,
     ) {
       delete $elm.listeners[type];
-    },
-    getBoundingClientRect() {
-      return {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      };
     },
     render() {
       methods.set$elm($elm);
