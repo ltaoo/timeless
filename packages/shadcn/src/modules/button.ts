@@ -38,7 +38,21 @@ const SIZES = {
 } as const;
 
 type ButtonVariant = keyof typeof VARIANTS;
-type ButtonSize = keyof typeof SIZES;
+export type ButtonSize = keyof typeof SIZES;
+
+export const buttonVariants = ({
+  variant = "default",
+  size = "default",
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+} = {}) => {
+  return [
+    "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+    VARIANTS[variant] || VARIANTS.default,
+    SIZES[size] || SIZES.default,
+  ].join(" ");
+};
 
 export function Button(
   props: ViewProps & {
@@ -53,19 +67,18 @@ export function Button(
   const listener$ = ListenerManager([state_]);
   listener$.add(store.onStateChange(() => state_.as(store.state)));
 
-  const classname_ = computed(state_, (s) => {
-    const v = s.variant as ButtonVariant;
-    const z = s.size as ButtonSize;
-    return [
-      "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-      VARIANTS[v] || VARIANTS.default,
-      SIZES[z] || SIZES.default,
+  const classname_ = computed(state_, (s) =>
+    [
+      buttonVariants({
+        variant: s.variant as ButtonVariant,
+        size: s.size as ButtonSize,
+      }),
       s.loading ? "opacity-70 pointer-events-none cursor-not-allowed" : "",
       s.disabled ? "opacity-50 pointer-events-none cursor-not-allowed" : "",
     ]
       .filter(Boolean)
-      .join(" ");
-  });
+      .join(" "),
+  );
 
   return ui.ButtonPrimitive.Root(
     {

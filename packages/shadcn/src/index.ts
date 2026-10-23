@@ -30,6 +30,8 @@ import { ContextMenu } from "./modules/context-menu";
 import { Tabs } from "./modules/tabs";
 import { Steps } from "./modules/steps";
 import { Button } from "./modules/button";
+export { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "./modules/pagination";
+export type { PaginationLinkProps } from "./modules/pagination";
 import { ScrollView } from "./modules/scroll-view";
 import { Badge } from "./modules/badge";
 import { Separator } from "./modules/separator";
