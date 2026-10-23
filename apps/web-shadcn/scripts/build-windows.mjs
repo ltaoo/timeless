@@ -26,8 +26,6 @@ run("pnpm", [
   "--filter",
   "@timeless/timeless-native",
   "--filter",
-  "@timeless/timeless-macos",
-  "--filter",
   "@timeless/timeless-windows",
   "-r",
   "build",
@@ -43,6 +41,11 @@ for (const [name, repository, revision] of [
     "yoga",
     "https://github.com/facebook/yoga.git",
     "042f5013152eb81c1552dec945b88f7b95ca350f",
+  ],
+  [
+    "nanosvg",
+    "https://github.com/memononen/nanosvg.git",
+    "239e102ec2c691f2902e20ace2ed36ee4a35cfe6",
   ],
 ]) {
   const source = resolve(root, "apps/web-shadcn/build/windows-sources", name);
@@ -62,19 +65,20 @@ for (const [name, repository, revision] of [
 mkdirSync(resolve(output, ".."), { recursive: true });
 const stage = mkdtempSync(resolve(output, "../.windows-build-"));
 try {
-  run("docker", [
-    "--context",
-    "orbstack",
-    "build",
-    "--progress=plain",
-    "--file",
-    "apps/web-shadcn/Dockerfile.windows",
-    "--target",
-    "artifact",
-    "--output",
-    `type=local,dest=${stage}`,
-    root,
-  ]);
+  if (process.argv.includes("--verify")) {
+    run("docker", ["--context", "orbstack", "build", "--platform", "linux/amd64", "--progress=plain",
+      "--file", "apps/web-shadcn/Dockerfile.windows", "--target", "verify",
+      "--tag", "timeless-shadcn-windows-test", root]);
+    // Keep each test container for inspecting failures without overwriting an earlier run.
+    const container = `timeless-shadcn-windows-${Date.now()}`;
+    run("docker", ["--context", "orbstack", "run", "--name", container,
+      "--platform", "linux/amd64", "--network=none", "timeless-shadcn-windows-test"]);
+    for (const name of ["Timeless-Shadcn.exe", "timeless_shadcn_test.exe", "app.js",
+      "LICENSE.txt", "QUICKJS-LICENSE.txt", "YOGA-LICENSE.txt", "NANOSVG-LICENSE.txt", "screenshots"])
+      run("docker", ["--context", "orbstack", "cp", `${container}:/application/${name}`, resolve(stage, name)]);
+  } else run("docker", ["--context", "orbstack", "build", "--progress=plain",
+    "--file", "apps/web-shadcn/Dockerfile.windows", "--target", "artifact",
+    "--output", `type=local,dest=${stage}`, root]);
   rmSync(output, { recursive: true, force: true });
   renameSync(stage, output);
   console.log(`Built ${output}/Timeless-Shadcn.exe`);

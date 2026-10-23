@@ -10,12 +10,19 @@ export default defineConfig((environment) => {
     resolve: {
       alias: {
         "@": resolve(__dirname, "src"),
-        "@timeless/timeless-macos": resolve(
+        "@timeless/timeless-windows": resolve(
           __dirname,
           "../../packages/timeless-windows/src/index.ts",
         ),
       },
     },
-    build: { ...base.build, outDir: "dist/windows" },
+    build: {
+      ...base.build,
+      outDir: "dist/windows",
+      rollupOptions: {
+        ...base.build?.rollupOptions,
+        input: resolve(__dirname, "index.windows.html"),
+      },
+    },
   };
 });

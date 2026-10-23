@@ -17,6 +17,7 @@
     "start:macos": "open \"build/Timeless Shadcn.app\"",
     "build:windows": "vite build --config vite.windows.config.ts",
     "build:windows:orbstack": "node scripts/build-windows.mjs",
+    "test:windows:orbstack": "node scripts/build-windows.mjs --verify",
     "test:windows": "pnpm run build:windows && node scripts/test-native.mjs windows"
   },
   "devDependencies": {

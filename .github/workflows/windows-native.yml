@@ -11,6 +11,8 @@ on:
       - "packages/reactive/**"
       - "packages/timeless/**"
       - "apps/windows-demo/**"
+      - "apps/web-shadcn/**"
+      - "packages/shadcn/**"
       - "pnpm-lock.yaml"
       - ".github/workflows/windows-native.yml"
   pull_request:
@@ -22,6 +24,8 @@ on:
       - "packages/reactive/**"
       - "packages/timeless/**"
       - "apps/windows-demo/**"
+      - "apps/web-shadcn/**"
+      - "packages/shadcn/**"
       - "pnpm-lock.yaml"
       - ".github/workflows/windows-native.yml"
 
@@ -48,6 +52,8 @@ jobs:
         run: pnpm --filter @timeless/inner-vite-plugin --filter @timeless/timeless-native --filter @timeless/timeless-windows --filter @timeless/windows-demo -r build
       - name: Test shared native styles
         run: pnpm exec vitest run --config vitest.platform.config.ts
+      - name: Build and test shared shadcn Windows entry
+        run: pnpm --filter ./apps/web-shadcn test:windows
       - name: Build development HMR fixture
         run: pnpm --filter @timeless/windows-demo exec vite build --mode development --outDir dist-dev
       - name: Compile Windows host
@@ -63,4 +69,5 @@ jobs:
             apps/windows-demo/build/Release/timeless-windows.exe
             apps/windows-demo/build/Release/app.js
             apps/windows-demo/build/Release/*LICENSE.txt
+            apps/web-shadcn/dist/windows/app.js
           if-no-files-found: error

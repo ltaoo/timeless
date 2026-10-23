@@ -6,6 +6,8 @@
 !packages/timeless-windows/native/**
 !apps/
 !apps/web-shadcn/
+!apps/web-shadcn/scripts/
+!apps/web-shadcn/scripts/test-windows-container.sh
 !apps/web-shadcn/dist/
 !apps/web-shadcn/dist/windows/
 !apps/web-shadcn/dist/windows/app.js

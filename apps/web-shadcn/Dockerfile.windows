@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:22-bookworm-slim AS build
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS build
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git cmake make g++-mingw-w64-x86-64-posix && rm -rf /var/lib/apt/lists/*
 WORKDIR /workspace
 COPY LICENSE ./LICENSE
@@ -8,12 +8,25 @@ COPY apps/web-shadcn/dist/windows/app.js /application/app.js
 COPY apps/web-shadcn/build/windows-sources /sources
 RUN --network=none cmake -S packages/timeless-windows/native -B /native-build \
       -DCMAKE_TOOLCHAIN_FILE=cmake/mingw.cmake -DCMAKE_BUILD_TYPE=Release \
-      -DBUILD_TESTING=OFF -DTIMELESS_TEST_BUNDLE=/application/app.js \
+      -DBUILD_TESTING=ON -DTIMELESS_TEST_BUNDLE=/application/app.js \
       -DFETCHCONTENT_SOURCE_DIR_QUICKJS=/sources/quickjs -DFETCHCONTENT_SOURCE_DIR_YOGA=/sources/yoga \
-    && cmake --build /native-build --target timeless-windows --parallel 4
+      -DFETCHCONTENT_SOURCE_DIR_NANOSVG=/sources/nanosvg \
+    && cmake --build /native-build --target timeless-windows timeless_shadcn_test --parallel 4
 FROM scratch AS artifact
 COPY --from=build /native-build/timeless-windows.exe /Timeless-Shadcn.exe
+COPY --from=build /native-build/timeless_shadcn_test.exe /timeless_shadcn_test.exe
 COPY --from=build /native-build/app.js /app.js
 COPY --from=build /native-build/LICENSE.txt /LICENSE.txt
 COPY --from=build /native-build/QUICKJS-LICENSE.txt /QUICKJS-LICENSE.txt
 COPY --from=build /native-build/YOGA-LICENSE.txt /YOGA-LICENSE.txt
+COPY --from=build /native-build/NANOSVG-LICENSE.txt /NANOSVG-LICENSE.txt
+
+# Wine executes the x64 Windows binary; this is not a Windows kernel container.
+FROM ubuntu:24.04 AS verify
+RUN apt-get update && apt-get install -y --no-install-recommends wine64 xvfb xauth fonts-noto-cjk fonts-liberation fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends fonts-wine fontconfig xcompmgr && fc-cache -f && rm -rf /var/lib/apt/lists/*
+WORKDIR /application
+COPY --from=artifact / /application/
+COPY apps/web-shadcn/scripts/test-windows-container.sh /application/test.sh
+ENV WINEDEBUG=-all WINEARCH=win64 WINEPREFIX=/tmp/timeless-wine TIMELESS_WINDOWS_SCREENSHOTS=Z:\\application\\screenshots
+CMD ["sh", "test.sh"]
