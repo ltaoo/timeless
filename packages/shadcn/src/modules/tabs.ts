@@ -17,6 +17,8 @@ export function Tabs(
 ) {
   const { store, items, ...rest } = props;
   const state_ = refobj(store.state);
+  const name = rest.attributes?.n ?? `tabs-${store.uid()}`;
+  const tabHosts = new Map<string, any>();
 
   store.onStateChange((v) => {
     state_.as(v);
@@ -34,6 +36,7 @@ export function Tabs(
           store,
           class:
             "inline-flex h-10 items-center justify-center rounded-md bg-zinc-100 p-1 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
+          attributes: { n: `${name}-list`, role: "tablist" },
         },
         [
           For({
@@ -45,6 +48,44 @@ export function Tabs(
                   store,
                   value: item.value,
                   index: i,
+                  attributes: {
+                    id: `${name}-tab-${item.value}`,
+                    n: `${name}-tab-${item.value}`,
+                    role: "tab",
+                    "aria-selected": computed(state_, (state) =>
+                      String(state.curId === item.value),
+                    ),
+                    "aria-controls": children
+                      ? undefined
+                      : `${name}-content-${item.value}`,
+                    tabindex: computed(state_, (state) =>
+                      state.curId === item.value ? "0" : "-1",
+                    ),
+                  },
+                  onMounted(event) {
+                    tabHosts.set(item.value, event.target);
+                    return () => {
+                      tabHosts.delete(item.value);
+                    };
+                  },
+                  onKeyDown(event) {
+                    const options = items ?? store.tabs;
+                    const count = options.length;
+                    const next =
+                      event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                          ? count - 1
+                          : event.key === "ArrowRight"
+                            ? (i + 1) % count
+                            : event.key === "ArrowLeft"
+                              ? (i - 1 + count) % count
+                              : undefined;
+                    if (next === undefined) return;
+                    event.preventDefault();
+                    store.selectById(options[next].value);
+                    tabHosts.get(options[next].value)?.focus();
+                  },
                   class: computed(state_, (d) => {
                     const isActive = d.curId === item.value;
                     const baseClass =
@@ -88,6 +129,12 @@ export function Tabs(
                         {
                           store,
                           value: item.value,
+                          id: `${name}-content-${item.value}`,
+                          attributes: {
+                            n: `${name}-content-${item.value}`,
+                            role: "tabpanel",
+                            "aria-labelledby": `${name}-tab-${item.value}`,
+                          },
                           class: "mt-2",
                         },
                         item.content,

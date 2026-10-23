@@ -1,11 +1,12 @@
 import { ui, vm } from "@timeless/timeless";
-import { computed, refobj, Show } from "@timeless/timeless";
+import { computed, Icon, refobj, Show } from "@timeless/timeless";
 import { For, ViewChildren, ViewProps } from "@timeless/timeless";
 
 type AccordionItem = {
   title: ViewChildren;
   content: ViewChildren;
 };
+let accordionId = 0;
 
 export function Accordion(
   props: ViewProps & {
@@ -15,6 +16,7 @@ export function Accordion(
 ) {
   const { store, items, ...rest } = props;
   const state_ = refobj(store.state);
+  const name = rest.attributes?.n ?? `accordion-${++accordionId}`;
 
   store.onStateChange((v) => {
     state_.as(v);
@@ -42,6 +44,10 @@ export function Accordion(
                 {
                   store,
                   index: i,
+                  attributes: {
+                    n: `${name}-trigger-${i}`,
+                    "aria-controls": `${name}-content-${i}`,
+                  },
                   class:
                     "flex w-full items-center justify-between py-4 font-medium transition-all cursor-pointer hover:underline",
                 },
@@ -59,17 +65,24 @@ export function Accordion(
                     {
                       store,
                       index: i,
-                      class: computed(state_, (d) => {
-                        const isOpen = d.openItems.includes(i);
-                        return [
-                          "text-sm transition-transform duration-200",
-                          isOpen ? "rotate-180" : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ");
-                      }),
+                      class: "flex size-4 shrink-0 items-center justify-center",
+                      attributes: {
+                        n: `${name}-chevron-${i}`,
+                        "aria-hidden": "true",
+                      },
                     },
-                    ["▾"],
+                    [
+                      Icon({
+                        name: computed(state_, (d) =>
+                          d.openItems.includes(i) ? "chevron-up" : "chevron-down",
+                        ),
+                        size: 16,
+                        attributes: {
+                          n: `${name}-chevron-icon-${i}`,
+                          "aria-hidden": "true",
+                        },
+                      }),
+                    ],
                   ),
                 ],
               ),
@@ -77,6 +90,8 @@ export function Accordion(
                 {
                   store,
                   index: i,
+                  id: `${name}-content-${i}`,
+                  attributes: { n: `${name}-content-${i}` },
                   class: computed(state_, (d) => {
                     const isOpen = d.openItems.includes(i);
                     return isOpen

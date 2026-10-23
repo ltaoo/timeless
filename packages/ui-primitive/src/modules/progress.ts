@@ -25,10 +25,14 @@ export function Root(
     return View(
       {
         ...rest,
-        // role: "progressbar",
-        // "aria-valuemin": 0,
-        // "aria-valuemax": computed(state, (d) => d.max ?? 100),
-        // "aria-valuenow": computed(state, (d) => d.value ?? 0),
+        attributes: {
+          n: "progress",
+          ...rest.attributes,
+          role: "progressbar",
+          "aria-valuemin": "0",
+          "aria-valuemax": computed(state, (value) => value.max ?? 100),
+          "aria-valuenow": computed(state, (value) => value.value),
+        },
         onUnmounted() {
           for (const fn of events) if (typeof fn === "function") fn();
           if (rest.onUnmounted) rest.onUnmounted();
@@ -41,10 +45,16 @@ export function Root(
   return View(
     {
       ...rest,
-      // role: "progressbar",
-      // "aria-valuemin": 0,
-      // "aria-valuemax": max,
-      // "aria-valuenow": isRef(value) ? computed(value, (v) => v) : value,
+      attributes: {
+        n: "progress",
+        ...rest.attributes,
+        role: "progressbar",
+        "aria-valuemin": "0",
+        "aria-valuemax": max,
+        "aria-valuenow": isRef(value)
+          ? computed(value, (value) => value)
+          : value,
+      },
     },
     children,
   );
@@ -53,7 +63,7 @@ export function Root(
 export function Indicator(
   props: ViewProps & {
     store?: ProgressCore;
-    value: Ref<number>;
+    value?: Ref<number> | number;
     max?: number;
   },
   children?: ViewChildren,
@@ -73,6 +83,15 @@ export function Indicator(
     return View(
       {
         ...rest,
+        onMounted(event) {
+          state.as(store.state);
+          const unsubscribe = store.onStateChange((value) => state.as(value));
+          const cleanup = rest.onMounted?.(event);
+          return () => {
+            unsubscribe();
+            cleanup?.();
+          };
+        },
         style: {
           ...extraStyle,
           width: computed(state, (d) => {
@@ -86,12 +105,13 @@ export function Indicator(
     );
   }
 
+  const valueRef = isRef(value) ? value : ref(value ?? 0);
   return View(
     {
       ...rest,
       style: {
         ...extraStyle,
-        width: computed(value, (d) => {
+        width: computed(valueRef, (d) => {
           const v = d;
           return `${Math.min(Math.max((v / max) * 100, 0), 100)}%`;
         }),

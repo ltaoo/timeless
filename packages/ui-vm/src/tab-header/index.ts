@@ -173,7 +173,6 @@ export class TabHeaderCore<
         id,
         options,
       };
-      return;
     }
     const { ignore } = options;
     const matchedIndex = this.tabs.findIndex((t) => t[this.key] === id);
@@ -220,7 +219,8 @@ export class TabHeaderCore<
     if (!matchedTab) {
       return null;
     }
-    const client = this.extra[matchedTab[this.key]].rect();
+    const client = this.extra[matchedTab[this.key]]?.rect();
+    if (!client) return null;
     // console.log("[DOMAIN]ui/tab-header/index - calcLineLeft", this.extra, client);
     return client.left + client.width / 2;
   }

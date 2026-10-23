@@ -1,7 +1,6 @@
 import { computed } from "../core";
-import { View, ViewProps, ViewChildren  } from "../core";
+import { Button, View, ViewProps, ViewChildren, styleNames } from "../core";
 import { AccordionCore } from "@timeless/inner-vm";
-
 
 export function Root(
   props: ViewProps & { store: AccordionCore },
@@ -26,21 +25,19 @@ export function Trigger(
   const { store, index, ...rest } = props;
   const isOpen = computed(store.openItems, (d) => d.includes(index));
 
-  const toggle = () => {
-    if (store.type === "single") {
-      store.openItems.as(store.openItems.value.includes(index) ? [] : [index]);
-    } else {
-      const nextOpenItems = store.openItems.value.includes(index)
-        ? store.openItems.value.filter((i: number) => i !== index)
-        : [...store.openItems.value, index];
-      store.openItems.as(nextOpenItems);
-    }
-  };
-
-  return View(
+  return Button(
     {
       ...rest,
-      onClick: toggle,
+      attributes: {
+        n: "accordion-trigger",
+        type: "button",
+        ...rest.attributes,
+        "aria-expanded": computed(isOpen, (open) => String(open)),
+      },
+      onClick(event) {
+        rest.onClick?.(event);
+        if (!event.defaultPrevented) store.toggle(index);
+      },
     },
     children,
   );
@@ -51,16 +48,8 @@ export function Chevron(
   children: ViewChildren = [],
 ) {
   const { store, index, ...rest } = props;
-  const isOpen = computed(store.openItems, (d) => d.includes(index));
-
   return View(
-    {
-      ...rest,
-      class: computed(isOpen, (d) => {
-        const baseClass = rest.class || "";
-        return typeof baseClass === "string" ? baseClass : "";
-      }),
-    },
+    { ...rest, attributes: { n: "accordion-chevron", ...rest.attributes } },
     children,
   );
 }
@@ -75,10 +64,11 @@ export function Content(
   return View(
     {
       ...rest,
-      class: computed(isOpen, (d) => {
-        const baseClass = rest.class || "";
-        return typeof baseClass === "string" ? baseClass : "";
-      }),
+      attributes: { n: "accordion-content", ...rest.attributes },
+      style: styleNames([
+        rest.style,
+        { display: computed(isOpen, (open) => (open ? undefined : "none")) },
+      ]),
     },
     children,
   );

@@ -53,7 +53,7 @@ export function Trigger(
         rest.onClick?.(event);
         if (event.defaultPrevented) return;
         const target = event.target as { tagName?: string; isContentEditable?: boolean };
-        if (["INPUT", "TEXTAREA"].includes(target?.tagName) || target?.isContentEditable) return;
+        if (["INPUT", "TEXTAREA"].includes(target?.tagName ?? "") || target?.isContentEditable) return;
         store.handleClickTrigger();
       },
       onKeyDown(event) {

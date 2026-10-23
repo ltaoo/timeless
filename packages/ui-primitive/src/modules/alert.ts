@@ -9,10 +9,13 @@ export function Alert(
     {
       ...rest,
       dataset: {
+        ...rest.dataset,
         alert: "",
         variant,
       },
       attributes: {
+        n: "alert",
+        ...rest.attributes,
         role: "alert",
       },
     },

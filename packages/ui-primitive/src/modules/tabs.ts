@@ -44,7 +44,7 @@ export function Tab(
           },
         });
         if (rest.onMounted) {
-          rest.onMounted(event);
+          return rest.onMounted(event);
         }
       },
       onClick() {

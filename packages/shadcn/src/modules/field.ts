@@ -177,7 +177,7 @@ export function FieldError(props: {}, children: ViewChildren = []) {
 
 export function Field(
   props: ViewProps & {
-    store: vm.SingleFieldCore<any>;
+    store?: vm.SingleFieldCore<any>;
     id?: string;
     // autoRender?: boolean;
     orientation?: "vertical" | "horizontal";
@@ -187,11 +187,33 @@ export function Field(
   children: ViewChildren = [],
 ) {
   const orientation = props.orientation || "vertical";
+  if (!props.store) {
+    const { class: cls, attributes, orientation: _, inline, ...rest } = props;
+    return View(
+      {
+        ...rest,
+        attributes: {
+          n: "field",
+          role: "group",
+          "data-slot": "field",
+          ...attributes,
+        },
+        class: classNames([
+          orientation === "horizontal"
+            ? "flex w-full items-center gap-3"
+            : "flex w-full flex-col gap-3",
+          cls,
+        ]),
+      },
+      children,
+    );
+  }
 
+  const store = props.store;
   const listener$ = ListenerManager();
 
-  const state_ = refobj(props.store.state);
-  const error_ = refobj(props.store.state.error);
+  const state_ = refobj(store.state);
+  const error_ = refobj(store.state.error);
   const invalid_ = computed(error_, (e) => !!e);
 
   // let $root: HTMLElement | null = null;
@@ -215,19 +237,19 @@ export function Field(
   // };
 
   listener$.push(
-    props.store.onStateChange((v) => {
+    store.onStateChange((v) => {
       state_.as(v);
     }),
   );
   listener$.push(
-    props.store.onError((v) => {
+    store.onError((v) => {
       error_.as(v);
     }),
   );
 
-  const fid = props.id || props.store.name || props.store.id;
+  const fid = props.id || store.name || store.id;
 
-  const { class: cls, dataset, onMounted, onUnmounted, ...rest } = props;
+  const { class: cls, dataset, id: control_id, onMounted, onUnmounted, ...rest } = props;
 
   return View(
     {
@@ -266,7 +288,7 @@ export function Field(
           // console.log("render label in ok");
           return [
             FieldLabel({
-              store: props.store,
+              store,
               for: fid,
             }),
             Fragment({}, children),
@@ -277,7 +299,7 @@ export function Field(
             Fragment({}, children),
             FieldLabel({
               class: "inline",
-              store: props.store,
+              store,
               for: fid,
             }),
           ];
@@ -297,13 +319,13 @@ export function Field(
         cases: {
           error() {
             return [
-              FieldError({ store: props.store }, [
+              FieldError({ store }, [
                 computed(error_, (e) => e?.message || ""),
               ]),
             ];
           },
           help() {
-            return [FieldHelp({ store: props.store }, [props.store.help])];
+            return [FieldHelp({ store }, [store.help])];
           },
         },
       }),

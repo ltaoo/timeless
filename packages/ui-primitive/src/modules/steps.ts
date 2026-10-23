@@ -1,12 +1,5 @@
 import { refobj, computed } from "../core";
-import {
-  View,
-  ViewProps,
-  ViewChildren,
-  For,
-  Show,
-  Text,
-} from "../core";
+import { View, ViewProps, ViewChildren, For, Text } from "../core";
 import { StepCore } from "@timeless/inner-vm";
 
 export type StepItem = {
@@ -46,7 +39,7 @@ export function List(
       ...rest,
       // "data-steps-list": "",
     },
-    [
+    children ?? [
       For({
         each: items,
         // @ts-ignore
@@ -116,17 +109,8 @@ export function Indicator(
       // "data-steps-indicator": "",
       // "data-state": stepState,
     },
-    [
-      Show({
-        when: !!children,
-        ok() {
-          return [
-            computed(state_, (s) =>
-              index < s.value ? "✓" : String(index + 1),
-            ),
-          ];
-        },
-      }),
+    children ?? [
+      computed(state_, (s) => (index < s.value ? "✓" : String(index + 1))),
     ],
   );
 }

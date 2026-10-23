@@ -7,11 +7,15 @@ export function Separator(
   return View({
     ...rest,
     dataset: {
+      ...rest.dataset,
       separator: "",
       orientation,
     },
     attributes: {
+      n: "separator",
+      ...rest.attributes,
       role: "separator",
+      "aria-orientation": orientation,
     },
   });
 }

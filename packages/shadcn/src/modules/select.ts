@@ -183,7 +183,7 @@ export function Select(
           store,
           class: classNames([
             cls,
-            "flex w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+            "flex w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 px-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
             "data-placeholder:text-muted-foreground",
             "dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
             // "*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5",
@@ -282,16 +282,20 @@ export function Select(
                 ui.SelectPrimitive.Icon(
                   {
                     store,
-                    class: "pointer-events-none size-4 text-muted-foreground",
+                    class:
+                      "pointer-events-none flex size-4 shrink-0 items-center justify-center text-muted-foreground",
+                    attributes: { n: "select-arrow", "aria-hidden": "true" },
                   },
                   [
                     Icon({
-                      name: "chevron-up",
-                      class: classNames([
-                        computed(state_, (t) => {
-                          return t.open ? "" : "rotate-180";
-                        }),
-                      ]),
+                      name: computed(state_, (t) =>
+                        t.open ? "chevron-up" : "chevron-down",
+                      ),
+                      size: 16,
+                      attributes: {
+                        n: "select-arrow-icon",
+                        "aria-hidden": "true",
+                      },
                     }),
                   ],
                 ),

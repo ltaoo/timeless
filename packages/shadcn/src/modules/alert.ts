@@ -4,7 +4,7 @@ import { ViewProps, ViewChildren } from "@timeless/timeless";
 
 const VARIANTS = {
   default:
-    "bg-white text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50 [&>div.alert-icon]:text-zinc-950 dark:[&>div.alert-icon]:text-zinc-50",
+    "border-zinc-200 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 [&>div.alert-icon]:text-zinc-950 dark:[&>div.alert-icon]:text-zinc-50",
   destructive:
     "border-red-500/50 text-red-500 dark:border-red-500 [&>div.alert-icon]:text-red-500",
 };
@@ -19,7 +19,7 @@ export function Alert(
       ...rest,
       variant,
       class: classNames([
-        "relative w-full rounded-lg border border-zinc-200 p-4 dark:border-zinc-800 [&>div.alert-icon+div]:translate-y-[-3px] [&>div.alert-icon]:absolute [&>div.alert-icon]:left-4 [&>div.alert-icon]:top-4 [&>div.alert-icon~*]:pl-7",
+        "relative w-full rounded-lg border p-4 [&>div.alert-icon+div]:translate-y-[-3px] [&>div.alert-icon]:absolute [&>div.alert-icon]:left-4 [&>div.alert-icon]:top-4 [&>div.alert-icon~*]:pl-7",
         VARIANTS[variant] || VARIANTS.default,
         cls,
       ]),
