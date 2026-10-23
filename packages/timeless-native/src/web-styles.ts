@@ -24,6 +24,10 @@ type Rule = {
 export type WebStyleSheet = {
   rules: Rule[];
   properties: Record<string, { value?: string; inherits: boolean }>;
+  keyframes?: Record<
+    string,
+    { offset: number; declarations: Record<string, string> }[]
+  >;
 };
 type Node = {
   type?: string;
@@ -32,15 +36,41 @@ type Node = {
   parentNode?: Node;
   style: Record<string, string>;
   _cssVariables?: Record<string, string>;
-  _nativeStyle?: { states: Record<string, boolean> };
+  _nativeStyle?: {
+    inline: Record<string, string>;
+    defaults: Record<string, string>;
+    states: Record<string, boolean>;
+  };
 };
-type StyleChange = "classes" | "attributes" | "states";
+type StyleChange = "classes" | "attributes" | "states" | "structure";
 const registry = ((globalThis as any).__timeless_web_styles ??= {
   sheets: new Map<string, WebStyleSheet>(),
   indexed: new Map<string, { rule: Rule; order: number }[]>(),
   properties: {} as WebStyleSheet["properties"],
 });
 const sheets = registry.sheets as Map<string, WebStyleSheet>;
+type ComputedStyle = {
+  index: object;
+  matching: { rule: Rule; order: number }[];
+  inherited: Record<string, string>;
+  defaults: Record<string, string>;
+  inline: Record<string, string>;
+  parentVariables?: Record<string, string>;
+  variables: Record<string, string>;
+  width: number;
+  height: number;
+  result: Record<string, string>;
+};
+const computed_styles = new WeakMap<Node, ComputedStyle>();
+function equal_values(
+  left: Record<string, string>,
+  right: Record<string, string>,
+) {
+  return (
+    Object.keys(left).length === Object.keys(right).length &&
+    Object.keys(left).every((key) => left[key] === right[key])
+  );
+}
 sheets.clear();
 let onChange: (() => void) | undefined;
 export function onWebStylesChange(callback: () => void) {
@@ -50,45 +80,22 @@ export function registerWebStyleSheet(id: string, sheet: WebStyleSheet) {
   sheets.set(id, sheet);
   registry.indexed = new Map();
   registry.properties = {};
-  registry.external = {
-    classes: new Set<string>(),
-    attributes: new Set<string>(),
-    states: new Set<string>(),
-  };
-  function dependencies(tokens: Token[], outside = false) {
-    const siblings =
-      outside ||
-      tokens.some(
-        (token) =>
-          token.type === "combinator" &&
-          ["+", "~"].includes(token.value.trim()),
-      );
-    for (const token of tokens) {
-      if (siblings && token.type === "class")
-        registry.external.classes.add(token.value);
-      if (siblings && token.type === "class")
-        registry.external.attributes.add("class");
-      if (siblings && token.type === "id")
-        registry.external.attributes.add("id");
-      if (siblings && token.type === "attribute")
-        registry.external.attributes.add(token.attribute);
-      if (token.type !== "pseudo") continue;
-      if (token.value === ":focus-within")
-        registry.external.states.add("focus");
-      if (siblings) {
-        registry.external.states.add(token.value.slice(1));
-        if ([":disabled", ":enabled"].includes(token.value))
-          registry.external.attributes.add("disabled");
-      }
-      for (const nested of token.nodes ?? [])
-        dependencies(nested, siblings || token.value === ":has");
-    }
-  }
+  registry.keyframes = {};
+  registry.dependencies = Object.fromEntries(
+    ["classes", "attributes", "states", "structure"].map((type) => [
+      type,
+      new Map<string, Dependency[]>(),
+    ]),
+  );
   let order = 0;
   for (const current of sheets.values()) {
     Object.assign(registry.properties, current.properties);
+    Object.assign(registry.keyframes, current.keyframes);
     for (const rule of current.rules) {
-      dependencies(rule.selector);
+      const subject = rule.selector.slice(
+        rule.selector.findLastIndex((token) => token.type === "combinator") + 1,
+      );
+      index_dependencies(rule.selector, subject.filter(static_token));
       let key = "";
       for (
         let i = rule.selector.length - 1;
@@ -108,8 +115,163 @@ export function registerWebStyleSheet(id: string, sheet: WebStyleSheet) {
   onChange?.();
 }
 
-export function webStyleChangeNeedsRoot(type: StyleChange, names: string[]) {
-  return names.some((name) => registry.external?.[type].has(name));
+type ScopeStep = { kind: "parent" } | { kind: "ancestors"; filters: Token[] };
+type Dependency = { filters: Token[]; path: ScopeStep[]; target: Token[] };
+
+function static_token(token: Token): boolean {
+  if (["class", "id", "tag", "attribute", "universal"].includes(token.type))
+    return true;
+  return (
+    token.type === "pseudo" &&
+    [":is", ":where", ":not"].includes(token.value) &&
+    (token.nodes?.every((selector) => selector.every(static_token)) ?? false)
+  );
+}
+
+function index_dependencies(
+  tokens: Token[],
+  target: Token[],
+  path: ScopeStep[] = [],
+  inherited: Token[] = [],
+) {
+  const compounds: Token[][] = [[]];
+  const relations: string[] = [];
+  for (const token of tokens) {
+    if (token.type === "combinator") {
+      relations.push(token.value.trim());
+      compounds.push([]);
+    } else compounds[compounds.length - 1].push(token);
+  }
+  compounds.forEach((compound, index) => {
+    const filters = [
+      ...compound.filter(static_token),
+      ...(index === compounds.length - 1 ? inherited : []),
+    ];
+    const next_path: ScopeStep[] = [
+      ...(["+", "~"].includes(relations[index])
+        ? [{ kind: "parent" } as const]
+        : []),
+      ...path,
+    ];
+    const add = (
+      type: StyleChange,
+      name: string,
+      owner = filters,
+      steps = next_path,
+    ) => {
+      const entries = registry.dependencies[type].get(name) ?? [];
+      entries.push({ filters: owner, path: steps, target });
+      registry.dependencies[type].set(name, entries);
+    };
+    for (const token of compound) {
+      if (token.type === "class") add("classes", token.value);
+      if (token.type === "id") add("attributes", "id");
+      if (token.type === "attribute") {
+        add("attributes", token.attribute!);
+        const alias = token.attribute!.replace(/^data-data-/, "data-");
+        if (alias !== token.attribute) add("attributes", alias);
+      }
+      if (token.type !== "pseudo") continue;
+      const outer_filters = [
+        ...compound.filter((other) => other !== token && static_token(other)),
+        ...(index === compounds.length - 1 ? inherited : []),
+      ];
+      if (token.value === ":focus-within") {
+        add(
+          "states",
+          "focus",
+          [],
+          [{ kind: "ancestors", filters: outer_filters }, ...next_path],
+        );
+      } else if (token.value === ":has") {
+        const steps: ScopeStep[] = [
+          { kind: "ancestors", filters: outer_filters },
+          ...next_path,
+        ];
+        add("structure", "children", [], steps);
+        for (const nested of token.nodes ?? [])
+          index_dependencies(nested, target, steps);
+      } else if (token.nodes?.length) {
+        for (const nested of token.nodes)
+          index_dependencies(nested, target, next_path, outer_filters);
+      } else if (
+        [":empty", ":first-child", ":last-child", ":only-child"].includes(
+          token.value,
+        )
+      ) {
+        // Position selectors observe the parent's child list; :empty observes its own.
+        add("structure", "children", [], next_path);
+      } else {
+        const name = token.value.slice(1);
+        add("states", name);
+        if (["disabled", "enabled"].includes(name))
+          add("attributes", "disabled");
+        if (name === "checked") add("attributes", "checked");
+      }
+    }
+  });
+}
+
+/** Select affected subjects before refreshing their inherited styles. */
+export function webStyleInvalidationTargets(
+  node: Node,
+  type: StyleChange,
+  names: string[],
+  previous: Node = node,
+): Node[] {
+  const entries = new Set<Dependency>();
+  const collect = (kind: StyleChange, keys: string[]) => {
+    for (const key of keys)
+      for (const entry of registry.dependencies?.[kind].get(key) ?? [])
+        entries.add(entry);
+  };
+  if (
+    type === "classes" ||
+    (type === "attributes" && names.includes("class"))
+  ) {
+    const before = new Set<string>((previous.attrs?.class ?? "").split(/\s+/));
+    const after = new Set<string>((node.attrs?.class ?? "").split(/\s+/));
+    collect(
+      "classes",
+      [...new Set([...before, ...after])].filter(
+        (name) => before.has(name) !== after.has(name),
+      ),
+    );
+    collect("attributes", ["class"]);
+  } else collect(type, names);
+  const targets = new Set<Node>();
+  const matches = (current: Node, filters: Token[]) =>
+    filters.every((token) => tokenMatches(current, token));
+  const visit = (current: Node, target: Token[]) => {
+    if (
+      matches(current, target) ||
+      (current === node && matches(previous, target))
+    )
+      targets.add(current);
+    if (current.style.display !== "none" || current === node)
+      for (const child of current.children ?? []) visit(child, target);
+  };
+  for (const entry of entries) {
+    if (!matches(node, entry.filters) && !matches(previous, entry.filters))
+      continue;
+    let scopes = new Set([node]);
+    for (const step of entry.path) {
+      const next = new Set<Node>();
+      for (const scope of scopes) {
+        if (step.kind === "parent") next.add(parent(scope) ?? scope);
+        else
+          for (
+            let ancestor: Node | undefined = scope;
+            ancestor;
+            ancestor = parent(ancestor)
+          )
+            if (matches(ancestor, step.filters)) next.add(ancestor);
+      }
+      scopes = next;
+    }
+    for (const scope of scopes) visit(scope, entry.target);
+  }
+  return [...targets];
 }
 
 function parent(node: Node): Node | undefined {
@@ -141,6 +303,15 @@ function descendants(node: Node): Node[] {
 function attribute(node: Node, key: string) {
   return node.attrs?.[key] ?? node.attrs?.[key.replace(/^data-data-/, "data-")];
 }
+const table_tags: Record<string, string> = {
+  "table-header": "thead",
+  "table-body": "tbody",
+  "table-footer": "tfoot",
+  "table-row": "tr",
+  "table-head": "th",
+  "table-cell": "td",
+  "table-caption": "caption",
+};
 function tokenMatches(node: Node, token: Token, scope?: Node): boolean {
   const attrs = node.attrs ?? {};
   const classes = (attrs.class ?? "").split(/\s+/);
@@ -149,7 +320,10 @@ function tokenMatches(node: Node, token: Token, scope?: Node): boolean {
   if (token.type === "id") return attrs.id === token.value;
   if (token.type === "tag")
     return (
-      token.value === (node.type === "view" ? "div" : node.type) ||
+      token.value ===
+        (node.type === "view"
+          ? "div"
+          : (table_tags[node.type ?? ""] ?? node.type)) ||
       (token.value === "html" && !parent(node))
     );
   if (token.type === "attribute") {
@@ -249,6 +423,38 @@ function matchesSelector(
 
 function expand(property: string, value: string): Record<string, string> {
   const parts = splitCSS(value, " ");
+  if (property === "animation") {
+    const tokens = splitCSS(splitCSS(value)[0] ?? "none", " ");
+    const times = tokens.filter((token) => /^-?[\d.]+m?s$/.test(token));
+    const timing = tokens.find((token) =>
+      /^(ease(?:-in(?:-out)?|-out)?|linear|cubic-bezier\(.+\))$/.test(token),
+    );
+    const fill = tokens.find((token) =>
+      ["forwards", "backwards", "both"].includes(token),
+    );
+    const direction = tokens.find((token) =>
+      ["normal", "reverse", "alternate", "alternate-reverse"].includes(token),
+    );
+    const iterations = tokens.find(
+      (token) => token === "infinite" || /^\d*\.?\d+$/.test(token),
+    );
+    const name = tokens.find(
+      (token) =>
+        !times.includes(token) &&
+        ![timing, fill, direction, iterations, "running", "paused"].includes(
+          token,
+        ),
+    );
+    return {
+      "animation-name": name ?? "none",
+      "animation-duration": times[0] ?? "0s",
+      "animation-delay": times[1] ?? "0s",
+      "animation-timing-function": timing ?? "ease",
+      "animation-fill-mode": fill ?? "none",
+      "animation-direction": direction ?? "normal",
+      "animation-iteration-count": iterations ?? "1",
+    };
+  }
   const edges = ["top", "right", "bottom", "left"];
   if (
     ["padding", "margin", "border-width", "border-color"].includes(property) &&
@@ -307,14 +513,6 @@ export function computeWebStyle(
 ): Record<string, string> | undefined {
   if (![...sheets.values()].some((sheet) => sheet.rules.length)) return;
   const properties = registry.properties as WebStyleSheet["properties"];
-  const variables: Record<string, string> = {};
-  for (const [key, value] of Object.entries(
-    node.parentNode?._cssVariables ?? {},
-  ))
-    if (properties[key]?.inherits !== false) variables[key] = value;
-  for (const [key, property] of Object.entries(properties))
-    if (variables[key] === undefined && property.value !== undefined)
-      variables[key] = property.value;
   const root = (() => {
     let result = node;
     while (result.parentNode) result = result.parentNode;
@@ -362,6 +560,33 @@ export function computeWebStyle(
           matching.push({ rule, order });
       }
   }
+  const cached = computed_styles.get(node);
+  const parent_variables = node.parentNode?._cssVariables;
+  if (
+    cached &&
+    cached.index === registry.indexed &&
+    cached.width === context.width &&
+    cached.height === context.height &&
+    cached.parentVariables === parent_variables &&
+    cached.matching.length === matching.length &&
+    cached.matching.every(
+      (entry, index) =>
+        entry.rule === matching[index].rule &&
+        entry.order === matching[index].order,
+    ) &&
+    equal_values(cached.inherited, inherited) &&
+    equal_values(cached.defaults, defaults) &&
+    equal_values(cached.inline, inline)
+  ) {
+    node._cssVariables = cached.variables;
+    return cached.result;
+  }
+  const variables: Record<string, string> = {};
+  for (const [key, value] of Object.entries(parent_variables ?? {}))
+    if (properties[key]?.inherits !== false) variables[key] = value;
+  for (const [key, property] of Object.entries(properties))
+    if (variables[key] === undefined && property.value !== undefined)
+      variables[key] = property.value;
   const cascade: Record<string, { value: string; weight: number }> = {};
   function assign(property: string, value: string, weight: number) {
     if (!cascade[property] || cascade[property].weight <= weight)
@@ -385,7 +610,10 @@ export function computeWebStyle(
       if (resolved === undefined) delete variables[property];
       else variables[property] = resolved;
     }
-  node._cssVariables = variables;
+  node._cssVariables =
+    cached && equal_values(cached.variables, variables)
+      ? cached.variables
+      : variables;
   const declarations: Record<string, { value: string; weight: number }> = {};
   for (const [property, { value, weight }] of Object.entries(cascade)) {
     if (property.startsWith("--")) continue;
@@ -430,9 +658,51 @@ export function computeWebStyle(
     result.display = "flex";
     result["flex-direction"] ??= "row";
   }
+  const animation_name = result["animation-name"];
+  // shortcut: one single-run opacity/transform animation; extend when more CSS animation properties are needed.
+  const frames: NonNullable<WebStyleSheet["keyframes"]>[string] | undefined =
+    registry.keyframes?.[animation_name];
+  if (frames?.length && (result["animation-iteration-count"] ?? "1") === "1") {
+    const resolved = frames.map((frame) => ({
+      offset: frame.offset,
+      style: Object.fromEntries(
+        Object.entries(frame.declarations as Record<string, string>).flatMap(
+          ([key, value]) => {
+            if (!["opacity", "transform"].includes(key)) return [];
+            const expanded = cssVariables(value, variables);
+            const calculated =
+              expanded === undefined ? undefined : cssMath(expanded, context);
+            return calculated === undefined ? [] : [[key, calculated]];
+          },
+        ),
+      ),
+    }));
+    if (resolved.some((frame) => Object.keys(frame.style).length))
+      result["-timeless-animation"] = JSON.stringify({
+        name: animation_name,
+        duration: result["animation-duration"] ?? "0s",
+        delay: result["animation-delay"] ?? "0s",
+        timing: result["animation-timing-function"] ?? "ease",
+        fill: result["animation-fill-mode"] ?? "none",
+        direction: result["animation-direction"] ?? "normal",
+        frames: resolved,
+      });
+  }
   if (["fragment", "show", "for", "lazy-view"].includes(node.type ?? ""))
     result.display = "contents";
   for (const key of Object.keys(result))
     if (key.startsWith("--")) delete result[key];
+  computed_styles.set(node, {
+    index: registry.indexed,
+    matching,
+    inherited: { ...inherited },
+    defaults: { ...defaults },
+    inline: { ...inline },
+    parentVariables: parent_variables,
+    variables: node._cssVariables,
+    width: context.width,
+    height: context.height,
+    result,
+  });
   return result;
 }

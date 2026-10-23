@@ -40,6 +40,36 @@ export function compileWebStyles(source: string, filename: string) {
   const root = postcss.parse(source, { from: filename });
   const properties: Record<string, { value?: string; inherits: boolean }> = {};
   const rules: any[] = [];
+  const keyframes: Record<
+    string,
+    { offset: number; declarations: Record<string, string> }[]
+  > = {};
+  root.walkAtRules((rule) => {
+    if (!/^(?:-webkit-)?keyframes$/.test(rule.name)) return;
+    const frames = new Map<number, Record<string, string>>();
+    rule.walkRules((frame) => {
+      for (const selector of frame.selector.split(",")) {
+        const key = selector.trim();
+        const offset =
+          key === "from"
+            ? 0
+            : key === "to"
+              ? 1
+              : key.endsWith("%")
+                ? Number(key.slice(0, -1)) / 100
+                : NaN;
+        if (!Number.isFinite(offset) || offset < 0 || offset > 1) continue;
+        const declarations = frames.get(offset) ?? {};
+        frame.walkDecls((decl) => {
+          if (!decl.important) declarations[decl.prop] = decl.value;
+        });
+        frames.set(offset, declarations);
+      }
+    });
+    keyframes[rule.params] = [...frames]
+      .sort(([a], [b]) => a - b)
+      .map(([offset, declarations]) => ({ offset, declarations }));
+  });
   root.walkAtRules("property", (rule) => {
     let value: string | undefined,
       inherits = false;
@@ -74,7 +104,7 @@ export function compileWebStyles(source: string, filename: string) {
       });
     }
   });
-  return { properties, rules };
+  return { properties, rules, keyframes };
 }
 
 /** Consume the same stylesheet links and Tailwind source that the browser entry consumes. */

@@ -18,6 +18,61 @@ afterEach(() => {
 });
 
 describe("native class styles", () => {
+  it("finishes native event layout once after nested state updates and cancels the deferred pass", () => {
+    vi.useFakeTimers();
+    sheet(".button:active { height: 40px }");
+    const { dom } = buildAndRender(Button({ class: "button" }, ["Go"]));
+    dom._onStyleChange = vi.fn();
+    const relayout = vi.fn();
+    (globalThis as any).__nativeBridge_relayout = relayout;
+    dom._batchStyleUpdates(() => {
+      dom._batchStyleUpdates(() => dom._setStyleState("active", true));
+      expect(relayout).not.toHaveBeenCalled();
+    });
+    expect(relayout).toHaveBeenCalledTimes(1);
+    vi.runAllTimers();
+    expect(relayout).toHaveBeenCalledTimes(1);
+  });
+
+  it("skips unchanged text and lets hosts avoid layout only when they explicitly return false", () => {
+    vi.useFakeTimers();
+    const value = ref("old");
+    const { dom } = buildAndRender(Text(value));
+    const relayout = vi.fn();
+    (globalThis as any).__nativeBridge_relayout = relayout;
+    const content = vi.fn(() => false);
+    dom._onContentChange = content;
+    value.as("new");
+    vi.runAllTimers();
+    expect(content).toHaveBeenCalledWith("new");
+    expect(relayout).not.toHaveBeenCalled();
+    content.mockClear();
+    value.as("new");
+    expect(content).not.toHaveBeenCalled();
+    dom._onContentChange = () => true;
+    value.as("wraps onto another line");
+    vi.runAllTimers();
+    expect(relayout).toHaveBeenCalledTimes(1);
+    dom._onContentChange = () => {};
+    value.as("");
+    vi.runAllTimers();
+    expect(relayout).toHaveBeenCalledTimes(2);
+  });
+
+  it("batches native focus, active and listener updates into their final styles", () => {
+    sheet(".button:focus { color: #f00 } .button:active { color: #00f }");
+    const { dom } = buildAndRender(Button({ class: "button" }, ["Go"]));
+    const changed = vi.fn();
+    dom._onStyleChange = changed;
+    dom._batchStyleUpdates(() => {
+      dom._setStyleState("focus", true);
+      dom._setStyleState("active", true);
+      expect(changed).not.toHaveBeenCalled();
+    });
+    expect(changed).toHaveBeenCalledTimes(1);
+    expect(dom.style.color).toBe("#00f");
+  });
+
   it("updates reactive classes, inherits text styles and removes stale declarations", () => {
     sheet(
       ".primary { color: #fff; background-color: #123; padding: 12px } .danger { color: #f00 }",

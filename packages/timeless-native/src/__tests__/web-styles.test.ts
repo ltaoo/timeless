@@ -4,7 +4,7 @@ import { Button, View, ref, vm } from "@timeless/timeless";
 import { Button as ShadcnButton } from "../../../shadcn/src/modules/button";
 import { compileWebStyles } from "../../../vite-plugin/src/web-styles";
 import { buildAndRender } from "../renderer";
-import { registerWebStyleSheet } from "../web-styles";
+import { computeWebStyle, registerWebStyleSheet } from "../web-styles";
 import { cssVariables, cssMath, cssColor } from "../css-values";
 import { bindNativeStyleRoot } from "../stylesheet";
 
@@ -18,6 +18,162 @@ afterEach(() => {
 });
 
 describe("shared Web CSS", () => {
+  it.each([
+    ":where(.peer):disabled + .target { color: #f00 }",
+    ":where(.peer):not(:enabled) + .target { color: #f00 }",
+    ".panel:has(.peer:disabled) .target { color: #f00 }",
+    ".panel:has(.peer[disabled]) .target { color: #f00 }",
+  ])("invalidates disabled dependencies only for their owners: %s", (css) => {
+    registerWebStyleSheet("test", compileWebStyles(css, "disabled-owners.css"));
+    const disabled = ref(false);
+    const peer_disabled = ref(false);
+    const { dom } = buildAndRender(View({ class: "panel" }, [
+      Button({ disabled }, ["Unrelated"]),
+      Button({ class: "peer", disabled: peer_disabled }, ["Owner"]),
+      View({ class: "target" }, ["Dependent"]),
+    ]));
+    const viewport = vi.fn(() => ({ width: 1000, height: 720 }));
+    (globalThis as any).__nativeBridge_viewport = viewport;
+    disabled.as(true);
+    expect(viewport).not.toHaveBeenCalled();
+    expect(dom.children[2].style.color).toBeUndefined();
+    peer_disabled.as(true);
+    expect(dom.children[2].style.color).toBe("#ff0000ff");
+    peer_disabled.as(false);
+    expect(dom.children[2].style.color).toBeUndefined();
+  });
+
+  it("does not walk a table when passive ancestors first enter hover, but preserves row hover and later class changes", () => {
+    registerWebStyleSheet("test", compileWebStyles(`
+      .row:hover { background-color: #f00 }
+      .highlight:hover { color: #00f }
+    `, "table-hover.css"));
+    const rows = Array.from({ length: 20 }, (_, row) => View(
+      { class: "row", attributes: { n: `row-${row}` } },
+      Array.from({ length: 4 }, (_, column) => View(
+        { attributes: { n: `cell-${row}-${column}` } }, ["Invoice"],
+      )),
+    ));
+    const root = View({ attributes: { n: "table-container" } }, [
+      View({ attributes: { n: "table" } }, rows),
+    ]);
+    const { dom } = buildAndRender(root);
+    const viewport = vi.fn(() => ({ width: 1000, height: 720 }));
+    (globalThis as any).__nativeBridge_viewport = viewport;
+    dom._setStyleState("hover", true);
+    dom.children[0]._setStyleState("hover", true);
+    expect(viewport).not.toHaveBeenCalled();
+    const row = dom.children[0].children[0];
+    row._setStyleState("hover", true);
+    expect(row.style["background-color"]).toBe("#ff0000ff");
+    expect(viewport.mock.calls.length).toBeLessThanOrEqual(9);
+    row._setStyleState("hover", false);
+    expect(row.style["background-color"]).toBeUndefined();
+    root.$elm.setStyleSet(["highlight"]);
+    expect(row.style.color).toBe("#0000ffff");
+  });
+
+  it("observes hover on group, peer and nested logical selector owners without invalidating unrelated ancestors", () => {
+    registerWebStyleSheet("test", compileWebStyles(`
+      .target:is(:where(.group):hover *) { color: #f00 }
+      :where(.peer):not(:hover) + .target { background-color: #00f }
+      .panel:has(.trigger:hover) .target { opacity: .5 }
+    `, "state-owners.css"));
+    const { dom } = buildAndRender(View({ class: "panel", attributes: { n: "panel" } }, [
+      View({ class: "group", attributes: { n: "group" } }, [
+        Button({ class: "peer trigger", attributes: { n: "peer" } }, ["Hover"]),
+        View({ class: "target", attributes: { n: "target" } }, ["Target"]),
+      ]),
+    ]));
+    const [group] = dom.children;
+    const [peer, target] = group.children;
+    const viewport = vi.fn(() => ({ width: 1000, height: 720 }));
+    (globalThis as any).__nativeBridge_viewport = viewport;
+    dom._setStyleState("hover", true);
+    expect(viewport).not.toHaveBeenCalled();
+    group._setStyleState("hover", true);
+    expect(target.style.color).toBe("#ff0000ff");
+    expect(target.style["background-color"]).toBe("#0000ffff");
+    peer._setStyleState("hover", true);
+    expect(target.style["background-color"]).toBeUndefined();
+    expect(target.style.opacity).toBe(".5");
+    peer._setStyleState("hover", false);
+    expect(target.style.opacity).toBeUndefined();
+    expect(target.style["background-color"]).toBe("#0000ffff");
+  });
+
+  it("reuses unchanged cascades and invalidates cached variables, viewport, inline values and sheets", () => {
+    let width = 1000;
+    (globalThis as any).__nativeBridge_viewport = () => ({ width, height: 720 });
+    registerWebStyleSheet("test", compileWebStyles(`
+      .root { --gap: 10px }
+      .item { width: calc(var(--gap) + 1vw); color: #f00 }
+      @media (min-width: 900px) { .item { color: #00f } }
+    `, "cache.css"));
+    const parent = { type: "view", attrs: { class: "root" }, style: {} };
+    const child = { type: "view", attrs: { class: "item" }, style: {}, parentNode: parent };
+    const parent_inline = { "--gap": "10px" };
+    const inline: Record<string, string> = {};
+    const inherited = { "font-size": "14px" };
+    const refresh_parent = () => computeWebStyle(parent, {}, {}, parent_inline);
+    const resolve = () => computeWebStyle(child, inherited, {}, inline)!;
+    refresh_parent();
+    const first = resolve();
+    expect(first.width).toBe("20px");
+    expect(first.color).toBe("#0000ffff");
+    refresh_parent();
+    expect(resolve()).toBe(first);
+    parent_inline["--gap"] = "20px";
+    refresh_parent();
+    expect(resolve().width).toBe("30px");
+    width = 600;
+    expect(resolve().width).toBe("26px");
+    expect(resolve().color).toBe("#ff0000ff");
+    inline.width = "2em";
+    expect(resolve().width).toBe("28px");
+    inherited["font-size"] = "20px";
+    expect(resolve().width).toBe("40px");
+    inline.width = "3em";
+    expect(resolve().width).toBe("60px");
+    registerWebStyleSheet("test", compileWebStyles(".item { opacity: .5 }", "replacement.css"));
+    expect(resolve().opacity).toBe(".5");
+    expect(resolve().color).toBeUndefined();
+  });
+
+  it("inherits white-space into text and permits wrapping inside a nested surface", () => {
+    registerWebStyleSheet("test", compileWebStyles(".nowrap { white-space: nowrap } .normal { white-space: normal }", "whitespace.css"));
+    const { dom } = buildAndRender(View({ class: "nowrap" }, [
+      Button({}, ["Keep button text on one line"]),
+      View({ class: "normal" }, ["Allow the surface description to wrap"]),
+    ]));
+    expect(dom.children[0].children[0].style["white-space"]).toBe("nowrap");
+    expect(dom.children[1].children[0].style["white-space"]).toBe("normal");
+  });
+
+  it("coalesces event-driven style changes without recalculating unrelated siblings", () => {
+    registerWebStyleSheet("test", compileWebStyles(".selected { color: #123 }", "event.css"));
+    const selected = ref("");
+    const { dom } = buildAndRender(View({}, [
+      Button({ class: selected, onClick() { selected.as("intermediate"); selected.as("selected"); } }, ["Choose"]),
+      ...Array.from({ length: 40 }, () => View({}, ["Unrelated"])),
+    ]));
+    const viewport = vi.fn(() => ({ width: 1000, height: 720 }));
+    (globalThis as any).__nativeBridge_viewport = viewport;
+    dom.children[0]._dispatchNativeEvent("click");
+    expect(dom.children[0].children[0].style.color).toBe("#112233ff");
+    expect(viewport.mock.calls.length).toBeLessThanOrEqual(2);
+  });
+
+  it("resolves a newly built subtree once after its nodes have parents", () => {
+    registerWebStyleSheet("test", compileWebStyles(".calendar { color: #123 } .day { height: 32px }", "build.css"));
+    const viewport = vi.fn(() => ({ width: 1000, height: 720 }));
+    (globalThis as any).__nativeBridge_viewport = viewport;
+    const { dom } = buildAndRender(View({ class: "calendar" }, Array.from({ length: 84 }, () => Button({ class: "day" }, ["1"]))));
+    expect(dom.children[83].style.height).toBe("32px");
+    expect(dom.children[83].children[0].style.color).toBe("#112233ff");
+    expect(viewport.mock.calls.length).toBeLessThanOrEqual(169);
+  });
+
   it("recomputes only the changed subtree for local pointer states and ignores unchanged states", () => {
     registerWebStyleSheet(
       "test",

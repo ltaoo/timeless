@@ -1,7 +1,7 @@
 import {
   computeWebStyle,
   onWebStylesChange,
-  webStyleChangeNeedsRoot,
+  webStyleInvalidationTargets,
 } from "./web-styles";
 
 export type NativeStyleRule = {
@@ -17,6 +17,7 @@ type StyleNode = {
   children?: StyleNode[];
   parentNode?: StyleNode;
   checked?: boolean;
+  _cssVariables?: Record<string, string>;
   listeners?: Record<string, (event: any) => void>;
   _nativeStyle?: {
     inline: Record<string, string>;
@@ -25,6 +26,7 @@ type StyleNode = {
   };
   _onStyleChange?: ((style: Record<string, string>) => void) | null;
   _setStyleState?: (name: string, value: boolean) => void;
+  _batchStyleUpdates?: (update: () => void) => void;
   _dispatchNativeEvent?: (
     name: string,
     payload: Record<string, unknown>,
@@ -36,9 +38,46 @@ const registry = ((globalThis as any).__timeless_native_styles ??= {
   sheets: new Map<string, NativeStyleRule[]>(),
   root: null as StyleNode | null,
   pending: false,
+  timer: undefined as ReturnType<typeof setTimeout> | undefined,
 });
 registry.sheets.clear();
-registry.pending = false;
+clearNativeLayout();
+let batch_depth = 0;
+const pending_styles = new Map<StyleNode, boolean>();
+
+/** Resolve each affected subtree once after construction or an event. */
+export function batchNativeStyles<T>(build: () => T): T {
+  batch_depth += 1;
+  try {
+    return build();
+  } finally {
+    batch_depth -= 1;
+    if (!batch_depth) {
+      const depth = (node: StyleNode) => {
+        let value = 0;
+        while (node.parentNode) {
+          value++;
+          node = node.parentNode;
+        }
+        return value;
+      };
+      const roots = [...pending_styles]
+        .filter(([node]) => {
+          let parent = node.parentNode;
+          while (parent) {
+            if (pending_styles.get(parent)) return false;
+            parent = parent.parentNode;
+          }
+          return true;
+        })
+        .sort(([left], [right]) => depth(left) - depth(right));
+      pending_styles.clear();
+      const pass = { visited: new Set<StyleNode>(), forced: new Map(roots) };
+      for (const [root, cascade] of roots)
+        refreshNativeStyles(root, cascade, pass);
+    }
+  }
+}
 
 const inherited_keys = [
   "color",
@@ -50,7 +89,15 @@ const inherited_keys = [
   "text-decoration",
   "line-height",
   "letter-spacing",
+  "white-space",
 ];
+
+/** The explicit native pass already includes queued changes to the tree. */
+export function clearNativeLayout() {
+  if (registry.timer !== undefined) clearTimeout(registry.timer);
+  registry.timer = undefined;
+  registry.pending = false;
+}
 
 export function requestNativeLayout() {
   if (
@@ -59,7 +106,8 @@ export function requestNativeLayout() {
   )
     return;
   registry.pending = true;
-  setTimeout(() => {
+  registry.timer = setTimeout(() => {
+    registry.timer = undefined;
     registry.pending = false;
     (globalThis as any).__nativeBridge_relayout();
   }, 0);
@@ -74,51 +122,100 @@ export function registerNativeStyleSheet(id: string, rules: NativeStyleRule[]) {
 function state(node: StyleNode) {
   if (!node._nativeStyle) {
     node._nativeStyle = { inline: { ...node.style }, defaults: {}, states: {} };
+    node._batchStyleUpdates = (update) => {
+      batchNativeStyles(update);
+      if (!batch_depth && registry.pending) {
+        clearNativeLayout();
+        (globalThis as any).__nativeBridge_relayout();
+      }
+    };
     node._setStyleState = (name, value) => {
       if (!!node._nativeStyle!.states[name] === value) return;
       node._nativeStyle!.states[name] = value;
       invalidateNativeStyles(node, "states", [name]);
     };
-    node._dispatchNativeEvent = (name, payload = {}) => {
-      let stopped = false;
-      const event = {
-        ...payload,
-        type: name,
-        target: node,
-        currentTarget: node,
-        defaultPrevented: false,
-        preventDefault() {
-          this.defaultPrevented = true;
-        },
-        stopPropagation() {
-          stopped = true;
-        },
-      };
-      let target: StyleNode | undefined = node;
-      do {
-        event.currentTarget = target;
-        target.listeners?.[name]?.(event);
-        target = target.parentNode;
-      } while (
-        target &&
-        !stopped &&
-        !["focus", "blur", "mouseenter", "mouseleave"].includes(name)
-      );
-      return event.defaultPrevented;
-    };
+    node._dispatchNativeEvent = (name, payload = {}) =>
+      batchNativeStyles(() => {
+        let stopped = false;
+        const event = {
+          ...payload,
+          type: name,
+          target: node,
+          currentTarget: node,
+          defaultPrevented: false,
+          preventDefault() {
+            this.defaultPrevented = true;
+          },
+          stopPropagation() {
+            stopped = true;
+          },
+        };
+        let target: StyleNode | undefined = node;
+        do {
+          event.currentTarget = target;
+          target.listeners?.[name]?.(event);
+          target = target.parentNode;
+        } while (
+          target &&
+          !stopped &&
+          !["focus", "blur", "mouseenter", "mouseleave"].includes(name)
+        );
+        return event.defaultPrevented;
+      });
   }
   return node._nativeStyle;
 }
 
 export function invalidateNativeStyles(
   node: StyleNode,
-  type: "classes" | "attributes" | "states",
+  type: "classes" | "attributes" | "states" | "structure",
   names: string[],
+  previous: StyleNode = node,
 ) {
-  refreshNativeStyles(node, webStyleChangeNeedsRoot(type, names));
+  if (type === "structure") {
+    while (
+      ["fragment", "show", "for", "lazy-view"].includes(node.type ?? "") &&
+      node.parentNode
+    )
+      node = node.parentNode;
+    for (const child of node.children ?? []) child.parentNode = node;
+  }
+  const targets = new Set(
+    webStyleInvalidationTargets(node, type, names, previous),
+  );
+  const class_change =
+    type === "classes" || (type === "attributes" && names.includes("class"));
+  const classes = [
+    ...(node.attrs?.class ?? "").split(/\s+/),
+    ...(previous.attrs?.class ?? "").split(/\s+/),
+  ];
+  const native_rule = [...registry.sheets.values()].some(
+    (rules: NativeStyleRule[]) =>
+      rules.some((rule) =>
+        class_change
+          ? rule.classes.some((name) => classes.includes(name))
+          : rule.states.some((name) => names.includes(name)) &&
+            rule.classes.every((name) =>
+              (node.attrs?.class ?? "").split(/\s+/).includes(name),
+            ),
+      ),
+  );
+  if (native_rule || type === "structure") targets.add(node);
+  batchNativeStyles(() => {
+    for (const target of targets)
+      refreshNativeStyles(target, type === "structure" && target === node);
+  });
 }
 
 const paint_properties = new Set([
+  "-timeless-animation",
+  "animation-name",
+  "animation-duration",
+  "animation-delay",
+  "animation-timing-function",
+  "animation-fill-mode",
+  "animation-direction",
+  "animation-iteration-count",
   "color",
   "background",
   "background-color",
@@ -137,9 +234,23 @@ const paint_properties = new Set([
   "outline-color",
 ]);
 
-export function refreshNativeStyles(node: StyleNode, from_root = false) {
-  if (from_root) while (node.parentNode) node = node.parentNode;
+export function refreshNativeStyles(
+  node: StyleNode,
+  cascade = true,
+  pass = {
+    visited: new Set<StyleNode>(),
+    forced: new Map<StyleNode, boolean>(),
+  },
+) {
+  cascade ||= !!pass.forced.get(node);
+  if (pass.visited.has(node)) return;
+  if (batch_depth) {
+    pending_styles.set(node, !!pending_styles.get(node) || cascade);
+    return;
+  }
+  pass.visited.add(node);
   const current = state(node);
+  const previous_variables = node._cssVariables;
   const classes = new Set(
     (node.attrs?.class || "").split(/\s+/).filter(Boolean),
   );
@@ -201,6 +312,11 @@ export function refreshNativeStyles(node: StyleNode, from_root = false) {
       (key) =>
         !paint_properties.has(key) && node.style[key] !== resolved_style[key],
     );
+  const inherited_changed =
+    previous_variables !== node._cssVariables ||
+    inherited_keys.some((key) => resolved_style[key] !== node.style[key]);
+  cascade ||=
+    node.style.display === "none" && resolved_style.display !== "none";
   node.style = resolved_style;
   if (changed && node._onStyleChange) {
     node._onStyleChange(node.style);
@@ -209,7 +325,8 @@ export function refreshNativeStyles(node: StyleNode, from_root = false) {
   for (const child of node.children || []) {
     child.parentNode = node;
     // Hidden pages receive current inherited styles when they become visible.
-    if (resolved_style.display !== "none") refreshNativeStyles(child);
+    if (resolved_style.display !== "none" && (cascade || inherited_changed))
+      refreshNativeStyles(child, cascade, pass);
   }
 }
 
@@ -218,7 +335,7 @@ export function setNativeInlineStyle(
   style: Record<string, string>,
 ) {
   state(node).inline = style;
-  refreshNativeStyles(node);
+  refreshNativeStyles(node, false);
 }
 
 export function setNativeStyleValue(
@@ -227,7 +344,7 @@ export function setNativeStyleValue(
   value: string,
 ) {
   state(node).inline[key] = value;
-  refreshNativeStyles(node);
+  refreshNativeStyles(node, false);
 }
 
 export function setNativeDefaultStyle(
@@ -235,7 +352,7 @@ export function setNativeDefaultStyle(
   style: Record<string, string>,
 ) {
   Object.assign(state(node).defaults, style);
-  refreshNativeStyles(node);
+  refreshNativeStyles(node, false);
 }
 
 export function bindNativeStyleRoot(node: StyleNode) {

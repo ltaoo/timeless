@@ -46,7 +46,11 @@ function functions(
       value.slice(position + name.length + 1, end - 1),
     );
     if (replacement === undefined) return undefined;
-    value = value.slice(0, position) + replacement + value.slice(end);
+    const before = value.slice(0, position), after = value.slice(end);
+    const separates = (left: string, right: string) =>
+      name === "var" && /[\w.%#)\-]$/.test(left) && /^[\w.%#\-]/.test(right);
+    value = before + (separates(before, replacement) ? " " : "") + replacement +
+      (separates(replacement, after) ? " " : "") + after;
     position = value.indexOf(`${name}(`, position + replacement.length);
   }
   return value;
